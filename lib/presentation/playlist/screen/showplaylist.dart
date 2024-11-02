@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
+import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
+import 'package:nex_music/presentation/playlist/widget/chipwidget.dart';
 
 class ShowPlaylist extends StatefulWidget {
   static const routeName = "/showplaylist";
@@ -14,7 +17,6 @@ class ShowPlaylist extends StatefulWidget {
 }
 
 class _ShowPlaylistState extends State<ShowPlaylist> {
-  String playlistId = "";
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -30,6 +32,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.sizeOf(context).height;
     final playlistData =
         ModalRoute.of(context)?.settings.arguments as PlayListmodel;
 
@@ -66,88 +69,69 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
               ],
             ),
             body: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0105),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                      padding: EdgeInsets.only(bottom: screenSize * 0.0105),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            height: 220,
+                            margin: EdgeInsets.symmetric(
+                                horizontal: screenSize * 0.0052),
+                            height: screenSize * 0.290,
+                            width: screenSize * 0.290,
                             decoration: BoxDecoration(
-                                color: Colors.amber,
-                                borderRadius: BorderRadius.circular(10)),
+                                borderRadius:
+                                    BorderRadius.circular(screenSize * 0.0131)),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Image.network(
-                                playlistData.thumbnail,
-                                fit: BoxFit.fill,
+                              borderRadius:
+                                  BorderRadius.circular(screenSize * 0.0131),
+                              child: CachedNetworkImage(
+                                imageUrl: playlistData.thumbnail,
+                                placeholder: (_, __) {
+                                  return Image.asset(
+                                    "assets/imageplaceholder.png",
+                                  );
+                                },
+                                errorWidget: (_, __, ___) =>
+                                    Image.asset("assets/imageplaceholder.png"),
                               ),
                             ),
                           ),
-                          const SizedBox(
-                            width: 15,
+                          SizedBox(
+                            width: screenSize * 0.0263,
                           ),
                           Column(
                             children: [
+                              ChipWidget(
+                                label: state.playlistSongs.length.toString(),
+                                icon: Icons.music_note,
+                                onTap: () {
+                                  showSnackbar(context, "not added yet!");
+                                },
+                              ),
                               SizedBox(
-                                width: 125,
-                                child: Chip(
-                                  label: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text("Songs: "),
-                                      Text("${state.playlistSongs.length} "),
-                                      const Icon(
-                                        Icons.music_note,
-                                        size: 24,
-                                      )
-                                    ],
-                                  ),
-                                ),
+                                height: screenSize * 0.0197,
                               ),
-                              const SizedBox(
-                                height: 15,
+                              ChipWidget(
+                                label: "Share",
+                                icon: Icons.share,
+                                onTap: () {
+                                  showSnackbar(context, "not added yet!");
+                                },
                               ),
-                              const SizedBox(
-                                width: 125,
-                                child: Chip(
-                                  label: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text("Share   "),
-                                      Icon(
-                                        Icons.share,
-                                        size: 25,
-                                      )
-                                    ],
-                                  ),
-                                ),
+                              SizedBox(
+                                height: screenSize * 0.0197,
                               ),
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              const SizedBox(
-                                width: 125,
-                                child: Chip(
-                                  label: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text("Shuffle  "),
-                                      Icon(
-                                        Icons.shuffle,
-                                        size: 24,
-                                      )
-                                    ],
-                                  ),
-                                ),
+                              ChipWidget(
+                                label: "Shuffle",
+                                icon: Icons.shuffle,
+                                onTap: () {
+                                  showSnackbar(context, "not added yet!");
+                                },
                               ),
                             ],
                           ),

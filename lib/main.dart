@@ -36,9 +36,8 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'NEX  MUSIC',
+          title: 'NEX MUSIC',
           theme: themeData(context),
-          // home: const HomeScreen(),
           home: const NavBar(),
           routes: routes,
         ),

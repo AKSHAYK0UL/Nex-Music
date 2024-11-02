@@ -8,7 +8,7 @@ BottomNavigationBarThemeData bottomNavBarTheme(double screenSize) {
     elevation: 0,
     selectedIconTheme: IconThemeData(
       color: accentColor,
-      size: 25,
+      size: screenSize * 0.0329,
     ),
     selectedLabelStyle: TextStyle(
       color: textColor,
@@ -18,7 +18,7 @@ BottomNavigationBarThemeData bottomNavBarTheme(double screenSize) {
     selectedItemColor: textColor,
     unselectedIconTheme: IconThemeData(
       color: Colors.grey.shade600,
-      size: 23,
+      size: screenSize * 0.0303,
     ),
     unselectedLabelStyle: TextStyle(
       color: Colors.grey.shade600,

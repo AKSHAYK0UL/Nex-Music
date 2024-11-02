@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 
 class SongTitle extends StatelessWidget {
   final Songmodel songData;
+
   const SongTitle({
     super.key,
     required this.songData,
@@ -22,7 +24,24 @@ class SongTitle extends StatelessWidget {
         },
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(screenSize * 0.0106),
-          child: Image.network(songData.thumbnail),
+          child: CachedNetworkImage(
+            imageUrl: songData.thumbnail,
+            height: screenSize * 0.0733,
+            width: screenSize * 0.0755,
+            fit: BoxFit.fill,
+            placeholder: (_, __) => Image.asset(
+              "assets/imageplaceholder.png",
+              height: screenSize * 0.0733,
+              width: screenSize * 0.0755,
+              fit: BoxFit.fill,
+            ),
+            errorWidget: (_, __, ___) => Image.asset(
+              "assets/imageplaceholder.png",
+              height: screenSize * 0.0733,
+              width: screenSize * 0.0755,
+              fit: BoxFit.fill,
+            ),
+          ),
         ),
         title: Text(
           songData.songName,

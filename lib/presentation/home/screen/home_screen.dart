@@ -51,6 +51,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white,
                   ),
                 ),
+                IconButton(
+                  onPressed: () {
+                    showSnackbar(context, "not added yet");
+                  },
+                  icon: Icon(
+                    size: screenSize * 0.0369,
+                    Icons.person,
+                    color: Colors.white,
+                  ),
+                ),
               ],
               title: Padding(
                 padding: EdgeInsets.only(left: screenSize * 0.0158),
@@ -69,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: screenSize * 0.435,
+                      height: screenSize * 0.440, //435
                       child: ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,

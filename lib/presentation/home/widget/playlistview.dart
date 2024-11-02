@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/helper_function/general/nameshotener.dart';
 
@@ -21,6 +22,8 @@ class PlaylistView extends StatelessWidget {
             .pushNamed(ShowPlaylist.routeName, arguments: playList);
       },
       child: Container(
+        // width: 226,
+        width: screenSize * 0.298,
         margin: EdgeInsets.all(screenSize * 0.0106),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(screenSize * 0.0132),
@@ -30,8 +33,19 @@ class PlaylistView extends StatelessWidget {
           borderRadius: BorderRadius.circular(screenSize * 0.0132),
           child: Column(
             children: [
-              Image.network(
-                playList.thumbnail,
+              CachedNetworkImage(
+                imageUrl: playList.thumbnail,
+                height: screenSize * 0.298,
+                placeholder: (_, __) {
+                  return Image.asset(
+                    "assets/imageplaceholder.png",
+                    height: screenSize * 0.298,
+                  );
+                },
+                errorWidget: (_, __, ___) => Image.asset(
+                  "assets/imageplaceholder.png",
+                  height: screenSize * 0.298,
+                ),
               ),
               SizedBox(
                 height: screenSize * 0.0158,

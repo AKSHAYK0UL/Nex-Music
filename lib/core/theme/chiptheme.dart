@@ -3,15 +3,16 @@ import 'package:nex_music/core/theme/hexcolor.dart';
 
 ChipThemeData chipTheme(double screenSize) {
   return ChipThemeData(
-    backgroundColor: accentColor,
+    backgroundColor: secondaryColor,
     elevation: 0,
     labelStyle: TextStyle(
-      color: secondaryColor,
-      fontSize: screenSize * 0.0185,
+      color: textColor,
+      fontSize: screenSize * 0.0190,
       fontWeight: FontWeight.bold,
     ),
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(screenSize * 0.0263),
+      side: BorderSide(color: secondaryColor, width: 0),
     ),
   );
 }

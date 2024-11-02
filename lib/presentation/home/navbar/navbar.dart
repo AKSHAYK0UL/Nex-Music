@@ -20,6 +20,7 @@ class _NavBarState extends State<NavBar> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.sizeOf(context).height;
     return Scaffold(
       body: IndexedStack(
         index: _selectedIndex,
@@ -32,7 +33,7 @@ class _NavBarState extends State<NavBar> {
           highlightColor: Colors.transparent,
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 0, vertical: 2.5),
+          padding: EdgeInsets.only(top: screenSize * 0.0028),
           child: BottomNavigationBar(
             items: const [
               BottomNavigationBarItem(
