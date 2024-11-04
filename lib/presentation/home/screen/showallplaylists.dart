@@ -35,7 +35,6 @@ class ShowAllPlaylists extends StatelessWidget {
               itemCount: state.playlist.length,
               itemBuilder: (BuildContext context, int index) {
                 final playlistData = state.playlist[index];
-
                 return PlaylistGridView(
                   playList: playlistData,
                 );

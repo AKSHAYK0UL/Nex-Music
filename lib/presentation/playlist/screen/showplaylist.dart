@@ -22,25 +22,29 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final playlistData =
-          ModalRoute.of(context)?.settings.arguments as PlayListmodel;
-
-      context
-          .read<PlaylistBloc>()
-          .add(GetPlaylistEvent(playlistId: playlistData.playListId));
-    });
-    scrollController.addListener(() {
-      if (scrollController.position.pixels ==
-          scrollController.position.maxScrollExtent) {
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) {
         final playlistData =
             ModalRoute.of(context)?.settings.arguments as PlayListmodel;
 
         context
             .read<PlaylistBloc>()
-            .add(LoadMoreSongsEvent(playlistId: playlistData.playListId));
-      }
-    });
+            .add(GetPlaylistEvent(playlistId: playlistData.playListId));
+      },
+    );
+    scrollController.addListener(
+      () {
+        if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent) {
+          final playlistData =
+              ModalRoute.of(context)?.settings.arguments as PlayListmodel;
+
+          context
+              .read<PlaylistBloc>()
+              .add(LoadMoreSongsEvent(playlistId: playlistData.playListId));
+        }
+      },
+    );
     super.initState();
   }
 
@@ -160,7 +164,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                         ? state.playlistSongs.length + 1
                         : state.playlistSongs.length,
                     itemBuilder: (context, index) {
-                      print(state.playlistSongs.length);
+                      debugPrint(state.playlistSongs.length.toString());
                       if (index < state.playlistSongs.length) {
                         final songData = state.playlistSongs[index];
                         return SongTitle(songData: songData);

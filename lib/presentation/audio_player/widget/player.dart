@@ -1,11 +1,19 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
+
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/theme/hexcolor.dart';
 
 class Player extends StatefulWidget {
   final String songId;
-  const Player({super.key, required this.songId});
+  final double screenSize;
+  const Player({
+    super.key,
+    required this.songId,
+    required this.screenSize,
+  });
 
   @override
   State<Player> createState() => _PlayerState();
@@ -52,15 +60,22 @@ class _PlayerState extends State<Player> {
             setState(() {
               _isPlaying = false;
             });
-            print("error");
+            debugPrint("error");
           });
         }
       },
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
         if (state is LoadingState) {
-          return const Center(
-            child: CircularProgressIndicator(),
+          return Center(
+            child: CircleAvatar(
+              backgroundColor: accentColor,
+              radius: widget.screenSize * 0.0593,
+              child: CircularProgressIndicator(
+                color: secondaryColor,
+                strokeWidth: 6,
+              ),
+            ),
           );
         }
         if (state is ErrorState) {
@@ -69,12 +84,18 @@ class _PlayerState extends State<Player> {
           );
         }
         return Center(
-          child: IconButton(
-            onPressed: _togglePlayPause,
-            icon: Icon(
-              _isPlaying ? Icons.pause_circle : Icons.play_circle,
-              size: 100.0,
-              color: Colors.blue,
+          child: GestureDetector(
+            onTap: _togglePlayPause,
+            child: CircleAvatar(
+              backgroundColor: accentColor,
+              radius: widget.screenSize * 0.0593,
+              child: Center(
+                child: Icon(
+                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                  size: widget.screenSize * 0.0791,
+                  color: secondaryColor,
+                ),
+              ),
             ),
           ),
         );

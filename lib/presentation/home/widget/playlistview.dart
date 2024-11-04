@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:nex_music/helper_function/general/nameshotener.dart';
-
+import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/presentation/playlist/screen/showplaylist.dart';
 
@@ -53,11 +52,18 @@ class PlaylistView extends StatelessWidget {
               SizedBox(
                 height: screenSize * 0.0158,
               ),
-              Text(
-                nameShotener(name: playList.playlistName, length: 16),
-                maxLines: 1,
-                style: Theme.of(context).textTheme.titleMedium,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0200),
+                child: animatedText(
+                  text: playList.playlistName,
+                  style: Theme.of(context).textTheme.titleMedium!,
+                ),
               ),
+              // Text(
+              //   nameShotener(name: playList.playlistName, length: 16),
+              //   maxLines: 1,
+              //   style: Theme.of(context).textTheme.titleMedium,
+              // ),
             ],
           ),
         ),

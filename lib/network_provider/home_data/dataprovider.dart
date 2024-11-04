@@ -19,7 +19,7 @@ class DataProvider {
     final fetchedData = await Future.wait(
       [
         _ytMusic.getHomeSections(),
-        _ytMusic.searchSongs("Trending Punjabi Songs"),
+        _ytMusic.searchSongs("Trending Punjabi Songs of this month"),
       ],
     );
 

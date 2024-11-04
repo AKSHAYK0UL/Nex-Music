@@ -1,4 +1,5 @@
 import 'package:dart_ytmusic_api/types.dart';
+import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 
@@ -14,7 +15,8 @@ class RepositoryHelperFunction {
           vId: quickPicksDataObj.videoId,
           songName: quickPicksDataObj.name,
           artist: quickPicksDataObj.artist,
-          thumbnail: quickPicksDataObj.thumbnails.first.url,
+          // thumbnail: quickPicksDataObj.thumbnails[1].url,
+          thumbnail: getThumbnail(quickPicksDataObj.thumbnails),
         ),
       );
     }
@@ -52,14 +54,15 @@ class RepositoryHelperFunction {
     List<Songmodel> loadedSongsList = [];
 
     for (int i = 0; i < songList.length; i++) {
-      final qpData = songList[i];
+      final playlistSongsData = songList[i];
 
       loadedSongsList.add(
         Songmodel(
-          vId: qpData.videoId,
-          songName: qpData.name,
-          artist: qpData.artist,
-          thumbnail: qpData.thumbnails.first.url,
+          vId: playlistSongsData.videoId,
+          songName: playlistSongsData.name,
+          artist: playlistSongsData.artist,
+          // thumbnail: playlistSongsData.thumbnails.first.url,
+          thumbnail: getThumbnail(playlistSongsData.thumbnails),
         ),
       );
     }

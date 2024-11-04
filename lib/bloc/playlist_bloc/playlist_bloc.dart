@@ -8,15 +8,17 @@ part 'playlist_state.dart';
 
 class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
   final Repository repository;
-  static int index = 0;
+  int index = 0;
   int playlistSize = 0;
 
   PlaylistBloc(this.repository) : super(PlaylistInitial()) {
     on<GetPlaylistEvent>(_getPlaylist);
     on<LoadMoreSongsEvent>(_loadMore);
   }
+
   Future<void> _getPlaylist(
       GetPlaylistEvent event, Emitter<PlaylistState> emit) async {
+    index = 0; //reset it to 0
     emit(LoadingState());
     debugPrint(event.playlistId);
     try {
@@ -46,7 +48,7 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
       if (currentState.isLoading == false) {
         // Emit loading state with current playlist songs
         emit(currentState.copyWith(isLoading: true));
-        print("Loading More Data");
+        debugPrint("Loading More Data");
 
         // Fetch more songs
         final playlistData =

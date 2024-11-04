@@ -118,8 +118,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 size: screenSize * 0.0290,
                               ),
                             ),
-                            // child: Text("More",
-                            //     style: Theme.of(context).textTheme.titleSmall),
                           ),
                         ],
                       ),

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 
@@ -44,7 +45,21 @@ class SongTitle extends StatelessWidget {
             ),
           ),
         ),
-        title: Text(
+        title: animatedText(
+          text: songData.songName,
+          style: Theme.of(context).textTheme.titleSmall!,
+        ),
+        subtitle: animatedText(
+          text: songData.artist.name,
+          style: Theme.of(context).textTheme.bodySmall!,
+        ),
+      ),
+    );
+  }
+}
+
+/*
+title: Text(
           songData.songName,
           style: Theme.of(context).textTheme.titleSmall,
           overflow: TextOverflow.ellipsis,
@@ -56,7 +71,4 @@ class SongTitle extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
         ),
-      ),
-    );
-  }
-}
+ */

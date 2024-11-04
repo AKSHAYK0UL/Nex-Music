@@ -42,6 +42,7 @@ dependencies:
   hexcolor: ^3.0.1
   cached_network_image: ^3.4.1
   lottie: ^3.1.3
+  overflow_text_animated: ^0.0.6
 
 dev_dependencies:
   flutter_test:
