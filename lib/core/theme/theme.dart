@@ -13,7 +13,7 @@ ThemeData themeData(BuildContext context) {
     canvasColor: backgroundColor,
     colorScheme: ColorScheme.fromSwatch().copyWith(secondary: secondaryColor),
     scaffoldBackgroundColor: backgroundColor,
-    appBarTheme: appBarTheme(),
+    appBarTheme: appBarTheme(screenSize),
     textTheme: textTheme(context, screenSize),
     snackBarTheme: snackBarTheme(screenSize),
     listTileTheme: listTileTheme(context, screenSize),

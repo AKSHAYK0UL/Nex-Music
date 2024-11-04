@@ -28,18 +28,25 @@ class Repository {
   }
 
   // Get playlist songs
-  Future<List<Songmodel>> getPlayList(
+  Future<({List<Songmodel> playlistSongs, int playlistSize})> getPlayList(
     String playlistId,
+    int index,
   ) async {
-    final songStream = _dataProvider.getSongIdFromPlayList(playlistId);
+    final songStream =
+        await _dataProvider.getSongIdFromPlayList(playlistId).toList();
+    int totalSongs = songStream.length;
     List<String> songIds =
-        await songStream.map((video) => video.id.value).toList();
+        songStream.skip(index).map((video) => video.id.value).take(20).toList();
 
     final songsList = await _dataProvider.getPlayListSongs(songIds);
 
-    return await RepositoryHelperFunction.getSongsList(songsList);
+    return (
+      playlistSongs: await RepositoryHelperFunction.getSongsList(songsList),
+      playlistSize: totalSongs,
+    );
   }
 
+  // Future<int> playListTotalSongs() async {}
   Future<Uri> getSongUrl(String songId) async {
     final manifest = await _dataProvider.songStreamUrl(songId);
     return manifest.audioOnly.withHighestBitrate().url;

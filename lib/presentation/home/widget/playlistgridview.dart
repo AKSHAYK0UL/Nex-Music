@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/helper_function/general/nameshotener.dart';
@@ -5,9 +6,9 @@ import 'package:nex_music/helper_function/general/nameshotener.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/presentation/playlist/screen/showplaylist.dart';
 
-class PlaylistView extends StatelessWidget {
+class PlaylistGridView extends StatelessWidget {
   final PlayListmodel playList;
-  const PlaylistView({
+  const PlaylistGridView({
     super.key,
     required this.playList,
   });
@@ -22,9 +23,10 @@ class PlaylistView extends StatelessWidget {
             .pushNamed(ShowPlaylist.routeName, arguments: playList);
       },
       child: Container(
-        // width: 226,
-        width: screenSize * 0.298,
-        margin: EdgeInsets.all(screenSize * 0.0106),
+        height: screenSize * 0.237,
+        width: screenSize * 0.240,
+        margin: EdgeInsets.symmetric(
+            horizontal: screenSize * 0.0100, vertical: screenSize * 0.0070),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(screenSize * 0.0132),
           color: Theme.of(context).colorScheme.secondary,
@@ -35,7 +37,8 @@ class PlaylistView extends StatelessWidget {
             children: [
               CachedNetworkImage(
                 imageUrl: playList.thumbnail,
-                height: screenSize * 0.298,
+                height: screenSize * 0.238,
+                width: screenSize * 0.240,
                 fit: BoxFit.fill,
                 placeholder: (_, __) {
                   return Image.asset(
@@ -54,8 +57,9 @@ class PlaylistView extends StatelessWidget {
                 height: screenSize * 0.0158,
               ),
               Text(
-                nameShotener(name: playList.playlistName, length: 16),
+                nameShotener(name: playList.playlistName, length: 14),
                 maxLines: 1,
+                textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ],

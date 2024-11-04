@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/isolates/isolateservices.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 
@@ -9,22 +8,27 @@ part 'playlist_state.dart';
 
 class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
   final Repository repository;
+  static int index = 0;
+  int playlistSize = 0;
 
   PlaylistBloc(this.repository) : super(PlaylistInitial()) {
     on<GetPlaylistEvent>(_getPlaylist);
+    on<LoadMoreSongsEvent>(_loadMore);
   }
   Future<void> _getPlaylist(
       GetPlaylistEvent event, Emitter<PlaylistState> emit) async {
     emit(LoadingState());
     debugPrint(event.playlistId);
     try {
-      // final List<Songmodel> songslist =
-      //     await repository.getPlayList(event.playlistId);
-      final List<Songmodel> songslist =
-          await IsolateServiceClass.getPlayListDataIsolate(
-              repository, event.playlistId);
+      final playlistData =
+          await repository.getPlayList(event.playlistId, index);
+      playlistSize = playlistData.playlistSize;
+      index = playlistData.playlistSongs.length;
       emit(
-        PlaylistDataState(playlistSongs: songslist),
+        PlaylistDataState(
+          playlistSongs: playlistData.playlistSongs,
+          totalSongs: playlistData.playlistSize,
+        ),
       );
     } catch (e) {
       emit(
@@ -32,6 +36,33 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
           errorMessage: e.toString(),
         ),
       );
+    }
+  }
+
+  Future<void> _loadMore(
+      LoadMoreSongsEvent event, Emitter<PlaylistState> emit) async {
+    if (state is PlaylistDataState && index < playlistSize) {
+      final currentState = state as PlaylistDataState;
+      if (currentState.isLoading == false) {
+        // Emit loading state with current playlist songs
+        emit(currentState.copyWith(isLoading: true));
+        print("Loading More Data");
+
+        // Fetch more songs
+        final playlistData =
+            await repository.getPlayList(event.playlistId, index);
+        index = currentState.playlistSongs.length +
+            playlistData.playlistSongs.length;
+
+        // Emit the updated state with new songs and reset loading
+        emit(currentState.copyWith(
+          isLoading: false,
+          playlistSongs: [
+            ...currentState.playlistSongs,
+            ...playlistData.playlistSongs,
+          ],
+        ));
+      }
     }
   }
 }

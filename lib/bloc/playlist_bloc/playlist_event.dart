@@ -7,3 +7,9 @@ final class GetPlaylistEvent extends PlaylistEvent {
 
   GetPlaylistEvent({required this.playlistId});
 }
+
+final class LoadMoreSongsEvent extends PlaylistEvent {
+  final String playlistId;
+
+  LoadMoreSongsEvent({required this.playlistId});
+}

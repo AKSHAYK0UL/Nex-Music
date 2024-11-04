@@ -21,8 +21,8 @@ class ChipWidget extends StatelessWidget {
         onTap();
       },
       child: SizedBox(
-        width: screenSize * 0.146,
-        height: screenSize * 0.0791,
+        width: screenSize * 0.148,
+        height: screenSize * 0.0721,
         child: Chip(
           label: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

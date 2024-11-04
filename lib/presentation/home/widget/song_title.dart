@@ -18,6 +18,7 @@ class SongTitle extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(screenSize * 0.00395),
       child: ListTile(
+        splashColor: Colors.transparent,
         onTap: () {
           Navigator.of(context)
               .pushNamed(AudioPlayerScreen.routeName, arguments: songData);

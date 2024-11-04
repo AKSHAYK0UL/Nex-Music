@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
 import 'package:nex_music/presentation/home/widget/playlistview.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 
@@ -64,9 +65,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
               title: Padding(
                 padding: EdgeInsets.only(left: screenSize * 0.0158),
-                child: Text(
+                child: const Text(
                   "Quick Picks",
-                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
             ),
@@ -87,17 +87,41 @@ class _HomeScreenState extends State<HomeScreen> {
                             .ceil(), // Calculate the number of horizontal items
                         itemBuilder: (context, rowIndex) {
                           return SongColumView(
-                              rowIndex: rowIndex,
-                              quickPicksLength: state.quickPicks.length,
-                              quickPicks: state.quickPicks);
+                            rowIndex: rowIndex,
+                            quickPicksLength: state.quickPicks.length,
+                            quickPicks: state.quickPicks,
+                          );
                         },
                       ),
                     ),
                     Padding(
                       padding: EdgeInsets.only(left: screenSize * 0.0106),
-                      child: Text(
-                        "Playlists For You",
-                        style: Theme.of(context).textTheme.titleLarge,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Playlists For You",
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.of(context)
+                                  .pushNamed(ShowAllPlaylists.routeName);
+                            },
+                            child: Container(
+                              color: Colors.transparent,
+                              width: screenSize * 0.080,
+                              alignment: Alignment.topRight,
+                              child: Icon(
+                                Icons.arrow_forward_ios,
+                                color: Colors.white,
+                                size: screenSize * 0.0290,
+                              ),
+                            ),
+                            // child: Text("More",
+                            //     style: Theme.of(context).textTheme.titleSmall),
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(
@@ -105,7 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
-                        itemCount: state.playlist.length,
+                        // itemCount: state.playlist.length,
+                        itemCount: 6,
                         itemBuilder: (context, index) {
                           final playlistData = state.playlist[index];
                           return PlaylistView(playList: playlistData);
