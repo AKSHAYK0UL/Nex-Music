@@ -18,7 +18,7 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
 
   Future<void> _getPlaylist(
       GetPlaylistEvent event, Emitter<PlaylistState> emit) async {
-    index = 0; //reset it to 0
+    index = 0; //reset to 0
     emit(LoadingState());
     debugPrint(event.playlistId);
     try {
@@ -30,6 +30,7 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
         PlaylistDataState(
           playlistSongs: playlistData.playlistSongs,
           totalSongs: playlistData.playlistSize,
+          playlistDuration: playlistData.playListDuration,
         ),
       );
     } catch (e) {

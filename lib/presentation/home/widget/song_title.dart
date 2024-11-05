@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
+import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 
@@ -21,8 +22,11 @@ class SongTitle extends StatelessWidget {
       child: ListTile(
         splashColor: Colors.transparent,
         onTap: () {
-          Navigator.of(context)
-              .pushNamed(AudioPlayerScreen.routeName, arguments: songData);
+          Navigator.of(context).pushNamed(AudioPlayerScreen.routeName,
+              arguments: {
+                "songdata": songData,
+                "route": SongMiniPlayerRoute.songRoute
+              });
         },
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(screenSize * 0.0106),
@@ -53,6 +57,7 @@ class SongTitle extends StatelessWidget {
           text: songData.artist.name,
           style: Theme.of(context).textTheme.bodySmall!,
         ),
+        trailing: songData.duration.isNotEmpty ? Text(songData.duration) : null,
       ),
     );
   }

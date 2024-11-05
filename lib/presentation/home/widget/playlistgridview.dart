@@ -52,10 +52,10 @@ class PlaylistGridView extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                height: screenSize * 0.0158,
+                height: screenSize * 0.0140,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0200),
+                padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0220),
                 child: animatedText(
                   text: playList.playlistName,
                   style: Theme.of(context).textTheme.titleMedium!,

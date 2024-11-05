@@ -1,5 +1,6 @@
 import 'package:dart_ytmusic_api/types.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
+import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 
@@ -17,6 +18,7 @@ class RepositoryHelperFunction {
           artist: quickPicksDataObj.artist,
           // thumbnail: quickPicksDataObj.thumbnails[1].url,
           thumbnail: getThumbnail(quickPicksDataObj.thumbnails),
+          duration: "",
         ),
       );
     }
@@ -50,7 +52,8 @@ class RepositoryHelperFunction {
   }
 
 //get songs
-  static Future<List<Songmodel>> getSongsList(List<SongFull> songList) async {
+  static Future<List<Songmodel>> getSongsList(
+      List<SongFull> songList, List<int> songsDuration) async {
     List<Songmodel> loadedSongsList = [];
 
     for (int i = 0; i < songList.length; i++) {
@@ -63,6 +66,7 @@ class RepositoryHelperFunction {
           artist: playlistSongsData.artist,
           // thumbnail: playlistSongsData.thumbnails.first.url,
           thumbnail: getThumbnail(playlistSongsData.thumbnails),
+          duration: songsDuration[i] == 0 ? "" : timeFormate(songsDuration[i]),
         ),
       );
     }

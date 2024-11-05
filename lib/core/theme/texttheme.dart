@@ -33,5 +33,10 @@ TextTheme textTheme(BuildContext context, double screenSize) {
       fontSize: screenSize * 0.0192,
       fontWeight: FontWeight.normal,
     ),
+    labelSmall: TextStyle(
+      color: textColor,
+      fontSize: screenSize * 0.0170,
+      fontWeight: FontWeight.normal,
+    ),
   );
 }

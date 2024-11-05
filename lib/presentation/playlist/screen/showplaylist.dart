@@ -6,6 +6,7 @@ import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/playlistmodel.dart';
+import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 import 'package:nex_music/presentation/playlist/widget/chipwidget.dart';
 
@@ -132,6 +133,13 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                               onTap: () {},
                             ),
                             ChipWidget(
+                              label: state.playlistDuration,
+                              icon: Icons.alarm,
+                              onTap: () {
+                                showSnackbar(context, "not added yet!");
+                              },
+                            ),
+                            ChipWidget(
                               label: "Share",
                               icon: Icons.share,
                               onTap: () {
@@ -141,13 +149,6 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                             ChipWidget(
                               label: "Playlist",
                               icon: Icons.add,
-                              onTap: () {
-                                showSnackbar(context, "not added yet!");
-                              },
-                            ),
-                            ChipWidget(
-                              label: "Shuffle",
-                              icon: Icons.shuffle,
                               onTap: () {
                                 showSnackbar(context, "not added yet!");
                               },
@@ -188,6 +189,8 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 ],
               ),
             ),
+            //  bottomNavigationBar: //,
+            bottomSheet: MiniPlayer(screenSize: screenSize),
           );
         }
 

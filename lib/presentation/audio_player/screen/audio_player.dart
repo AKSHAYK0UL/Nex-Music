@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
+import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/player.dart';
 
@@ -19,7 +20,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
-    final songData = ModalRoute.of(context)?.settings.arguments as Songmodel;
+    final routeData =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+    final songData = routeData["songdata"] as Songmodel;
+    final route = routeData["route"] as SongMiniPlayerRoute;
 
     return Scaffold(
       body: SafeArea(
@@ -148,8 +152,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     ),
                   ),
                   Player(
-                    songId: songData.vId,
+                    songData: songData,
                     screenSize: screenSize,
+                    route: route,
                   ),
                   IconButton(
                     onPressed: () {},

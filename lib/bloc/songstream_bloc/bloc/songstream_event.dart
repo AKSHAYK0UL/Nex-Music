@@ -2,8 +2,9 @@ part of 'songstream_bloc.dart';
 
 sealed class SongstreamEvent {}
 
-final class GetSongStreamUrlEvent extends SongstreamEvent {
-  final String songUrl;
-
-  GetSongStreamUrlEvent({required this.songUrl});
+class GetSongStreamEvent extends SongstreamEvent {
+  final Songmodel songData;
+  GetSongStreamEvent({required this.songData});
 }
+
+class PlayPauseEvent extends SongstreamEvent {}

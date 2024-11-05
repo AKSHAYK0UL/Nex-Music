@@ -2,18 +2,28 @@ part of 'songstream_bloc.dart';
 
 sealed class SongstreamState {}
 
-final class SongstreamInitial extends SongstreamState {}
+class SongstreamInitial extends SongstreamState {}
 
-final class LoadingState extends SongstreamState {}
+class LoadingState extends SongstreamState {}
 
-final class ErrorState extends SongstreamState {
-  final String errorMessage;
+class StreamSongState extends SongstreamState {}
 
-  ErrorState({required this.errorMessage});
+class PlayingState extends SongstreamState {
+  final Songmodel songData;
+  PlayingState({
+    required this.songData,
+  });
 }
 
-final class StreamSongUrlState extends SongstreamState {
-  final Uri songurl;
+class PausedState extends SongstreamState {
+  final Songmodel songData;
 
-  StreamSongUrlState({required this.songurl});
+  PausedState({
+    required this.songData,
+  });
+}
+
+class ErrorState extends SongstreamState {
+  final String errorMessage;
+  ErrorState({required this.errorMessage});
 }

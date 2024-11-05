@@ -1,3 +1,4 @@
+import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/helper_function/repository/repository_helper_function.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -28,25 +29,45 @@ class Repository {
   }
 
   // Get playlist songs
-  Future<({List<Songmodel> playlistSongs, int playlistSize})> getPlayList(
+  Future<
+      ({
+        List<Songmodel> playlistSongs,
+        int playlistSize,
+        String playListDuration
+      })> getPlayList(
     String playlistId,
     int index,
   ) async {
     final songStream =
         await _dataProvider.getSongIdFromPlayList(playlistId).toList();
     int totalSongs = songStream.length;
+
     List<String> songIds =
         songStream.skip(index).map((video) => video.id.value).take(20).toList();
+
+    List<int> songsDuration = songStream
+        .skip(index)
+        .map((video) => video.duration!.inSeconds)
+        .take(20)
+        .toList();
+
+    int totalDurationInSeconds = songStream
+        .map((video) => video.duration?.inSeconds ?? 0)
+        .fold(0, (total, duration) => total + duration);
+
+    String playListDuration = timeFormate(totalDurationInSeconds);
 
     final songsList = await _dataProvider.getPlayListSongs(songIds);
 
     return (
-      playlistSongs: await RepositoryHelperFunction.getSongsList(songsList),
+      playlistSongs:
+          await RepositoryHelperFunction.getSongsList(songsList, songsDuration),
       playlistSize: totalSongs,
+      playListDuration: playListDuration,
     );
   }
 
-  // Future<int> playListTotalSongs() async {}
+  //Future<int> playListTotalSongs() async {}
   Future<Uri> getSongUrl(String songId) async {
     final manifest = await _dataProvider.songStreamUrl(songId);
     return manifest.audioOnly.withHighestBitrate().url;

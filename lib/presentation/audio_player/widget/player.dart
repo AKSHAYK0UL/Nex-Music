@@ -1,18 +1,21 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
-
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/enum/song_miniplayer_route.dart';
+import 'package:nex_music/model/songmodel.dart';
 
 class Player extends StatefulWidget {
-  final String songId;
+  final Songmodel songData;
   final double screenSize;
+  final SongMiniPlayerRoute route;
+
   const Player({
     super.key,
-    required this.songId,
+    required this.songData,
     required this.screenSize,
+    required this.route,
   });
 
   @override
@@ -21,25 +24,16 @@ class Player extends StatefulWidget {
 
 class _PlayerState extends State<Player> {
   final _audioPlayer = AudioPlayer();
-  bool _isPlaying = true;
 
   @override
   void initState() {
-    super.initState();
-    context
-        .read<SongstreamBloc>()
-        .add(GetSongStreamUrlEvent(songUrl: widget.songId));
-  }
-
-  void _togglePlayPause() {
-    if (_isPlaying) {
-      _audioPlayer.pause();
-    } else {
-      _audioPlayer.play();
+    if (widget.route == SongMiniPlayerRoute.songRoute) {
+      context.read<SongstreamBloc>().add(GetSongStreamEvent(
+            songData: widget.songData,
+          ));
     }
-    setState(() {
-      _isPlaying = !_isPlaying;
-    });
+
+    super.initState();
   }
 
   @override
@@ -50,20 +44,7 @@ class _PlayerState extends State<Player> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SongstreamBloc, SongstreamState>(
-      listenWhen: (previous, current) => previous != current,
-      listener: (context, state) {
-        if (state is StreamSongUrlState) {
-          _audioPlayer.setUrl(state.songurl.toString()).then((_) {
-            _audioPlayer.play();
-          }).catchError((_) {
-            setState(() {
-              _isPlaying = false;
-            });
-            debugPrint("error");
-          });
-        }
-      },
+    return BlocBuilder<SongstreamBloc, SongstreamState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
         if (state is LoadingState) {
@@ -77,21 +58,23 @@ class _PlayerState extends State<Player> {
               ),
             ),
           );
-        }
-        if (state is ErrorState) {
+        } else if (state is ErrorState) {
           return Center(
             child: Text(state.errorMessage),
           );
         }
+
         return Center(
           child: GestureDetector(
-            onTap: _togglePlayPause,
+            onTap: () {
+              context.read<SongstreamBloc>().add(PlayPauseEvent());
+            },
             child: CircleAvatar(
               backgroundColor: accentColor,
               radius: widget.screenSize * 0.0593,
               child: Center(
                 child: Icon(
-                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                  state is PausedState ? Icons.play_arrow : Icons.pause,
                   size: widget.screenSize * 0.0791,
                   color: secondaryColor,
                 ),

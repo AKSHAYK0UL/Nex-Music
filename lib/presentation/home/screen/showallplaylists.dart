@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
+import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/widget/playlistgridview.dart';
 
 class ShowAllPlaylists extends StatelessWidget {
@@ -10,7 +11,7 @@ class ShowAllPlaylists extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sreenSize = MediaQuery.sizeOf(context).height;
+    final screenSize = MediaQuery.sizeOf(context).height;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Playlists For You"),
@@ -30,7 +31,7 @@ class ShowAllPlaylists extends StatelessWidget {
             return GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: sreenSize * 0.00107,
+                childAspectRatio: screenSize * 0.00107,
               ),
               itemCount: state.playlist.length,
               itemBuilder: (BuildContext context, int index) {
@@ -44,6 +45,7 @@ class ShowAllPlaylists extends StatelessWidget {
           return const SizedBox();
         },
       ),
+      bottomNavigationBar: MiniPlayer(screenSize: screenSize),
     );
   }
 }
