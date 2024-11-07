@@ -7,7 +7,7 @@ OverflowTextAnimated animatedText(
     text: text,
     style: style,
     animation: OverFlowTextAnimations.scrollOpposite,
-    animateDuration: const Duration(milliseconds: 3000),
+    animateDuration: const Duration(milliseconds: 3500),
     curve: Curves.linear,
   );
 }

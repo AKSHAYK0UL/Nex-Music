@@ -6,7 +6,8 @@ String timeFormate(int totalDurationInSeconds) {
   String formattedDuration;
   if (duration.inHours > 0) {
     // Format as HH:mm:ss if there are hours
-    formattedDuration = DateFormat('HH:mm').format(DateTime(0).add(duration));
+    formattedDuration =
+        DateFormat('HH:mm:ss').format(DateTime(0).add(duration));
   } else {
     // Format as mm:ss if there are no hours
     formattedDuration = DateFormat('m:ss').format(DateTime(0).add(duration));

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
 
 class NavBar extends StatefulWidget {
@@ -26,43 +27,51 @@ class _NavBarState extends State<NavBar> {
         index: _selectedIndex,
         children: screens,
       ),
-      bottomNavigationBar: Theme(
-        data: ThemeData(
-          bottomNavigationBarTheme: Theme.of(context).bottomNavigationBarTheme,
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(top: screenSize * 0.0028),
-          child: BottomNavigationBar(
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.music_note),
-                label: 'Recent',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.playlist_play),
-                label: 'Playlist',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.star),
-                label: 'Favorite',
-              ),
-            ],
-            currentIndex: _selectedIndex,
-            onTap: (index) {
-              setState(
-                () {
-                  _selectedIndex = index;
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          MiniPlayer(screenSize: screenSize),
+          Theme(
+            data: ThemeData(
+              bottomNavigationBarTheme:
+                  Theme.of(context).bottomNavigationBarTheme,
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(top: screenSize * 0.0028),
+              child: BottomNavigationBar(
+                items: const [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: 'Home',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.music_note),
+                    label: 'Recent',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.playlist_play),
+                    label: 'Playlist',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.star),
+                    label: 'Favorite',
+                  ),
+                ],
+                currentIndex: _selectedIndex,
+                onTap: (index) {
+                  setState(
+                    () {
+                      _selectedIndex = index;
+                    },
+                  );
                 },
-              );
-            },
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

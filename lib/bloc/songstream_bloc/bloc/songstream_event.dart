@@ -8,3 +8,12 @@ class GetSongStreamEvent extends SongstreamEvent {
 }
 
 class PlayPauseEvent extends SongstreamEvent {}
+
+class CloseMiniPlayerEvent extends SongstreamEvent {}
+
+class SongCompletedEvent extends SongstreamEvent {}
+
+class SeekToEvent extends SongstreamEvent {
+  final Duration position;
+  SeekToEvent({required this.position});
+}

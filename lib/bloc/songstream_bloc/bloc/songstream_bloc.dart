@@ -11,35 +11,59 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   bool _isPlaying = false;
   Songmodel? songData;
   String _currentSongUrl = '';
+  Duration songDuration = Duration.zero;
+  Stream<Duration>? songPosition;
+
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   SongstreamBloc(this.repository) : super(SongstreamInitial()) {
     on<GetSongStreamEvent>(_getSongUrl);
     on<PlayPauseEvent>(_togglePlayPause);
+    on<CloseMiniPlayerEvent>(_closeMiniPlayer);
+    on<SongCompletedEvent>(_onSongCompleted);
+    on<SeekToEvent>(_seekTo);
+
+    songPosition = _audioPlayer.positionStream;
+
+    // Initialize audio player listeners
+    _initializeAudioPlayerListeners();
+  }
+
+  void _initializeAudioPlayerListeners() {
+    _audioPlayer.durationStream.listen((duration) {
+      songDuration = duration!; // Update song duration when available
+    });
+
+    _audioPlayer.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        // Dispatch SongCompletedEvent when song completes
+        add(SongCompletedEvent());
+        return;
+      }
+    });
   }
 
   Future<void> _getSongUrl(
       GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
+    _resetAudioPlayer();
+
     emit(LoadingState());
     songData = event.songData;
+    songDuration = Duration.zero;
+    _audioPlayer.seek(Duration.zero);
 
     try {
       final songUrl = await repository.getSongUrl(event.songData.vId);
       _currentSongUrl = songUrl.toString();
       await _audioPlayer.setUrl(_currentSongUrl).then((_) {
         _audioPlayer.play();
+        _isPlaying = true;
       }).catchError((_) {
         emit(ErrorState(errorMessage: "Error loading song"));
         return;
       });
-      _audioPlayer.play();
-      _isPlaying = true;
 
-      emit(
-        PlayingState(
-          songData: songData!,
-        ),
-      );
+      emit(PlayingState(songData: songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: e.toString()));
     }
@@ -49,15 +73,42 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     if (_isPlaying) {
       _audioPlayer.pause();
       _isPlaying = false;
-      emit(PausedState(
-        songData: songData!,
-      ));
+      emit(PausedState(songData: songData!));
     } else {
       _audioPlayer.play();
       _isPlaying = true;
-      emit(PlayingState(
-        songData: songData!,
-      ));
+      emit(PlayingState(songData: songData!));
+    }
+  }
+
+  void _closeMiniPlayer(
+      CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) {
+    if (_isPlaying) {
+      _audioPlayer.pause();
+      _isPlaying = false;
+    }
+    emit(CloseMiniPlayerState());
+  }
+
+  void _onSongCompleted(
+      SongCompletedEvent event, Emitter<SongstreamState> emit) {
+    _audioPlayer.seek(Duration.zero);
+    _audioPlayer.pause();
+    _isPlaying = false;
+
+    // Emit paused state after song completion
+    emit(PausedState(songData: songData!));
+  }
+
+  void _seekTo(SeekToEvent event, Emitter<SongstreamState> emit) {
+    _audioPlayer.seek(event.position);
+  }
+
+// Function
+  void _resetAudioPlayer() {
+    if (_isPlaying) {
+      _audioPlayer.pause();
+      _isPlaying = false;
     }
   }
 }

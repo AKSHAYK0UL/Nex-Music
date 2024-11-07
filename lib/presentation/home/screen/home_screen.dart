@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
-import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
 import 'package:nex_music/presentation/home/widget/playlistview.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
@@ -128,7 +127,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
-                        // itemCount: state.playlist.length,
                         itemCount: 6,
                         itemBuilder: (context, index) {
                           final playlistData = state.playlist[index];
@@ -140,7 +138,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
-            bottomNavigationBar: MiniPlayer(screenSize: screenSize),
           );
         }
         return const SizedBox();
