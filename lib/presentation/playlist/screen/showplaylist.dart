@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
-import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/animatedtext.dart';
+import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/playlistmodel.dart';
@@ -81,9 +81,9 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         if (playlistState is PlaylistDataState) {
           return Scaffold(
             appBar: AppBar(
-              title: Text(
-                playlistData.playlistName,
-                style: Theme.of(context).textTheme.titleLarge,
+              title: animatedText(
+                text: playlistData.playlistName,
+                style: Theme.of(context).textTheme.titleLarge!,
               ),
               actions: [
                 IconButton(
@@ -118,8 +118,8 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              height: screenSize * 0.290,
-                              width: screenSize * 0.290,
+                              height: screenSize * 0.280,
+                              width: screenSize * 0.280,
                               decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.circular(screenSize * 0.0131),
@@ -127,19 +127,19 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                               child: ClipRRect(
                                 borderRadius:
                                     BorderRadius.circular(screenSize * 0.0131),
-                                child: CachedNetworkImage(
+                                child: cacheImage(
                                   imageUrl: playlistData.thumbnail,
-                                  placeholder: (_, __) => Image.asset(
-                                      "assets/imageplaceholder.png"),
-                                  errorWidget: (_, __, ___) => Image.asset(
-                                      "assets/imageplaceholder.png"),
+                                  width: screenSize * 0.280,
+                                  height: screenSize * 0.280,
                                 ),
                               ),
                             ),
                             Column(
                               children: [
                                 ChipWidget(
-                                  label: "      ${playlistState.totalSongs}",
+                                  label: playlistState.totalSongs
+                                      .toString()
+                                      .padLeft(10, ' '),
                                   icon: Icons.music_note,
                                   onTap: () {},
                                 ),
@@ -181,7 +181,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                             return SongTitle(songData: songData);
                           } else {
                             return Transform.scale(
-                              scaleX: screenSize * 0.00225,
+                              scaleX: screenSize * 0.00227,
                               scaleY: screenSize * 0.00158,
                               child: Center(
                                 child: Lottie.asset(
@@ -201,9 +201,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 );
               },
             ),
-            bottomSheet: ColoredBox(
-                color: backgroundColor,
-                child: MiniPlayer(screenSize: screenSize)),
+            bottomSheet: MiniPlayer(screenSize: screenSize),
           );
         }
 

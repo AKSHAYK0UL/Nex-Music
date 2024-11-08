@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
+import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
@@ -30,23 +30,10 @@ class SongTitle extends StatelessWidget {
         },
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(screenSize * 0.0106),
-          child: CachedNetworkImage(
+          child: cacheImage(
             imageUrl: songData.thumbnail,
-            height: screenSize * 0.0733,
             width: screenSize * 0.0755,
-            fit: BoxFit.fill,
-            placeholder: (_, __) => Image.asset(
-              "assets/imageplaceholder.png",
-              height: screenSize * 0.0733,
-              width: screenSize * 0.0755,
-              fit: BoxFit.fill,
-            ),
-            errorWidget: (_, __, ___) => Image.asset(
-              "assets/imageplaceholder.png",
-              height: screenSize * 0.0733,
-              width: screenSize * 0.0755,
-              fit: BoxFit.fill,
-            ),
+            height: screenSize * 0.0733,
           ),
         ),
         title: animatedText(
@@ -62,18 +49,3 @@ class SongTitle extends StatelessWidget {
     );
   }
 }
-
-/*
-title: Text(
-          songData.songName,
-          style: Theme.of(context).textTheme.titleSmall,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
-        subtitle: Text(
-          songData.artist.name,
-          style: Theme.of(context).textTheme.bodySmall,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-        ),
- */

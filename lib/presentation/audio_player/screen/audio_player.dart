@@ -1,20 +1,17 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
+import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
-import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/player.dart';
+import 'package:nex_music/presentation/audio_player/widget/streambuilder.dart';
 
 // ignore: must_be_immutable
 class AudioPlayerScreen extends StatelessWidget {
   static const routeName = "/audioplayer";
-  AudioPlayerScreen({super.key});
-
-  double sliderValue = 0.0;
+  const AudioPlayerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +27,9 @@ class AudioPlayerScreen extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5.5),
+              padding: EdgeInsets.symmetric(
+                  horizontal: screenSize * 0.0197,
+                  vertical: screenSize * 0.00725),
               child: Row(
                 children: [
                   GestureDetector(
@@ -56,7 +55,7 @@ class AudioPlayerScreen extends StatelessWidget {
                     child: Hero(
                       tag: songData.vId,
                       child: Container(
-                        height: screenSize * 0.420,
+                        height: screenSize * 0.410,
                         width: screenSize * 0.448,
                         decoration: BoxDecoration(
                           borderRadius:
@@ -65,23 +64,10 @@ class AudioPlayerScreen extends StatelessWidget {
                         child: ClipRRect(
                           borderRadius:
                               BorderRadius.circular(screenSize * 0.0131),
-                          child: CachedNetworkImage(
+                          child: cacheImage(
                             imageUrl: songData.thumbnail,
-                            height: screenSize * 0.420,
                             width: screenSize * 0.448,
-                            fit: BoxFit.fill,
-                            placeholder: (_, __) => Image.asset(
-                              "assets/imageplaceholder.png",
-                              height: screenSize * 0.420,
-                              width: screenSize * 0.448,
-                              fit: BoxFit.fill,
-                            ),
-                            errorWidget: (_, __, ___) => Image.asset(
-                              "assets/imageplaceholder.png",
-                              height: screenSize * 0.420,
-                              width: screenSize * 0.448,
-                              fit: BoxFit.fill,
-                            ),
+                            height: screenSize * 0.410,
                           ),
                         ),
                       ),
@@ -89,7 +75,7 @@ class AudioPlayerScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  height: screenSize * 0.0395,
+                  height: screenSize * 0.0380,
                 ),
                 Padding(
                   padding:
@@ -128,7 +114,7 @@ class AudioPlayerScreen extends StatelessWidget {
                           IconButton(
                             onPressed: () {},
                             icon: Icon(
-                              Icons.favorite,
+                              CupertinoIcons.heart_fill,
                               color: textColor,
                               size: screenSize * 0.0395,
                             ),
@@ -139,61 +125,11 @@ class AudioPlayerScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  height: screenSize * 0.0395,
+                  height: screenSize * 0.0370,
                 ),
-                StreamBuilder(
-                  stream: context.read<SongstreamBloc>().songPosition,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox();
-                    }
-                    final duration =
-                        context.read<SongstreamBloc>().songDuration;
-                    final position = snapshot.data;
-
-                    double sliderValue = 0.0;
-                    if (position != null && duration.inMilliseconds > 0) {
-                      sliderValue =
-                          position.inMilliseconds / duration.inMilliseconds;
-                    }
-
-                    return Column(
-                      children: [
-                        StatefulBuilder(
-                          builder: (context, setState) => Slider(
-                            value: sliderValue,
-                            min: 0,
-                            max: 1,
-                            onChanged: (value) {
-                              setState(() {
-                                sliderValue = value;
-                              });
-                            },
-                            onChangeEnd: (value) {
-                              final seekToPosition = Duration(
-                                milliseconds:
-                                    (value * duration.inMilliseconds).toInt(),
-                              );
-                              context
-                                  .read<SongstreamBloc>()
-                                  .add(SeekToEvent(position: seekToPosition));
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: screenSize * 0.0329),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(timeFormate(position!.inSeconds)),
-                              Text(songData.duration),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                StreamBuilderWidget(
+                  songData: songData,
+                  screenSize: screenSize,
                 ),
                 Padding(
                   padding:
@@ -204,9 +140,9 @@ class AudioPlayerScreen extends StatelessWidget {
                       IconButton(
                         onPressed: () {},
                         icon: Icon(
-                          Icons.shuffle,
+                          CupertinoIcons.shuffle,
                           color: textColor,
-                          size: screenSize * 0.0329,
+                          size: screenSize * 0.0350, //329
                         ),
                       ),
                       IconButton(
@@ -233,9 +169,9 @@ class AudioPlayerScreen extends StatelessWidget {
                       IconButton(
                         onPressed: () {},
                         icon: Icon(
-                          Icons.loop_sharp,
+                          CupertinoIcons.loop,
                           color: textColor,
-                          size: screenSize * 0.0329,
+                          size: screenSize * 0.0350,
                         ),
                       ),
                     ],

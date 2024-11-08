@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
@@ -31,7 +32,10 @@ class MyApp extends StatelessWidget {
             create: (context) => PlaylistBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (context) => SongstreamBloc(context.read<Repository>()),
+            create: (context) => SongstreamBloc(
+              context.read<Repository>(),
+              AudioPlayer(),
+            ),
           )
         ],
         child: MaterialApp(

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
@@ -42,22 +43,29 @@ class _NavBarState extends State<NavBar> {
             child: Padding(
               padding: EdgeInsets.only(top: screenSize * 0.0028),
               child: BottomNavigationBar(
-                items: const [
+                items: [
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
+                    icon: Icon(
+                        _selectedIndex == 0 ? Icons.home : Icons.home_outlined),
                     label: 'Home',
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.music_note),
+                    icon: Icon(_selectedIndex == 1
+                        ? Icons.music_note
+                        : Icons.music_note_outlined),
                     label: 'Recent',
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.playlist_play),
+                    icon: Icon(_selectedIndex == 2
+                        ? Icons.playlist_play_rounded
+                        : Icons.playlist_play),
                     label: 'Playlist',
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.star),
-                    label: 'Favorite',
+                    icon: Icon(_selectedIndex == 3
+                        ? CupertinoIcons.heart_fill
+                        : CupertinoIcons.heart),
+                    label: 'Favorites',
                   ),
                 ],
                 currentIndex: _selectedIndex,

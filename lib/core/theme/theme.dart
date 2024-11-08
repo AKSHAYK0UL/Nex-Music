@@ -4,6 +4,7 @@ import 'package:nex_music/core/theme/chiptheme.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/theme/listtiletheme.dart';
 import 'package:nex_music/core/theme/navbartheme.dart';
+import 'package:nex_music/core/theme/slidertheme.dart';
 import 'package:nex_music/core/theme/snackbartheme.dart';
 import 'package:nex_music/core/theme/texttheme.dart';
 
@@ -19,5 +20,6 @@ ThemeData themeData(BuildContext context) {
     listTileTheme: listTileTheme(context, screenSize),
     bottomNavigationBarTheme: bottomNavBarTheme(screenSize),
     chipTheme: chipTheme(screenSize),
+    sliderTheme: sliderTheme(),
   );
 }

@@ -1,6 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
+import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/presentation/playlist/screen/showplaylist.dart';
 
@@ -33,26 +33,14 @@ class PlaylistGridView extends StatelessWidget {
           borderRadius: BorderRadius.circular(screenSize * 0.0132),
           child: Column(
             children: [
-              CachedNetworkImage(
+              cacheImage(
                 imageUrl: playList.thumbnail,
-                height: screenSize * 0.238,
                 width: screenSize * 0.240,
-                fit: BoxFit.fill,
-                placeholder: (_, __) {
-                  return Image.asset(
-                    "assets/imageplaceholder.png",
-                    height: screenSize * 0.298,
-                    fit: BoxFit.fill,
-                  );
-                },
-                errorWidget: (_, __, ___) => Image.asset(
-                  "assets/imageplaceholder.png",
-                  height: screenSize * 0.298,
-                  fit: BoxFit.fill,
-                ),
+                height: screenSize * 0.238,
               ),
+
               SizedBox(
-                height: screenSize * 0.0140,
+                height: screenSize * 0.0120,
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0220),

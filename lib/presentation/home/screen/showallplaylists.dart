@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/widget/playlistgridview.dart';
@@ -46,10 +45,7 @@ class ShowAllPlaylists extends StatelessWidget {
           return const SizedBox();
         },
       ),
-      bottomNavigationBar: ColoredBox(
-        color: secondaryColor,
-        child: MiniPlayer(screenSize: screenSize),
-      ),
+      bottomNavigationBar: MiniPlayer(screenSize: screenSize),
     );
   }
 }

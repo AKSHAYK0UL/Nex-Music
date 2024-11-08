@@ -51,10 +51,10 @@ class _PlayerState extends State<Player> {
           return Center(
             child: CircleAvatar(
               backgroundColor: accentColor,
-              radius: widget.screenSize * 0.0593,
+              radius: widget.screenSize * 0.0520,
               child: CircularProgressIndicator(
                 color: secondaryColor,
-                strokeWidth: 6,
+                strokeWidth: 4,
               ),
             ),
           );
@@ -71,7 +71,7 @@ class _PlayerState extends State<Player> {
             },
             child: CircleAvatar(
               backgroundColor: accentColor,
-              radius: widget.screenSize * 0.0593,
+              radius: widget.screenSize * 0.0520,
               child: Center(
                 child: Icon(
                   state is PausedState ? Icons.play_arrow : Icons.pause,
