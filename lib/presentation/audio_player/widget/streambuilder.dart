@@ -48,7 +48,7 @@ class StreamBuilderWidget extends StatelessWidget {
                 children: [
                   Padding(
                     padding:
-                        EdgeInsets.symmetric(horizontal: screenSize * 0.0316),
+                        EdgeInsets.symmetric(horizontal: screenSize * 0.0325),
                     child: LinearProgressIndicator(
                       value: bufferValue,
                       color: Colors.grey,
@@ -81,16 +81,11 @@ class StreamBuilderWidget extends StatelessWidget {
               child: BlocBuilder<SongstreamBloc, SongstreamState>(
                 buildWhen: (previous, current) => previous != current,
                 builder: (context, state) {
-                  final songData =
-                      context.read<SongstreamBloc>().getCurrentSongData;
-
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(timeFormate(position?.inSeconds ?? 0)),
-                      Text(songData.duration.isEmpty
-                          ? timeFormate(duration.inSeconds)
-                          : songData.duration),
+                      Text(timeFormate(duration.inSeconds)),
                     ],
                   );
                 },

@@ -9,7 +9,6 @@ import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/player.dart';
 import 'package:nex_music/presentation/audio_player/widget/streambuilder.dart';
 
-// ignore: must_be_immutable
 class AudioPlayerScreen extends StatelessWidget {
   static const routeName = "/audioplayer";
   const AudioPlayerScreen({super.key});
@@ -70,13 +69,16 @@ class AudioPlayerScreen extends StatelessWidget {
                           borderRadius:
                               BorderRadius.circular(screenSize * 0.0131),
                         ),
-                        child: ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(screenSize * 0.0131),
-                          child: cacheImage(
-                            imageUrl: songData.thumbnail,
-                            width: screenSize * 0.448,
-                            height: screenSize * 0.410,
+                        child: Hero(
+                          tag: songData.vId,
+                          child: ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(screenSize * 0.0131),
+                            child: cacheImage(
+                              imageUrl: songData.thumbnail,
+                              width: screenSize * 0.448,
+                              height: screenSize * 0.410,
+                            ),
                           ),
                         ),
                       ),
@@ -168,25 +170,51 @@ class AudioPlayerScreen extends StatelessWidget {
                   BlocBuilder<SongstreamBloc, SongstreamState>(
                     buildWhen: (previous, current) => previous != current,
                     builder: (context, state) {
+                      if (state is PausedState || state is PlayingState) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
+                              onPressed: () {},
+                              icon: Icon(
+                                CupertinoIcons.speaker_1,
+                                color: textColor,
+                                size: screenSize * 0.0350, //329
+                              ),
+                            ),
+                            SizedBox(
+                              width: screenSize * 0.0197,
+                            ),
+                            IconButton(
+                              onPressed: () {},
+                              icon: Icon(
+                                Icons.skip_previous,
+                                color: textColor,
+                                size: screenSize * 0.0527,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           IconButton(
-                            onPressed: () {},
+                            onPressed: null,
                             icon: Icon(
                               CupertinoIcons.speaker_1,
-                              color: textColor,
+                              color: Colors.white38,
                               size: screenSize * 0.0350, //329
                             ),
                           ),
-                          const SizedBox(
-                            width: 20,
+                          SizedBox(
+                            width: screenSize * 0.0197,
                           ),
                           IconButton(
-                            onPressed: () {},
+                            onPressed: null,
                             icon: Icon(
                               Icons.skip_previous,
-                              color: textColor,
+                              color: Colors.white38,
                               size: screenSize * 0.0527,
                             ),
                           ),
@@ -194,43 +222,71 @@ class AudioPlayerScreen extends StatelessWidget {
                       );
                     },
                   ),
-                  const SizedBox(
-                    width: 10,
+                  SizedBox(
+                    width: screenSize * 0.0131,
                   ),
                   Player(
                     songData: songData,
                     screenSize: screenSize,
                     route: route,
                   ),
-                  const SizedBox(
-                    width: 10,
+                  SizedBox(
+                    width: screenSize * 0.0131,
                   ),
                   BlocBuilder<SongstreamBloc, SongstreamState>(
                     buildWhen: (previous, current) => previous != current,
                     builder: (context, state) {
+                      if (state is PausedState || state is PlayingState) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(
+                              onPressed: () {},
+                              icon: Icon(
+                                Icons.skip_next,
+                                color: textColor,
+                                size: screenSize * 0.0527,
+                              ),
+                            ),
+                            SizedBox(
+                              width: screenSize * 0.0197,
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                context.read<SongstreamBloc>().add(LoopEvent());
+                              },
+                              icon: Icon(
+                                context.read<SongstreamBloc>().getLoopStatus
+                                    ? CupertinoIcons.loop
+                                    : CupertinoIcons.shuffle,
+                                color: textColor,
+                                size: screenSize * 0.0350,
+                              ),
+                            ),
+                          ],
+                        );
+                      }
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           IconButton(
-                            onPressed: () {},
+                            onPressed: null,
                             icon: Icon(
                               Icons.skip_next,
-                              color: textColor,
+                              color: Colors.white38,
                               size: screenSize * 0.0527,
                             ),
                           ),
-                          const SizedBox(
-                            width: 20,
+                          SizedBox(
+                            width: screenSize * 0.0197,
                           ),
                           IconButton(
-                            onPressed: () {
-                              context.read<SongstreamBloc>().add(LoopEvent());
-                            },
+                            onPressed: null,
                             icon: Icon(
                               context.read<SongstreamBloc>().getLoopStatus
                                   ? CupertinoIcons.loop
                                   : CupertinoIcons.shuffle,
-                              color: textColor,
+                              color: Colors.white38,
                               size: screenSize * 0.0350,
                             ),
                           ),

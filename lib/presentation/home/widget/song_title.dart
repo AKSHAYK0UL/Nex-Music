@@ -29,12 +29,15 @@ class SongTitle extends StatelessWidget {
                 "route": SongMiniPlayerRoute.songRoute
               });
         },
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(screenSize * 0.0106),
-          child: cacheImage(
-            imageUrl: songData.thumbnail,
-            width: screenSize * 0.0755,
-            height: screenSize * 0.0733,
+        leading: Hero(
+          tag: songData.vId,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(screenSize * 0.0106),
+            child: cacheImage(
+              imageUrl: songData.thumbnail,
+              width: screenSize * 0.0755,
+              height: screenSize * 0.0733,
+            ),
           ),
         ),
         title: animatedText(

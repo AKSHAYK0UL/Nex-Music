@@ -25,16 +25,14 @@ class MiniPlayer extends StatelessWidget {
           songData = state.songData;
         } else if (state is PausedState) {
           songData = state.songData;
+        } else if (state is LoadingState) {
+          songData = state.songData;
         }
+
         // Show mini player UI if song data exists
         if (songData != null) {
           return GestureDetector(
             onTap: () {
-              // Navigator.of(context).pushNamed(AudioPlayerScreen.routeName,
-              //     arguments: {
-              //       "songdata": songData,
-              //       "route": SongMiniPlayerRoute.miniPlayerRoute
-              //     });
               Navigator.of(context).push(
                 slideTransitionRoute(
                   songData: songData!,
@@ -51,12 +49,15 @@ class MiniPlayer extends StatelessWidget {
                   ),
                   contentPadding: EdgeInsets.only(
                       left: screenSize * 0.0356, right: screenSize * 0.00527),
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(screenSize * 0.0106),
-                    child: cacheImage(
-                      imageUrl: songData.thumbnail,
-                      width: screenSize * 0.0755,
-                      height: screenSize * 0.0733,
+                  leading: Hero(
+                    tag: songData.vId,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(screenSize * 0.0106),
+                      child: cacheImage(
+                        imageUrl: songData.thumbnail,
+                        width: screenSize * 0.0755,
+                        height: screenSize * 0.0733,
+                      ),
                     ),
                   ),
                   title: animatedText(
@@ -70,18 +71,33 @@ class MiniPlayer extends StatelessWidget {
                   trailing: Wrap(
                     direction: Axis.horizontal,
                     children: [
-                      IconButton(
-                        icon: Icon(
-                          state is PlayingState
-                              ? CupertinoIcons.pause_circle_fill
-                              : CupertinoIcons.play_circle_fill,
-                          color: textColor,
-                          size: screenSize * 0.0520,
-                        ),
-                        onPressed: () {
-                          context.read<SongstreamBloc>().add(PlayPauseEvent());
-                        },
-                      ),
+                      state is LoadingState
+                          ? Container(
+                              margin: EdgeInsets.only(
+                                  top: screenSize * 0.0131,
+                                  right: screenSize * 0.0131),
+                              height: screenSize * 0.0395,
+                              width: screenSize * 0.0395,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: textColor,
+                                ),
+                              ),
+                            )
+                          : IconButton(
+                              icon: Icon(
+                                state is PlayingState
+                                    ? CupertinoIcons.pause_circle_fill
+                                    : CupertinoIcons.play_circle_fill,
+                                color: textColor,
+                                size: screenSize * 0.0520,
+                              ),
+                              onPressed: () {
+                                context
+                                    .read<SongstreamBloc>()
+                                    .add(PlayPauseEvent());
+                              },
+                            ),
                       IconButton(
                         icon: Icon(
                           Icons.close,
