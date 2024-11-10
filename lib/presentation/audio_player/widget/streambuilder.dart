@@ -5,14 +5,11 @@ import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/model/audioplayerstream.dart';
-import 'package:nex_music/model/songmodel.dart';
 
 class StreamBuilderWidget extends StatelessWidget {
-  final Songmodel songData;
   final double screenSize;
   const StreamBuilderWidget({
     super.key,
-    required this.songData,
     required this.screenSize,
   });
 
@@ -33,12 +30,14 @@ class StreamBuilderWidget extends StatelessWidget {
         double bufferValue = 0.0;
 
         if (position != null && duration.inMilliseconds > 0) {
-          sliderValue = position.inMilliseconds / duration.inMilliseconds;
+          sliderValue = (position.inMilliseconds / duration.inMilliseconds)
+              .clamp(0.0, 1.0);
         }
 
         if (bufferedPosition != null && duration.inMilliseconds > 0) {
           bufferValue =
-              bufferedPosition.inMilliseconds / duration.inMilliseconds;
+              (bufferedPosition.inMilliseconds / duration.inMilliseconds)
+                  .clamp(0.0, 1.0);
         }
 
         return Column(
@@ -79,14 +78,22 @@ class StreamBuilderWidget extends StatelessWidget {
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0329),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(timeFormate(position?.inSeconds ?? 0)),
-                  Text(songData.duration.isEmpty
-                      ? timeFormate(duration.inSeconds)
-                      : songData.duration),
-                ],
+              child: BlocBuilder<SongstreamBloc, SongstreamState>(
+                buildWhen: (previous, current) => previous != current,
+                builder: (context, state) {
+                  final songData =
+                      context.read<SongstreamBloc>().getCurrentSongData;
+
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(timeFormate(position?.inSeconds ?? 0)),
+                      Text(songData.duration.isEmpty
+                          ? timeFormate(duration.inSeconds)
+                          : songData.duration),
+                    ],
+                  );
+                },
               ),
             ),
           ],

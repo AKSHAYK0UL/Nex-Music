@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';

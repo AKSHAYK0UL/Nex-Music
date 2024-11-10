@@ -51,15 +51,12 @@ class MiniPlayer extends StatelessWidget {
                   ),
                   contentPadding: EdgeInsets.only(
                       left: screenSize * 0.0356, right: screenSize * 0.00527),
-                  leading: Hero(
-                    tag: songData.vId,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(screenSize * 0.0106),
-                      child: cacheImage(
-                        imageUrl: songData.thumbnail,
-                        width: screenSize * 0.0755,
-                        height: screenSize * 0.0733,
-                      ),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(screenSize * 0.0106),
+                    child: cacheImage(
+                      imageUrl: songData.thumbnail,
+                      width: screenSize * 0.0755,
+                      height: screenSize * 0.0733,
                     ),
                   ),
                   title: animatedText(
@@ -128,7 +125,7 @@ class MiniPlayer extends StatelessWidget {
                     sliderValue = sliderValue.clamp(0.0, 1.0);
 
                     return Positioned(
-                      bottom: 1,
+                      bottom: 0,
                       child: SizedBox(
                         width: screenSize * 0.516,
                         child: LinearProgressIndicator(

@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
-import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -18,42 +19,50 @@ class AudioPlayerScreen extends StatelessWidget {
     final screenSize = MediaQuery.sizeOf(context).height;
     final routeData =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-    final songData = routeData["songdata"] as Songmodel;
+    Songmodel songData = routeData["songdata"] as Songmodel;
     final route = routeData["route"] as SongMiniPlayerRoute;
 
     return Scaffold(
       body: SafeArea(
-        // minimum: EdgeInsets.only(top: screenSize * 0.0659),
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: screenSize * 0.0197,
-                  vertical: screenSize * 0.00725),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Icon(
-                      Icons.keyboard_arrow_down,
-                      color: textColor,
-                      size: screenSize * 0.0493,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: screenSize * 0.0197,
+                vertical: screenSize * 0.00725),
+            child: Row(
               children: [
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: screenSize * 0.0329),
-                  child: Center(
-                    child: Hero(
-                      tag: songData.vId,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: textColor,
+                    size: screenSize * 0.0493,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0329),
+                child: BlocBuilder<SongstreamBloc, SongstreamState>(
+                  buildWhen: (previous, current) => previous != current,
+                  builder: (context, state) {
+                    // if (state is PlayingState) {
+                    //   songData = state.songData;
+                    // }
+                    // if (state is PausedState) {
+                    //   songData = state.songData;
+                    // }
+                    if (state is LoadingState) {
+                      songData = state.songData;
+                    }
+                    return Center(
                       child: Container(
                         height: screenSize * 0.410,
                         width: screenSize * 0.448,
@@ -71,131 +80,184 @@ class AudioPlayerScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
-                SizedBox(
-                  height: screenSize * 0.0380,
-                ),
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: screenSize * 0.0329),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: screenSize * 0.356,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                animatedText(
-                                  text: songData.songName,
-                                  style:
-                                      Theme.of(context).textTheme.titleLarge!,
-                                ),
-                                SizedBox(
-                                  height: screenSize * 0.0050,
-                                ),
-                                animatedText(
-                                  text: songData.artist.name,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium!,
-                                ),
-                              ],
-                            ),
+              ),
+              SizedBox(
+                height: screenSize * 0.0380,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0329),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: screenSize * 0.356,
+                          child: BlocBuilder<SongstreamBloc, SongstreamState>(
+                            buildWhen: (previous, current) =>
+                                previous != current,
+                            builder: (context, state) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    songData.songName,
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  // animatedText(
+                                  //   text: songData.songName,
+                                  //   style: Theme.of(context)
+                                  //       .textTheme
+                                  //       .titleLarge!,
+                                  // ),
+                                  SizedBox(
+                                    height: screenSize * 0.0050,
+                                  ),
+                                  Text(
+                                    songData.artist.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  )
+                                  // animatedText(
+                                  //   text: songData.artist.name,
+                                  //   style: Theme.of(context)
+                                  //       .textTheme
+                                  //       .titleMedium!,
+                                  // ),
+                                ],
+                              );
+                            },
                           ),
-                        ],
-                      ),
-                      Column(
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            CupertinoIcons.heart_fill,
+                            color: textColor,
+                            size: screenSize * 0.0395,
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: screenSize * 0.0370,
+              ),
+              StreamBuilderWidget(
+                screenSize: screenSize,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  BlocBuilder<SongstreamBloc, SongstreamState>(
+                    buildWhen: (previous, current) => previous != current,
+                    builder: (context, state) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           IconButton(
                             onPressed: () {},
                             icon: Icon(
-                              CupertinoIcons.heart_fill,
+                              CupertinoIcons.speaker_1,
                               color: textColor,
-                              size: screenSize * 0.0395,
+                              size: screenSize * 0.0350, //329
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.skip_previous,
+                              color: textColor,
+                              size: screenSize * 0.0527,
                             ),
                           ),
                         ],
-                      )
-                    ],
+                      );
+                    },
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Player(
+                    songData: songData,
+                    screenSize: screenSize,
+                    route: route,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  BlocBuilder<SongstreamBloc, SongstreamState>(
+                    buildWhen: (previous, current) => previous != current,
+                    builder: (context, state) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          IconButton(
+                            onPressed: () {},
+                            icon: Icon(
+                              Icons.skip_next,
+                              color: textColor,
+                              size: screenSize * 0.0527,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              context.read<SongstreamBloc>().add(LoopEvent());
+                            },
+                            icon: Icon(
+                              context.read<SongstreamBloc>().getLoopStatus
+                                  ? CupertinoIcons.loop
+                                  : CupertinoIcons.shuffle,
+                              color: textColor,
+                              size: screenSize * 0.0350,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: screenSize * 0.0240,
+              ),
+              Align(
+                alignment: Alignment.center,
+                child: IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.keyboard_arrow_up,
+                    color: textColor,
+                    size: screenSize * 0.0593,
                   ),
                 ),
-                SizedBox(
-                  height: screenSize * 0.0370,
-                ),
-                StreamBuilderWidget(
-                  songData: songData,
-                  screenSize: screenSize,
-                ),
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: screenSize * 0.0329),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          CupertinoIcons.shuffle,
-                          color: textColor,
-                          size: screenSize * 0.0350, //329
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.skip_previous,
-                          color: textColor,
-                          size: screenSize * 0.0527,
-                        ),
-                      ),
-                      Player(
-                        songData: songData,
-                        screenSize: screenSize,
-                        route: route,
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.skip_next,
-                          color: textColor,
-                          size: screenSize * 0.0527,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          CupertinoIcons.loop,
-                          color: textColor,
-                          size: screenSize * 0.0350,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: screenSize * 0.0240,
-                ),
-                Align(
-                  alignment: Alignment.center,
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.keyboard_arrow_up,
-                      color: textColor,
-                      size: screenSize * 0.0593,
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
+              )
+            ],
+          ),
+        ],
+      )),
     );
   }
 }

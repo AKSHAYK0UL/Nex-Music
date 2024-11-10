@@ -79,6 +79,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         }
 
         if (playlistState is PlaylistDataState) {
+          print("PlayListData State***************************");
+          context.read<ss.SongstreamBloc>().add(
+              ss.GetSongPlaylistEvent(songlist: playlistState.playlistSongs));
+
           return Scaffold(
             appBar: AppBar(
               title: animatedText(

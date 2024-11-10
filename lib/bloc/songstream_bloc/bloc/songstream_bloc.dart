@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/model/audioplayerstream.dart';
@@ -19,6 +18,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   Duration songDuration = Duration.zero;
   Stream<Duration>? songPosition;
   Stream<Duration>? bufferedPositionStream;
+  bool _isLooping = false;
+  List<Songmodel> playlistSongs = [];
+  int currentSongIndex = 1; // Keep track of the current song in the playlist
 
   SongstreamBloc(this.repository, this._audioPlayer)
       : super(SongstreamInitial()) {
@@ -29,6 +31,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<SeekToEvent>(_seekTo);
     on<PauseEvent>(_togglePause);
     on<PlayEvent>(_togglePlay);
+    on<LoopEvent>(_toggleLoop);
+    on<GetSongPlaylistEvent>(_songsPlaylist);
+    on<GetSongUrlOnShuffleEvent>(_getSongUrlOnShuffle);
 
     songPosition = _audioPlayer.positionStream;
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
@@ -49,63 +54,68 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     });
 
     _audioPlayer.playerStateStream.listen((state) {
-      // Handle completed state
       if (state.processingState == ProcessingState.completed) {
         add(SongCompletedEvent());
       }
     });
   }
 
-  void _seekTo(SeekToEvent event, Emitter<SongstreamState> emit) {
-    _audioPlayer.seek(event.position);
-  }
-
-  // Reset audio player (stop, clear state, ...)
-  void _resetAudioPlayer() {
-    if (_isPlaying) {
-      _audioPlayer.pause();
-      _isPlaying = false;
-    }
-    songData = null;
-    _currentSongUrl = '';
-    songDuration = Duration.zero;
-    _audioPlayer.seek(Duration.zero); // Reset position
-  }
-
   // Fetch the song URL and handle playback
   Future<void> _getSongUrl(
       GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
     _resetAudioPlayer();
-    emit(LoadingState());
+    emit(LoadingState(songData: event.songData));
 
     songData = event.songData;
-
     try {
-      final songUrl = await repository.getSongUrl(event.songData.vId);
+      final songUrl = await repository.getSongUrl(songData!.vId);
       _currentSongUrl = songUrl.toString();
-
-      // Load the song and handle potential errors
-      await _audioPlayer.setUrl(_currentSongUrl).then((_) {
-        _audioPlayer.play();
-        _isPlaying = true;
-
-        emit(PlayingState(songData: songData!));
-      }).catchError((error) {
-        // If error occurs during audio load, emit an error state
-        emit(ErrorState(errorMessage: "Error loading song: $error"));
-      });
+      await _audioPlayer.setUrl(_currentSongUrl);
+      _audioPlayer.play();
+      _isPlaying = true;
+      emit(PlayingState(songData: songData!));
     } catch (e) {
-      // Handle errors (network or otherwise) when fetching song URL
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
     }
   }
 
-//Pause Event
+//when on shuffle
+  Future<void> _getSongUrlOnShuffle(
+      GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
+    emit(LoadingState(songData: event.songData));
+    songData = event.songData;
+    try {
+      final songUrl = await repository.getSongUrl(songData!.vId);
+      _currentSongUrl = songUrl.toString();
+      await _audioPlayer.setUrl(_currentSongUrl);
+      _audioPlayer.play();
+      _isPlaying = true;
+      emit(PlayingState(songData: songData!));
+    } catch (e) {
+      emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
+    }
+  }
+
+  void _seekTo(SeekToEvent event, Emitter<SongstreamState> emit) {
+    _audioPlayer.seek(event.position);
+  }
+
+  //Get loop status
+  bool get getLoopStatus {
+    return _isLooping;
+  }
+
+  // get current song Data
+  Songmodel get getCurrentSongData {
+    return songData!;
+  }
+
+  // Pause Event
   void _togglePause(PauseEvent event, Emitter<SongstreamState> emit) {
     emit(PausedState(songData: songData!));
   }
 
-//Play Event
+  // Play Event
   void _togglePlay(PlayEvent event, Emitter<SongstreamState> emit) {
     emit(PlayingState(songData: songData!));
   }
@@ -115,11 +125,11 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     if (_isPlaying) {
       _audioPlayer.pause();
       _isPlaying = false;
-      emit(PausedState(songData: songData!));
+      emit(PausedState(songData: songData!, isLoop: _isLooping));
     } else {
       _audioPlayer.play();
       _isPlaying = true;
-      emit(PlayingState(songData: songData!));
+      emit(PlayingState(songData: songData!, isLoop: _isLooping));
     }
   }
 
@@ -133,15 +143,61 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     emit(CloseMiniPlayerState());
   }
 
+  void _resetAudioPlayer() {
+    if (_isPlaying) {
+      _audioPlayer.pause();
+      _isPlaying = false;
+    }
+    songData = null;
+    _currentSongUrl = '';
+    songDuration = Duration.zero;
+
+    _audioPlayer.seek(Duration.zero); // Reset position
+  }
+
   // Handle when the song is completed
   void _onSongCompleted(
-      SongCompletedEvent event, Emitter<SongstreamState> emit) {
-    _audioPlayer.seek(Duration.zero);
-    _audioPlayer.pause();
-    _isPlaying = false;
+      SongCompletedEvent event, Emitter<SongstreamState> emit) async {
+    // add(GetSongStreamEvent(songData: playlistSongs[currentSongIndex]));
+    if (!_isLooping) {
+      add(GetSongUrlOnShuffleEvent(songData: playlistSongs[currentSongIndex]));
 
-    // Emit PausedState after song completion
-    emit(PausedState(songData: songData!));
+      currentSongIndex++;
+    }
+  }
+
+  // Toggle loop state
+  void _toggleLoop(LoopEvent event, Emitter<SongstreamState> emit) {
+    _isLooping = !_isLooping;
+
+    final currentLoopMode = _audioPlayer.loopMode;
+    if (state is PlayingState) {
+      final playingState = state as PlayingState;
+      if (currentLoopMode == LoopMode.off) {
+        _audioPlayer.setLoopMode(LoopMode.one); // Set loop mode
+        emit(playingState.copyWith(isLoop: _isLooping));
+      } else {
+        _audioPlayer.setLoopMode(LoopMode.off); // Disable loop mode
+        emit(playingState.copyWith(isLoop: _isLooping));
+      }
+    } else if (state is PausedState) {
+      final pausedState = state as PausedState;
+      if (currentLoopMode == LoopMode.off) {
+        _audioPlayer.setLoopMode(LoopMode.one);
+        emit(pausedState.copyWith(isLoop: _isLooping));
+      } else {
+        _audioPlayer.setLoopMode(LoopMode.off);
+        emit(pausedState.copyWith(isLoop: _isLooping));
+      }
+    }
+  }
+
+  // Handle playlist songs
+  void _songsPlaylist(
+      GetSongPlaylistEvent event, Emitter<SongstreamState> emit) {
+    playlistSongs = [];
+    playlistSongs = event.songlist;
+    print("PLAYLIST LENGTH ${playlistSongs.length}");
   }
 
   @override
