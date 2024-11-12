@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
+import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/bloc_provider/repository_provider/repository_provider.dart';
 import 'package:nex_music/core/route/route.dart';
@@ -36,7 +37,10 @@ class MyApp extends StatelessWidget {
               context.read<Repository>(),
               AudioPlayer(),
             ),
-          )
+          ),
+          BlocProvider(
+            create: (context) => SearchBloc(context.read<Repository>()),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

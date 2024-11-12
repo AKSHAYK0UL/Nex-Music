@@ -6,8 +6,7 @@ import 'package:nex_music/model/songmodel.dart';
 
 class RepositoryHelperFunction {
   // Get QuickPicks
-  static Future<List<Songmodel>> getQuickPicks(
-      List<SongDetailed> quickPicks) async {
+  static List<Songmodel> getQuickPicks(List<SongDetailed> quickPicks) {
     List<Songmodel> songsList = [];
     for (var i = 0; i < quickPicks.length; i++) {
       final quickPicksDataObj = quickPicks[i];
@@ -16,9 +15,8 @@ class RepositoryHelperFunction {
           vId: quickPicksDataObj.videoId,
           songName: quickPicksDataObj.name,
           artist: quickPicksDataObj.artist,
-          // thumbnail: quickPicksDataObj.thumbnails[1].url,
           thumbnail: getThumbnail(quickPicksDataObj.thumbnails),
-          duration: "",
+          duration: timeFormate(quickPicksDataObj.duration ?? 0),
         ),
       );
     }
@@ -52,8 +50,8 @@ class RepositoryHelperFunction {
   }
 
 //get songs
-  static Future<List<Songmodel>> getSongsList(
-      List<SongFull> songList, List<int> songsDuration) async {
+  static List<Songmodel> getSongsList(
+      List<SongFull> songList, List<int> songsDuration) {
     List<Songmodel> loadedSongsList = [];
 
     for (int i = 0; i < songList.length; i++) {
@@ -64,7 +62,6 @@ class RepositoryHelperFunction {
           vId: playlistSongsData.videoId,
           songName: playlistSongsData.name,
           artist: playlistSongsData.artist,
-          // thumbnail: playlistSongsData.thumbnails.first.url,
           thumbnail: getThumbnail(playlistSongsData.thumbnails),
           duration:
               songsDuration[i] == 0 ? "" : timeFormate(songsDuration[i] - 1),

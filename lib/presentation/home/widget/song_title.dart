@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -40,13 +39,17 @@ class SongTitle extends StatelessWidget {
             height: screenSize * 0.0733,
           ),
         ),
-        title: animatedText(
-          text: songData.songName,
+        title: Text(
+          songData.songName,
           style: Theme.of(context).textTheme.titleSmall!,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-        subtitle: animatedText(
-          text: songData.artist.name,
+        subtitle: Text(
+          songData.artist.name,
           style: Theme.of(context).textTheme.bodySmall!,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         trailing: songData.duration.isNotEmpty ? Text(songData.duration) : null,
       ),

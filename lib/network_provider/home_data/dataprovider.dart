@@ -1,5 +1,6 @@
 import 'package:dart_ytmusic_api/types.dart';
 import 'package:dart_ytmusic_api/yt_music.dart';
+
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class DataProvider {
@@ -51,5 +52,13 @@ class DataProvider {
 
   Future<StreamManifest> songStreamUrl(String songId) async {
     return await _youtubeExplode.videos.streamsClient.getManifest(songId);
+  }
+
+  //search
+  Future<List<SongDetailed>> searchSong(String inputText) async {
+    return await _ytMusic.searchSongs(inputText);
+
+    // final a = _ytMusic.searchAlbums(inputText);
+    // final art = _ytMusic.searchArtists(inputText);
   }
 }

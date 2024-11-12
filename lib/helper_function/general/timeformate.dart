@@ -4,6 +4,9 @@ String timeFormate(int totalDurationInSeconds) {
   Duration duration = Duration(seconds: totalDurationInSeconds);
 
   String formattedDuration;
+  if (totalDurationInSeconds == 0) {
+    return '';
+  }
   if (duration.inHours > 0) {
     // Format as HH:mm:ss if there are hours
     formattedDuration =

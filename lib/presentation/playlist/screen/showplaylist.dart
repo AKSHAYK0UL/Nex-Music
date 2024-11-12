@@ -25,9 +25,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
 
   @override
   void initState() {
+    context.read<ss.SongstreamBloc>().add(ss.CleanPlaylistEvent());
+
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
-        context.read<ss.SongstreamBloc>().add(ss.CleanPlaylistEvent());
         final playlistData =
             ModalRoute.of(context)?.settings.arguments as PlayListmodel;
 

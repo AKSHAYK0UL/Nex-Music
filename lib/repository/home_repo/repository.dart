@@ -19,7 +19,7 @@ class Repository {
   Future<({List<Songmodel> quickPicks, List<PlayListmodel> playlist})>
       homeScreenSongsList() async {
     final networkData = await _dataProvider.homeScreenSongs;
-    final quickPicks = await RepositoryHelperFunction.getQuickPicks(
+    final quickPicks = RepositoryHelperFunction.getQuickPicks(
       networkData.quickPicks,
     );
     final playlist =
@@ -61,7 +61,7 @@ class Repository {
 
     return (
       playlistSongs:
-          await RepositoryHelperFunction.getSongsList(songsList, songsDuration),
+          RepositoryHelperFunction.getSongsList(songsList, songsDuration),
       playlistSize: totalSongs,
       playListDuration: playListDuration,
     );
@@ -71,5 +71,11 @@ class Repository {
   Future<Uri> getSongUrl(String songId) async {
     final manifest = await _dataProvider.songStreamUrl(songId);
     return manifest.audioOnly.withHighestBitrate().url;
+  }
+
+  Future<List<Songmodel>> searchSongs(String inputText) async {
+    final songs = await _dataProvider.searchSong(inputText);
+    final songsList = RepositoryHelperFunction.getQuickPicks(songs);
+    return songsList;
   }
 }
