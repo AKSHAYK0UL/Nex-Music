@@ -8,10 +8,12 @@ import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 
 class SongTitle extends StatelessWidget {
   final Songmodel songData;
+  final int songIndex;
 
   const SongTitle({
     super.key,
     required this.songData,
+    required this.songIndex,
   });
 
   @override
@@ -23,21 +25,19 @@ class SongTitle extends StatelessWidget {
       child: ListTile(
         splashColor: Colors.transparent,
         onTap: () {
-          Navigator.of(context).pushNamed(AudioPlayerScreen.routeName,
-              arguments: {
-                "songdata": songData,
-                "route": SongMiniPlayerRoute.songRoute
-              });
+          Navigator.of(context)
+              .pushNamed(AudioPlayerScreen.routeName, arguments: {
+            "songindex": songIndex,
+            "songdata": songData,
+            "route": SongMiniPlayerRoute.songRoute
+          });
         },
-        leading: Hero(
-          tag: songData.vId,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(screenSize * 0.0106),
-            child: cacheImage(
-              imageUrl: songData.thumbnail,
-              width: screenSize * 0.0755,
-              height: screenSize * 0.0733,
-            ),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(screenSize * 0.0106),
+          child: cacheImage(
+            imageUrl: songData.thumbnail,
+            width: screenSize * 0.0755,
+            height: screenSize * 0.0733,
           ),
         ),
         title: animatedText(

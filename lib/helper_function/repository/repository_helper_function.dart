@@ -66,7 +66,8 @@ class RepositoryHelperFunction {
           artist: playlistSongsData.artist,
           // thumbnail: playlistSongsData.thumbnails.first.url,
           thumbnail: getThumbnail(playlistSongsData.thumbnails),
-          duration: songsDuration[i] == 0 ? "" : timeFormate(songsDuration[i]),
+          duration:
+              songsDuration[i] == 0 ? "" : timeFormate(songsDuration[i] - 1),
         ),
       );
     }

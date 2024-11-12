@@ -9,6 +9,7 @@ import 'package:nex_music/model/songmodel.dart';
 class Player extends StatefulWidget {
   final Songmodel songData;
   final double screenSize;
+  final int songIndex;
   final SongMiniPlayerRoute route;
 
   const Player({
@@ -16,6 +17,7 @@ class Player extends StatefulWidget {
     required this.songData,
     required this.screenSize,
     required this.route,
+    required this.songIndex,
   });
 
   @override
@@ -30,6 +32,7 @@ class _PlayerState extends State<Player> {
     if (widget.route == SongMiniPlayerRoute.songRoute) {
       context.read<SongstreamBloc>().add(GetSongStreamEvent(
             songData: widget.songData,
+            songIndex: widget.songIndex,
           ));
     }
 

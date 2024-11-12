@@ -38,7 +38,6 @@ class PlaylistGridView extends StatelessWidget {
                 width: screenSize * 0.240,
                 height: screenSize * 0.238,
               ),
-
               SizedBox(
                 height: screenSize * 0.0120,
               ),
@@ -49,12 +48,6 @@ class PlaylistGridView extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium!,
                 ),
               ),
-              // Text(
-              //   nameShotener(name: playList.playlistName, length: 12),
-              //   maxLines: 1,
-              //   textAlign: TextAlign.center,
-              //   style: Theme.of(context).textTheme.titleMedium,
-              // ),
             ],
           ),
         ),

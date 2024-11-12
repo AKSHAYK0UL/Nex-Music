@@ -13,20 +13,16 @@ class LoadingState extends SongstreamState {
 class StreamSongState extends SongstreamState {}
 
 class PlayingState extends SongstreamState {
-  final bool isLoop;
   final Songmodel songData;
 
   PlayingState({
     required this.songData,
-    this.isLoop = false,
   });
 
   PlayingState copyWith({
-    bool? isLoop,
     Songmodel? songData,
   }) {
     return PlayingState(
-      isLoop: isLoop ?? this.isLoop,
       songData: songData ?? this.songData,
     );
   }
@@ -34,19 +30,15 @@ class PlayingState extends SongstreamState {
 
 class PausedState extends SongstreamState {
   final Songmodel songData;
-  final bool isLoop;
 
   PausedState({
     required this.songData,
-    this.isLoop = false,
   });
 
   PausedState copyWith({
-    bool? isLoop,
     Songmodel? songData,
   }) {
     return PausedState(
-      isLoop: isLoop ?? this.isLoop,
       songData: songData ?? this.songData,
     );
   }

@@ -27,6 +27,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
+        context.read<ss.SongstreamBloc>().add(ss.CleanPlaylistEvent());
         final playlistData =
             ModalRoute.of(context)?.settings.arguments as PlayListmodel;
 
@@ -48,6 +49,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         }
       },
     );
+
     super.initState();
   }
 
@@ -64,6 +66,24 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
     final screenSize = MediaQuery.sizeOf(context).height;
 
     return BlocBuilder<PlaylistBloc, PlaylistState>(
+      buildWhen: (previous, current) {
+        if (previous != current) {
+          if (current is PlaylistDataState) {
+            context
+                .read<ss.SongstreamBloc>()
+                .add(ss.GetSongPlaylistEvent(songlist: current.playlistSongs));
+          }
+
+          //auto load data after every 89 sec
+          Future.delayed(const Duration(seconds: 89), () {
+            if (!context.mounted) return;
+            context
+                .read<PlaylistBloc>()
+                .add(LoadMoreSongsEvent(playlistId: playlistData.playListId));
+          });
+        }
+        return previous != current;
+      },
       builder: (context, playlistState) {
         if (playlistState is LoadingState) {
           return const Loading();
@@ -79,10 +99,6 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         }
 
         if (playlistState is PlaylistDataState) {
-          print("PlayListData State***************************");
-          context.read<ss.SongstreamBloc>().add(
-              ss.GetSongPlaylistEvent(songlist: playlistState.playlistSongs));
-
           return Scaffold(
             appBar: AppBar(
               title: animatedText(
@@ -150,9 +166,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                 ChipWidget(
                                   label: playlistState.playlistDuration,
                                   icon: Icons.alarm,
-                                  onTap: () {
-                                    showSnackbar(context, "not added yet!");
-                                  },
+                                  onTap: () {},
                                 ),
                                 ChipWidget(
                                   label: "Share",
@@ -182,7 +196,8 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                         itemBuilder: (context, index) {
                           if (index < playlistState.playlistSongs.length) {
                             final songData = playlistState.playlistSongs[index];
-                            return SongTitle(songData: songData);
+                            return SongTitle(
+                                songData: songData, songIndex: index);
                           } else {
                             return Transform.scale(
                               scaleX: screenSize * 0.00227,

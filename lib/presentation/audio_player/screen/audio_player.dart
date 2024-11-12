@@ -20,6 +20,7 @@ class AudioPlayerScreen extends StatelessWidget {
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
     Songmodel songData = routeData["songdata"] as Songmodel;
     final route = routeData["route"] as SongMiniPlayerRoute;
+    final songIndex = routeData["songindex"] as int;
 
     return Scaffold(
       body: SafeArea(
@@ -52,12 +53,6 @@ class AudioPlayerScreen extends StatelessWidget {
                 child: BlocBuilder<SongstreamBloc, SongstreamState>(
                   buildWhen: (previous, current) => previous != current,
                   builder: (context, state) {
-                    // if (state is PlayingState) {
-                    //   songData = state.songData;
-                    // }
-                    // if (state is PausedState) {
-                    //   songData = state.songData;
-                    // }
                     if (state is LoadingState) {
                       songData = state.songData;
                     }
@@ -113,12 +108,6 @@ class AudioPlayerScreen extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  // animatedText(
-                                  //   text: songData.songName,
-                                  //   style: Theme.of(context)
-                                  //       .textTheme
-                                  //       .titleLarge!,
-                                  // ),
                                   SizedBox(
                                     height: screenSize * 0.0050,
                                   ),
@@ -130,12 +119,6 @@ class AudioPlayerScreen extends StatelessWidget {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   )
-                                  // animatedText(
-                                  //   text: songData.artist.name,
-                                  //   style: Theme.of(context)
-                                  //       .textTheme
-                                  //       .titleMedium!,
-                                  // ),
                                 ],
                               );
                             },
@@ -170,40 +153,24 @@ class AudioPlayerScreen extends StatelessWidget {
                   BlocBuilder<SongstreamBloc, SongstreamState>(
                     buildWhen: (previous, current) => previous != current,
                     builder: (context, state) {
-                      if (state is PausedState || state is PlayingState) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                CupertinoIcons.speaker_1,
-                                color: textColor,
-                                size: screenSize * 0.0350, //329
-                              ),
-                            ),
-                            SizedBox(
-                              width: screenSize * 0.0197,
-                            ),
-                            IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.skip_previous,
-                                color: textColor,
-                                size: screenSize * 0.0527,
-                              ),
-                            ),
-                          ],
-                        );
-                      }
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           IconButton(
-                            onPressed: null,
+                            onPressed: state is LoadingState
+                                ? null
+                                : () {
+                                    context
+                                        .read<SongstreamBloc>()
+                                        .add(MuteEvent());
+                                  },
                             icon: Icon(
-                              CupertinoIcons.speaker_1,
-                              color: Colors.white38,
+                              context.read<SongstreamBloc>().getMuteStatus
+                                  ? CupertinoIcons.speaker_slash
+                                  : CupertinoIcons.speaker_2,
+                              color: state is LoadingState
+                                  ? Colors.white38
+                                  : textColor,
                               size: screenSize * 0.0350, //329
                             ),
                           ),
@@ -211,10 +178,12 @@ class AudioPlayerScreen extends StatelessWidget {
                             width: screenSize * 0.0197,
                           ),
                           IconButton(
-                            onPressed: null,
+                            onPressed: state is LoadingState ? null : () {},
                             icon: Icon(
                               Icons.skip_previous,
-                              color: Colors.white38,
+                              color: state is LoadingState
+                                  ? Colors.white38
+                                  : textColor,
                               size: screenSize * 0.0527,
                             ),
                           ),
@@ -227,6 +196,7 @@ class AudioPlayerScreen extends StatelessWidget {
                   ),
                   Player(
                     songData: songData,
+                    songIndex: songIndex,
                     screenSize: screenSize,
                     route: route,
                   ),
@@ -236,44 +206,16 @@ class AudioPlayerScreen extends StatelessWidget {
                   BlocBuilder<SongstreamBloc, SongstreamState>(
                     buildWhen: (previous, current) => previous != current,
                     builder: (context, state) {
-                      if (state is PausedState || state is PlayingState) {
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.skip_next,
-                                color: textColor,
-                                size: screenSize * 0.0527,
-                              ),
-                            ),
-                            SizedBox(
-                              width: screenSize * 0.0197,
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                context.read<SongstreamBloc>().add(LoopEvent());
-                              },
-                              icon: Icon(
-                                context.read<SongstreamBloc>().getLoopStatus
-                                    ? CupertinoIcons.loop
-                                    : CupertinoIcons.shuffle,
-                                color: textColor,
-                                size: screenSize * 0.0350,
-                              ),
-                            ),
-                          ],
-                        );
-                      }
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           IconButton(
-                            onPressed: null,
+                            onPressed: state is LoadingState ? null : () {},
                             icon: Icon(
                               Icons.skip_next,
-                              color: Colors.white38,
+                              color: state is LoadingState
+                                  ? Colors.white38
+                                  : textColor,
                               size: screenSize * 0.0527,
                             ),
                           ),
@@ -281,12 +223,20 @@ class AudioPlayerScreen extends StatelessWidget {
                             width: screenSize * 0.0197,
                           ),
                           IconButton(
-                            onPressed: null,
+                            onPressed: state is LoadingState
+                                ? null
+                                : () {
+                                    context
+                                        .read<SongstreamBloc>()
+                                        .add(LoopEvent());
+                                  },
                             icon: Icon(
                               context.read<SongstreamBloc>().getLoopStatus
                                   ? CupertinoIcons.loop
                                   : CupertinoIcons.shuffle,
-                              color: Colors.white38,
+                              color: state is LoadingState
+                                  ? Colors.white38
+                                  : textColor,
                               size: screenSize * 0.0350,
                             ),
                           ),

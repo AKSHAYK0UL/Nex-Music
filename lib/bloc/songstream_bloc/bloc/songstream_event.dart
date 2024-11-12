@@ -4,7 +4,11 @@ sealed class SongstreamEvent {}
 
 class GetSongStreamEvent extends SongstreamEvent {
   final Songmodel songData;
-  GetSongStreamEvent({required this.songData});
+  final int songIndex;
+  GetSongStreamEvent({
+    required this.songData,
+    required this.songIndex,
+  });
 }
 
 class GetSongUrlOnShuffleEvent extends SongstreamEvent {
@@ -34,3 +38,13 @@ final class GetSongPlaylistEvent extends SongstreamEvent {
 
   GetSongPlaylistEvent({required this.songlist});
 }
+
+final class CleanPlaylistEvent extends SongstreamEvent {}
+
+final class LoadingEvent extends SongstreamEvent {}
+
+final class PlayNextSongEvent extends SongstreamEvent {}
+
+final class PlayPreviousSongEvent extends SongstreamEvent {}
+
+final class MuteEvent extends SongstreamEvent {}
