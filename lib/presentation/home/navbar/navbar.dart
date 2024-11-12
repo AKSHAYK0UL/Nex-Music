@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
 
@@ -10,15 +12,34 @@ class NavBar extends StatefulWidget {
   State<NavBar> createState() => _NavBarState();
 }
 
-class _NavBarState extends State<NavBar> {
+class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   List<Widget> screens = const [
-    //TODO
-    HomeScreen(), //home
-    HomeScreen(), //recent
-    HomeScreen(), //fav
-    HomeScreen(), //playlist
+    HomeScreen(), // home
+    HomeScreen(), // recent
+    HomeScreen(), // favorites
+    HomeScreen(), // playlist
   ];
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<SongstreamBloc>().add(UpdataUIEvent());
+      print("**********************Foreground********************");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,11 +91,9 @@ class _NavBarState extends State<NavBar> {
                 ],
                 currentIndex: _selectedIndex,
                 onTap: (index) {
-                  setState(
-                    () {
-                      _selectedIndex = index;
-                    },
-                  );
+                  setState(() {
+                    _selectedIndex = index;
+                  });
                 },
               ),
             ),

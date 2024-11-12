@@ -56,6 +56,12 @@ class AudioPlayerScreen extends StatelessWidget {
                     if (state is LoadingState) {
                       songData = state.songData;
                     }
+                    if (state is PlayingState) {
+                      songData = state.songData;
+                    }
+                    if (state is PausedState) {
+                      songData = state.songData;
+                    }
                     return Center(
                       child: Container(
                         height: screenSize * 0.410,

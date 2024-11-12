@@ -78,4 +78,9 @@ class Repository {
     final songsList = RepositoryHelperFunction.getQuickPicks(songs);
     return songsList;
   }
+
+  //test
+  Future<void> testing() async {
+    await _dataProvider.testing();
+  }
 }

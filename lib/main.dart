@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
@@ -11,7 +12,13 @@ import 'package:nex_music/core/theme/theme.dart';
 import 'package:nex_music/presentation/home/navbar/navbar.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await JustAudioBackground.init(
+    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+    androidNotificationChannelName: 'Audio playback',
+    androidNotificationOngoing: true,
+  );
   runApp(const MyApp());
 }
 

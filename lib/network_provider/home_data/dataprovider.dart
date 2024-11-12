@@ -61,4 +61,10 @@ class DataProvider {
     // final a = _ytMusic.searchAlbums(inputText);
     // final art = _ytMusic.searchArtists(inputText);
   }
+
+  //testing
+  Future<void> testing() async {
+    final value = await _ytMusic.getSearchSuggestions("52 bars");
+    print(value);
+  }
 }

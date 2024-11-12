@@ -7,3 +7,5 @@ final class SeachSongEvent extends SearchEvent {
 
   SeachSongEvent({required this.inputText});
 }
+
+final class Testing extends SearchEvent {}

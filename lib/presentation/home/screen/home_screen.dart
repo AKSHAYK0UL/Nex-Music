@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
+import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart' as sb;
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
@@ -59,6 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 IconButton(
                   onPressed: () {
+                    context.read<sb.SearchBloc>().add(sb.Testing());
                     showSnackbar(context, "not added yet");
                   },
                   icon: Icon(

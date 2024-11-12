@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:nex_music/model/audioplayerstream.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
@@ -24,6 +25,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       0; //store the index of first song played in the playlist
   bool _isMute = false;
   double _storedVolume = 0.0;
+  bool _songLoaded = false;
 
   SongstreamBloc(this._repository, this._audioPlayer)
       : super(SongstreamInitial()) {
@@ -40,6 +42,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<LoadingEvent>(_loading);
     on<CleanPlaylistEvent>(_cleanSongsPlaylist);
     on<MuteEvent>(_togglemute);
+    on<UpdataUIEvent>(_updateUIFromBackground);
 
     songPosition = _audioPlayer.positionStream;
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
@@ -64,16 +67,30 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         if (state.processingState == ProcessingState.completed) {
           add(SongCompletedEvent());
         }
-        if (state.playing &&
-            state.processingState != ProcessingState.buffering) {
-          add(PlayEvent());
+        if (_songLoaded) {
+          if (state.playing) {
+            add(PlayEvent());
+          } else if (!state.playing) {
+            add(PauseEvent());
+          }
         }
 
-        if (state.processingState == ProcessingState.buffering) {
+        if (state.processingState == ProcessingState.buffering ||
+            state.processingState == ProcessingState.loading) {
           add(LoadingEvent());
         }
       },
     );
+  }
+
+  //Update UI when came back from Background
+  void _updateUIFromBackground(
+      UpdataUIEvent event, Emitter<SongstreamState> emit) {
+    if (_isPlaying) {
+      add(PlayEvent());
+    } else {
+      add(PauseEvent());
+    }
   }
 
   // Fetch the song URL and handle playback
@@ -86,9 +103,18 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _firstSongPlayedIndex = event.songIndex;
     try {
       final songUrl = await _repository.getSongUrl(_songData!.vId);
-      await _audioPlayer.setUrl(songUrl.toString());
+      await _audioPlayer.setUrl(
+        songUrl.toString(),
+        tag: MediaItem(
+          id: _songData!.vId,
+          title: _songData!.songName,
+          artist: _songData!.artist.name,
+          artUri: Uri.parse(_songData!.thumbnail),
+        ),
+      );
       _audioPlayer.play();
       _isPlaying = true;
+      _songLoaded = true;
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
@@ -98,13 +124,23 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 //when on shuffle
   Future<void> _getSongUrlOnShuffle(
       GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
+    _songLoaded = false;
     emit(LoadingState(songData: event.songData));
     _songData = event.songData;
     try {
       final songUrl = await _repository.getSongUrl(_songData!.vId);
-      await _audioPlayer.setUrl(songUrl.toString());
+      await _audioPlayer.setUrl(
+        songUrl.toString(),
+        tag: MediaItem(
+          id: _songData!.vId,
+          title: _songData!.songName,
+          artist: _songData!.artist.name,
+          artUri: Uri.parse(_songData!.thumbnail),
+        ),
+      );
       _audioPlayer.play();
       _isPlaying = true;
+      _songLoaded = true;
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
@@ -195,6 +231,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   void _resetAudioPlayer() {
+    _songLoaded = false;
     if (_isPlaying) {
       _audioPlayer.pause();
       _isPlaying = false;
