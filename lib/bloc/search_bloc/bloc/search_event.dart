@@ -7,11 +7,3 @@ final class SearchSongSuggestionEvent extends SearchEvent {
 
   SearchSongSuggestionEvent({required this.inputQuery});
 }
-
-final class SeachSongEvent extends SearchEvent {
-  final String inputText;
-
-  SeachSongEvent({required this.inputText});
-}
-
-final class Testing extends SearchEvent {}

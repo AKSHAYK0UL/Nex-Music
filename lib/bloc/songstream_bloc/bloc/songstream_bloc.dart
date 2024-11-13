@@ -25,7 +25,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       0; //store the index of first song played in the playlist
   bool _isMute = false;
   double _storedVolume = 0.0;
-  bool _songLoaded = false;
+  bool _songLoaded = true;
 
   SongstreamBloc(this._repository, this._audioPlayer)
       : super(SongstreamInitial()) {

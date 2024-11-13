@@ -16,9 +16,3 @@ final class SearchSuggestionResultState extends SearchState {
   List<String> searchSuggestions = [];
   SearchSuggestionResultState({required this.searchSuggestions});
 }
-
-final class SearchedSongsState extends SearchState {
-  final List<Songmodel> searchedSongs;
-
-  SearchedSongsState({required this.searchedSongs});
-}

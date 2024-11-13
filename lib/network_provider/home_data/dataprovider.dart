@@ -1,4 +1,4 @@
-import 'package:dart_ytmusic_api/types.dart';
+import 'package:dart_ytmusic_api/types.dart' as yt;
 import 'package:dart_ytmusic_api/yt_music.dart';
 
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -14,8 +14,11 @@ class DataProvider {
         _youtubeExplode = youtubeExplode;
 
   //get home section data
-  Future<({List<HomeSection> homeSectionData, List<SongDetailed> quickPicks})>
-      get homeScreenSongs async {
+  Future<
+      ({
+        List<yt.HomeSection> homeSectionData,
+        List<yt.SongDetailed> quickPicks
+      })> get homeScreenSongs async {
     await _ytMusic.initialize();
     final fetchedData = await Future.wait(
       [
@@ -25,8 +28,8 @@ class DataProvider {
     );
 
     final homeSectionData =
-        fetchedData[0] as List<HomeSection>; //PlayList, Album
-    final quickPicks = fetchedData[1] as List<SongDetailed>; ////Quick Picks
+        fetchedData[0] as List<yt.HomeSection>; //PlayList, Album
+    final quickPicks = fetchedData[1] as List<yt.SongDetailed>; ////Quick Picks
 
     return (homeSectionData: homeSectionData, quickPicks: quickPicks);
   }
@@ -36,10 +39,10 @@ class DataProvider {
     yield* songStream;
   }
 
-  Future<List<SongFull>> getPlayListSongs(
+  Future<List<yt.SongFull>> getPlayListSongs(
     List<String> songIds,
   ) async {
-    final List<SongFull> songs = [];
+    final List<yt.SongFull> songs = [];
     for (var i = 0; i < songIds.length; i++) {
       final data = await _ytMusic.getSong(songIds[i]);
       if (data.type == "SONG") {
@@ -54,16 +57,18 @@ class DataProvider {
     return await _youtubeExplode.videos.streamsClient.getManifest(songId);
   }
 
-  //search
-  Future<List<SongDetailed>> searchSong(String inputText) async {
-    return await _ytMusic.searchSongs(inputText);
-
-    // final a = _ytMusic.searchAlbums(inputText);
-    // final art = _ytMusic.searchArtists(inputText);
-  }
-
   //search suggestion
   Future<List<String>> searchSuggestion(String query) async {
     return await _ytMusic.getSearchSuggestions(query);
+  }
+
+  //search in songs
+  Future<List<yt.SongDetailed>> searchSong(String inputText) async {
+    return await _ytMusic.searchSongs(inputText);
+  }
+
+  //search in videos
+  Future<List<yt.VideoDetailed>> searchVideo(String inputText) async {
+    return await _ytMusic.searchVideos(inputText);
   }
 }

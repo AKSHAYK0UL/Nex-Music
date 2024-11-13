@@ -5,7 +5,9 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
+import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/core/bloc_provider/repository_provider/repository_provider.dart';
 import 'package:nex_music/core/route/route.dart';
 import 'package:nex_music/core/theme/theme.dart';
@@ -47,6 +49,12 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => SearchBloc(context.read<Repository>()),
+          ),
+          BlocProvider(
+            create: (context) => SongBloc(context.read<Repository>()),
+          ),
+          BlocProvider(
+            create: (context) => VideoBloc(context.read<Repository>()),
           ),
         ],
         child: MaterialApp(

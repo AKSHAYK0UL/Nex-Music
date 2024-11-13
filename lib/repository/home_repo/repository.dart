@@ -1,3 +1,4 @@
+import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/helper_function/repository/repository_helper_function.dart';
 import 'package:nex_music/model/playlistmodel.dart';
@@ -73,14 +74,46 @@ class Repository {
     return manifest.audioOnly.withHighestBitrate().url;
   }
 
-  Future<List<Songmodel>> searchSongs(String inputText) async {
-    final songs = await _dataProvider.searchSong(inputText);
-    final songsList = RepositoryHelperFunction.getQuickPicks(songs);
-    return songsList;
-  }
-
   //Search suggestion
   Future<List<String>> searchSuggetion(String query) async {
     return await _dataProvider.searchSuggestion(query);
+  }
+
+//seach in songs
+  Future<List<Songmodel>> searchSong(String inputText) async {
+    final searchResults = await _dataProvider.searchSong(inputText);
+    List<Songmodel> songs = [];
+    for (var i = 0; i < searchResults.length; i++) {
+      final song = searchResults[i];
+      songs.add(
+        Songmodel(
+          vId: song.videoId,
+          songName: song.name,
+          artist: song.artist,
+          thumbnail: getThumbnail(song.thumbnails),
+          duration: timeFormate(song.duration ?? 0),
+        ),
+      );
+    }
+    return songs;
+  }
+
+  //search in videos
+  Future<List<Songmodel>> searchVideo(String inputText) async {
+    final searchResults = await _dataProvider.searchVideo(inputText);
+    List<Songmodel> songs = [];
+    for (var i = 0; i < searchResults.length; i++) {
+      final song = searchResults[i];
+      songs.add(
+        Songmodel(
+          vId: song.videoId,
+          songName: song.name,
+          artist: song.artist,
+          thumbnail: getThumbnail(song.thumbnails),
+          duration: timeFormate(song.duration ?? 0),
+        ),
+      );
+    }
+    return songs;
   }
 }

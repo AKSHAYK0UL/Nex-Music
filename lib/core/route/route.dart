@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
-import 'package:nex_music/presentation/home/screen/search_screen.dart';
+import 'package:nex_music/presentation/search/screens/search_result_tab.dart';
+import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
 import 'package:nex_music/presentation/playlist/screen/showplaylist.dart';
 
@@ -9,4 +10,5 @@ Map<String, WidgetBuilder> routes = {
   ShowPlaylist.routeName: (context) => const ShowPlaylist(),
   ShowAllPlaylists.routeName: (context) => const ShowAllPlaylists(),
   SearchScreen.routeName: (context) => const SearchScreen(),
+  SearchResultTab.routeName: (context) => const SearchResultTab(),
 };

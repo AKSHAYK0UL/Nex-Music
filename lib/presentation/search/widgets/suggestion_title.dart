@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
+import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
+import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 
 class SuggestionTitle extends StatelessWidget {
@@ -16,7 +17,9 @@ class SuggestionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.read<SearchBloc>().add(SeachSongEvent(inputText: text));
+        print("object");
+        context.read<SongBloc>().add(SeachInSongEvent(inputText: text));
+        context.read<VideoBloc>().add(SearchInVideoEvent(inputText: text));
       },
       child: Container(
         margin: EdgeInsets.only(top: size * 0.00329),

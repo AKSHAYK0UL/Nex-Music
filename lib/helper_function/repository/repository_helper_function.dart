@@ -39,7 +39,7 @@ class RepositoryHelperFunction {
                 playListId: content.playlistId,
                 playlistName: content.name,
                 artistBasic: content.artist,
-                thumbnail: content.thumbnails.first.url,
+                thumbnail: getThumbnail(content.thumbnails),
               ),
             );
           }
