@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:overflow_text_animated/overflow_text_animated.dart';
+import 'package:text_scroll/text_scroll.dart';
 
-OverflowTextAnimated animatedText(
-    {required String text, required TextStyle style}) {
-  return OverflowTextAnimated(
-    text: text,
+TextScroll animatedText({required String text, required TextStyle style}) {
+  return TextScroll(
+    text,
+    mode: TextScrollMode.endless,
+    velocity: const Velocity(pixelsPerSecond: Offset(30, 0)),
+    delayBefore: const Duration(seconds: 2),
+    pauseBetween: const Duration(seconds: 3),
     style: style,
-    animation: OverFlowTextAnimations.scrollOpposite,
-    animateDuration: const Duration(milliseconds: 4500),
-    curve: Curves.easeInOut,
+    textAlign: TextAlign.right,
+    textDirection: TextDirection.ltr,
   );
 }

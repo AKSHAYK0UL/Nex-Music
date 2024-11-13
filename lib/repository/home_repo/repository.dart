@@ -79,8 +79,8 @@ class Repository {
     return songsList;
   }
 
-  //test
-  Future<void> testing() async {
-    await _dataProvider.testing();
+  //Search suggestion
+  Future<List<String>> searchSuggetion(String query) async {
+    return await _dataProvider.searchSuggestion(query);
   }
 }

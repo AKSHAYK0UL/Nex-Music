@@ -62,9 +62,8 @@ class DataProvider {
     // final art = _ytMusic.searchArtists(inputText);
   }
 
-  //testing
-  Future<void> testing() async {
-    final value = await _ytMusic.getSearchSuggestions("52 bars");
-    print(value);
+  //search suggestion
+  Future<List<String>> searchSuggestion(String query) async {
+    return await _ytMusic.getSearchSuggestions(query);
   }
 }

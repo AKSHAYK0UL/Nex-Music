@@ -134,7 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
-                        itemCount: 6,
+                        itemCount: state.playlist.length >= 6
+                            ? 6
+                            : state.playlist.length,
                         itemBuilder: (context, index) {
                           final playlistData = state.playlist[index];
                           return PlaylistView(playList: playlistData);

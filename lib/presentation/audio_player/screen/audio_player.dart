@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -107,24 +108,20 @@ class AudioPlayerScreen extends StatelessWidget {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    songData.songName,
+                                  animatedText(
+                                    text: songData.songName,
                                     style:
                                         Theme.of(context).textTheme.titleLarge!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   SizedBox(
                                     height: screenSize * 0.0050,
                                   ),
-                                  Text(
-                                    songData.artist.name,
+                                  animatedText(
+                                    text: songData.artist.name,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  )
+                                  ),
                                 ],
                               );
                             },

@@ -8,9 +8,24 @@ part 'search_state.dart';
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final Repository _repository;
   SearchBloc(this._repository) : super(SearchInitial()) {
+    on<SearchSongSuggestionEvent>(_searchSuggestion);
     on<SeachSongEvent>(_searchSong);
-    on<Testing>(_testing);
   }
+
+//provide search suggestion
+  Future<void> _searchSuggestion(
+      SearchSongSuggestionEvent event, Emitter<SearchState> emit) async {
+    emit(LoadingState());
+    try {
+      final suggestionList =
+          await _repository.searchSuggetion(event.inputQuery);
+      emit(SearchSuggestionResultState(searchSuggestions: suggestionList));
+    } catch (e) {
+      emit(ErrorState(errorMessage: e.toString()));
+    }
+  }
+
+//search song
   Future<void> _searchSong(
       SeachSongEvent event, Emitter<SearchState> emit) async {
     emit(LoadingState());
@@ -20,10 +35,5 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     } catch (e) {
       emit(ErrorState(errorMessage: e.toString()));
     }
-  }
-
-  //testing
-  Future<void> _testing(Testing event, Emitter<SearchState> emit) async {
-    await _repository.testing();
   }
 }
