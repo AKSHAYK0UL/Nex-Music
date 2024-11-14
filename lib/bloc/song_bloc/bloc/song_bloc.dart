@@ -13,10 +13,13 @@ class SongBloc extends Bloc<SongEvent, SongState> {
   //search In song
   Future<void> _searchInSong(
       SeachInSongEvent event, Emitter<SongState> emit) async {
-    emit(LoadingState());
+    emit(LoadingState(query: event.inputText));
     try {
       final songsResult = await _repository.searchSong(event.inputText);
-      emit(SongsResultState(searchedSongs: songsResult));
+      emit(SongsResultState(
+        query: event.inputText,
+        searchedSongs: songsResult,
+      ));
     } catch (e) {
       emit(ErrorState(errorMessage: e.toString()));
     }

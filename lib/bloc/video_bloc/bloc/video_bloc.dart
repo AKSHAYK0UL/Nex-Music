@@ -9,7 +9,14 @@ class VideoBloc extends Bloc<VideoEvent, VideoState> {
   final Repository _repository;
   VideoBloc(this._repository) : super(VideoInitial()) {
     on<SearchInVideoEvent>(_searchInVideo);
+    on<SetStateToInitialEvent>(_setStateToIntial);
   }
+  //Set state to VideoInitial
+  void _setStateToIntial(
+      SetStateToInitialEvent event, Emitter<VideoState> emit) {
+    emit(VideoInitial());
+  }
+
   //search In video
   Future<void> _searchInVideo(
       SearchInVideoEvent event, Emitter<VideoState> emit) async {

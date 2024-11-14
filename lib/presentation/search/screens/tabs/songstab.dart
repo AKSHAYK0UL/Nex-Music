@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 
+import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
 class SongsTab extends StatelessWidget {
+  final String inputText;
+  final double screenSize;
   const SongsTab({
     super.key,
+    required this.inputText,
+    required this.screenSize,
   });
 
   @override
@@ -20,16 +24,21 @@ class SongsTab extends StatelessWidget {
           );
         }
         if (state is SongsResultState) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: state.searchedSongs.length,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                final songData = state.searchedSongs[index];
-                return SongTitle(songData: songData, songIndex: index);
-              },
+          return SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.only(
+                  right: screenSize * 0.0131,
+                  left: screenSize * 0.0131,
+                  top: screenSize * 0.0131),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: state.searchedSongs.length,
+                physics: const NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final songData = state.searchedSongs[index];
+                  return SongTitle(songData: songData, songIndex: index);
+                },
+              ),
             ),
           );
         }

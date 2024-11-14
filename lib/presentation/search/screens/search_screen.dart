@@ -34,6 +34,7 @@ class _SearchScreenState extends State<SearchScreen> {
           if (state is songbloc.LoadingState) {
             Navigator.of(context).pushNamed(
               SearchResultTab.routeName,
+              arguments: state.query,
             );
           }
         },

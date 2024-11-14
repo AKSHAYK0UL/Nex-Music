@@ -18,7 +18,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   Duration songDuration = Duration.zero;
   Stream<Duration>? songPosition;
   Stream<Duration>? bufferedPositionStream;
-  bool _isLooping = true; //default true
+  bool _isLooping = false; //default false
   List<Songmodel> _playlistSongs = [];
   int _currentSongIndex = -1; // Keep track of the current song in the playlist
   int _firstSongPlayedIndex =
@@ -67,17 +67,19 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         if (state.processingState == ProcessingState.completed) {
           add(SongCompletedEvent());
         }
-        if (_songLoaded) {
+
+        if (state.processingState == ProcessingState.buffering ||
+            state.processingState == ProcessingState.loading) {
+          add(LoadingEvent());
+        }
+        if (_songLoaded &&
+            (state.processingState != ProcessingState.buffering ||
+                state.processingState != ProcessingState.loading)) {
           if (state.playing) {
             add(PlayEvent());
           } else if (!state.playing) {
             add(PauseEvent());
           }
-        }
-
-        if (state.processingState == ProcessingState.buffering ||
-            state.processingState == ProcessingState.loading) {
-          add(LoadingEvent());
         }
       },
     );

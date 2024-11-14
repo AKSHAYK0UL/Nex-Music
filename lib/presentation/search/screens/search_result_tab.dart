@@ -1,5 +1,7 @@
+import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:flutter/material.dart';
-import 'package:nex_music/enum/segment_button_value.dart';
+import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/search/screens/tabs/playlisttab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/songstab.dart';
@@ -14,90 +16,64 @@ class SearchResultTab extends StatefulWidget {
 }
 
 class _SearchResultTabState extends State<SearchResultTab> {
-  SegmentButtonValue selectedSegment = SegmentButtonValue.songs;
-  List<Widget> tabs = [
-    const SongsTab(),
-    const Videostab(),
-    const PlaylistTab(),
-    const SongsTab(),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final searchText = ModalRoute.of(context)!.settings.arguments as String;
     final screenSize = MediaQuery.sizeOf(context).height;
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Results"),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: screenSize * 0.0175),
-              width: double.infinity,
-              height: screenSize * 0.063,
-              child: SegmentedButton<SegmentButtonValue>(
-                showSelectedIcon: false,
-                segments: <ButtonSegment<SegmentButtonValue>>[
-                  ButtonSegment(
-                    value: SegmentButtonValue.songs,
-                    label: FittedBox(
-                      child: Text(
-                        'Songs',
-                        style: Theme.of(context).textTheme.titleSmall,
-                        maxLines: 1,
-                      ),
-                    ),
-                  ),
-                  ButtonSegment(
-                    value: SegmentButtonValue.videos,
-                    label: FittedBox(
-                      child: Text(
-                        'Videos',
-                        style: Theme.of(context).textTheme.titleSmall,
-                        maxLines: 1,
-                      ),
-                    ),
-                  ),
-                  ButtonSegment(
-                    value: SegmentButtonValue.playlists,
-                    label: FittedBox(
-                      child: Text(
-                        'Playlists',
-                        style: Theme.of(context).textTheme.titleSmall,
-                        maxLines: 1,
-                      ),
-                    ),
-                  ),
-                  ButtonSegment(
-                    value: SegmentButtonValue.artist,
-                    label: FittedBox(
-                      child: Text(
-                        'Artist',
-                        style: Theme.of(context).textTheme.titleSmall,
-                        maxLines: 1,
-                      ),
-                    ),
-                  ),
-                ],
-                selected: <SegmentButtonValue>{selectedSegment},
-                onSelectionChanged: (newSelection) {
-                  setState(
-                    () {
-                      selectedSegment = newSelection.first;
-                    },
-                  );
-                },
+    return DefaultTabController(
+      initialIndex: 0,
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          title: animatedText(
+            text: searchText,
+            style: Theme.of(context).textTheme.titleLarge!,
+          ),
+          bottom: ButtonsTabBar(
+            splashColor: backgroundColor,
+            backgroundColor: Colors.grey.shade700,
+            unselectedBackgroundColor: secondaryColor,
+            width: screenSize / 8,
+            contentCenter: true,
+            elevation: 0,
+            labelStyle: Theme.of(context).textTheme.titleSmall,
+            unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
+            tabs: const [
+              Tab(
+                text: "Songs",
               ),
-            ),
-            IndexedStack(
-              index: selectedSegment.index,
-              children: tabs,
-            )
-          ],
+              Tab(
+                text: "Videos",
+              ),
+              Tab(
+                text: "Playlists",
+              ),
+              Tab(
+                text: "Artist",
+              ),
+            ],
+          ),
         ),
+        body: TabBarView(children: [
+          SongsTab(
+            inputText: searchText,
+            screenSize: screenSize,
+          ),
+          Videostab(
+            inputText: searchText,
+            screenSize: screenSize,
+          ),
+          PlaylistTab(
+            inputText: searchText,
+            screenSize: screenSize,
+          ),
+          SongsTab(
+            inputText: searchText,
+            screenSize: screenSize,
+          ),
+        ]),
+        bottomNavigationBar: MiniPlayer(screenSize: screenSize),
       ),
-      bottomNavigationBar: MiniPlayer(screenSize: screenSize),
     );
   }
 }

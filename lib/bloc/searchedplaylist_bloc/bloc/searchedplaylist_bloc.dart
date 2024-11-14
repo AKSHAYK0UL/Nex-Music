@@ -10,7 +10,14 @@ class SearchedplaylistBloc
   final Repository _repository;
   SearchedplaylistBloc(this._repository) : super(SearchedplaylistInitial()) {
     on<SearchInPlaylistEvent>(_searchPlaylist);
+    on<SetStateToInitialEvent>(_setStateToInitial);
   }
+  //set State to Initial
+  void _setStateToInitial(
+      SetStateToInitialEvent event, Emitter<SearchedplaylistState> emit) {
+    emit(SearchedplaylistInitial());
+  }
+
   Future<void> _searchPlaylist(
       SearchInPlaylistEvent event, Emitter<SearchedplaylistState> emit) async {
     emit(LoadingState());

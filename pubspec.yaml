@@ -48,6 +48,7 @@ dependencies:
   audio_video_progress_bar: ^2.0.3
   just_audio_background: ^0.0.1-beta.13
   text_scroll: ^0.2.0
+  buttons_tabbar: ^1.3.14
 
 dev_dependencies:
   flutter_test:
