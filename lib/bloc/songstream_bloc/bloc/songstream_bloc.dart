@@ -13,19 +13,19 @@ part 'songstream_state.dart';
 class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   final Repository _repository;
   final AudioPlayer _audioPlayer;
-  bool _isPlaying = false;
+  bool _isPlaying = false; //default false
   Songmodel? _songData;
   Duration songDuration = Duration.zero;
   Stream<Duration>? songPosition;
   Stream<Duration>? bufferedPositionStream;
-  bool _isLooping = false;
+  bool _isLooping = true; //default true
   List<Songmodel> _playlistSongs = [];
   int _currentSongIndex = -1; // Keep track of the current song in the playlist
   int _firstSongPlayedIndex =
       0; //store the index of first song played in the playlist
-  bool _isMute = false;
+  bool _isMute = false; //default false
   double _storedVolume = 0.0;
-  bool _songLoaded = true;
+  bool _songLoaded = false; //default false
 
   SongstreamBloc(this._repository, this._audioPlayer)
       : super(SongstreamInitial()) {
@@ -230,6 +230,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     emit(CloseMiniPlayerState());
   }
 
+//reset audio player
   void _resetAudioPlayer() {
     _songLoaded = false;
     if (_isPlaying) {

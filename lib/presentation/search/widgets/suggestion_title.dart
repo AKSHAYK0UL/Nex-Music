@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart';
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
@@ -20,6 +21,9 @@ class SuggestionTitle extends StatelessWidget {
         print("object");
         context.read<SongBloc>().add(SeachInSongEvent(inputText: text));
         context.read<VideoBloc>().add(SearchInVideoEvent(inputText: text));
+        context
+            .read<SearchedplaylistBloc>()
+            .add(SearchInPlaylistEvent(inputText: text));
       },
       child: Container(
         margin: EdgeInsets.only(top: size * 0.00329),

@@ -116,4 +116,11 @@ class Repository {
     }
     return songs;
   }
+
+  //search In playlists
+  Future<List<PlayListmodel>> searchPlaylist(String inputText) async {
+    final playlists = await _dataProvider.searchPlaylist(inputText);
+    return RepositoryHelperFunction.getPlaylistDetailedToPlayListModel(
+        playlists);
+  }
 }

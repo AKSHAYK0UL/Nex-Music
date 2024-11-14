@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nex_music/enum/segment_button_value.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
+import 'package:nex_music/presentation/search/screens/tabs/playlisttab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/songstab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/videostab.dart';
 
@@ -17,7 +18,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
   List<Widget> tabs = [
     const SongsTab(),
     const Videostab(),
-    const SongsTab(),
+    const PlaylistTab(),
     const SongsTab(),
   ];
 
@@ -34,35 +35,48 @@ class _SearchResultTabState extends State<SearchResultTab> {
             Container(
               margin: EdgeInsets.symmetric(horizontal: screenSize * 0.0175),
               width: double.infinity,
+              height: screenSize * 0.063,
               child: SegmentedButton<SegmentButtonValue>(
                 showSelectedIcon: false,
                 segments: <ButtonSegment<SegmentButtonValue>>[
                   ButtonSegment(
                     value: SegmentButtonValue.songs,
-                    label: Text(
-                      'Songs',
-                      style: Theme.of(context).textTheme.titleSmall,
+                    label: FittedBox(
+                      child: Text(
+                        'Songs',
+                        style: Theme.of(context).textTheme.titleSmall,
+                        maxLines: 1,
+                      ),
                     ),
                   ),
                   ButtonSegment(
                     value: SegmentButtonValue.videos,
-                    label: Text(
-                      'Videos',
-                      style: Theme.of(context).textTheme.titleSmall,
+                    label: FittedBox(
+                      child: Text(
+                        'Videos',
+                        style: Theme.of(context).textTheme.titleSmall,
+                        maxLines: 1,
+                      ),
                     ),
                   ),
                   ButtonSegment(
                     value: SegmentButtonValue.playlists,
-                    label: Text(
-                      'Playlists',
-                      style: Theme.of(context).textTheme.titleSmall,
+                    label: FittedBox(
+                      child: Text(
+                        'Playlists',
+                        style: Theme.of(context).textTheme.titleSmall,
+                        maxLines: 1,
+                      ),
                     ),
                   ),
                   ButtonSegment(
                     value: SegmentButtonValue.artist,
-                    label: Text(
-                      'Artist',
-                      style: Theme.of(context).textTheme.titleSmall,
+                    label: FittedBox(
+                      child: Text(
+                        'Artist',
+                        style: Theme.of(context).textTheme.titleSmall,
+                        maxLines: 1,
+                      ),
                     ),
                   ),
                 ],

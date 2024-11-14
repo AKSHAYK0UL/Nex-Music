@@ -71,4 +71,25 @@ class RepositoryHelperFunction {
 
     return loadedSongsList;
   }
+
+  //PlaylistDetailed to PlayListModel
+  static List<PlayListmodel> getPlaylistDetailedToPlayListModel(
+      List<PlaylistDetailed> detailedPlaylist) {
+    List<PlayListmodel> playlists = [];
+
+    for (int i = 0; i < detailedPlaylist.length; i++) {
+      final playlist = detailedPlaylist[i];
+
+      playlists.add(
+        PlayListmodel(
+          playListId: playlist.playlistId,
+          playlistName: playlist.name,
+          artistBasic: playlist.artist,
+          thumbnail: getThumbnail(playlist.thumbnails),
+        ),
+      );
+    }
+
+    return playlists;
+  }
 }

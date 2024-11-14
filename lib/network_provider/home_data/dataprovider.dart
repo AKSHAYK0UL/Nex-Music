@@ -71,4 +71,9 @@ class DataProvider {
   Future<List<yt.VideoDetailed>> searchVideo(String inputText) async {
     return await _ytMusic.searchVideos(inputText);
   }
+
+  //search In playlist
+  Future<List<yt.PlaylistDetailed>> searchPlaylist(String inputText) async {
+    return await _ytMusic.searchPlaylists(inputText);
+  }
 }
