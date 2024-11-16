@@ -1,6 +1,7 @@
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/helper_function/repository/repository_helper_function.dart';
+import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/network_provider/home_data/dataprovider.dart';
@@ -122,5 +123,11 @@ class Repository {
     final playlists = await _dataProvider.searchPlaylist(inputText);
     return RepositoryHelperFunction.getPlaylistDetailedToPlayListModel(
         playlists);
+  }
+
+  //search artist
+  Future<List<ArtistModel>> searchArtist(String inputText) async {
+    final artists = await _dataProvider.searchArtist(inputText);
+    return RepositoryHelperFunction.getArtist(artists);
   }
 }

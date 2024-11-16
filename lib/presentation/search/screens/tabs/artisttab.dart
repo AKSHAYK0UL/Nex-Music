@@ -1,38 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
-import 'package:nex_music/presentation/home/widget/song_title.dart';
+import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
+import 'package:nex_music/presentation/search/widgets/artistInfo.dart';
 
-class Videostab extends StatefulWidget {
+class ArtistTab extends StatefulWidget {
   final String inputText;
   final double screenSize;
-
-  const Videostab({
+  const ArtistTab({
     super.key,
     required this.inputText,
     required this.screenSize,
   });
 
   @override
-  State<Videostab> createState() => _VideostabState();
+  State<ArtistTab> createState() => _ArtistTabState();
 }
 
-class _VideostabState extends State<Videostab> {
+class _ArtistTabState extends State<ArtistTab> {
   @override
   void initState() {
-    final currentState = context.read<VideoBloc>().state;
-    if (currentState.runtimeType != VideosResultState) {
+    final currentState = context.read<ArtistBloc>().state;
+    if (currentState.runtimeType != ArtistDataState) {
       context
-          .read<VideoBloc>()
-          .add(SearchInVideoEvent(inputText: widget.inputText));
+          .read<ArtistBloc>()
+          .add(GetArtistEvent(inputText: widget.inputText));
     }
-
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<VideoBloc, VideoState>(
+    return BlocBuilder<ArtistBloc, ArtistState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
         if (state is LoadingState) {
@@ -40,7 +38,7 @@ class _VideostabState extends State<Videostab> {
             child: CircularProgressIndicator(),
           );
         }
-        if (state is VideosResultState) {
+        if (state is ArtistDataState) {
           return SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.only(
@@ -49,11 +47,14 @@ class _VideostabState extends State<Videostab> {
                   top: widget.screenSize * 0.0131),
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: state.searchedVideo.length,
+                itemCount: state.artists.length,
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
-                  final songData = state.searchedVideo[index];
-                  return SongTitle(songData: songData, songIndex: index);
+                  final artistData = state.artists[index];
+                  return ArtistInfo(
+                    artistModel: artistData,
+                    screenSize: widget.screenSize,
+                  );
                 },
               ),
             ),

@@ -21,75 +21,62 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Search",
-          style: Theme.of(context).textTheme.titleLarge,
+    return BlocListener<songbloc.SongBloc, songbloc.SongState>(
+      listenWhen: (previous, current) => previous != current,
+      listener: (context, state) {
+        if (state is songbloc.LoadingState) {
+          Navigator.of(context).pushNamed(
+            SearchResultTab.routeName,
+            arguments: state.query,
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: SearchField(
+            onTextChanges: (text) {
+              context
+                  .read<SearchBloc>()
+                  .add(SearchSongSuggestionEvent(inputQuery: text));
+            },
+            hintText: "Search songs, albums, artists...",
+          ),
         ),
-      ),
-      body: BlocListener<songbloc.SongBloc, songbloc.SongState>(
-        listenWhen: (previous, current) => previous != current,
-        listener: (context, state) {
-          if (state is songbloc.LoadingState) {
-            Navigator.of(context).pushNamed(
-              SearchResultTab.routeName,
-              arguments: state.query,
-            );
-          }
-        },
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SearchField(
-              onTextChanges: (text) {
-                context
-                    .read<SearchBloc>()
-                    .add(SearchSongSuggestionEvent(inputQuery: text));
-              },
-              hintText: "Search Song",
-            ),
-            Expanded(
-              child: BlocBuilder<SearchBloc, SearchState>(
-                buildWhen: (previous, current) => previous != current,
-                builder: (context, state) {
-                  if (state is LoadingState) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: accentColor,
-                      ),
+        body: BlocBuilder<SearchBloc, SearchState>(
+          buildWhen: (previous, current) => previous != current,
+          builder: (context, state) {
+            if (state is LoadingState) {
+              return Center(
+                child: CircularProgressIndicator(
+                  color: accentColor,
+                ),
+              );
+            }
+            if (state is ErrorState) {
+              return Center(child: Text(state.errorMessage));
+            }
+            if (state is SearchSuggestionResultState) {
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenSize * 0.0105,
+                    vertical: screenSize * 0.0200),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: state.searchSuggestions.length,
+                  itemBuilder: (context, index) {
+                    final suggestion = state.searchSuggestions[index];
+                    return SuggestionTitle(
+                      text: suggestion,
+                      size: screenSize,
                     );
-                  }
-                  if (state is ErrorState) {
-                    return Center(child: Text(state.errorMessage));
-                  }
-                  if (state is SearchSuggestionResultState) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenSize * 0.0105,
-                          vertical: screenSize * 0.0200),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: state.searchSuggestions.length,
-                        itemBuilder: (context, index) {
-                          final suggestion = state.searchSuggestions[index];
-                          return SuggestionTitle(
-                            text: suggestion,
-                            size: screenSize,
-                          );
-                        },
-                      ),
-                    );
-                  }
-                  return const SizedBox();
-                },
-              ),
-            ),
-          ],
+                  },
+                ),
+              );
+            }
+            return const SizedBox();
+          },
         ),
-      ),
-      bottomNavigationBar: MiniPlayer(
-        screenSize: screenSize,
+        bottomNavigationBar: MiniPlayer(screenSize: screenSize),
       ),
     );
   }

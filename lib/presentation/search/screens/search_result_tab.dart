@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
+import 'package:nex_music/presentation/search/screens/tabs/artisttab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/playlisttab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/songstab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/videostab.dart';
@@ -31,7 +32,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
           ),
           bottom: ButtonsTabBar(
             splashColor: backgroundColor,
-            backgroundColor: Colors.grey.shade700,
+            backgroundColor: Colors.white38,
             unselectedBackgroundColor: secondaryColor,
             width: screenSize / 8,
             contentCenter: true,
@@ -67,7 +68,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
             inputText: searchText,
             screenSize: screenSize,
           ),
-          SongsTab(
+          ArtistTab(
             inputText: searchText,
             screenSize: screenSize,
           ),

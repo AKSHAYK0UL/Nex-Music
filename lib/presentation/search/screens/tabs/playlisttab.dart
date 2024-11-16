@@ -32,44 +32,35 @@ class _PlaylistTabState extends State<PlaylistTab> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context).height;
-    return Center(
-      child: BlocBuilder<SearchedplaylistBloc, SearchedplaylistState>(
-        buildWhen: (previous, current) => previous != current,
-        builder: (context, state) {
-          if (state is LoadingState) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-          if (state is PlaylistDataState) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(
-                    right: widget.screenSize * 0.00263,
-                    left: widget.screenSize * 0.00263,
-                    top: widget.screenSize * 0.0131),
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: screenSize * 0.00107,
-                  ),
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: state.playlist.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final playlistData = state.playlist[index];
-                    return PlaylistGridView(
-                      playList: playlistData,
-                    );
-                  },
-                ),
+    return BlocBuilder<SearchedplaylistBloc, SearchedplaylistState>(
+      buildWhen: (previous, current) => previous != current,
+      builder: (context, state) {
+        if (state is LoadingState) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (state is PlaylistDataState) {
+          return SingleChildScrollView(
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: widget.screenSize * 0.00107,
               ),
-            );
-          }
-          return const SizedBox();
-        },
-      ),
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: state.playlist.length,
+              itemBuilder: (BuildContext context, int index) {
+                final playlistData = state.playlist[index];
+                return PlaylistGridView(
+                  playList: playlistData,
+                );
+              },
+            ),
+          );
+        }
+        return const SizedBox();
+      },
     );
   }
 }

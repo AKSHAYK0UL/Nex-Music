@@ -1,6 +1,7 @@
 import 'package:dart_ytmusic_api/types.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
+import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 
@@ -91,5 +92,18 @@ class RepositoryHelperFunction {
     }
 
     return playlists;
+  }
+
+  //artist
+  static List<ArtistModel> getArtist(List<ArtistDetailed> artist) {
+    final artists = artist
+        .map(
+          (art) => ArtistModel(
+            artist: ArtistBasic(name: art.name, artistId: art.artistId),
+            thumbnail: getThumbnail(art.thumbnails),
+          ),
+        )
+        .toList();
+    return artists;
   }
 }

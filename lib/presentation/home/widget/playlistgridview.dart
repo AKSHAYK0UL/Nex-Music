@@ -39,7 +39,7 @@ class PlaylistGridView extends StatelessWidget {
                 height: screenSize * 0.238,
               ),
               SizedBox(
-                height: screenSize * 0.0120,
+                height: screenSize * 0.0050,
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0220),

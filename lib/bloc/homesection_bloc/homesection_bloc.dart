@@ -16,10 +16,11 @@ class HomesectionBloc extends Bloc<HomesectionEvent, HomesectionState> {
     emit(LoadingState());
     try {
       final homeSectionData = await repository.homeScreenSongsList();
+      final playlistsSet = homeSectionData.playlist.toSet();
       emit(
         HomeSectionState(
             quickPicks: homeSectionData.quickPicks,
-            playlist: homeSectionData.playlist),
+            playlist: playlistsSet.toList()),
       );
     } catch (e) {
       emit(

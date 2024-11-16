@@ -51,9 +51,9 @@ class _SearchFieldState extends State<SearchField> {
           return TextField(
             focusNode: _focusNode,
             decoration: InputDecoration(
-              contentPadding: EdgeInsets.symmetric(
-                  horizontal: screenSize * 0.0263,
-                  vertical: screenSize * 0.0237),
+              // contentPadding: EdgeInsets.symmetric(
+              //     // horizontal: screenSize * 0.0063,
+              //     vertical: screenSize * 0.0237),
               suffixIcon: IconButton(
                 onPressed: () {
                   _controller.clear();
@@ -70,39 +70,32 @@ class _SearchFieldState extends State<SearchField> {
                     color:
                         _focusNode.hasFocus ? textColor : Colors.grey.shade500,
                   ),
-              border: border(
-                gapPadding: 4.0,
-                borderradius: BorderRadius.circular(screenSize * 0.0263),
-                borderside: const BorderSide(),
-              ),
-              enabledBorder: border(
-                gapPadding: 4.0,
-                borderradius: BorderRadius.circular(screenSize * 0.0263),
-                borderside: BorderSide(
+              border: UnderlineInputBorder(
+                borderSide: BorderSide(
                   width: 2,
-                  color: Colors.grey.shade500,
-                  style: BorderStyle.solid,
+                  color: secondaryColor,
                 ),
               ),
-              focusedBorder: border(
-                gapPadding: 4.0,
-                borderradius: BorderRadius.circular(screenSize * 0.0263),
-                borderside: BorderSide(
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  width: 2,
+                  color: secondaryColor,
+                ),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
                   width: 2,
                   color: textColor,
-                  style: BorderStyle.solid,
                 ),
               ),
-              focusedErrorBorder: border(
-                gapPadding: 4.0,
-                borderradius: BorderRadius.circular(screenSize * 0.0263),
-                borderside: const BorderSide(
+              focusedErrorBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(
                   width: 2,
                   color: Colors.red,
-                  style: BorderStyle.solid,
                 ),
               ),
             ),
+            autofocus: true,
             cursorColor: textColor,
             cursorHeight: screenSize * 0.0329,
             style: Theme.of(context).textTheme.bodyMedium,
@@ -112,16 +105,4 @@ class _SearchFieldState extends State<SearchField> {
       ),
     );
   }
-}
-
-OutlineInputBorder border({
-  required double gapPadding,
-  required BorderRadius borderradius,
-  required BorderSide borderside,
-}) {
-  return OutlineInputBorder(
-    gapPadding: gapPadding,
-    borderRadius: borderradius,
-    borderSide: borderside,
-  );
 }

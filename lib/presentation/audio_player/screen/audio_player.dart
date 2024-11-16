@@ -145,10 +145,13 @@ class AudioPlayerScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                height: screenSize * 0.0370,
+                height: screenSize * 0.0400,
               ),
               StreamBuilderWidget(
                 screenSize: screenSize,
+              ),
+              SizedBox(
+                height: screenSize * 0.0150,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
