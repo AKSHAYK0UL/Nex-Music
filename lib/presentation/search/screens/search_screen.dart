@@ -18,9 +18,12 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  late final _searchFieldKey = GlobalKey<SearchFieldState>();
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
+
     return BlocListener<songbloc.SongBloc, songbloc.SongState>(
       listenWhen: (previous, current) => previous != current,
       listener: (context, state) {
@@ -34,6 +37,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: SearchField(
+            key: _searchFieldKey,
             onTextChanges: (text) {
               context
                   .read<SearchBloc>()
@@ -68,6 +72,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     return SuggestionTitle(
                       text: suggestion,
                       size: screenSize,
+                      onSuggestionSelected: (selectedText) {
+                        _searchFieldKey.currentState?.setText(selectedText);
+                      },
                     );
                   },
                 ),

@@ -10,10 +10,13 @@ import 'package:nex_music/core/theme/hexcolor.dart';
 class SuggestionTitle extends StatelessWidget {
   final String text;
   final double size;
+  final void Function(String) onSuggestionSelected;
+
   const SuggestionTitle({
     super.key,
     required this.text,
     required this.size,
+    required this.onSuggestionSelected,
   });
 
   @override
@@ -40,16 +43,21 @@ class SuggestionTitle extends StatelessWidget {
             borderRadius: BorderRadius.circular(0),
           ),
           leading: Icon(
-            Icons.restore,
+            Icons.search,
             size: size * 0.0380,
           ),
           title: Text(
             text,
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          trailing: Icon(
-            Icons.trending_up,
-            size: size * 0.0350,
+          trailing: IconButton(
+            onPressed: () {
+              onSuggestionSelected(text);
+            },
+            icon: Icon(
+              Icons.north_west,
+              size: size * 0.0350,
+            ),
           ),
         ),
       ),
