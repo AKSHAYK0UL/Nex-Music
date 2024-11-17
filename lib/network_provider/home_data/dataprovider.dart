@@ -1,6 +1,5 @@
 import 'package:dart_ytmusic_api/types.dart' as yt;
 import 'package:dart_ytmusic_api/yt_music.dart';
-
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class DataProvider {

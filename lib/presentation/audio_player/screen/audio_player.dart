@@ -184,7 +184,14 @@ class AudioPlayerScreen extends StatelessWidget {
                             width: screenSize * 0.0197,
                           ),
                           IconButton(
-                            onPressed: state is LoadingState ? null : () {},
+                            onPressed: state is LoadingState
+                                ? null
+                                : () {
+                                    print("Skip");
+                                    context
+                                        .read<SongstreamBloc>()
+                                        .add(PlayPreviousSongEvent());
+                                  },
                             icon: Icon(
                               Icons.skip_previous,
                               color: state is LoadingState
@@ -216,7 +223,14 @@ class AudioPlayerScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           IconButton(
-                            onPressed: state is LoadingState ? null : () {},
+                            onPressed: state is LoadingState
+                                ? null
+                                : () {
+                                    print("NEXT");
+                                    context
+                                        .read<SongstreamBloc>()
+                                        .add(PlayNextSongEvent());
+                                  },
                             icon: Icon(
                               Icons.skip_next,
                               color: state is LoadingState

@@ -43,6 +43,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<CleanPlaylistEvent>(_cleanSongsPlaylist);
     on<MuteEvent>(_togglemute);
     on<UpdataUIEvent>(_updateUIFromBackground);
+    on<PlayNextSongEvent>(_playNextSong);
+    on<PlayPreviousSongEvent>(_playPreviousSong);
 
     songPosition = _audioPlayer.positionStream;
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
@@ -103,6 +105,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
     _songData = event.songData;
     _firstSongPlayedIndex = event.songIndex;
+    _currentSongIndex = _firstSongPlayedIndex;
     try {
       final songUrl = await _repository.getSongUrl(_songData!.vId);
       await _audioPlayer.setUrl(
@@ -196,9 +199,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   // Pause Event
-  void _togglePause(PauseEvent event, Emitter<SongstreamState> emit) {
+  void _togglePause(PauseEvent event, Emitter<SongstreamState> emit) async {
     _isPlaying = false;
-    _audioPlayer.pause();
+    await _audioPlayer.pause();
     emit(PausedState(songData: _songData!));
   }
 
@@ -212,31 +215,56 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // Toggle between play and pause
   void _togglePlayPause(PlayPauseEvent event, Emitter<SongstreamState> emit) {
     if (_isPlaying) {
-      _audioPlayer.pause();
-      _isPlaying = false;
-      emit(PausedState(songData: _songData!));
+      add(PauseEvent());
     } else {
-      _audioPlayer.play();
-      _isPlaying = true;
-      emit(PlayingState(songData: _songData!));
+      add(PlayEvent());
+    }
+  }
+
+  //Play next
+  void _playNextSong(PlayNextSongEvent event, Emitter<SongstreamState> emit) {
+    if ((_currentSongIndex + 1) < _playlistSongs.length) {
+      _currentSongIndex++;
+      add(GetSongStreamEvent(
+          songData: _playlistSongs[_currentSongIndex],
+          songIndex: _currentSongIndex));
+    } else {
+      _currentSongIndex = 0;
+      add(GetSongStreamEvent(
+          songData: _playlistSongs[_currentSongIndex],
+          songIndex: _currentSongIndex));
+    }
+  }
+
+  //play previous
+  void _playPreviousSong(
+      PlayPreviousSongEvent event, Emitter<SongstreamState> emit) {
+    if ((_currentSongIndex - 1) > 0) {
+      _currentSongIndex--;
+      add(GetSongStreamEvent(
+          songData: _playlistSongs[_currentSongIndex],
+          songIndex: _currentSongIndex));
+    } else {
+      _currentSongIndex = _playlistSongs.length - 1;
+      add(GetSongStreamEvent(
+          songData: _playlistSongs[_currentSongIndex],
+          songIndex: _currentSongIndex));
     }
   }
 
   // Close the mini player
   void _closeMiniPlayer(
-      CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) {
-    if (_isPlaying) {
-      _audioPlayer.pause();
-      _isPlaying = false;
-    }
+      CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) async {
+    await _audioPlayer.pause();
+    _isPlaying = false;
     emit(CloseMiniPlayerState());
   }
 
 //reset audio player
-  void _resetAudioPlayer() {
+  void _resetAudioPlayer() async {
     _songLoaded = false;
     if (_isPlaying) {
-      _audioPlayer.pause();
+      await _audioPlayer.pause();
       _isPlaying = false;
     }
     songDuration = Duration.zero;
@@ -264,8 +292,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
           }
         }
         if (_currentSongIndex >= _playlistSongs.length) {
-          _currentSongIndex = -1;
-          _currentSongIndex++;
+          _currentSongIndex = 0;
           add(GetSongUrlOnShuffleEvent(
               songData: _playlistSongs[_currentSongIndex]));
         }
