@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
+import 'package:nex_music/presentation/recent/screens/recentscreen.dart';
 
 class NavBar extends StatefulWidget {
   const NavBar({super.key});
@@ -15,7 +17,7 @@ class NavBar extends StatefulWidget {
 class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   List<Widget> screens = const [
     HomeScreen(), // home
-    HomeScreen(), // recent
+    RecentScreen(), // recent
     HomeScreen(), // favorites
     HomeScreen(), // playlist
   ];
@@ -30,6 +32,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+
     super.dispose();
   }
 
@@ -43,6 +46,14 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (_selectedIndex == 1) {
+      final recentSongs = context.read<SongstreamBloc>().getRecentPlayedList;
+      print(recentSongs.length);
+      context.read<RecentplayedBloc>().add(
+            AddRecentplayedSongEvent(recentSongs: recentSongs),
+          );
+      context.read<RecentplayedBloc>().add(GetRecentPlayedEvent());
+    }
     final screenSize = MediaQuery.sizeOf(context).height;
     return Scaffold(
       body: IndexedStack(

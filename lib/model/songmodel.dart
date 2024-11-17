@@ -1,6 +1,7 @@
 import 'package:dart_ytmusic_api/types.dart';
+import 'package:equatable/equatable.dart';
 
-class Songmodel {
+class Songmodel extends Equatable {
   final String vId;
   final String songName;
   final ArtistBasic artist;
@@ -30,4 +31,7 @@ class Songmodel {
       duration: duration ?? this.duration,
     );
   }
+
+  @override
+  List<Object?> get props => [vId, songName, artist, thumbnail, duration];
 }

@@ -17,11 +17,11 @@ class ArtistInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      height: screenSize * 0.2455,
       alignment: Alignment.topCenter,
       margin: EdgeInsets.symmetric(
-          horizontal: screenSize * 0.00263, vertical: screenSize * 0.00659),
+        horizontal: screenSize * 0.00263,
+        vertical: screenSize * 0.00659,
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(
           screenSize * 0.0131,
@@ -42,7 +42,7 @@ class ArtistInfo extends StatelessWidget {
                 child: cacheImage(
                   imageUrl: artistModel.thumbnail,
                   width: screenSize * 0.240,
-                  height: screenSize * 0.2455,
+                  height: screenSize * 0.253,
                 ),
               ),
               Positioned(

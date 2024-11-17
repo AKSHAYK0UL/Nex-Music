@@ -29,7 +29,7 @@ class ChipOptions extends StatelessWidget {
         ),
         backgroundColor: backgroundColor,
         label: SizedBox(
-          width: screenSize * 0.165,
+          width: screenSize * 0.149,
           height: screenSize * 0.0329,
           child: Align(
             alignment: Alignment.center,

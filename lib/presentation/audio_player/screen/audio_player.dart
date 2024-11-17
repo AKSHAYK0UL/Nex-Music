@@ -187,7 +187,6 @@ class AudioPlayerScreen extends StatelessWidget {
                             onPressed: state is LoadingState
                                 ? null
                                 : () {
-                                    print("Skip");
                                     context
                                         .read<SongstreamBloc>()
                                         .add(PlayPreviousSongEvent());
@@ -226,7 +225,6 @@ class AudioPlayerScreen extends StatelessWidget {
                             onPressed: state is LoadingState
                                 ? null
                                 : () {
-                                    print("NEXT");
                                     context
                                         .read<SongstreamBloc>()
                                         .add(PlayNextSongEvent());

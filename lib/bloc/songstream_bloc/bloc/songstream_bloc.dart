@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:nex_music/helper_function/recent_tab/recentplaylist.dart';
 import 'package:nex_music/model/audioplayerstream.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
@@ -26,6 +27,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   bool _isMute = false; //default false
   double _storedVolume = 0.0;
   bool _songLoaded = false; //default false
+  List<Songmodel> _recentPlayed = [];
 
   SongstreamBloc(this._repository, this._audioPlayer)
       : super(SongstreamInitial()) {
@@ -120,6 +122,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
+
+      _recentPlayed = updateRecentPlayedList(_recentPlayed, _songData!);
+
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
@@ -146,6 +151,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
+
+      _recentPlayed = updateRecentPlayedList(_recentPlayed, _songData!);
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
@@ -174,6 +181,11 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   //get mute status
   bool get getMuteStatus {
     return _isMute;
+  }
+
+  //get recent played list
+  List<Songmodel> get getRecentPlayedList {
+    return _recentPlayed;
   }
 
   //Mute Audio Player

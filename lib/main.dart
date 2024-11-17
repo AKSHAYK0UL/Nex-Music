@@ -5,6 +5,7 @@ import 'package:just_audio_background/just_audio_background.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
+import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
 import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart';
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
@@ -64,6 +65,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => ArtistBloc(context.read<Repository>()),
+          ),
+          BlocProvider(
+            create: (context) => RecentplayedBloc(),
           )
         ],
         child: MaterialApp(
