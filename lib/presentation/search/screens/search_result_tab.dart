@@ -50,7 +50,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
                 text: "Playlists",
               ),
               Tab(
-                text: "Artist",
+                text: "Artists",
               ),
             ],
           ),

@@ -130,4 +130,10 @@ class Repository {
     final artists = await _dataProvider.searchArtist(inputText);
     return RepositoryHelperFunction.getArtist(artists);
   }
+
+  //get artist Songs
+  Future<List<Songmodel>> getArtistSongs(String artistId) async {
+    final artistSongs = await _dataProvider.getArtistSongs(artistId);
+    return RepositoryHelperFunction.getQuickPicks(artistSongs);
+  }
 }

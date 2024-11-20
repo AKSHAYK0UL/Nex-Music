@@ -72,8 +72,9 @@ class MiniPlayer extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: Wrap(
-                    direction: Axis.horizontal,
+                  trailing: Row(
+                    // direction: Axis.horizontal,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       state is LoadingState
                           ? Container(

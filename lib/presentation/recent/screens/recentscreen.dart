@@ -8,20 +8,34 @@ class RecentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.sizeOf(context).height;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Recent"),
+        title: Padding(
+          padding: EdgeInsets.only(left: screenSize * 0.0158),
+          child: Text(
+            "Recent",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
       ),
       body: BlocBuilder<RecentplayedBloc, RecentplayedState>(
         buildWhen: (previous, current) => previous != current,
         builder: (context, state) {
           if (state is RecentPlayedSongsState) {
-            return ListView.builder(
-              itemCount: state.recentPlayedList.length,
-              itemBuilder: (context, index) {
-                final songData = state.recentPlayedList[index];
-                return SongTitle(songData: songData, songIndex: index);
-              },
+            return Padding(
+              padding: EdgeInsets.only(
+                right: screenSize * 0.0131,
+                left: screenSize * 0.0131,
+                top: screenSize * 0.0131,
+              ),
+              child: ListView.builder(
+                itemCount: state.recentPlayedList.length,
+                itemBuilder: (context, index) {
+                  final songData = state.recentPlayedList[index];
+                  return SongTitle(songData: songData, songIndex: index);
+                },
+              ),
             );
           }
           return const SizedBox();

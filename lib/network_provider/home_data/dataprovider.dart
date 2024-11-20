@@ -1,4 +1,5 @@
 import 'package:dart_ytmusic_api/types.dart' as yt;
+import 'package:dart_ytmusic_api/types.dart';
 import 'package:dart_ytmusic_api/yt_music.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -79,5 +80,19 @@ class DataProvider {
   //search artist
   Future<List<yt.ArtistDetailed>> searchArtist(String inputText) async {
     return await _ytMusic.searchArtists(inputText);
+  }
+
+  //get Artist songs
+  Future<List<yt.SongDetailed>> getArtistSongs(String artistId) async {
+    return await _ytMusic.getArtistSongs(artistId);
+  }
+
+  //get Artist videos
+  //TODO:
+  // Future<void> getArtistVideos(String artistId) async {
+  //   await _ytMusic.getArtistAlbums(artistId);
+  // }
+  Future<List<AlbumDetailed>> getArtistSingles(String artistId) async {
+    return await _ytMusic.getArtistSingles(artistId);
   }
 }

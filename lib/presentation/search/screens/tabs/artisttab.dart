@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
-import 'package:nex_music/presentation/search/widgets/artistInfo.dart';
+import 'package:nex_music/presentation/search/widgets/artistgridview.dart';
 
 class ArtistTab extends StatefulWidget {
   final String inputText;
@@ -45,15 +45,18 @@ class _ArtistTabState extends State<ArtistTab> {
                   right: widget.screenSize * 0.0131,
                   left: widget.screenSize * 0.0131,
                   top: widget.screenSize * 0.0131),
-              child: ListView.builder(
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: widget.screenSize * 0.00107,
+                ),
+                physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: state.artists.length,
-                physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   final artistData = state.artists[index];
-                  return ArtistInfo(
-                    artistModel: artistData,
-                    screenSize: widget.screenSize,
+                  return ArtistGridView(
+                    artist: artistData,
                   );
                 },
               ),
