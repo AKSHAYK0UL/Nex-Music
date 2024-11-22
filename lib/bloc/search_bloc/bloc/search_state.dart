@@ -16,3 +16,8 @@ final class SearchSuggestionResultState extends SearchState {
   List<String> searchSuggestions = [];
   SearchSuggestionResultState({required this.searchSuggestions});
 }
+
+final class LoadedRecentSearchState extends SearchState {
+  List<String> recentSerach = [];
+  LoadedRecentSearchState({required this.recentSerach});
+}

@@ -13,6 +13,12 @@ class DataProvider {
   })  : _ytMusic = ytMusic,
         _youtubeExplode = youtubeExplode;
 
+//cancel all ongoing request
+  void cancelRequest() {
+    _ytMusic.dio.close();
+    _youtubeExplode.close();
+  }
+
   //get home section data
   Future<
       ({
@@ -92,7 +98,8 @@ class DataProvider {
   // Future<void> getArtistVideos(String artistId) async {
   //   await _ytMusic.getArtistAlbums(artistId);
   // }
-  Future<List<AlbumDetailed>> getArtistSingles(String artistId) async {
-    return await _ytMusic.getArtistSingles(artistId);
+  //get artist album
+  Future<List<AlbumDetailed>> getArtistAlbums(String artistId) async {
+    return await _ytMusic.getArtistAlbums(artistId);
   }
 }

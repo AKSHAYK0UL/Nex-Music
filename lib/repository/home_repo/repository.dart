@@ -17,6 +17,12 @@ class Repository {
   })  : _dataProvider = dataProvider,
         _yt = yt;
 
+//cancel all ongoing request
+
+  void cancelRequest() {
+    _dataProvider.cancelRequest();
+  }
+
 //using records
   Future<({List<Songmodel> quickPicks, List<PlayListmodel> playlist})>
       homeScreenSongsList() async {
@@ -135,5 +141,11 @@ class Repository {
   Future<List<Songmodel>> getArtistSongs(String artistId) async {
     final artistSongs = await _dataProvider.getArtistSongs(artistId);
     return RepositoryHelperFunction.getQuickPicks(artistSongs);
+  }
+
+  //get artist album
+  Future<List<PlayListmodel>> getArtistAlbums(String artistId) async {
+    final albums = await _dataProvider.getArtistAlbums(artistId);
+    return RepositoryHelperFunction.albumsToPlaylist(albums);
   }
 }

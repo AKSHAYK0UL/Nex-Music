@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/route.dart';
@@ -60,20 +61,15 @@ class MiniPlayer extends StatelessWidget {
                       ),
                     ),
                   ),
-                  title: Text(
-                    songData.songName,
+                  title: animatedText(
+                    text: songData.songName,
                     style: Theme.of(context).textTheme.titleSmall!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: Text(
-                    songData.artist.name,
+                  subtitle: animatedText(
+                    text: songData.artist.name,
                     style: Theme.of(context).textTheme.bodySmall!,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Row(
-                    // direction: Axis.horizontal,
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       state is LoadingState

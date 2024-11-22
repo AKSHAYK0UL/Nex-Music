@@ -47,6 +47,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<UpdataUIEvent>(_updateUIFromBackground);
     on<PlayNextSongEvent>(_playNextSong);
     on<PlayPreviousSongEvent>(_playPreviousSong);
+    on<AddToPlayNextEvent>(_addToPlayNext);
 
     songPosition = _audioPlayer.positionStream;
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
@@ -159,6 +160,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     }
   }
 
+//add to play next
+  void _addToPlayNext(AddToPlayNextEvent event, Emitter<SongstreamState> emit) {
+    _playlistSongs.insert(_currentSongIndex + 1, event.songData);
+  }
+
+//seek forward/backward
   void _seekTo(SeekToEvent event, Emitter<SongstreamState> emit) {
     _audioPlayer.seek(event.position);
   }
@@ -269,6 +276,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) async {
     await _audioPlayer.pause();
     _isPlaying = false;
+    // _repository.cancelRequest();
     emit(CloseMiniPlayerState());
   }
 
@@ -346,6 +354,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _firstSongPlayedIndex = 0;
   }
 
+//close
   @override
   Future<void> close() {
     _audioPlayer.dispose();

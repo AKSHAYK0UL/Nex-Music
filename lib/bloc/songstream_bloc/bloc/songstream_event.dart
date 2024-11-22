@@ -50,3 +50,9 @@ final class PlayNextSongEvent extends SongstreamEvent {}
 final class PlayPreviousSongEvent extends SongstreamEvent {}
 
 final class MuteEvent extends SongstreamEvent {}
+
+final class AddToPlayNextEvent extends SongstreamEvent {
+  final Songmodel songData;
+
+  AddToPlayNextEvent({required this.songData});
+}

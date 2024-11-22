@@ -106,4 +106,21 @@ class RepositoryHelperFunction {
         .toList();
     return artists;
   }
+
+  //album to playlist
+  static List<PlayListmodel> albumsToPlaylist(List<AlbumDetailed> album) {
+    List<PlayListmodel> playlist = [];
+    for (int i = 0; i < album.length; i++) {
+      final data = album[i];
+      playlist.add(
+        PlayListmodel(
+          playListId: data.playlistId,
+          playlistName: data.name,
+          artistBasic: data.artist,
+          thumbnail: getThumbnail(data.thumbnails),
+        ),
+      );
+    }
+    return playlist;
+  }
 }

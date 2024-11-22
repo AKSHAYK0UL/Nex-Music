@@ -38,5 +38,10 @@ TextTheme textTheme(BuildContext context, double screenSize) {
       fontSize: screenSize * 0.0170,
       fontWeight: FontWeight.normal,
     ),
+    labelMedium: TextStyle(
+      color: textColor,
+      fontSize: screenSize * 0.0220,
+      fontWeight: FontWeight.w600,
+    ),
   );
 }

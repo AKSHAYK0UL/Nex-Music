@@ -5,6 +5,7 @@ import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
+import 'package:nex_music/presentation/home/widget/long_press_options.dart';
 
 class SongTitle extends StatelessWidget {
   final Songmodel songData;
@@ -24,6 +25,12 @@ class SongTitle extends StatelessWidget {
       margin: EdgeInsets.all(screenSize * 0.00395),
       child: ListTile(
         splashColor: Colors.transparent,
+        //TODO: onLongPress show [Play next song, Add to playlist, Show more songs from the same artist]
+        onLongPress: () {
+          print("Long Press");
+          showLongPressOptions(
+              context: context, songData: songData, screenSize: screenSize);
+        },
         onTap: () {
           Navigator.of(context)
               .pushNamed(AudioPlayerScreen.routeName, arguments: {
