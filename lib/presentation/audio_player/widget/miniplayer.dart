@@ -71,6 +71,7 @@ class MiniPlayer extends StatelessWidget {
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       state is LoadingState
                           ? Container(
@@ -102,14 +103,18 @@ class MiniPlayer extends StatelessWidget {
                       IconButton(
                         icon: Icon(
                           Icons.close,
-                          color: Colors.red,
+                          color: state.runtimeType == LoadingState
+                              ? Colors.redAccent.shade100
+                              : Colors.red,
                           size: screenSize * 0.0500,
                         ),
-                        onPressed: () {
-                          context
-                              .read<SongstreamBloc>()
-                              .add(CloseMiniPlayerEvent());
-                        },
+                        onPressed: state.runtimeType == LoadingState
+                            ? null
+                            : () {
+                                context
+                                    .read<SongstreamBloc>()
+                                    .add(CloseMiniPlayerEvent());
+                              },
                       ),
                     ],
                   ),
@@ -144,7 +149,7 @@ class MiniPlayer extends StatelessWidget {
                     return Positioned(
                       bottom: 0,
                       child: SizedBox(
-                        width: screenSize * 0.516,
+                        width: MediaQuery.sizeOf(context).width,
                         child: LinearProgressIndicator(
                           value: sliderValue,
                           backgroundColor: textColor,
