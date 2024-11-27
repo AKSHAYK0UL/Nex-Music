@@ -73,6 +73,8 @@ class _SearchScreenState extends State<SearchScreen> {
             if (state is LoadedRecentSearchState) {
               return ListView.builder(
                   itemCount: state.recentSerach.length,
+                  reverse: true,
+                  shrinkWrap: true,
                   itemBuilder: (context, index) {
                     final recentSearch = state.recentSerach[index];
                     return RecentSearchTitle(
