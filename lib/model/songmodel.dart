@@ -16,6 +16,16 @@ class Songmodel extends Equatable {
     required this.duration,
   });
 
+  Map<String, dynamic> toJson() {
+    return {
+      "v_id": vId,
+      "song_name": songName,
+      "artist": {"artist_name": artist.name, "artist_id": artist.artistId},
+      "thumbnail": thumbnail,
+      "duration": duration,
+    };
+  }
+
   Songmodel copyWith({
     String? vId,
     String? songName,

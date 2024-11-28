@@ -1,0 +1,4 @@
+enum CollectionEnum {
+  recentPlayed,
+  recentSearch,
+}

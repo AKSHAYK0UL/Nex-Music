@@ -27,7 +27,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   bool _isMute = false; //default false
   double _storedVolume = 0.0;
   bool _songLoaded = false; //default false
-  List<Songmodel> _recentPlayed = [];
+  // List<Songmodel> _recentPlayed = [];
 
   SongstreamBloc(this._repository, this._audioPlayer)
       : super(SongstreamInitial()) {
@@ -124,7 +124,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _isPlaying = true;
       _songLoaded = true;
 
-      _recentPlayed = updateRecentPlayedList(_recentPlayed, _songData!);
+      // _recentPlayed = updateRecentPlayedList(_recentPlayed, _songData!);
 
       emit(PlayingState(songData: _songData!));
     } catch (e) {
@@ -153,7 +153,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _isPlaying = true;
       _songLoaded = true;
 
-      _recentPlayed = updateRecentPlayedList(_recentPlayed, _songData!);
+      // _recentPlayed = updateRecentPlayedList(_recentPlayed, _songData!);
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
@@ -191,9 +191,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   //get recent played list
-  List<Songmodel> get getRecentPlayedList {
-    return _recentPlayed;
-  }
+  // List<Songmodel> get getRecentPlayedList {
+  //   return _recentPlayed;
+  // }
 
   //Mute Audio Player
   void _togglemute(MuteEvent event, Emitter<SongstreamState> emit) {

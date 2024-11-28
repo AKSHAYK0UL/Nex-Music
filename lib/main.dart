@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
@@ -16,10 +17,13 @@ import 'package:nex_music/core/bloc_provider/repository_provider/repository_prov
 import 'package:nex_music/core/route/route.dart';
 import 'package:nex_music/core/theme/theme.dart';
 import 'package:nex_music/presentation/home/navbar/navbar.dart';
+import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
+import 'package:nex_music/secrets/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await JustAudioBackground.init(
     androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
     androidNotificationChannelName: 'Audio playback',
@@ -35,7 +39,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        repositoryProvider,
+        RepositoryProviderClass.repositoryProvider,
+        RepositoryProviderClass.dbRepositoryProvider,
       ],
       child: MultiBlocProvider(
         providers: [
@@ -68,7 +73,7 @@ class MyApp extends StatelessWidget {
             create: (context) => ArtistBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (context) => RecentplayedBloc(),
+            create: (context) => RecentplayedBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
             create: (context) => FullArtistSongBloc(context.read<Repository>()),

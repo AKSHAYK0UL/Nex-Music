@@ -3,8 +3,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
-class RecentScreen extends StatelessWidget {
+class RecentScreen extends StatefulWidget {
   const RecentScreen({super.key});
+
+  @override
+  State<RecentScreen> createState() => _RecentScreenState();
+}
+
+class _RecentScreenState extends State<RecentScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

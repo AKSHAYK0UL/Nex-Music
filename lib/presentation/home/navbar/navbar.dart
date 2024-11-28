@@ -47,11 +47,11 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (_selectedIndex == 1) {
-      final recentSongs = context.read<SongstreamBloc>().getRecentPlayedList;
-      print(recentSongs.length);
-      context.read<RecentplayedBloc>().add(
-            AddRecentplayedSongEvent(recentSongs: recentSongs),
-          );
+      // final recentSongs = context.read<SongstreamBloc>().getRecentPlayedList;
+      // print(recentSongs.length);
+      // context.read<RecentplayedBloc>().add(
+      //       AddRecentplayedSongEvent(recentSongs: recentSongs),
+      //     );
       context.read<RecentplayedBloc>().add(GetRecentPlayedEvent());
     }
     final screenSize = MediaQuery.sizeOf(context).height;
