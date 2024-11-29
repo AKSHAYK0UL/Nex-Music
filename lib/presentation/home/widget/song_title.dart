@@ -10,11 +10,13 @@ import 'package:nex_music/presentation/home/widget/long_press_options.dart';
 class SongTitle extends StatelessWidget {
   final Songmodel songData;
   final int songIndex;
+  final bool showDelete;
 
   const SongTitle({
     super.key,
     required this.songData,
     required this.songIndex,
+    required this.showDelete,
   });
 
   @override
@@ -27,9 +29,12 @@ class SongTitle extends StatelessWidget {
         splashColor: Colors.transparent,
         //TODO: onLongPress show [Play next song, Add to playlist, Show more songs from the same artist]
         onLongPress: () {
-          print("Long Press");
           showLongPressOptions(
-              context: context, songData: songData, screenSize: screenSize);
+            context: context,
+            songData: songData,
+            screenSize: screenSize,
+            showDelete: showDelete,
+          );
         },
         onTap: () {
           Navigator.of(context)

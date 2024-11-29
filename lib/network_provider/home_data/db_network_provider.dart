@@ -43,4 +43,13 @@ class DbNetworkProvider {
         .orderBy('timestamp', descending: true) //sort by timestamp
         .snapshots();
   }
+
+  //delete recent Played song
+  Future<void> deleteRecentPlayedSong(String vId) async {
+    final querySnapshot =
+        await _recentPlayedCollection.where('v_id', isEqualTo: vId).get();
+    for (var docs in querySnapshot.docs) {
+      await docs.reference.delete();
+    }
+  }
 }

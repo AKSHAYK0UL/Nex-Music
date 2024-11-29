@@ -198,7 +198,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                           if (index < playlistState.playlistSongs.length) {
                             final songData = playlistState.playlistSongs[index];
                             return SongTitle(
-                                songData: songData, songIndex: index);
+                              songData: songData,
+                              songIndex: index,
+                              showDelete: false,
+                            );
                           } else {
                             return Transform.scale(
                               scaleX: screenSize * 0.00227,

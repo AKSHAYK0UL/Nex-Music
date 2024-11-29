@@ -36,7 +36,11 @@ class SongsTab extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   final songData = state.searchedSongs[index];
-                  return SongTitle(songData: songData, songIndex: index);
+                  return SongTitle(
+                    songData: songData,
+                    songIndex: index,
+                    showDelete: false,
+                  );
                 },
               ),
             ),

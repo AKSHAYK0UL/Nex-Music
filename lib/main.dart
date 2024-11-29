@@ -11,13 +11,13 @@ import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
 import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart';
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
+import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/core/bloc_provider/repository_provider/repository_provider.dart';
 import 'package:nex_music/core/route/route.dart';
 import 'package:nex_music/core/theme/theme.dart';
 import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
-import 'package:nex_music/presentation/home/navbar/navbar.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/secrets/firebase_options.dart';
@@ -80,6 +80,9 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => FullArtistSongBloc(context.read<Repository>()),
           ),
+          BlocProvider(
+            create: (context) => SongDialogBloc(context.read<DbRepository>()),
+          )
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

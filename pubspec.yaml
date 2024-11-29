@@ -55,7 +55,7 @@ dependencies:
   cloud_firestore: ^5.5.0
   google_sign_in: ^6.2.2
   font_awesome_flutter: ^10.8.0
-  animated_text_kit: ^4.2.2
+  # animated_text_kit: ^4.2.2
   google_fonts: ^6.2.1
 
 dev_dependencies:

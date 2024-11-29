@@ -63,7 +63,10 @@ class _RecentScreenState extends State<RecentScreen> {
                         itemBuilder: (context, index) {
                           final songData = recentData[index];
                           return SongTitle(
-                              songData: songData, songIndex: index);
+                            songData: songData,
+                            songIndex: index,
+                            showDelete: true,
+                          );
                         },
                       );
                     }

@@ -4,9 +4,9 @@ import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
-import 'package:nex_music/presentation/home/widget/playlistview.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(
-                      height: screenSize * 0.396,
+                      height: screenSize * 0.345,
                       child: ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
@@ -137,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             : state.playlist.length,
                         itemBuilder: (context, index) {
                           final playlistData = state.playlist[index];
-                          return PlaylistView(playList: playlistData);
+                          return HomePlaylist(playList: playlistData);
                         },
                       ),
                     ),

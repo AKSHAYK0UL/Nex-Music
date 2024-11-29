@@ -8,8 +8,10 @@ const accent = "#8ebbff";
 const text = "#f4f4fc";
 
 const secondary = "#2f3855";
+const orange = "#ffa500";
 
 Color backgroundColor = HexColor(bG);
 Color accentColor = HexColor(accent);
 Color textColor = HexColor(text);
 Color secondaryColor = HexColor(secondary);
+Color boldOrange = HexColor(orange);

@@ -60,7 +60,7 @@ TextTheme textTheme(BuildContext context, double screenSize) {
     ),
     headlineLarge: TextStyle(
       color: textColor,
-      fontSize: screenSize * 0.0395,
+      fontSize: screenSize * 0.0550,
       fontWeight: FontWeight.normal,
     ),
   );

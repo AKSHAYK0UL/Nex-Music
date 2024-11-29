@@ -19,4 +19,8 @@ class DbRepository {
       }).toList();
     });
   }
+
+  Future<void> deleteRecentPlayedSong(String vId) async {
+    await _dbDataProvider.deleteRecentPlayedSong(vId);
+  }
 }

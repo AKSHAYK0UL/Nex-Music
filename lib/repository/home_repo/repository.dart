@@ -18,7 +18,6 @@ class Repository {
         _yt = yt;
 
 //cancel all ongoing request
-
   void cancelRequest() {
     _dataProvider.cancelRequest();
   }

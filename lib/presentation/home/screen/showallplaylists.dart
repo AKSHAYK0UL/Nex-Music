@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
-import 'package:nex_music/presentation/home/widget/playlistgridview.dart';
+import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 
 class ShowAllPlaylists extends StatelessWidget {
   static const routeName = "/showallplaylists";
@@ -31,12 +31,12 @@ class ShowAllPlaylists extends StatelessWidget {
             return GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: screenSize * 0.00107,
+                childAspectRatio: screenSize * 0.00109,
               ),
               itemCount: state.playlist.length,
               itemBuilder: (BuildContext context, int index) {
                 final playlistData = state.playlist[index];
-                return PlaylistGridView(
+                return HomePlaylist(
                   playList: playlistData,
                 );
               },

@@ -53,7 +53,11 @@ class _VideostabState extends State<Videostab> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   final songData = state.searchedVideo[index];
-                  return SongTitle(songData: songData, songIndex: index);
+                  return SongTitle(
+                    songData: songData,
+                    songIndex: index,
+                    showDelete: false,
+                  );
                 },
               ),
             ),

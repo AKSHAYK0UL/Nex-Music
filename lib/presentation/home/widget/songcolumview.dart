@@ -31,6 +31,7 @@ class SongColumView extends StatelessWidget {
               return SongTitle(
                 songData: songData,
                 songIndex: index,
+                showDelete: false,
               );
             } else {
               return const SizedBox();

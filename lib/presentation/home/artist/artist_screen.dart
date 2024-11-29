@@ -49,7 +49,11 @@ class _ArtistScreenState extends State<ArtistScreen> {
               final songData = state.artistSongs[index];
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0131),
-                child: SongTitle(songData: songData, songIndex: index),
+                child: SongTitle(
+                  songData: songData,
+                  songIndex: index,
+                  showDelete: false,
+                ),
               );
             },
           );
