@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
@@ -46,14 +45,6 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (_selectedIndex == 1) {
-      // final recentSongs = context.read<SongstreamBloc>().getRecentPlayedList;
-      // print(recentSongs.length);
-      // context.read<RecentplayedBloc>().add(
-      //       AddRecentplayedSongEvent(recentSongs: recentSongs),
-      //     );
-      context.read<RecentplayedBloc>().add(GetRecentPlayedEvent());
-    }
     final screenSize = MediaQuery.sizeOf(context).height;
     return Scaffold(
       body: IndexedStack(

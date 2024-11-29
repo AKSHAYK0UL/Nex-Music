@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 
 import 'package:nex_music/core/ui_component/cacheimage.dart';
@@ -40,9 +38,6 @@ class SongTitle extends StatelessWidget {
             "songdata": songData,
             "route": SongMiniPlayerRoute.songRoute
           });
-          context
-              .read<RecentplayedBloc>()
-              .add(AddRecentplayedSongEvent(song: songData));
         },
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(screenSize * 0.0106),

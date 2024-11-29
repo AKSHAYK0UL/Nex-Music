@@ -22,9 +22,9 @@ final class ErrorState extends RecentplayedState {
 
 // ignore: must_be_immutable
 final class RecentPlayedSongsState extends RecentplayedState {
-  List<Songmodel> recentPlayedList = [];
-  RecentPlayedSongsState({required this.recentPlayedList});
+  Stream<List<Songmodel>> recentPlayedStream;
+  RecentPlayedSongsState({required this.recentPlayedStream});
 
   @override
-  List<Object?> get props => [recentPlayedList];
+  List<Object?> get props => [recentPlayedStream];
 }

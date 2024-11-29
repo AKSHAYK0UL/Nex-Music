@@ -6,6 +6,7 @@ class DbNetworkProvider {
   late final Map<CollectionEnum, String> _collections;
   late final String _userId;
   late final CollectionReference _recentPlayedCollection;
+  final String _usersCollection = "users";
 
   DbNetworkProvider({
     required FirebaseFirestore firestoreInstance,
@@ -15,15 +16,31 @@ class DbNetworkProvider {
     _userId = userId;
     _collections = collections;
     _recentPlayedCollection = _firestoreInstance
-        .collection("Users")
+        .collection(_usersCollection)
         .doc(_userId)
         .collection(_collections[CollectionEnum.recentPlayed]!);
   }
 
   // Add to recent played collection
   Future<void> addToRecentPlayedCollection(Map<String, dynamic> songMap) async {
+    // Query for an existing instance of the song
+    final querySnapShot = await _recentPlayedCollection
+        .where("v_id", isEqualTo: songMap["v_id"])
+        .get();
+    for (var songs in querySnapShot.docs) {
+      await songs.reference.delete();
+    }
+    //add the timestamp of when the song was played
+    songMap["timestamp"] = FieldValue.serverTimestamp();
+
+    //add to recent collection
     await _recentPlayedCollection.add(songMap);
   }
 
-  // TODO: Add methods for Get and Delete
+  // Get Recent Played
+  Stream<QuerySnapshot> getRecentPlayed() {
+    return _recentPlayedCollection
+        .orderBy('timestamp', descending: true) //sort by timestamp
+        .snapshots();
+  }
 }

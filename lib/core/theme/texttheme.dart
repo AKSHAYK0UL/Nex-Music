@@ -43,5 +43,25 @@ TextTheme textTheme(BuildContext context, double screenSize) {
       fontSize: screenSize * 0.0220,
       fontWeight: FontWeight.w600,
     ),
+    labelLarge: TextStyle(
+      color: textColor,
+      fontSize: screenSize * 0.0260,
+      fontWeight: FontWeight.w500,
+    ),
+    displaySmall: TextStyle(
+      color: textColor,
+      fontSize: screenSize * 0.0183,
+      fontWeight: FontWeight.normal,
+    ),
+    displayMedium: TextStyle(
+      color: textColor,
+      fontSize: screenSize * 0.0183,
+      fontWeight: FontWeight.bold,
+    ),
+    headlineLarge: TextStyle(
+      color: textColor,
+      fontSize: screenSize * 0.0395,
+      fontWeight: FontWeight.normal,
+    ),
   );
 }

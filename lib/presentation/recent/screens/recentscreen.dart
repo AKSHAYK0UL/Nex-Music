@@ -13,7 +13,8 @@ class RecentScreen extends StatefulWidget {
 class _RecentScreenState extends State<RecentScreen> {
   @override
   void initState() {
-    // TODO: implement initState
+    context.read<RecentplayedBloc>().add(GetRecentPlayedEvent());
+
     super.initState();
   }
 
@@ -40,13 +41,33 @@ class _RecentScreenState extends State<RecentScreen> {
                 left: screenSize * 0.0131,
                 top: screenSize * 0.0131,
               ),
-              child: ListView.builder(
-                itemCount: state.recentPlayedList.length,
-                itemBuilder: (context, index) {
-                  final songData = state.recentPlayedList[index];
-                  return SongTitle(songData: songData, songIndex: index);
-                },
-              ),
+              child: StreamBuilder(
+                  stream: state.recentPlayedStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text(snapshot.error.toString()),
+                      );
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(
+                          child: Text('No recent songs played.'));
+                    } else {
+                      final recentData = snapshot.data!;
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: recentData.length,
+                        itemBuilder: (context, index) {
+                          final songData = recentData[index];
+                          return SongTitle(
+                              songData: songData, songIndex: index);
+                        },
+                      );
+                    }
+                  }),
             );
           }
           return const SizedBox();

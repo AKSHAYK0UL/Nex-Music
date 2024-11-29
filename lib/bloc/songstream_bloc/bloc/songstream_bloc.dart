@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
-import 'package:nex_music/helper_function/recent_tab/recentplaylist.dart';
 import 'package:nex_music/model/audioplayerstream.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/utils/audioutils/audioplayerstream.dart';
 
@@ -14,6 +14,7 @@ part 'songstream_state.dart';
 class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   final Repository _repository;
   final AudioPlayer _audioPlayer;
+  final DbRepository _dbRepository;
   bool _isPlaying = false; //default false
   Songmodel? _songData;
   Duration songDuration = Duration.zero;
@@ -27,10 +28,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   bool _isMute = false; //default false
   double _storedVolume = 0.0;
   bool _songLoaded = false; //default false
-  // List<Songmodel> _recentPlayed = [];
 
-  SongstreamBloc(this._repository, this._audioPlayer)
-      : super(SongstreamInitial()) {
+  SongstreamBloc(
+    this._repository,
+    this._audioPlayer,
+    this._dbRepository,
+  ) : super(SongstreamInitial()) {
     on<GetSongStreamEvent>(_getSongUrl);
     on<PlayPauseEvent>(_togglePlayPause);
     on<CloseMiniPlayerEvent>(_closeMiniPlayer);
@@ -124,8 +127,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _isPlaying = true;
       _songLoaded = true;
 
-      // _recentPlayed = updateRecentPlayedList(_recentPlayed, _songData!);
-
+      //add to db recent played collection
+      _dbRepository.addToRecentPlayedCollection(_songData!);
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
@@ -152,8 +155,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
-
-      // _recentPlayed = updateRecentPlayedList(_recentPlayed, _songData!);
+//add to db recent played collection
+      _dbRepository.addToRecentPlayedCollection(_songData!);
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
@@ -189,11 +192,6 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   bool get getMuteStatus {
     return _isMute;
   }
-
-  //get recent played list
-  // List<Songmodel> get getRecentPlayedList {
-  //   return _recentPlayed;
-  // }
 
   //Mute Audio Player
   void _togglemute(MuteEvent event, Emitter<SongstreamState> emit) {
