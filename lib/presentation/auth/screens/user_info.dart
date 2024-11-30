@@ -1,10 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
+import 'package:nex_music/core/ui_component/signing_out_loading.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
 import 'package:nex_music/presentation/auth/widgets/user_info_title.dart';
 
@@ -31,7 +30,7 @@ class UserInfo extends StatelessWidget {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text("Are You Sure?"),
-                  content: const Text("Are you sure you want to logout?"),
+                  content: const Text("Are you sure you want to Sign Out?"),
                   actions: [
                     TextButton(
                       onPressed: () {
@@ -41,9 +40,11 @@ class UserInfo extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        context.read<AuthBloc>().add(SignOutEvent());
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();
+
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const SigningOutLoading()));
                       },
                       child: const Text("Yes"),
                     )

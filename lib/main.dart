@@ -101,17 +101,17 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'NEX MUSIC',
           theme: themeData(context),
-          // home: const NavBar(),
           home: BlocSelector<UserLoggedBloc, UserLoggedState, bool>(
             selector: (state) {
               return state is LoggedInState;
             },
             builder: (context, isloggedIn) {
               if (isloggedIn) {
+                // Display when the user is logged in
                 return NavBar(
                   currentUser:
                       RepositoryProviderClass.firebaseAuthInstance.currentUser!,
-                ); // Display when the user is logged in
+                );
               } else {
                 return const AuthScreen(); // Display when the user is logged out
               }

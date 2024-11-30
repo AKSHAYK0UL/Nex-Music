@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 
@@ -73,29 +74,53 @@ class _AuthScreenState extends State<AuthScreen>
                       SizedBox(
                         height: screenSize * 0.141,
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          context.read<AuthBloc>().add(GoogleSignInEvent());
+                      BlocBuilder<AuthBloc, AuthState>(
+                        buildWhen: (previous, current) => previous != current,
+                        builder: (context, state) {
+                          return ElevatedButton.icon(
+                            onPressed: state is LoadingState
+                                ? null
+                                : () {
+                                    context
+                                        .read<AuthBloc>()
+                                        .add(GoogleSignInEvent());
+                                  },
+                            label: state is LoadingState
+                                ? const Text(" Signing In")
+                                : Text("${'\t' * 1} Continue with Google"),
+                            icon: state is LoadingState
+                                ? SizedBox(
+                                    width: screenSize * 0.070,
+                                    height: screenSize * 0.065,
+                                    child: LoadingIndicator(
+                                      indicatorType: Indicator.pacman,
+                                      colors: [accentColor],
+                                      strokeWidth: 1,
+                                    ),
+                                  )
+                                : Icon(
+                                    FontAwesomeIcons.google,
+                                    size: screenSize * 0.0263,
+                                  ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: secondaryColor,
+                              textStyle: Theme.of(context).textTheme.labelLarge,
+                              foregroundColor: textColor,
+                              iconColor: textColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      screenSize * 0.0329),
+                                  side: BorderSide(
+                                      color: Colors.blueGrey,
+                                      width: screenSize * 0.00197)),
+                              minimumSize:
+                                  Size(screenSize * 1, screenSize * 0.0659),
+                              disabledBackgroundColor: secondaryColor,
+                              disabledForegroundColor: textColor,
+                              disabledIconColor: textColor,
+                            ),
+                          );
                         },
-                        label: Text("${'\t' * 1} Continue with Google"),
-                        icon: Icon(
-                          FontAwesomeIcons.google,
-                          size: screenSize * 0.0263,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: secondaryColor,
-                          textStyle: Theme.of(context).textTheme.labelLarge,
-                          foregroundColor: textColor,
-                          iconColor: textColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.circular(screenSize * 0.0329),
-                              side: BorderSide(
-                                  color: Colors.blueGrey,
-                                  width: screenSize * 0.00197)),
-                          minimumSize:
-                              Size(screenSize * 1, screenSize * 0.0659),
-                        ),
                       ),
                       SizedBox(
                         height: screenSize * 0.0171,

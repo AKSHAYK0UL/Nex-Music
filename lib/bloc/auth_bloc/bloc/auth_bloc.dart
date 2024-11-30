@@ -17,6 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(LoadingState());
     try {
       await _authRepository.googleSignIn();
+      emit(SuccessState());
     } on FirebaseAuthException catch (e) {
       emit(ErrorState(errorMessage: e.toString()));
     }
@@ -26,6 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(LoadingState());
     try {
       await _authRepository.signOut();
+      emit(SuccessState());
     } on FirebaseAuth catch (e) {
       emit(ErrorState(errorMessage: e.toString()));
     }

@@ -19,3 +19,8 @@ final class ErrorState extends AuthState {
   @override
   List<Object?> get props => [errorMessage];
 }
+
+final class SuccessState extends AuthState {
+  @override
+  List<Object?> get props => [];
+}

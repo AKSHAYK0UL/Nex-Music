@@ -19,7 +19,6 @@ class UserLoggedBloc extends Bloc<UserLoggedEvent, UserLoggedState> {
       }
     });
 
-    // Handle events
     on<UserLoggedInDetected>(
         (UserLoggedInDetected event, Emitter<UserLoggedState> emit) =>
             emit(LoggedInState()));
@@ -33,7 +32,7 @@ class UserLoggedBloc extends Bloc<UserLoggedEvent, UserLoggedState> {
 
   @override
   Future<void> close() async {
-    _authSubscription.cancel(); // Cancel subscription to prevent memory leaks
+    _authSubscription.cancel();
     return super.close();
   }
 }
