@@ -1,30 +1,38 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
 import 'package:nex_music/presentation/recent/screens/recentscreen.dart';
 
 class NavBar extends StatefulWidget {
-  const NavBar({super.key});
+  final User currentUser;
+  const NavBar({
+    super.key,
+    required this.currentUser,
+  });
 
   @override
   State<NavBar> createState() => _NavBarState();
 }
 
 class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
-  List<Widget> screens = const [
-    HomeScreen(), // home
-    RecentScreen(), // recent
-    HomeScreen(), // favorites
-    HomeScreen(), // playlist
-  ];
+  late List<Widget> screens;
   int _selectedIndex = 0;
 
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
+    screens = [
+      HomeScreen(currentUser: widget.currentUser), // home
+      const RecentScreen(), // recent
+      HomeScreen(currentUser: widget.currentUser), // favorites
+      HomeScreen(currentUser: widget.currentUser), // playlist
+    ];
     super.initState();
   }
 

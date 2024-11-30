@@ -1,16 +1,22 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
 import 'package:nex_music/core/ui_component/loading.dart';
-import 'package:nex_music/core/ui_component/snackbar.dart';
-import 'package:nex_music/presentation/home/widget/home_playlist.dart';
-import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
+import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
+import 'package:nex_music/presentation/search/screens/search_screen.dart';
+import 'package:nex_music/presentation/auth/screens/user_info.dart' as info;
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final User currentUser;
+  const HomeScreen({
+    super.key,
+    required this.currentUser,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -59,7 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 IconButton(
                   onPressed: () {
-                    showSnackbar(context, "not added yet");
+                    // context.read<auth.AuthBloc>().add(auth.SignOutEvent());
+                    Navigator.of(context).pushNamed(info.UserInfo.routeName,
+                        arguments: widget.currentUser);
                   },
                   icon: Icon(
                     size: screenSize * 0.0369,

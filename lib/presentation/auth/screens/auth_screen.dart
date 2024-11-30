@@ -1,9 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
-import 'package:nex_music/presentation/home/navbar/navbar.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -69,18 +70,12 @@ class _AuthScreenState extends State<AuthScreen>
                           letterSpacing: 0,
                         ),
                       ),
-                      //     ),
-                      //   ),
-                      // ),
                       SizedBox(
-                        height: screenSize * 0.151,
+                        height: screenSize * 0.141,
                       ),
                       ElevatedButton.icon(
                         onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (context) {
-                            return const NavBar();
-                          }));
+                          context.read<AuthBloc>().add(GoogleSignInEvent());
                         },
                         label: Text("${'\t' * 1} Continue with Google"),
                         icon: Icon(
@@ -151,6 +146,9 @@ class _AuthScreenState extends State<AuthScreen>
                             ),
                           ],
                         ),
+                      ),
+                      SizedBox(
+                        height: screenSize * 0.010,
                       ),
                     ],
                   ),
