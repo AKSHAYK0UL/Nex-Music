@@ -6,7 +6,6 @@ import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
-import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
 import 'package:nex_music/presentation/auth/widgets/user_info_title.dart';
 
 class UserInfo extends StatelessWidget {
@@ -43,12 +42,8 @@ class UserInfo extends StatelessWidget {
                     TextButton(
                       onPressed: () {
                         context.read<AuthBloc>().add(SignOutEvent());
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(
-                            builder: (context) => const AuthScreen(),
-                          ),
-                          (route) => false,
-                        );
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
                       },
                       child: const Text("Yes"),
                     )

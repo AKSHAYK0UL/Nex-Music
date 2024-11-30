@@ -23,7 +23,6 @@ class NavBar extends StatefulWidget {
 class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   late List<Widget> screens;
   int _selectedIndex = 0;
-
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);

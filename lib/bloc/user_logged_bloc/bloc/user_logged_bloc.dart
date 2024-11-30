@@ -32,7 +32,7 @@ class UserLoggedBloc extends Bloc<UserLoggedEvent, UserLoggedState> {
   }
 
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _authSubscription.cancel(); // Cancel subscription to prevent memory leaks
     return super.close();
   }
