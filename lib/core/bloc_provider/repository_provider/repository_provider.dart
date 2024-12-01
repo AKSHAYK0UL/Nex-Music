@@ -7,38 +7,52 @@ import 'package:nex_music/enum/collection_enum.dart';
 import 'package:nex_music/network_provider/home_data/auth_provider.dart';
 import 'package:nex_music/network_provider/home_data/dataprovider.dart';
 import 'package:nex_music/network_provider/home_data/db_network_provider.dart';
-import 'package:nex_music/repository/auth_repository.dart';
+import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class RepositoryProviderClass {
-  static final firebaseAuthInstance = FirebaseAuth.instance;
-  static final repositoryProvider = RepositoryProvider(
-    create: (context) => Repository(
-      dataProvider: DataProvider(
-        ytMusic: YTMusic(),
-        youtubeExplode: YoutubeExplode(),
-      ),
-      yt: YoutubeExplode(),
-    ),
-  );
-  static final dbRepositoryProvider = RepositoryProvider(
-    create: (context) => DbRepository(
-      DbNetworkProvider(
-        firestoreInstance: FirebaseFirestore.instance,
-        userId: firebaseAuthInstance.currentUser!.uid,
-        collections: {
-          CollectionEnum.recentPlayed: "recentPlayed",
-        },
-      ),
-    ),
-  );
+  final FirebaseAuth firebaseAuthInstance;
 
-  static final authRepositoryProvider = RepositoryProvider(
-    create: (context) => AuthRepository(
-      AuthProviderr(firebaseAuthInstance),
-      GoogleSignIn(),
-    ),
-  );
+  RepositoryProviderClass({required this.firebaseAuthInstance});
+
+  // Getter for FirebaseInstance
+  FirebaseAuth get getFirebaseAuthInstance {
+    return firebaseAuthInstance;
+  }
+
+  // Getter for RepositoryProvider
+  RepositoryProvider<Repository> get repositoryProvider => RepositoryProvider(
+        create: (context) => Repository(
+          dataProvider: DataProvider(
+            ytMusic: YTMusic(),
+            youtubeExplode: YoutubeExplode(),
+          ),
+          yt: YoutubeExplode(),
+        ),
+      );
+
+  // Getter for DbRepositoryProvider
+  RepositoryProvider<DbRepository> get dbRepositoryProvider =>
+      RepositoryProvider(
+        create: (context) => DbRepository(
+          DbNetworkProvider(
+            firestoreInstance: FirebaseFirestore.instance,
+            userId: firebaseAuthInstance.currentUser!.uid,
+            collections: {
+              CollectionEnum.recentPlayed: "recentPlayed",
+            },
+          ),
+        ),
+      );
+
+  // Getter for AuthRepositoryProvider
+  RepositoryProvider<AuthRepository> get authRepositoryProvider =>
+      RepositoryProvider(
+        create: (context) => AuthRepository(
+          AuthProviderr(firebaseAuthInstance),
+          GoogleSignIn(),
+        ),
+      );
 }

@@ -3,9 +3,9 @@ import 'package:nex_music/enum/collection_enum.dart';
 
 class DbNetworkProvider {
   final FirebaseFirestore _firestoreInstance;
-  late final Map<CollectionEnum, String> _collections;
-  late final String _userId;
-  late final CollectionReference _recentPlayedCollection;
+  late Map<CollectionEnum, String> _collections;
+  late String _userId;
+  late CollectionReference _recentPlayedCollection;
   final String _usersCollection = "users";
 
   DbNetworkProvider({
@@ -13,6 +13,10 @@ class DbNetworkProvider {
     required String userId,
     required Map<CollectionEnum, String> collections,
   }) : _firestoreInstance = firestoreInstance {
+    _initialize(userId, collections);
+  }
+
+  void _initialize(String userId, Map<CollectionEnum, String> collections) {
     _userId = userId;
     _collections = collections;
     _recentPlayedCollection = _firestoreInstance
@@ -21,30 +25,23 @@ class DbNetworkProvider {
         .collection(_collections[CollectionEnum.recentPlayed]!);
   }
 
-  // Add to recent played collection
   Future<void> addToRecentPlayedCollection(Map<String, dynamic> songMap) async {
-    // Query for an existing instance of the song
     final querySnapShot = await _recentPlayedCollection
         .where("v_id", isEqualTo: songMap["v_id"])
         .get();
     for (var songs in querySnapShot.docs) {
       await songs.reference.delete();
     }
-    //add the timestamp of when the song was played
     songMap["timestamp"] = FieldValue.serverTimestamp();
-
-    //add to recent collection
     await _recentPlayedCollection.add(songMap);
   }
 
-  // Get Recent Played
   Stream<QuerySnapshot> getRecentPlayed() {
     return _recentPlayedCollection
-        .orderBy('timestamp', descending: true) //sort by timestamp
+        .orderBy('timestamp', descending: true)
         .snapshots();
   }
 
-  //delete recent Played song
   Future<void> deleteRecentPlayedSong(String vId) async {
     final querySnapshot =
         await _recentPlayedCollection.where('v_id', isEqualTo: vId).get();

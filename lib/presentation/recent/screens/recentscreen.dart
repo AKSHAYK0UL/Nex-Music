@@ -26,7 +26,7 @@ class _RecentScreenState extends State<RecentScreen> {
         title: Padding(
           padding: EdgeInsets.only(left: screenSize * 0.0158),
           child: Text(
-            "Recent",
+            "Recents",
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),

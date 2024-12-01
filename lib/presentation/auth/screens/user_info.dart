@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
-import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/signing_out_loading.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
@@ -14,8 +13,8 @@ class UserInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
-
     final currentUser = ModalRoute.of(context)?.settings.arguments as User;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -63,19 +62,26 @@ class UserInfo extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Spacer(),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(screenSize.height * 0.0923),
-            child: CircleAvatar(
-              radius: screenSize.height * 0.0923,
-              child: cacheImage(
-                imageUrl: currentUser.photoURL,
-                width: screenSize.height * 0.395,
-                height: screenSize.height * 0.395,
-              ),
+          Expanded(
+            flex: 2,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(screenSize.height * 0.0923),
+                  child: CircleAvatar(
+                    radius: screenSize.height * 0.0923,
+                    child: cacheImage(
+                      imageUrl: currentUser.photoURL,
+                      width: screenSize.height * 0.395,
+                      height: screenSize.height * 0.395,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const Spacer(),
           Align(
             alignment: Alignment.center,
             child: Chip(
@@ -85,53 +91,56 @@ class UserInfo extends StatelessWidget {
                 Icons.check,
                 color: Colors.green,
               ),
-              label: animatedText(
-                text: "Your account is secure",
+              label: Text(
+                "Your account is secure",
                 style: Theme.of(context).textTheme.bodyMedium!,
               ),
             ),
           ),
-          Card(
-            elevation: screenSize.height * 0.00200,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(screenSize.height * 0.0131),
-            ),
-            margin: EdgeInsets.symmetric(
-              horizontal: screenSize.height * 0.0110,
-              vertical: screenSize.height * 0.0000,
-            ),
-            color: secondaryColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                buildUserInfo(
-                  context: context,
-                  title: "Name",
-                  data: currentUser.displayName!,
-                  screenSize: screenSize,
-                ),
-                buildUserInfo(
-                  context: context,
-                  title: "Email",
-                  data: currentUser.email!,
-                  screenSize: screenSize,
-                ),
-                buildUserInfo(
-                  context: context,
-                  title: "Last SignIn Time",
-                  data: convertUkToIst(currentUser.metadata.lastSignInTime!),
-                  screenSize: screenSize,
-                ),
-                buildUserInfo(
-                  context: context,
-                  title: "Register On",
-                  data: convertUkToIst(currentUser.metadata.creationTime!),
-                  screenSize: screenSize,
-                ),
-              ],
+          Expanded(
+            flex: 3,
+            child: Card(
+              elevation: screenSize.height * 0.00200,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(screenSize.height * 0.0131),
+              ),
+              margin: EdgeInsets.only(
+                left: screenSize.height * 0.0110,
+                right: screenSize.height * 0.0110,
+                bottom: screenSize.height * 0.0110,
+              ),
+              color: secondaryColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  buildUserInfo(
+                    context: context,
+                    title: "Name",
+                    data: currentUser.displayName!,
+                    screenSize: screenSize,
+                  ),
+                  buildUserInfo(
+                    context: context,
+                    title: "Email",
+                    data: currentUser.email!,
+                    screenSize: screenSize,
+                  ),
+                  buildUserInfo(
+                    context: context,
+                    title: "Register On",
+                    data: convertUkToIst(currentUser.metadata.creationTime!),
+                    screenSize: screenSize,
+                  ),
+                  buildUserInfo(
+                    context: context,
+                    title: "Last Sign-In On",
+                    data: convertUkToIst(currentUser.metadata.lastSignInTime!),
+                    screenSize: screenSize,
+                  ),
+                ],
+              ),
             ),
           ),
-          const Spacer(),
         ],
       ),
     );

@@ -65,7 +65,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 IconButton(
                   onPressed: () {
-                    // context.read<auth.AuthBloc>().add(auth.SignOutEvent());
                     Navigator.of(context).pushNamed(info.UserInfo.routeName,
                         arguments: widget.currentUser);
                   },

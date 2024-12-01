@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/repository/auth_repository.dart';
+import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
