@@ -36,15 +36,14 @@ Future<void> main() async {
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
   );
-  final repositoryProviderClass =
-      RepositoryProviderClass(firebaseAuthInstance: FirebaseAuth.instance);
-  runApp(MyApp(repositoryProviderClass));
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final RepositoryProviderClass repositoryProviderClassInstance;
-  const MyApp(this.repositoryProviderClassInstance, {super.key});
-
+  MyApp({super.key});
+  final repositoryProviderClassInstance =
+      RepositoryProviderClass(firebaseAuthInstance: FirebaseAuth.instance);
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
@@ -116,8 +115,8 @@ class MyApp extends StatelessWidget {
               if (isloggedIn) {
                 // Display when the user is logged in
                 return NavBar(
-                  repositoryProviderClassInstance:
-                      repositoryProviderClassInstance,
+                  firebaseAuth:
+                      repositoryProviderClassInstance.getFirebaseAuthInstance,
                 );
               } else {
                 return const AuthScreen(); // Display when the user is logged out

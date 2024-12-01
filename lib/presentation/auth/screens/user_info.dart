@@ -39,9 +39,6 @@ class UserInfo extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pop();
-
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => const SigningOutLoading()));
                       },

@@ -1,17 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
-import 'package:nex_music/core/bloc_provider/repository_provider/repository_provider.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
 import 'package:nex_music/presentation/recent/screens/recentscreen.dart';
 
 class NavBar extends StatefulWidget {
-  final RepositoryProviderClass repositoryProviderClassInstance;
+  final FirebaseAuth firebaseAuth;
   const NavBar({
     super.key,
-    required this.repositoryProviderClassInstance,
+    required this.firebaseAuth,
   });
 
   @override
@@ -23,8 +23,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   int _selectedIndex = 0;
   @override
   void initState() {
-    final currentUser = widget
-        .repositoryProviderClassInstance.getFirebaseAuthInstance.currentUser!;
+    final currentUser = widget.firebaseAuth.currentUser!;
     WidgetsBinding.instance.addObserver(this);
     screens = [
       HomeScreen(currentUser: currentUser), // home
@@ -46,7 +45,6 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       context.read<SongstreamBloc>().add(UpdataUIEvent());
-      print("**********************Foreground********************");
     }
   }
 

@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_logged_bloc/bloc/user_logged_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/main.dart';
 
 class SigningOutLoading extends StatefulWidget {
   const SigningOutLoading({super.key});
@@ -19,12 +21,16 @@ class _SigningOutLoadingState extends State<SigningOutLoading> {
   @override
   void initState() {
     context.read<AuthBloc>().add(SignOutEvent());
+    context.read<SongstreamBloc>().add(CloseMiniPlayerEvent());
     _timer = Timer.periodic(
       const Duration(seconds: 3),
       (_) {
         final currentState = context.read<UserLoggedBloc>().state;
         if (currentState.runtimeType == UserLoggedInitial) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => MyApp()),
+            (route) => false,
+          );
         } else {
           context.read<AuthBloc>().add(SignOutEvent());
         }
