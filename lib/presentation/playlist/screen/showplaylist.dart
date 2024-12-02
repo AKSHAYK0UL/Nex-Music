@@ -11,6 +11,7 @@ import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 import 'package:nex_music/presentation/playlist/widget/chipwidget.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ShowPlaylist extends StatefulWidget {
   static const routeName = "/showplaylist";
@@ -106,15 +107,6 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 text: playlistData.playlistName,
                 style: Theme.of(context).textTheme.titleLarge!,
               ),
-              actions: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.search,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
             ),
             body: BlocBuilder<ss.SongstreamBloc, ss.SongstreamState>(
               builder: (context, songState) {
@@ -172,8 +164,9 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                 ChipWidget(
                                   label: "Share",
                                   icon: Icons.share,
-                                  onTap: () {
-                                    showSnackbar(context, "not added yet!");
+                                  onTap: () async {
+                                    await Share.share(
+                                        "https://music.youtube.com/playlist?list=${playlistData.playListId}");
                                   },
                                 ),
                                 ChipWidget(

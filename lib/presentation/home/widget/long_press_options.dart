@@ -6,6 +6,7 @@ import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:share_plus/share_plus.dart';
 
 Future<void> showLongPressOptions({
   required BuildContext context,
@@ -31,14 +32,17 @@ Future<void> showLongPressOptions({
           ),
           title: animatedText(
             text: songData.songName,
-            style: Theme.of(context).textTheme.titleMedium!,
+            style: Theme.of(context).textTheme.labelMedium!,
           ),
           subtitle: animatedText(
             text: songData.artist.name,
             style: Theme.of(context).textTheme.bodySmall!,
           ),
           trailing: IconButton(
-            onPressed: () {},
+            onPressed: () async {
+              await Share.share(
+                  "https://music.youtube.com/watch?v=${songData.vId}");
+            },
             icon: const Icon(Icons.share),
           ),
         ),
