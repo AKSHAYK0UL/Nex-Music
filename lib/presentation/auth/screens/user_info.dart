@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
-import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/signing_out_loading.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
 import 'package:nex_music/presentation/auth/widgets/user_info_title.dart';
@@ -66,13 +66,14 @@ class UserInfo extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius:
-                      BorderRadius.circular(screenSize.height * 0.0923),
+                      BorderRadius.circular(screenSize.height * 0.166),
                   child: CircleAvatar(
-                    radius: screenSize.height * 0.0923,
-                    child: cacheImage(
-                      imageUrl: currentUser.photoURL,
-                      width: screenSize.height * 0.395,
-                      height: screenSize.height * 0.395,
+                    backgroundColor: backgroundColor,
+                    radius: screenSize.height * 0.166,
+                    child: Lottie.asset(
+                      "assets/userinfo.json",
+                      repeat: false,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),

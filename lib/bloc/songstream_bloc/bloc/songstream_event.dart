@@ -51,6 +51,8 @@ final class PlayPreviousSongEvent extends SongstreamEvent {}
 
 final class MuteEvent extends SongstreamEvent {}
 
+final class DisposeAudioPlayerEvent extends SongstreamEvent {}
+
 final class AddToPlayNextEvent extends SongstreamEvent {
   final Songmodel songData;
 

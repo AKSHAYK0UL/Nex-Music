@@ -51,6 +51,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<PlayNextSongEvent>(_playNextSong);
     on<PlayPreviousSongEvent>(_playPreviousSong);
     on<AddToPlayNextEvent>(_addToPlayNext);
+    on<DisposeAudioPlayerEvent>(_disposeAudioPlayer);
 
     songPosition = _audioPlayer.positionStream;
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
@@ -350,6 +351,11 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _playlistSongs = [];
     _currentSongIndex = -1;
     _firstSongPlayedIndex = 0;
+  }
+
+  void _disposeAudioPlayer(
+      DisposeAudioPlayerEvent event, Emitter<SongstreamState> emit) {
+    _audioPlayer.dispose();
   }
 
 //close

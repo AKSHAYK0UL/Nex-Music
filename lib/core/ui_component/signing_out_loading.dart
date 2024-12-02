@@ -27,6 +27,7 @@ class _SigningOutLoadingState extends State<SigningOutLoading> {
       (_) {
         final currentState = context.read<UserLoggedBloc>().state;
         if (currentState.runtimeType == UserLoggedInitial) {
+          context.read<SongstreamBloc>().add(DisposeAudioPlayerEvent());
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => MyApp()),
             (route) => false,
