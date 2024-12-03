@@ -63,6 +63,14 @@ class DataProvider {
     return await _youtubeExplode.videos.streamsClient.getManifest(songId);
   }
 
+  Future<yt.SongFull> getSongForDeeplinkSearchSong(String songId) async {
+    return await _ytMusic.getSong(songId);
+  }
+
+  Future<yt.VideoFull> getSongForDeeplinkSearchVideo(String songId) async {
+    return await _ytMusic.getVideo(songId);
+  }
+
   //search suggestion
   Future<List<String>> searchSuggestion(String query) async {
     return await _ytMusic.getSearchSuggestions(query);

@@ -123,4 +123,26 @@ class RepositoryHelperFunction {
     }
     return playlist;
   }
+
+  //SongFull to SongModel
+  static Songmodel convertSongFullToSongModel(SongFull songfull) {
+    return Songmodel(
+        vId: songfull.videoId,
+        songName: songfull.name,
+        artist: songfull.artist,
+        thumbnail: getThumbnail(songfull.thumbnails),
+        duration:
+            songfull.duration == 0 ? "" : timeFormate(songfull.duration - 1));
+  }
+
+  //VideoFull to SongModel
+  static Songmodel convertVideoFullToSongModel(VideoFull videofull) {
+    return Songmodel(
+        vId: videofull.videoId,
+        songName: videofull.name,
+        artist: videofull.artist,
+        thumbnail: getThumbnail(videofull.thumbnails),
+        duration:
+            videofull.duration == 0 ? "" : timeFormate(videofull.duration - 1));
+  }
 }

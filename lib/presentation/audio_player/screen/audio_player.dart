@@ -9,6 +9,7 @@ import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/player.dart';
 import 'package:nex_music/presentation/audio_player/widget/streambuilder.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AudioPlayerScreen extends StatelessWidget {
   static const routeName = "/audioplayer";
@@ -29,9 +30,9 @@ class AudioPlayerScreen extends StatelessWidget {
         children: [
           Padding(
             padding: EdgeInsets.symmetric(
-                horizontal: screenSize * 0.0197,
-                vertical: screenSize * 0.00725),
+                horizontal: screenSize * 0.026, vertical: screenSize * 0.00725),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
                   onTap: () {
@@ -41,6 +42,17 @@ class AudioPlayerScreen extends StatelessWidget {
                     Icons.keyboard_arrow_down,
                     color: textColor,
                     size: screenSize * 0.0493,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    await Share.share(
+                        "https://music.youtube.com/watch?v=${songData.vId}");
+                  },
+                  child: Icon(
+                    Icons.share,
+                    color: textColor,
+                    size: screenSize * 0.0330,
                   ),
                 ),
               ],

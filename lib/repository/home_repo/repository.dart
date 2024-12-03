@@ -1,3 +1,4 @@
+import 'package:dart_ytmusic_api/types.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/helper_function/repository/repository_helper_function.dart';
@@ -74,7 +75,22 @@ class Repository {
     );
   }
 
-  //Future<int> playListTotalSongs() async {}
+//play get song [Deep link]
+  Future<Songmodel> getSongDataDeeplink(String songId) async {
+    final data = await Future.wait([
+      _dataProvider.getSongForDeeplinkSearchSong(songId),
+      _dataProvider.getSongForDeeplinkSearchVideo(songId),
+    ]);
+    final songFull = data[0] as SongFull;
+    final videoFull = data[1] as VideoFull;
+
+    if (songFull.videoId.isNotEmpty) {
+      return RepositoryHelperFunction.convertSongFullToSongModel(songFull);
+    }
+    return RepositoryHelperFunction.convertVideoFullToSongModel(videoFull);
+  }
+
+//get audio stream
   Future<Uri> getSongUrl(String songId) async {
     final manifest = await _dataProvider.songStreamUrl(songId);
     return manifest.audioOnly.withHighestBitrate().url;

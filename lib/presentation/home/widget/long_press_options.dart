@@ -42,6 +42,8 @@ Future<void> showLongPressOptions({
             onPressed: () async {
               await Share.share(
                   "https://music.youtube.com/watch?v=${songData.vId}");
+              if (!context.mounted) return;
+              Navigator.of(context).pop();
             },
             icon: const Icon(Icons.share),
           ),

@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
+import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
@@ -35,6 +37,7 @@ Future<void> main() async {
     androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
     androidNotificationChannelName: 'Audio playback',
     androidNotificationOngoing: true,
+    androidNotificationIcon: 'drawable/ic_notification',
   );
 
   runApp(MyApp());
@@ -44,6 +47,7 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
   final repositoryProviderClassInstance =
       RepositoryProviderClass(firebaseAuthInstance: FirebaseAuth.instance);
+  final applink = AppLinks();
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
@@ -55,44 +59,42 @@ class MyApp extends StatelessWidget {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (contexts) => HomesectionBloc(contexts.read<Repository>()),
+            create: (context) => HomesectionBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (contexts) => PlaylistBloc(contexts.read<Repository>()),
+            create: (context) => PlaylistBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (contexts) => SongstreamBloc(
-              contexts.read<Repository>(),
+            create: (context) => SongstreamBloc(
+              context.read<Repository>(),
               AudioPlayer(),
-              contexts.read<DbRepository>(),
+              context.read<DbRepository>(),
             ),
           ),
           BlocProvider(
-            create: (contexts) => SearchBloc(contexts.read<Repository>()),
+            create: (context) => SearchBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (contexts) => SongBloc(contexts.read<Repository>()),
+            create: (context) => SongBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (contexts) => VideoBloc(contexts.read<Repository>()),
+            create: (context) => VideoBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (contexts) =>
-                SearchedplaylistBloc(contexts.read<Repository>()),
+            create: (context) =>
+                SearchedplaylistBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (contexts) => ArtistBloc(contexts.read<Repository>()),
+            create: (context) => ArtistBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (contexts) =>
-                RecentplayedBloc(contexts.read<DbRepository>()),
+            create: (context) => RecentplayedBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
-            create: (contexts) =>
-                FullArtistSongBloc(contexts.read<Repository>()),
+            create: (context) => FullArtistSongBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (contexts) => SongDialogBloc(contexts.read<DbRepository>()),
+            create: (context) => SongDialogBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
             create: (context) => AuthBloc(context.read<AuthRepository>()),
@@ -101,7 +103,12 @@ class MyApp extends StatelessWidget {
             create: (context) => UserLoggedBloc(
               repositoryProviderClassInstance.getFirebaseAuthInstance,
             ),
-          )
+          ),
+          BlocProvider(
+            create: (context) => DeeplinkBloc(
+              context.read<Repository>(),
+            ),
+          ),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
@@ -115,6 +122,7 @@ class MyApp extends StatelessWidget {
               if (isloggedIn) {
                 // Display when the user is logged in
                 return NavBar(
+                  appLinks: applink,
                   firebaseAuth:
                       repositoryProviderClassInstance.getFirebaseAuthInstance,
                 );
