@@ -4,8 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart' as dp;
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/applink_function/uri_parser.dart';
@@ -38,6 +40,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ConnectivityBloc>().add(CheckConnectivityStatusEvent());
       streamSubscriptionUri = widget.appLinks.uriLinkStream.listen((uri) {
         if (uri.toString().isNotEmpty) {
           if (!uri.toString().contains("playlist")) {
@@ -91,29 +94,70 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
         }
       },
       child: Scaffold(
-        body: Stack(
-          children: [
-            IndexedStack(
-              index: _selectedIndex,
-              children: screens,
-            ),
-            BlocListener<dp.DeeplinkBloc, dp.DeeplinkState>(
-              listener: (context, state) {
-                if (state is dp.ErrorState) {
-                  showSnackbar(context, state.errorMessage);
-                }
-                if (state is dp.DeeplinkSongDataState) {
-                  Navigator.of(context)
-                      .pushNamed(AudioPlayerScreen.routeName, arguments: {
-                    "songindex": -1,
-                    "songdata": state.songData,
-                    "route": SongMiniPlayerRoute.songRoute,
-                  });
-                }
-              },
-              child: const SizedBox.shrink(),
-            ),
-          ],
+        body: BlocBuilder<ConnectivityBloc, ConnectivityState>(
+          buildWhen: (previous, current) => previous != current,
+          builder: (context, state) {
+            if (state is ConnectivitySuccessState) {
+              return Stack(
+                children: [
+                  IndexedStack(
+                    index: _selectedIndex,
+                    children: screens,
+                  ),
+                  BlocListener<dp.DeeplinkBloc, dp.DeeplinkState>(
+                    listener: (context, state) {
+                      if (state is dp.ErrorState) {
+                        showSnackbar(context, state.errorMessage);
+                      }
+                      if (state is dp.DeeplinkSongDataState) {
+                        Navigator.of(context)
+                            .pushNamed(AudioPlayerScreen.routeName, arguments: {
+                          "songindex": -1,
+                          "songdata": state.songData,
+                          "route": SongMiniPlayerRoute.songRoute,
+                        });
+                      }
+                    },
+                    child: const SizedBox.shrink(),
+                  ),
+                ],
+              );
+            }
+            if (state is ConnectivityFailureState) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Text(
+                      "No Internet Connection",
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  SizedBox(
+                    height: screenSize * 0.0131,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      context
+                          .read<ConnectivityBloc>()
+                          .add(CheckConnectivityStatusEvent());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: textColor,
+                      backgroundColor: secondaryColor,
+                    ),
+                    child: const Text("Retry"),
+                  ),
+                ],
+              );
+            }
+            if (state is ConnectivityErrorState) {
+              return Center(
+                child: Text(state.errorMessage),
+              );
+            }
+            return const SizedBox();
+          },
         ),
         bottomNavigationBar: Column(
           mainAxisSize: MainAxisSize.min,

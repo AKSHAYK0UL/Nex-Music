@@ -1,4 +1,5 @@
 import 'package:app_links/app_links.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
+import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
@@ -45,8 +47,10 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-  final repositoryProviderClassInstance =
-      RepositoryProviderClass(firebaseAuthInstance: FirebaseAuth.instance);
+  final repositoryProviderClassInstance = RepositoryProviderClass(
+      firebaseAuthInstance: FirebaseAuth.instance,
+      connectivity: Connectivity());
+
   final applink = AppLinks();
   @override
   Widget build(BuildContext context) {
@@ -107,6 +111,11 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => DeeplinkBloc(
               context.read<Repository>(),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => ConnectivityBloc(
+              repositoryProviderClassInstance.getConnectivityInstance,
             ),
           ),
         ],

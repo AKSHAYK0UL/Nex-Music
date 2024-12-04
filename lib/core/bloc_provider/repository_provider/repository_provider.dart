@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dart_ytmusic_api/yt_music.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,12 +15,19 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class RepositoryProviderClass {
   final FirebaseAuth firebaseAuthInstance;
+  final Connectivity connectivity;
 
-  RepositoryProviderClass({required this.firebaseAuthInstance});
+  RepositoryProviderClass(
+      {required this.firebaseAuthInstance, required this.connectivity});
 
   // Getter for FirebaseInstance
   FirebaseAuth get getFirebaseAuthInstance {
     return firebaseAuthInstance;
+  }
+
+  //Getter for Connectivity
+  Connectivity get getConnectivityInstance {
+    return connectivity;
   }
 
   // Getter for RepositoryProvider
