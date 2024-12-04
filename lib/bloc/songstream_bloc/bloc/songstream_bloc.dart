@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
@@ -34,7 +35,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     this._audioPlayer,
     this._dbRepository,
   ) : super(SongstreamInitial()) {
-    on<GetSongStreamEvent>(_getSongUrl);
+    on<GetSongStreamEvent>(_getSongUrl, transformer: restartable());
     on<PlayPauseEvent>(_togglePlayPause);
     on<CloseMiniPlayerEvent>(_closeMiniPlayer);
     on<SongCompletedEvent>(_onSongCompleted);
@@ -43,7 +44,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<PlayEvent>(_togglePlay);
     on<LoopEvent>(_toggleLoop);
     on<GetSongPlaylistEvent>(_songsPlaylist);
-    on<GetSongUrlOnShuffleEvent>(_getSongUrlOnShuffle);
+    on<GetSongUrlOnShuffleEvent>(_getSongUrlOnShuffle,
+        transformer: restartable());
     on<LoadingEvent>(_loading);
     on<CleanPlaylistEvent>(_cleanSongsPlaylist);
     on<MuteEvent>(_togglemute);
@@ -72,35 +74,41 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     });
 
     _audioPlayer.playerStateStream.listen(
-      (state) {
-        if (state.processingState == ProcessingState.completed) {
+      (streamState) {
+        if (streamState.processingState == ProcessingState.completed) {
           add(SongCompletedEvent());
         }
 
-        if (state.processingState == ProcessingState.buffering ||
-            state.processingState == ProcessingState.loading) {
+        if (streamState.processingState == ProcessingState.buffering ||
+            streamState.processingState == ProcessingState.loading) {
           add(LoadingEvent());
         }
         if (_songLoaded &&
-            (state.processingState != ProcessingState.buffering ||
-                state.processingState != ProcessingState.loading)) {
-          if (state.playing) {
-            add(PlayEvent());
-          } else if (!state.playing) {
-            add(PauseEvent());
+            (streamState.processingState != ProcessingState.buffering ||
+                streamState.processingState != ProcessingState.loading)) {
+          if (streamState.playing) {
+            if (state.runtimeType != CloseMiniPlayerState) {
+              add(PlayEvent());
+            }
+          } else if (!streamState.playing) {
+            if (state.runtimeType != CloseMiniPlayerState) {
+              add(PauseEvent());
+            }
           }
         }
       },
     );
   }
 
-  //Update UI when came back from Background
+  //Update UI when returning back from the Background / recent apps
   void _updateUIFromBackground(
       UpdataUIEvent event, Emitter<SongstreamState> emit) {
-    if (_isPlaying) {
-      add(PlayEvent());
-    } else {
-      add(PauseEvent());
+    if (state.runtimeType != CloseMiniPlayerState) {
+      if (_isPlaying) {
+        add(PlayEvent());
+      } else {
+        add(PauseEvent());
+      }
     }
   }
 
@@ -109,12 +117,17 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
     _resetAudioPlayer();
     emit(LoadingState(songData: event.songData));
-
     _songData = event.songData;
     _firstSongPlayedIndex = event.songIndex;
     _currentSongIndex = _firstSongPlayedIndex;
     try {
+      if (state is CloseMiniPlayerState) {
+        return;
+      }
       final songUrl = await _repository.getSongUrl(_songData!.vId);
+      if (state is CloseMiniPlayerState) {
+        return;
+      }
       await _audioPlayer.setUrl(
         songUrl.toString(),
         tag: MediaItem(
@@ -124,13 +137,21 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
           artUri: Uri.parse(_songData!.thumbnail),
         ),
       );
+      if (state is CloseMiniPlayerState) {
+        return;
+      }
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
 
       //add to db recent played collection
       _dbRepository.addToRecentPlayedCollection(_songData!);
-      emit(PlayingState(songData: _songData!));
+
+      if (state is CloseMiniPlayerState) {
+        _resetAudioPlayer();
+      } else {
+        emit(PlayingState(songData: _songData!));
+      }
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
     }
@@ -143,7 +164,13 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     emit(LoadingState(songData: event.songData));
     _songData = event.songData;
     try {
+      if (state is CloseMiniPlayerState) {
+        return;
+      }
       final songUrl = await _repository.getSongUrl(_songData!.vId);
+      if (state is CloseMiniPlayerState) {
+        return;
+      }
       await _audioPlayer.setUrl(
         songUrl.toString(),
         tag: MediaItem(
@@ -153,12 +180,19 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
           artUri: Uri.parse(_songData!.thumbnail),
         ),
       );
+      if (state is CloseMiniPlayerState) {
+        return;
+      }
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
 //add to db recent played collection
       _dbRepository.addToRecentPlayedCollection(_songData!);
-      emit(PlayingState(songData: _songData!));
+      if (state is CloseMiniPlayerState) {
+        _resetAudioPlayer();
+      } else {
+        emit(PlayingState(songData: _songData!));
+      }
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
     }
@@ -264,9 +298,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
           songIndex: _currentSongIndex));
     } else {
       _currentSongIndex = _playlistSongs.length - 1;
-      add(GetSongStreamEvent(
+      add(
+        GetSongStreamEvent(
           songData: _playlistSongs[_currentSongIndex],
-          songIndex: _currentSongIndex));
+          songIndex: _currentSongIndex,
+        ),
+      );
     }
   }
 
@@ -275,7 +312,6 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) async {
     await _audioPlayer.pause();
     _isPlaying = false;
-    // _repository.cancelRequest();
     emit(CloseMiniPlayerState());
   }
 

@@ -60,6 +60,7 @@ dependencies:
   loading_indicator: ^3.1.1
   share_plus: ^10.1.2
   app_links: ^6.3.2
+  bloc_concurrency: ^0.2.5
 
 dev_dependencies:
   flutter_test:
