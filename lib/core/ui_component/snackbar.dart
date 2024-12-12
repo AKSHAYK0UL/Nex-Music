@@ -10,6 +10,8 @@ ScaffoldMessengerState showSnackbar(BuildContext context, String message) {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
+        behavior: SnackBarBehavior.fixed,
+        elevation: 0,
         showCloseIcon: true,
       ),
     );

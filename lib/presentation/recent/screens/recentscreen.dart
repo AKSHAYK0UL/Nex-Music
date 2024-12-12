@@ -1,6 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
 class RecentScreen extends StatefulWidget {
@@ -21,6 +25,7 @@ class _RecentScreenState extends State<RecentScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
+    List<Songmodel> recentSongs = [];
     return Scaffold(
       appBar: AppBar(
         title: Padding(
@@ -30,6 +35,16 @@ class _RecentScreenState extends State<RecentScreen> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
+                  songlist: recentSongs)); //load recent songs in the playlist
+              showSnackbar(context, "Playlist added");
+            },
+            icon: const Icon(CupertinoIcons.shuffle),
+          ),
+        ],
       ),
       body: BlocBuilder<RecentplayedBloc, RecentplayedState>(
         buildWhen: (previous, current) => previous != current,
@@ -57,6 +72,7 @@ class _RecentScreenState extends State<RecentScreen> {
                           child: Text('No recent songs played.'));
                     } else {
                       final recentData = snapshot.data!;
+                      recentSongs = recentData;
                       return ListView.builder(
                         shrinkWrap: true,
                         itemCount: recentData.length,

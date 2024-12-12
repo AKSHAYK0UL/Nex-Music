@@ -83,16 +83,13 @@ class AudioPlayerScreen extends StatelessWidget {
                           borderRadius:
                               BorderRadius.circular(screenSize * 0.0131),
                         ),
-                        child: Hero(
-                          tag: songData.vId,
-                          child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(screenSize * 0.0131),
-                            child: cacheImage(
-                              imageUrl: songData.thumbnail,
-                              width: screenSize * 0.448,
-                              height: screenSize * 0.410,
-                            ),
+                        child: ClipRRect(
+                          borderRadius:
+                              BorderRadius.circular(screenSize * 0.0131),
+                          child: cacheImage(
+                            imageUrl: songData.thumbnail,
+                            width: screenSize * 0.448,
+                            height: screenSize * 0.410,
                           ),
                         ),
                       ),

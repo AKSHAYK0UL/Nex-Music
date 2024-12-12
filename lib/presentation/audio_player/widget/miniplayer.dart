@@ -50,15 +50,12 @@ class MiniPlayer extends StatelessWidget {
                   ),
                   contentPadding: EdgeInsets.only(
                       left: screenSize * 0.0356, right: screenSize * 0.00527),
-                  leading: Hero(
-                    tag: songData.vId,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(screenSize * 0.0106),
-                      child: cacheImage(
-                        imageUrl: songData.thumbnail,
-                        width: screenSize * 0.0755,
-                        height: screenSize * 0.0733,
-                      ),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(screenSize * 0.0106),
+                    child: cacheImage(
+                      imageUrl: songData.thumbnail,
+                      width: screenSize * 0.0755,
+                      height: screenSize * 0.0733,
                     ),
                   ),
                   title: animatedText(
