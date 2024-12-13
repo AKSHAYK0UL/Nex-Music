@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
@@ -15,6 +15,7 @@ class RecentScreen extends StatefulWidget {
 }
 
 class _RecentScreenState extends State<RecentScreen> {
+  ValueNotifier<bool> switchState = ValueNotifier(false);
   @override
   void initState() {
     context.read<RecentplayedBloc>().add(GetRecentPlayedEvent());
@@ -36,14 +37,33 @@ class _RecentScreenState extends State<RecentScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
-                  songlist: recentSongs)); //load recent songs in the playlist
-              showSnackbar(context, "Playlist added");
+          ValueListenableBuilder(
+            valueListenable: switchState,
+            builder: (context, value, _) {
+              return Switch(
+                activeColor: Colors.blueAccent.shade400,
+                thumbColor: WidgetStateProperty.resolveWith((states) {
+                  return value ? accentColor : Colors.blueGrey.shade200;
+                }),
+                inactiveTrackColor: Colors.blueGrey.shade700,
+                trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+                  return Colors.transparent;
+                }),
+                value: value,
+                onChanged: (newvalue) {
+                  switchState.value = newvalue;
+                  if (newvalue) {
+                    context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
+                        songlist:
+                            recentSongs)); //load recent songs in the playlist
+                    showSnackbar(context, "Now playing your recent songs");
+                  } else {
+                    context.read<SongstreamBloc>().add(CleanPlaylistEvent());
+                  }
+                },
+              );
             },
-            icon: const Icon(CupertinoIcons.shuffle),
-          ),
+          )
         ],
       ),
       body: BlocBuilder<RecentplayedBloc, RecentplayedState>(

@@ -35,6 +35,11 @@ final class SeekToEvent extends SongstreamEvent {
 
 final class LoopEvent extends SongstreamEvent {}
 
+final class StoreQuickPicksSongsEvent extends SongstreamEvent {
+  List<Songmodel> quickPicks = [];
+  StoreQuickPicksSongsEvent({required this.quickPicks});
+}
+
 final class GetSongPlaylistEvent extends SongstreamEvent {
   final List<Songmodel> songlist;
 

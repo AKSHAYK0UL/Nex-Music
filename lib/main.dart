@@ -121,7 +121,7 @@ class MyApp extends StatelessWidget {
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'NEX MUSIC',
+          title: 'Nex Music',
           theme: themeData(context),
           home: BlocSelector<UserLoggedBloc, UserLoggedState, bool>(
             selector: (state) {

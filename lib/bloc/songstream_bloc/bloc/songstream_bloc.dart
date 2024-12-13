@@ -30,6 +30,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   double _storedVolume = 0.0;
   bool _songLoaded = false; //default false
 
+  List<Songmodel> _storeQuicksPicksList = [];
+
   SongstreamBloc(
     this._repository,
     this._audioPlayer,
@@ -54,6 +56,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<PlayPreviousSongEvent>(_playPreviousSong);
     on<AddToPlayNextEvent>(_addToPlayNext);
     on<DisposeAudioPlayerEvent>(_disposeAudioPlayer);
+    on<StoreQuickPicksSongsEvent>(_storeQuickPicks);
 
     songPosition = _audioPlayer.positionStream;
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
@@ -377,6 +380,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // Handle playlist songs
   void _songsPlaylist(
       GetSongPlaylistEvent event, Emitter<SongstreamState> emit) {
+    _currentSongIndex = -1;
+    _firstSongPlayedIndex = 0;
     final list = event.songlist.toSet();
     _playlistSongs = list.toList();
   }
@@ -385,8 +390,16 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   void _cleanSongsPlaylist(
       CleanPlaylistEvent event, Emitter<SongstreamState> emit) {
     _playlistSongs = [];
+    _playlistSongs = _storeQuicksPicksList;
     _currentSongIndex = -1;
     _firstSongPlayedIndex = 0;
+  }
+
+  //store Quicks Picks
+
+  void _storeQuickPicks(
+      StoreQuickPicksSongsEvent event, Emitter<SongstreamState> emit) {
+    _storeQuicksPicksList = event.quickPicks;
   }
 
   void _disposeAudioPlayer(

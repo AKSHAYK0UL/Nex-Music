@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
@@ -46,9 +47,12 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
         if (state is HomeSectionState) {
-          // context
-          //     .read<ss.SongstreamBloc>()
-          //     .add(ss.GetSongPlaylistEvent(songlist: state.quickPicks));
+          context
+              .read<ss.SongstreamBloc>()
+              .add(ss.GetSongPlaylistEvent(songlist: state.quickPicks));
+          context
+              .read<ss.SongstreamBloc>() //store the quicks picks
+              .add(ss.StoreQuickPicksSongsEvent(quickPicks: state.quickPicks));
           return Scaffold(
             appBar: AppBar(
               actions: [
