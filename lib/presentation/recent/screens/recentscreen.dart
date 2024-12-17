@@ -53,6 +53,7 @@ class _RecentScreenState extends State<RecentScreen> {
                 onChanged: (newvalue) {
                   switchState.value = newvalue;
                   if (newvalue) {
+                    context.read<SongstreamBloc>().add(ResetPlaylistEvent());
                     context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
                         songlist:
                             recentSongs)); //load recent songs in the playlist

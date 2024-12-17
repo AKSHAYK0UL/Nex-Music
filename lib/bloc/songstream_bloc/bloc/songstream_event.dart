@@ -46,6 +46,8 @@ final class GetSongPlaylistEvent extends SongstreamEvent {
   GetSongPlaylistEvent({required this.songlist});
 }
 
+final class ResetPlaylistEvent extends SongstreamEvent {}
+
 final class CleanPlaylistEvent extends SongstreamEvent {}
 
 final class LoadingEvent extends SongstreamEvent {}

@@ -49,6 +49,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<GetSongUrlOnShuffleEvent>(_getSongUrlOnShuffle,
         transformer: restartable());
     on<LoadingEvent>(_loading);
+    on<ResetPlaylistEvent>(_resetPlaylist);
     on<CleanPlaylistEvent>(_cleanSongsPlaylist);
     on<MuteEvent>(_togglemute);
     on<UpdataUIEvent>(_updateUIFromBackground);
@@ -384,6 +385,13 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _firstSongPlayedIndex = 0;
     final list = event.songlist.toSet();
     _playlistSongs = list.toList();
+  }
+
+  //Reset Playlist
+  void _resetPlaylist(ResetPlaylistEvent event, Emitter<SongstreamState> emit) {
+    _playlistSongs = [];
+    _currentSongIndex = -1;
+    _firstSongPlayedIndex = 0;
   }
 
 //clean the playlist
