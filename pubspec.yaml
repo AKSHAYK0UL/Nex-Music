@@ -36,7 +36,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   # youtube_explode_dart: ^2.3.5
-  youtube_explode_dart: ^2.3.6
+  # youtube_explode_dart: ^2.3.6
   just_audio: ^0.9.41
   flutter_bloc: ^8.1.6
   dart_ytmusic_api: ^1.0.7
@@ -61,6 +61,10 @@ dependencies:
   app_links: ^6.3.2
   bloc_concurrency: ^0.2.5
   audio_service: ^0.18.17
+  youtube_explode_dart:
+    git:
+      url: https://github.com/anandnet/youtube_explode_dart.git
+      ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024  
 
 dev_dependencies:
   flutter_test:

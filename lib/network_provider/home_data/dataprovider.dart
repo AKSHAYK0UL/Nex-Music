@@ -60,8 +60,12 @@ class DataProvider {
     return songs;
   }
 
-  Future<StreamManifest> songStreamUrl(String songId) async {
-    return await _youtubeExplode.videos.streamsClient.getManifest(songId);
+  // Future<StreamManifest> songStreamUrl(String songId) async {
+  //   return await _youtubeExplode.videos.streamsClient.getManifest(songId);
+  // }
+
+  Future<StreamManifest> songStreamUrl(String songId) {
+    return _youtubeExplode.videos.streamsClient.getManifest(songId);
   }
 
   Future<yt.SongFull> getSongForDeeplinkSearchSong(String songId) async {

@@ -29,6 +29,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       0; //store the index of first song played in the playlist
   bool _isMute = false; //default false
   double _storedVolume = 0.0;
+  double _resetVolume = 0.0;
   bool _songLoaded = false; //default false
 
   List<Songmodel> _storeQuicksPicksList = [];
@@ -127,24 +128,24 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _songData = event.songData;
     _firstSongPlayedIndex = event.songIndex;
     _currentSongIndex = _firstSongPlayedIndex;
+    _audioPlayerHandler.setMediaItem(MediaItem(
+      id: _songData!.vId,
+      title: _songData!.songName,
+      artist: _songData!.artist.name,
+      artUri: Uri.parse(_songData!.thumbnail),
+    ));
     try {
-      if (state is CloseMiniPlayerState) {
-        return;
-      }
+      // if (state is CloseMiniPlayerState) {
+      //   return;
+      // }
       final songUrl = await _repository.getSongUrl(_songData!.vId);
-      if (state is CloseMiniPlayerState) {
-        return;
-      }
+      // if (state is CloseMiniPlayerState) {
+      //   return;
+      // }
       await _audioPlayer.setUrl(songUrl.toString());
-      _audioPlayerHandler.setMediaItem(MediaItem(
-        id: _songData!.vId,
-        title: _songData!.songName,
-        artist: _songData!.artist.name,
-        artUri: Uri.parse(_songData!.thumbnail),
-      ));
-      if (state is CloseMiniPlayerState) {
-        return;
-      }
+      // if (state is CloseMiniPlayerState) {
+      //   return;
+      // }
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
@@ -152,11 +153,11 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       //add to db recent played collection
       _dbRepository.addToRecentPlayedCollection(_songData!);
 
-      if (state is CloseMiniPlayerState) {
-        _resetAudioPlayer();
-      } else {
-        emit(PlayingState(songData: _songData!));
-      }
+      // if (state is CloseMiniPlayerState) {
+      //   _resetAudioPlayer();
+      // } else {
+      emit(PlayingState(songData: _songData!));
+      // }
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
     }
@@ -165,38 +166,47 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 //when on shuffle
   Future<void> _getSongUrlOnShuffle(
       GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
+    _resetAudioPlayerWhenOnShuffle();
     _songLoaded = false;
     emit(LoadingState(songData: event.songData));
     _songData = event.songData;
+    _audioPlayerHandler.setMediaItem(MediaItem(
+      id: _songData!.vId,
+      title: _songData!.songName,
+      artist: _songData!.artist.name,
+      artUri: Uri.parse(_songData!.thumbnail),
+    ));
     try {
-      if (state is CloseMiniPlayerState) {
-        return;
-      }
+      // if (state is CloseMiniPlayerState) {
+      //   return;
+      // }
       final songUrl = await _repository.getSongUrl(_songData!.vId);
-      if (state is CloseMiniPlayerState) {
-        return;
-      }
+      // if (state is CloseMiniPlayerState) {
+      //   return;
+      // }
       await _audioPlayer.setUrl(songUrl.toString());
+      //  _audioPlayerHandler.setMediaItem(MediaItem(
+      //     id: _songData!.vId,
+      //     title: _songData!.songName,
+      //     artist: _songData!.artist.name,
+      //     artUri: Uri.parse(_songData!.thumbnail),
+      //   ));
 
-      _audioPlayerHandler.setMediaItem(MediaItem(
-        id: _songData!.vId,
-        title: _songData!.songName,
-        artist: _songData!.artist.name,
-        artUri: Uri.parse(_songData!.thumbnail),
-      ));
-      if (state is CloseMiniPlayerState) {
-        return;
-      }
+      // if (state is CloseMiniPlayerState) {
+      //   return;
+      // }
+      _audioPlayer.setVolume(_resetVolume);
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
 //add to db recent played collection
       _dbRepository.addToRecentPlayedCollection(_songData!);
-      if (state is CloseMiniPlayerState) {
-        _resetAudioPlayer();
-      } else {
-        emit(PlayingState(songData: _songData!));
-      }
+      // if (state is CloseMiniPlayerState) {
+      //   _resetAudioPlayer();
+      // }
+      // else {
+      emit(PlayingState(songData: _songData!));
+      // }
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song URL: $e"));
     }
@@ -278,49 +288,73 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   //Play next
+  // void _playNextSong(PlayNextSongEvent event, Emitter<SongstreamState> emit) {
+  //   if ((_currentSongIndex + 1) < _playlistSongs.length) {
+  //     _currentSongIndex++;
+  //     add(GetSongStreamEvent(
+  //         songData: _playlistSongs[_currentSongIndex],
+  //         songIndex: _currentSongIndex));
+  //   } else {
+  //     _currentSongIndex = 0;
+  //     add(GetSongStreamEvent(
+  //         songData: _playlistSongs[_currentSongIndex],
+  //         songIndex: _currentSongIndex));
+  //   }
+  // }
+
+  // //play previous
+  // void _playPreviousSong(
+  //     PlayPreviousSongEvent event, Emitter<SongstreamState> emit) {
+  //   if ((_currentSongIndex - 1) > 0) {
+  //     _currentSongIndex--;
+  //     add(GetSongStreamEvent(
+  //         songData: _playlistSongs[_currentSongIndex],
+  //         songIndex: _currentSongIndex));
+  //   } else {
+  //     _currentSongIndex = _playlistSongs.length - 1;
+  //     add(
+  //       GetSongStreamEvent(
+  //         songData: _playlistSongs[_currentSongIndex],
+  //         songIndex: _currentSongIndex,
+  //       ),
+  //     );
+  //   }
+  // }
+
   void _playNextSong(PlayNextSongEvent event, Emitter<SongstreamState> emit) {
     if ((_currentSongIndex + 1) < _playlistSongs.length) {
       _currentSongIndex++;
-      add(GetSongStreamEvent(
-          songData: _playlistSongs[_currentSongIndex],
-          songIndex: _currentSongIndex));
     } else {
       _currentSongIndex = 0;
-      add(GetSongStreamEvent(
-          songData: _playlistSongs[_currentSongIndex],
-          songIndex: _currentSongIndex));
     }
+    add(GetSongUrlOnShuffleEvent(
+      songData: _playlistSongs[_currentSongIndex],
+    ));
   }
 
-  //play previous
   void _playPreviousSong(
       PlayPreviousSongEvent event, Emitter<SongstreamState> emit) {
-    if ((_currentSongIndex - 1) > 0) {
+    if ((_currentSongIndex - 1) >= 0) {
       _currentSongIndex--;
-      add(GetSongStreamEvent(
-          songData: _playlistSongs[_currentSongIndex],
-          songIndex: _currentSongIndex));
     } else {
       _currentSongIndex = _playlistSongs.length - 1;
-      add(
-        GetSongStreamEvent(
-          songData: _playlistSongs[_currentSongIndex],
-          songIndex: _currentSongIndex,
-        ),
-      );
     }
+    add(GetSongUrlOnShuffleEvent(
+      songData: _playlistSongs[_currentSongIndex],
+    ));
   }
 
   // Close the mini player
   void _closeMiniPlayer(
       CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) async {
+    _audioPlayerHandler.stop();
     _audioPlayer.pause();
     _isPlaying = false;
     emit(CloseMiniPlayerState());
   }
 
 //reset audio player
-  void _resetAudioPlayer() async {
+  void _resetAudioPlayer() {
     _songLoaded = false;
     if (_isPlaying) {
       _audioPlayer.pause();
@@ -328,6 +362,17 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     }
     songDuration = Duration.zero;
 
+    _audioPlayer.seek(Duration.zero); // Reset position
+  }
+
+//reset audio player on shuffle
+  void _resetAudioPlayerWhenOnShuffle() {
+    _songLoaded = false;
+    // Setting volume to 0 instead of using pause() because when using pause(), the notification disappears for a second.
+    _resetVolume = _audioPlayer.volume;
+    _audioPlayer.setVolume(0);
+    _isPlaying = false;
+    songDuration = Duration.zero;
     _audioPlayer.seek(Duration.zero); // Reset position
   }
 

@@ -65,6 +65,13 @@ class AudioPlayerHandler extends BaseAudioHandler {
     songstreamBloc?.add(PlayPreviousSongEvent());
     print("SKIP TO PREVIOUS CLICKED");
   }
+
+  @override
+  Future<void> stop() async {
+    //close notification
+    await _player.stop();
+    await super.stop();
+  }
 }
 
 extension on ProcessingState {
