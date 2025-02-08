@@ -1,11 +1,11 @@
 import 'package:app_links/app_links.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
@@ -31,22 +31,32 @@ import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 
 import 'package:nex_music/secrets/firebase_options.dart';
+import 'package:nex_music/utils/audioutils/audio_handler.dart';
 
+final audioPlayer = AudioPlayer(); //global audioplayer  instance
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await JustAudioBackground.init(
-    androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
-    androidNotificationChannelName: 'Audio playback',
-    androidNotificationOngoing: true,
-    androidNotificationIcon: 'drawable/ic_notification',
+  final audioHandler = await AudioService.init(
+    builder: () => AudioPlayerHandler(audioPlayer),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+      androidNotificationChannelName: 'Audio Playback',
+      androidNotificationOngoing: true,
+      androidResumeOnClick: true,
+      preloadArtwork: true,
+      androidNotificationIcon: 'drawable/ic_notification',
+    ),
   );
 
-  runApp(MyApp());
+  runApp(MyApp(
+    myAudioHandler: audioHandler,
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  final AudioPlayerHandler myAudioHandler;
+  MyApp({super.key, required this.myAudioHandler});
   final repositoryProviderClassInstance = RepositoryProviderClass(
       firebaseAuthInstance: FirebaseAuth.instance,
       connectivity: Connectivity());
@@ -69,11 +79,18 @@ class MyApp extends StatelessWidget {
             create: (context) => PlaylistBloc(context.read<Repository>()),
           ),
           BlocProvider(
-            create: (context) => SongstreamBloc(
-              context.read<Repository>(),
-              AudioPlayer(),
-              context.read<DbRepository>(),
-            ),
+            create: (context) {
+              // Create the SongstreamBloc instance.
+              final bloc = SongstreamBloc(
+                context.read<Repository>(),
+                audioPlayer,
+                myAudioHandler,
+                context.read<DbRepository>(),
+              );
+              // Immediately pass the bloc instance to the audio handler.
+              myAudioHandler.setSongstreamBloc(bloc);
+              return bloc;
+            },
           ),
           BlocProvider(
             create: (context) => SearchBloc(context.read<Repository>()),
@@ -146,3 +163,17 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+/**
+ * 
+ *   final audioHandler = await AudioService.init(
+    builder: () => AudioPlayerHandler(audioPlayer),
+    config: const AudioServiceConfig(
+      androidNotificationChannelId: 'com.ryanheise.bg_demo.channel.audio',
+      androidNotificationChannelName: 'Audio Playback',
+      androidNotificationOngoing: true,
+      androidResumeOnClick: true,
+      preloadArtwork: true,
+      androidNotificationIcon: 'drawable/ic_notification',
+    ),
+  );
+ */

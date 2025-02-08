@@ -1,12 +1,13 @@
 import 'dart:async';
+import 'package:audio_service/audio_service.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 import 'package:nex_music/model/audioplayerstream.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
+import 'package:nex_music/utils/audioutils/audio_handler.dart';
 import 'package:nex_music/utils/audioutils/audioplayerstream.dart';
 
 part 'songstream_event.dart';
@@ -31,10 +32,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   bool _songLoaded = false; //default false
 
   List<Songmodel> _storeQuicksPicksList = [];
+  final AudioPlayerHandler _audioPlayerHandler;
 
   SongstreamBloc(
     this._repository,
     this._audioPlayer,
+    this._audioPlayerHandler,
     this._dbRepository,
   ) : super(SongstreamInitial()) {
     on<GetSongStreamEvent>(_getSongUrl, transformer: restartable());
@@ -132,15 +135,13 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       if (state is CloseMiniPlayerState) {
         return;
       }
-      await _audioPlayer.setUrl(
-        songUrl.toString(),
-        tag: MediaItem(
-          id: _songData!.vId,
-          title: _songData!.songName,
-          artist: _songData!.artist.name,
-          artUri: Uri.parse(_songData!.thumbnail),
-        ),
-      );
+      await _audioPlayer.setUrl(songUrl.toString());
+      _audioPlayerHandler.setMediaItem(MediaItem(
+        id: _songData!.vId,
+        title: _songData!.songName,
+        artist: _songData!.artist.name,
+        artUri: Uri.parse(_songData!.thumbnail),
+      ));
       if (state is CloseMiniPlayerState) {
         return;
       }
@@ -175,15 +176,14 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       if (state is CloseMiniPlayerState) {
         return;
       }
-      await _audioPlayer.setUrl(
-        songUrl.toString(),
-        tag: MediaItem(
-          id: _songData!.vId,
-          title: _songData!.songName,
-          artist: _songData!.artist.name,
-          artUri: Uri.parse(_songData!.thumbnail),
-        ),
-      );
+      await _audioPlayer.setUrl(songUrl.toString());
+
+      _audioPlayerHandler.setMediaItem(MediaItem(
+        id: _songData!.vId,
+        title: _songData!.songName,
+        artist: _songData!.artist.name,
+        artUri: Uri.parse(_songData!.thumbnail),
+      ));
       if (state is CloseMiniPlayerState) {
         return;
       }
@@ -257,7 +257,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // Pause Event
   void _togglePause(PauseEvent event, Emitter<SongstreamState> emit) async {
     _isPlaying = false;
-    await _audioPlayer.pause();
+    _audioPlayer.pause();
     emit(PausedState(songData: _songData!));
   }
 
@@ -314,7 +314,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // Close the mini player
   void _closeMiniPlayer(
       CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) async {
-    await _audioPlayer.pause();
+    _audioPlayer.pause();
     _isPlaying = false;
     emit(CloseMiniPlayerState());
   }
@@ -323,7 +323,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   void _resetAudioPlayer() async {
     _songLoaded = false;
     if (_isPlaying) {
-      await _audioPlayer.pause();
+      _audioPlayer.pause();
       _isPlaying = false;
     }
     songDuration = Duration.zero;
@@ -404,7 +404,6 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   //store Quicks Picks
-
   void _storeQuickPicks(
       StoreQuickPicksSongsEvent event, Emitter<SongstreamState> emit) {
     _storeQuicksPicksList = event.quickPicks;

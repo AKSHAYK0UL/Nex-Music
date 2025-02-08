@@ -8,6 +8,7 @@ import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_logged_bloc/bloc/user_logged_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/main.dart';
+import 'package:nex_music/utils/audioutils/audio_handler.dart';
 
 class SigningOutLoading extends StatefulWidget {
   const SigningOutLoading({super.key});
@@ -29,7 +30,10 @@ class _SigningOutLoadingState extends State<SigningOutLoading> {
         if (currentState.runtimeType == UserLoggedInitial) {
           context.read<SongstreamBloc>().add(DisposeAudioPlayerEvent());
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => MyApp()),
+            MaterialPageRoute(
+                builder: (context) => MyApp(
+                      myAudioHandler: AudioPlayerHandler(audioPlayer),
+                    )),
             (route) => false,
           );
         } else {

@@ -47,7 +47,6 @@ dependencies:
   rxdart: ^0.28.0
   connectivity_plus: ^6.1.0
   audio_video_progress_bar: ^2.0.3
-  just_audio_background: ^0.0.1-beta.13
   text_scroll: ^0.2.0
   buttons_tabbar: ^1.3.14
   equatable: ^2.0.5
@@ -61,6 +60,7 @@ dependencies:
   share_plus: ^10.1.2
   app_links: ^6.3.2
   bloc_concurrency: ^0.2.5
+  audio_service: ^0.18.17
 
 dev_dependencies:
   flutter_test:
