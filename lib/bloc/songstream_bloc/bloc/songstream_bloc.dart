@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,6 +32,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   double _storedVolume = 0.0;
   double _resetVolume = 0.0;
   bool _songLoaded = false; //default false
+  // late CancelableOperation<void> _currentOperation;
 
   List<Songmodel> _storeQuicksPicksList = [];
   final AudioPlayerHandler _audioPlayerHandler;
@@ -41,7 +43,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     this._audioPlayerHandler,
     this._dbRepository,
   ) : super(SongstreamInitial()) {
-    on<GetSongStreamEvent>(_getSongUrl, transformer: restartable());
+    on<GetSongStreamEvent>(_getSongUrl,
+        transformer: restartable<GetSongStreamEvent>());
     on<PlayPauseEvent>(_togglePlayPause);
     on<CloseMiniPlayerEvent>(_closeMiniPlayer);
     on<SongCompletedEvent>(_onSongCompleted);
@@ -51,7 +54,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<LoopEvent>(_toggleLoop);
     on<GetSongPlaylistEvent>(_songsPlaylist);
     on<GetSongUrlOnShuffleEvent>(_getSongUrlOnShuffle,
-        transformer: restartable());
+        transformer: restartable<GetSongUrlOnShuffleEvent>());
     on<LoadingEvent>(_loading);
     on<ResetPlaylistEvent>(_resetPlaylist);
     on<CleanPlaylistEvent>(_cleanSongsPlaylist);
@@ -123,6 +126,13 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // Fetch the song URL and handle playback
   Future<void> _getSongUrl(
       GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
+    //        await _currentOperation.cancel();
+
+    // _currentOperation = CancelableOperation.fromFuture(
+
+    //   onCancel: () {_resetAudioPlayer(),}, // Cleanup on cancellation
+    // );
+
     _resetAudioPlayer();
     emit(LoadingState(songData: event.songData));
     _songData = event.songData;
@@ -167,7 +177,6 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   Future<void> _getSongUrlOnShuffle(
       GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
     _resetAudioPlayerWhenOnShuffle();
-    _songLoaded = false;
     emit(LoadingState(songData: event.songData));
     _songData = event.songData;
     _audioPlayerHandler.setMediaItem(MediaItem(
@@ -265,7 +274,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   // Pause Event
-  void _togglePause(PauseEvent event, Emitter<SongstreamState> emit) async {
+  void _togglePause(PauseEvent event, Emitter<SongstreamState> emit) {
     _isPlaying = false;
     _audioPlayer.pause();
     emit(PausedState(songData: _songData!));
@@ -346,8 +355,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   // Close the mini player
   void _closeMiniPlayer(
-      CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) async {
-    _audioPlayerHandler.stop();
+      CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) {
+    _audioPlayerHandler.onNotificationDeleted();
     _audioPlayer.pause();
     _isPlaying = false;
     emit(CloseMiniPlayerState());
@@ -378,7 +387,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   // Handle when the song is completed
   void _onSongCompleted(
-      SongCompletedEvent event, Emitter<SongstreamState> emit) async {
+      SongCompletedEvent event, Emitter<SongstreamState> emit) {
     if (_playlistSongs.isNotEmpty) {
       if (!_isLooping) {
         _currentSongIndex++;
