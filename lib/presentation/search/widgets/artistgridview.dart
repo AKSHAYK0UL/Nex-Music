@@ -20,32 +20,31 @@ class ArtistGridView extends StatelessWidget {
         Navigator.of(context)
             .pushNamed(ArtistFullScreen.routeName, arguments: artist);
       },
-      child: Container(
-        height: screenSize * 0.237,
-        width: screenSize * 0.240,
-        margin: EdgeInsets.symmetric(
-            horizontal: screenSize * 0.0100, vertical: screenSize * 0.0070),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(screenSize * 0.0132),
-          color: Theme.of(context).colorScheme.secondary,
-        ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+            horizontal: screenSize * 0.0050, vertical: screenSize * 0.0050),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(screenSize * 0.0132),
+          borderRadius: BorderRadius.circular(15),
           child: Column(
             children: [
-              cacheImage(
-                imageUrl: artist.thumbnail,
-                width: screenSize * 0.240,
-                height: screenSize * 0.238,
-              ),
-              SizedBox(
-                height: screenSize * 0.0050,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0220),
-                child: animatedText(
-                  text: artist.artist.name,
-                  style: Theme.of(context).textTheme.titleMedium!,
+              Expanded(
+                child: GridTile(
+                  footer: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: screenSize * 0.0110),
+                    color: Colors.black54,
+                    alignment: Alignment.center,
+                    height: screenSize * 0.0431,
+                    child: animatedText(
+                      text: artist.artist.name,
+                      style: Theme.of(context).textTheme.titleMedium!,
+                    ),
+                  ),
+                  child: cacheImage(
+                    imageUrl: artist.thumbnail,
+                    width: double.infinity,
+                    height: 0,
+                  ),
                 ),
               ),
             ],

@@ -32,7 +32,7 @@ class _RecentScreenState extends State<RecentScreen> {
         title: Padding(
           padding: EdgeInsets.only(left: screenSize * 0.0158),
           child: Text(
-            "Recents",
+            "Recent",
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
@@ -40,28 +40,32 @@ class _RecentScreenState extends State<RecentScreen> {
           ValueListenableBuilder(
             valueListenable: switchState,
             builder: (context, value, _) {
-              return Switch(
-                activeColor: Colors.blueAccent.shade400,
-                thumbColor: WidgetStateProperty.resolveWith((states) {
-                  return value ? accentColor : Colors.blueGrey.shade200;
-                }),
-                inactiveTrackColor: Colors.blueGrey.shade700,
-                trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-                  return Colors.transparent;
-                }),
-                value: value,
-                onChanged: (newvalue) {
-                  switchState.value = newvalue;
-                  if (newvalue) {
-                    context.read<SongstreamBloc>().add(ResetPlaylistEvent());
-                    context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
-                        songlist:
-                            recentSongs)); //load recent songs in the playlist
-                    showSnackbar(context, "Now playing your recent songs");
-                  } else {
-                    context.read<SongstreamBloc>().add(CleanPlaylistEvent());
-                  }
-                },
+              return Padding(
+                padding: EdgeInsets.only(right: screenSize * 0.0120),
+                child: Switch(
+                  activeColor: Colors.blue.shade400,
+                  inactiveThumbColor: Colors.blue.shade200,
+                  thumbColor: WidgetStateProperty.resolveWith((states) {
+                    return value ? accentColor : Colors.blueGrey.shade200;
+                  }),
+                  inactiveTrackColor: Colors.blueGrey.shade700,
+                  trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+                    return Colors.transparent;
+                  }),
+                  value: value,
+                  onChanged: (newvalue) {
+                    switchState.value = newvalue;
+                    if (newvalue) {
+                      context.read<SongstreamBloc>().add(ResetPlaylistEvent());
+                      context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
+                          songlist:
+                              recentSongs)); //load recent songs in the playlist
+                      showSnackbar(context, "Now playing your recent songs");
+                    } else {
+                      context.read<SongstreamBloc>().add(CleanPlaylistEvent());
+                    }
+                  },
+                ),
               );
             },
           )
@@ -78,36 +82,36 @@ class _RecentScreenState extends State<RecentScreen> {
                 top: screenSize * 0.0131,
               ),
               child: StreamBuilder(
-                  stream: state.recentPlayedStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text(snapshot.error.toString()),
-                      );
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(
-                          child: Text('No recent songs played.'));
-                    } else {
-                      final recentData = snapshot.data!;
-                      recentSongs = recentData;
-                      return ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: recentData.length,
-                        itemBuilder: (context, index) {
-                          final songData = recentData[index];
-                          return SongTitle(
-                            songData: songData,
-                            songIndex: index,
-                            showDelete: true,
-                          );
-                        },
-                      );
-                    }
-                  }),
+                stream: state.recentPlayedStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(snapshot.error.toString()),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('No recent songs played.'));
+                  } else {
+                    final recentData = snapshot.data!;
+                    recentSongs = recentData;
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: recentData.length,
+                      itemBuilder: (context, index) {
+                        final songData = recentData[index];
+                        return SongTitle(
+                          songData: songData,
+                          songIndex: index,
+                          showDelete: true,
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
             );
           }
           return const SizedBox();
