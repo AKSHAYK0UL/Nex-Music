@@ -173,7 +173,8 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                   label: "Playlist",
                                   icon: Icons.add,
                                   onTap: () {
-                                    showSnackbar(context, "not added yet!");
+                                    showSnackbar(
+                                        context, screenSize, "not added yet!");
                                   },
                                 ),
                               ],

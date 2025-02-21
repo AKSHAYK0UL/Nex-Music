@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 
@@ -47,8 +48,15 @@ class _PlayerState extends State<Player> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SongstreamBloc, SongstreamState>(
+    return BlocConsumer<SongstreamBloc, SongstreamState>(
+      listenWhen: (previous, current) => previous != current,
       buildWhen: (previous, current) => previous != current,
+      listener: (context, state) {
+        if (state is ErrorState) {
+          context.read<SongstreamBloc>().add(PauseEvent());
+          showSnackbar(context, widget.screenSize, state.errorMessage);
+        }
+      },
       builder: (context, state) {
         if (state is LoadingState) {
           return Center(
@@ -60,10 +68,6 @@ class _PlayerState extends State<Player> {
                 strokeWidth: 4,
               ),
             ),
-          );
-        } else if (state is ErrorState) {
-          return Center(
-            child: Text(state.errorMessage),
           );
         }
 

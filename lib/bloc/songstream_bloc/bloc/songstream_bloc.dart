@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:async/async.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,6 +81,10 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   void _initializeAudioPlayerListeners() {
     _audioPlayer.durationStream.listen((duration) {
       songDuration = duration ?? Duration.zero; // Handle null duration
+      if (duration != null) {
+        _audioPlayerHandler.updateMediaItemDuration(
+            duration); //update duration in control center
+      }
     });
 
     _audioPlayer.playerStateStream.listen(
@@ -138,12 +141,15 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _songData = event.songData;
     _firstSongPlayedIndex = event.songIndex;
     _currentSongIndex = _firstSongPlayedIndex;
-    _audioPlayerHandler.setMediaItem(MediaItem(
-      id: _songData!.vId,
-      title: _songData!.songName,
-      artist: _songData!.artist.name,
-      artUri: Uri.parse(_songData!.thumbnail),
-    ));
+    _audioPlayerHandler.setMediaItem(
+      MediaItem(
+        id: _songData!.vId,
+        title: _songData!.songName,
+        artist: _songData!.artist.name,
+        artUri: Uri.parse(_songData!.thumbnail),
+        duration: songDuration,
+      ),
+    );
     try {
       // if (state is CloseMiniPlayerState) {
       //   return;
@@ -184,6 +190,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       title: _songData!.songName,
       artist: _songData!.artist.name,
       artUri: Uri.parse(_songData!.thumbnail),
+      duration: songDuration,
     ));
     try {
       // if (state is CloseMiniPlayerState) {
@@ -295,40 +302,6 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       add(PlayEvent());
     }
   }
-
-  //Play next
-  // void _playNextSong(PlayNextSongEvent event, Emitter<SongstreamState> emit) {
-  //   if ((_currentSongIndex + 1) < _playlistSongs.length) {
-  //     _currentSongIndex++;
-  //     add(GetSongStreamEvent(
-  //         songData: _playlistSongs[_currentSongIndex],
-  //         songIndex: _currentSongIndex));
-  //   } else {
-  //     _currentSongIndex = 0;
-  //     add(GetSongStreamEvent(
-  //         songData: _playlistSongs[_currentSongIndex],
-  //         songIndex: _currentSongIndex));
-  //   }
-  // }
-
-  // //play previous
-  // void _playPreviousSong(
-  //     PlayPreviousSongEvent event, Emitter<SongstreamState> emit) {
-  //   if ((_currentSongIndex - 1) > 0) {
-  //     _currentSongIndex--;
-  //     add(GetSongStreamEvent(
-  //         songData: _playlistSongs[_currentSongIndex],
-  //         songIndex: _currentSongIndex));
-  //   } else {
-  //     _currentSongIndex = _playlistSongs.length - 1;
-  //     add(
-  //       GetSongStreamEvent(
-  //         songData: _playlistSongs[_currentSongIndex],
-  //         songIndex: _currentSongIndex,
-  //       ),
-  //     );
-  //   }
-  // }
 
   void _playNextSong(PlayNextSongEvent event, Emitter<SongstreamState> emit) {
     if ((_currentSongIndex + 1) < _playlistSongs.length) {

@@ -8,13 +8,13 @@ import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart' as dp;
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/ui_component/no_internet_banner.dart';
-import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/applink_function/uri_parser.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
 import 'package:nex_music/presentation/recent/screens/recentscreen.dart';
+import 'package:nex_music/core/ui_component/snackbar.dart';
 
 class NavBar extends StatefulWidget {
   final AppLinks appLinks;
@@ -45,11 +45,13 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
         if (uri.toString().isNotEmpty) {
           if (!uri.toString().contains("playlist")) {
             final songId = AppLinkUriParser.songUriParser(uri);
+            if (!mounted) return;
             context.read<dp.DeeplinkBloc>().add(
                   dp.GetDeeplinkSongDataEvent(songId: songId),
                 );
           } else {
             final playlistId = AppLinkUriParser.playlistUrlParser(uri);
+            print(playlistId);
             // Handle playlist if needed.
           }
         }
@@ -103,7 +105,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
             BlocListener<dp.DeeplinkBloc, dp.DeeplinkState>(
               listener: (context, state) {
                 if (state is dp.ErrorState) {
-                  showSnackbar(context, state.errorMessage);
+                  showSnackbar(context, screenSize, state.errorMessage);
                 }
                 if (state is dp.DeeplinkSongDataState) {
                   Navigator.of(context)
@@ -126,7 +128,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
             BlocConsumer<ConnectivityBloc, ConnectivityState>(
               listener: (context, state) {
                 if (state is ConnectivitySuccessState) {
-                  showSnackbar(context, "Back Online");
+                  showSnackbar(context, screenSize, "Back Online");
                 }
               },
               builder: (context, state) {

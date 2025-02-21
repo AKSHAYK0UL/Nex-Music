@@ -66,6 +66,7 @@ dependencies:
       url: https://github.com/anandnet/youtube_explode_dart.git
       ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024  
   async: ^2.11.0
+  fluttertoast: ^8.2.12
 
 dev_dependencies:
   flutter_test:

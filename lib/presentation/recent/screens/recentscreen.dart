@@ -39,32 +39,28 @@ class _RecentScreenState extends State<RecentScreen> {
         actions: [
           ValueListenableBuilder(
             valueListenable: switchState,
-            builder: (context, value, _) {
+            builder: (__, ___, _) {
               return Padding(
                 padding: EdgeInsets.only(right: screenSize * 0.0120),
-                child: Switch(
-                  activeColor: Colors.blue.shade400,
-                  inactiveThumbColor: Colors.blue.shade200,
-                  thumbColor: WidgetStateProperty.resolveWith((states) {
-                    return value ? accentColor : Colors.blueGrey.shade200;
-                  }),
-                  inactiveTrackColor: Colors.blueGrey.shade700,
-                  trackOutlineColor: WidgetStateProperty.resolveWith((states) {
-                    return Colors.transparent;
-                  }),
-                  value: value,
-                  onChanged: (newvalue) {
-                    switchState.value = newvalue;
-                    if (newvalue) {
+                child: IconButton(
+                  onPressed: () {
+                    switchState.value = !switchState.value;
+                    if (switchState.value) {
                       context.read<SongstreamBloc>().add(ResetPlaylistEvent());
                       context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
                           songlist:
                               recentSongs)); //load recent songs in the playlist
-                      showSnackbar(context, "Now playing your recent songs");
+                      showSnackbar(
+                          context, screenSize, "Now playing your recent songs");
                     } else {
                       context.read<SongstreamBloc>().add(CleanPlaylistEvent());
                     }
                   },
+                  icon: Icon(
+                    Icons.queue_music,
+                    size: screenSize * 0.038,
+                    color: switchState.value ? accentColor : Colors.grey,
+                  ),
                 ),
               );
             },

@@ -32,6 +32,14 @@ class AudioPlayerHandler extends BaseAudioHandler {
     // });
   }
 
+//update the duration of the current song in control center
+  void updateMediaItemDuration(Duration duration) {
+    final currentMediaItem = mediaItem.value;
+    if (currentMediaItem != null) {
+      mediaItem.add(currentMediaItem.copyWith(duration: duration));
+    }
+  }
+
   PlaybackState _transformEvent(PlaybackEvent event) {
     return PlaybackState(
       controls: [
