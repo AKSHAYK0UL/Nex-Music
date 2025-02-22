@@ -30,7 +30,7 @@ class _RecentScreenState extends State<RecentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Padding(
-          padding: EdgeInsets.only(left: screenSize * 0.0158),
+          padding: EdgeInsets.only(left: screenSize * 0.0131),
           child: Text(
             "Recent",
             style: Theme.of(context).textTheme.titleLarge,
@@ -41,7 +41,7 @@ class _RecentScreenState extends State<RecentScreen> {
             valueListenable: switchState,
             builder: (__, ___, _) {
               return Padding(
-                padding: EdgeInsets.only(right: screenSize * 0.0120),
+                padding: EdgeInsets.only(right: screenSize * 0.0131),
                 child: IconButton(
                   onPressed: () {
                     switchState.value = !switchState.value;

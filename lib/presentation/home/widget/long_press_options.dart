@@ -5,6 +5,7 @@ import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
+import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -58,6 +59,7 @@ Future<void> showLongPressOptions({
                 context
                     .read<SongstreamBloc>()
                     .add(AddToPlayNextEvent(songData: songData));
+                showSnackbar(context, screenSize, "Added to Play Next");
                 Navigator.of(context).pop();
               },
               label: Text(

@@ -26,7 +26,7 @@ final class PauseEvent extends SongstreamEvent {}
 
 final class PlayEvent extends SongstreamEvent {}
 
-final class UpdataUIEvent extends SongstreamEvent {}
+final class UpdateUIEvent extends SongstreamEvent {}
 
 final class SeekToEvent extends SongstreamEvent {
   final Duration position;

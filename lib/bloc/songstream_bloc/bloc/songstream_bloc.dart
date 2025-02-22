@@ -58,7 +58,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<ResetPlaylistEvent>(_resetPlaylist);
     on<CleanPlaylistEvent>(_cleanSongsPlaylist);
     on<MuteEvent>(_togglemute);
-    on<UpdataUIEvent>(_updateUIFromBackground);
+    on<UpdateUIEvent>(_updateUIFromBackground);
     on<PlayNextSongEvent>(_playNextSong);
     on<PlayPreviousSongEvent>(_playPreviousSong);
     on<AddToPlayNextEvent>(_addToPlayNext);
@@ -116,7 +116,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   //Update UI when returning back from the Background / recent apps
   void _updateUIFromBackground(
-      UpdataUIEvent event, Emitter<SongstreamState> emit) {
+      UpdateUIEvent event, Emitter<SongstreamState> emit) {
     if (state.runtimeType != CloseMiniPlayerState) {
       if (_isPlaying) {
         add(PlayEvent());
@@ -139,8 +139,11 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _resetAudioPlayer();
     emit(LoadingState(songData: event.songData));
     _songData = event.songData;
+
     _firstSongPlayedIndex = event.songIndex;
     _currentSongIndex = _firstSongPlayedIndex;
+    _playlistSongs.insert(_currentSongIndex,
+        _songData!); //add the current song to the loaded playlist
     _audioPlayerHandler.setMediaItem(
       MediaItem(
         id: _songData!.vId,
@@ -364,6 +367,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     if (_playlistSongs.isNotEmpty) {
       if (!_isLooping) {
         _currentSongIndex++;
+
         if (_currentSongIndex < _playlistSongs.length &&
             _currentSongIndex != _firstSongPlayedIndex) {
           add(GetSongUrlOnShuffleEvent(
@@ -371,11 +375,11 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         }
         if (_currentSongIndex < _playlistSongs.length &&
             _currentSongIndex == _firstSongPlayedIndex) {
-          if ((_currentSongIndex + 1) < _playlistSongs.length) {
-            _currentSongIndex++;
-            add(GetSongUrlOnShuffleEvent(
-                songData: _playlistSongs[_currentSongIndex]));
-          }
+          // if ((_currentSongIndex + 1) < _playlistSongs.length) {
+          _currentSongIndex++;
+          add(GetSongUrlOnShuffleEvent(
+              songData: _playlistSongs[_currentSongIndex]));
+          // }
         }
         if (_currentSongIndex >= _playlistSongs.length) {
           _currentSongIndex = 0;

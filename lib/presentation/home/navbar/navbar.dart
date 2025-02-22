@@ -78,7 +78,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      context.read<SongstreamBloc>().add(UpdataUIEvent());
+      context.read<SongstreamBloc>().add(UpdateUIEvent());
     }
   }
 
