@@ -99,16 +99,28 @@ class MiniPlayer extends StatelessWidget {
                             ),
                       IconButton(
                         icon: Icon(
-                          Icons.close,
-                          color: Colors.red,
+                          Icons.skip_next,
+                          color: textColor,
                           size: screenSize * 0.0500,
                         ),
                         onPressed: () {
                           context
                               .read<SongstreamBloc>()
-                              .add(CloseMiniPlayerEvent());
+                              .add(PlayNextSongEvent());
                         },
                       ),
+                      // IconButton(
+                      //   icon: Icon(
+                      //     Icons.close,
+                      //     color: Colors.red,
+                      //     size: screenSize * 0.0500,
+                      //   ),
+                      //   onPressed: () {
+                      //     context
+                      //         .read<SongstreamBloc>()
+                      //         .add(CloseMiniPlayerEvent());
+                      //   },
+                      // ),
                     ],
                   ),
                 ),

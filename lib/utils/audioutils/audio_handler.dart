@@ -40,6 +40,13 @@ class AudioPlayerHandler extends BaseAudioHandler {
     }
   }
 
+  @override
+  Future<void> stop() async {
+    await _player.stop();
+    await super.stop(); //  clears the notification
+    mediaItem.add(null); //  clear media item
+  }
+
   PlaybackState _transformEvent(PlaybackEvent event) {
     return PlaybackState(
       controls: [
@@ -72,13 +79,6 @@ class AudioPlayerHandler extends BaseAudioHandler {
   Future<void> skipToPrevious() async {
     songstreamBloc?.add(PlayPreviousSongEvent());
     print("SKIP TO PREVIOUS CLICKED");
-  }
-
-  @override
-  Future<void> stop() async {
-    //close notification
-    await _player.stop();
-    await super.stop();
   }
 }
 
