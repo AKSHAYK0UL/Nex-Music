@@ -27,7 +27,7 @@ class Repository {
   Future<({List<Songmodel> quickPicks, List<PlayListmodel> playlist})>
       homeScreenSongsList() async {
     final networkData = await _dataProvider.homeScreenSongs;
-    final quickPicks = RepositoryHelperFunction.getQuickPicks(
+    final quickPicks = await RepositoryHelperFunction.getQuickPicks(
       networkData.quickPicks,
     );
     final playlist =
@@ -112,7 +112,7 @@ class Repository {
           vId: song.videoId,
           songName: song.name,
           artist: song.artist,
-          thumbnail: getThumbnail(song.thumbnails),
+          thumbnail: await getThumbnailUsingUrl(song.videoId),
           duration: timeFormate(song.duration ?? 0),
         ),
       );

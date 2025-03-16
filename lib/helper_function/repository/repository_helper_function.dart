@@ -7,7 +7,8 @@ import 'package:nex_music/model/songmodel.dart';
 
 class RepositoryHelperFunction {
   // Get QuickPicks
-  static List<Songmodel> getQuickPicks(List<SongDetailed> quickPicks) {
+  static Future<List<Songmodel>> getQuickPicks(
+      List<SongDetailed> quickPicks) async {
     List<Songmodel> songsList = [];
     for (var i = 0; i < quickPicks.length; i++) {
       final quickPicksDataObj = quickPicks[i];
@@ -16,7 +17,7 @@ class RepositoryHelperFunction {
           vId: quickPicksDataObj.videoId,
           songName: quickPicksDataObj.name,
           artist: quickPicksDataObj.artist,
-          thumbnail: getThumbnail(quickPicksDataObj.thumbnails),
+          thumbnail: await getThumbnailUsingUrl(quickPicksDataObj.videoId),
           duration: timeFormate(quickPicksDataObj.duration ?? 0),
         ),
       );
