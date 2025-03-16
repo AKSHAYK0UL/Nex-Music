@@ -79,7 +79,7 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Quality Settings'),
+        title: const Text('Quality Settings'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
