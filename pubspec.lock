@@ -285,10 +285,10 @@ packages:
     dependency: "direct main"
     description:
       name: dart_ytmusic_api
-      sha256: "35e873faed7111dd9d0d1d1b49de1f99bbec93e7607845ad58b9d3afd371b658"
+      sha256: "1e35f07c69a36eab672f37815bc0f644328c06cda51404e30fa90a0412023135"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.7"
+    version: "1.0.8"
   dbus:
     dependency: transitive
     description:
