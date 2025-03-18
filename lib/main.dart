@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
@@ -13,6 +14,7 @@ import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
+import 'package:nex_music/bloc/quality_bloc/bloc/quality_bloc.dart';
 import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
 import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart';
@@ -21,8 +23,12 @@ import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_logged_bloc/bloc/user_logged_bloc.dart';
 import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
+import 'package:nex_music/constants/const.dart';
 import 'package:nex_music/core/bloc_provider/repository_provider/repository_provider.dart';
 import 'package:nex_music/core/route/route.dart';
+import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
+import 'package:nex_music/core/services/hive/hive__adapter_model/hive_registrar.g.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/theme.dart';
 import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
 import 'package:nex_music/presentation/home/navbar/navbar.dart';
@@ -32,10 +38,19 @@ import 'package:nex_music/repository/home_repo/repository.dart';
 
 import 'package:nex_music/secrets/firebase_options.dart';
 import 'package:nex_music/utils/audioutils/audio_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
 final audioPlayer = AudioPlayer(); //global audioplayer  instance
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // await Hive.initFlutter();
+  // Hive.registerAdapter(HiveQualityAdapter());
+  final dir = await getApplicationDocumentsDirectory();
+  Hive
+    ..init(dir.path)
+    ..registerAdapters();
+
+  await Hive.openBox<HiveQuality>(qualitySettingsBox);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final audioHandler = await AudioService.init(
     builder: () => AudioPlayerHandler(audioPlayer),
@@ -48,15 +63,17 @@ Future<void> main() async {
       androidNotificationIcon: 'drawable/ic_notification',
     ),
   );
-
+  final dbinstance = HiveDataBaseSingleton.instance;
   runApp(MyApp(
     myAudioHandler: audioHandler,
+    dbInstance: dbinstance,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final AudioPlayerHandler myAudioHandler;
-  MyApp({super.key, required this.myAudioHandler});
+  final HiveDataBaseSingleton dbInstance;
+  MyApp({super.key, required this.myAudioHandler, required this.dbInstance});
   final repositoryProviderClassInstance = RepositoryProviderClass(
       firebaseAuthInstance: FirebaseAuth.instance,
       connectivity: Connectivity());
@@ -86,6 +103,7 @@ class MyApp extends StatelessWidget {
                 audioPlayer,
                 myAudioHandler,
                 context.read<DbRepository>(),
+                dbInstance,
               );
               // Immediately pass the bloc instance to the audio handler.
               myAudioHandler.setSongstreamBloc(bloc);
@@ -135,6 +153,7 @@ class MyApp extends StatelessWidget {
               repositoryProviderClassInstance.getConnectivityInstance,
             ),
           ),
+          BlocProvider(create: (context) => QualityBloc(dbInstance)),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

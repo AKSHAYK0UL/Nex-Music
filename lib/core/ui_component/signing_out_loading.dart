@@ -6,6 +6,7 @@ import 'package:lottie/lottie.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_logged_bloc/bloc/user_logged_bloc.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/main.dart';
 import 'package:nex_music/utils/audioutils/audio_handler.dart';
@@ -32,7 +33,10 @@ class _SigningOutLoadingState extends State<SigningOutLoading> {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (context) => MyApp(
-                      myAudioHandler: AudioPlayerHandler(audioPlayer),
+                      myAudioHandler: AudioPlayerHandler(
+                        audioPlayer,
+                      ),
+                      dbInstance: HiveDataBaseSingleton.instance,
                     )),
             (route) => false,
           );

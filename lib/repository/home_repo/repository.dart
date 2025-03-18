@@ -1,4 +1,5 @@
 import 'package:dart_ytmusic_api/types.dart';
+import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/helper_function/repository/repository_helper_function.dart';
@@ -91,9 +92,22 @@ class Repository {
   }
 
 //get audio stream
-  Future<Uri> getSongUrl(String songId) async {
+  // Future<Uri> getSongUrl(String songId) async {
+  //   final manifest = await _dataProvider.songStreamUrl(songId);
+
+  //   return manifest.audioOnly.withHighestBitrate().url;
+  // }
+
+  Future<Uri> getSongUrl(String songId, AudioQuality quality) async {
     final manifest = await _dataProvider.songStreamUrl(songId);
-    return manifest.audioOnly.withHighestBitrate().url;
+    final audioStreams = manifest.audioOnly;
+
+    // Select the stream based on the desired quality.
+    final selectedStream =
+        RepositoryHelperFunction.selectStream(audioStreams, quality);
+    print("STREAM BITRATE : ${selectedStream.bitrate.kiloBitsPerSecond}");
+
+    return selectedStream.url;
   }
 
   //Search suggestion

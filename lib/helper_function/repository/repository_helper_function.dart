@@ -1,9 +1,11 @@
 import 'package:dart_ytmusic_api/types.dart';
+import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class RepositoryHelperFunction {
   // Get QuickPicks
@@ -144,5 +146,29 @@ class RepositoryHelperFunction {
         thumbnail: getThumbnail(videofull.thumbnails),
         duration:
             videofull.duration == 0 ? "" : timeFormate(videofull.duration - 1));
+  }
+
+  static AudioOnlyStreamInfo selectStream(
+      List<AudioOnlyStreamInfo> streams, AudioQuality quality) {
+    switch (quality) {
+      case AudioQuality.high:
+        // Prefer itag 251 or 140 for high quality.
+        return streams.lastWhere(
+          (stream) => stream.tag == 251 || stream.tag == 140,
+          orElse: () => streams.first,
+        );
+      case AudioQuality.medium:
+        // Choose itag 250 or 139 for medium quality.
+        return streams.lastWhere(
+          (stream) => stream.tag == 250 || stream.tag == 139,
+          orElse: () => streams.first,
+        );
+      case AudioQuality.low:
+        // Select itag 249 for low quality.
+        return streams.lastWhere(
+          (stream) => stream.tag == 249,
+          orElse: () => streams.first,
+        );
+    }
   }
 }

@@ -873,6 +873,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/model/audioplayerstream.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
@@ -887,6 +888,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   final Repository _repository;
   final AudioPlayer _audioPlayer;
   final DbRepository _dbRepository;
+  final HiveDataBaseSingleton _dbInstance;
   bool _isPlaying = false; //default false
   Songmodel? _songData;
   Duration songDuration = Duration.zero;
@@ -910,6 +912,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     this._audioPlayer,
     this._audioPlayerHandler,
     this._dbRepository,
+    this._dbInstance,
   ) : super(SongstreamInitial()) {
     on<GetSongStreamEvent>(_getSongUrl,
         transformer: restartable<GetSongStreamEvent>());
@@ -1013,7 +1016,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       ),
     );
     try {
-      final songUrl = await _repository.getSongUrl(_songData!.vId);
+      final qualityInfo = await _dbInstance.getData;
+      final songUrl = await _repository.getSongUrl(
+          _songData!.vId, qualityInfo.audioQuality);
 
       await _audioPlayer.setUrl(songUrl.toString());
 
@@ -1044,7 +1049,10 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       duration: songDuration,
     ));
     try {
-      final songUrl = await _repository.getSongUrl(_songData!.vId);
+      final qualityInfo = await _dbInstance.getData;
+
+      final songUrl = await _repository.getSongUrl(
+          _songData!.vId, qualityInfo.audioQuality);
 
       await _audioPlayer.setUrl(songUrl.toString());
 

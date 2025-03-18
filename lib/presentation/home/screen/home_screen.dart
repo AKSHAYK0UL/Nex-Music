@@ -10,6 +10,7 @@ import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/auth/screens/user_info.dart' as info;
+import 'package:nex_music/presentation/setting/screen/setting.dart';
 
 class HomeScreen extends StatefulWidget {
   final User currentUser;
@@ -74,6 +75,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icon(
                     size: screenSize * 0.0369,
                     Icons.person,
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(
+                      QualitySettingsScreen.routeName,
+                    );
+                  },
+                  icon: Icon(
+                    size: screenSize * 0.0369,
+                    Icons.settings,
                     color: Colors.white,
                   ),
                 ),
