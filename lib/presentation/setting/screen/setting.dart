@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/quality_bloc/bloc/quality_bloc.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
@@ -7,6 +8,9 @@ import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/presentation/setting/widget/build_option.dart';
+=======
+import 'package:nex_music/enum/thumbnail_audio_quallity.dart';
+>>>>>>> c369219eb22f24aac098b98a10db839c0a2caa9c
 
 class QualitySettingsScreen extends StatefulWidget {
   static const routeName = "setting";
@@ -30,6 +34,7 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
     super.dispose();
   }
 
+<<<<<<< HEAD
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
@@ -84,6 +89,79 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
         },
         child: const Text("Apply"),
       ),
+=======
+  Widget _buildQualityOptions<T>(
+      List<T> values, ValueNotifier<T> notifier, String title) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        ValueListenableBuilder<T>(
+          valueListenable: notifier,
+          builder: (context, selectedQuality, child) {
+            return Column(
+              children: List.generate(values.length, (index) {
+                T quality = values[index];
+
+                BorderRadius borderRadius = BorderRadius.zero;
+                if (index == 0) {
+                  borderRadius =
+                      BorderRadius.vertical(top: Radius.circular(15));
+                } else if (index == values.length - 1) {
+                  borderRadius =
+                      BorderRadius.vertical(bottom: Radius.circular(15));
+                }
+
+                return GestureDetector(
+                  onTap: () {
+                    notifier.value = quality;
+                  },
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(borderRadius: borderRadius),
+                    title:
+                        Text(quality.toString().split('.').last.toUpperCase()),
+                    leading: Radio<T>(
+                      value: quality,
+                      groupValue: selectedQuality,
+                      onChanged: (value) {
+                        if (value != null) {
+                          notifier.value = value;
+                        }
+                      },
+                    ),
+                  ),
+                );
+              }),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Quality Settings'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildQualityOptions(ThumbnailQuality.values,
+                thumbnailQualityNotifier, 'Thumbnail Quality'),
+            const SizedBox(height: 24),
+            _buildQualityOptions(
+                AudioQuality.values, audioQualityNotifier, 'Audio Quality'),
+          ],
+        ),
+      ),
+>>>>>>> c369219eb22f24aac098b98a10db839c0a2caa9c
     );
   }
 }

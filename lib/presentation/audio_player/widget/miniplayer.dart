@@ -52,10 +52,14 @@ class MiniPlayer extends StatelessWidget {
                       left: screenSize * 0.0356, right: screenSize * 0.00527),
                   leading: ClipRRect(
                     borderRadius: BorderRadius.circular(screenSize * 0.0106),
-                    child: cacheImage(
-                      imageUrl: songData.thumbnail,
-                      width: screenSize * 0.0755,
-                      height: screenSize * 0.0733,
+                    child: Transform.scale(
+                      scaleX: 1.78,
+                      scaleY: 1.0,
+                      child: cacheImage(
+                        imageUrl: songData.thumbnail,
+                        width: screenSize * 0.0755,
+                        height: screenSize * 0.0733,
+                      ),
                     ),
                   ),
                   title: animatedText(
