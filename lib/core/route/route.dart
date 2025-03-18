@@ -6,7 +6,7 @@ import 'package:nex_music/presentation/search/screens/search_result_tab.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
 import 'package:nex_music/presentation/playlist/screen/showplaylist.dart';
-import 'package:nex_music/presentation/setting/screen/setting.dart';
+import 'package:nex_music/presentation/setting/screen/settting.dart';
 
 Map<String, WidgetBuilder> routes = {
   AudioPlayerScreen.routeName: (context) => const AudioPlayerScreen(),

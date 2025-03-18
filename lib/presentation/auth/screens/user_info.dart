@@ -5,7 +5,7 @@ import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/signing_out_loading.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
 import 'package:nex_music/presentation/auth/widgets/user_info_title.dart';
-import 'package:nex_music/presentation/setting/screen/setting.dart';
+import 'package:nex_music/presentation/setting/screen/settting.dart';
 
 class UserInfo extends StatelessWidget {
   static const routeName = "/userinfo";

@@ -10,7 +10,7 @@ import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/auth/screens/user_info.dart' as info;
-import 'package:nex_music/presentation/setting/screen/setting.dart';
+import 'package:nex_music/presentation/setting/screen/settting.dart';
 
 class HomeScreen extends StatefulWidget {
   final User currentUser;
