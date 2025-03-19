@@ -1,0 +1,59 @@
+[33me55623e[m[33m ([m[1;36mHEAD[m[33m, [m[1;31mnexmusicremote/main[m[33m)[m working on audiostream and thumbnail quality
+[33m56032db[m minor changes
+[33m09f6c38[m Merge branch 'main' of https://github.com/AKSHAYK0UL/Nex-Music
+[33mcf68c24[m working on audio and thumbnail quality
+[33mc369219[m working on audiostream and thumbnail quality
+[33mb428b72[m Merge branch 'main' of https://github.com/AKSHAYK0UL/Nex-Music
+[33m98576d5[m working on audiostream and thumbnail quality
+[33m541ef45[m Fix issue with low-quality song thumbnails rendering
+[33m9999c70[m bug fixes and minor UI changes
+[33m94824d2[m bug fixes in songstream bloc "add to play next event"
+[33md13092a[m minor bug fixes
+[33m85ec226[m added song duration slider to control center and minor improvements
+[33m280a4ad[m minor bug fixes
+[33m97ab149[m fix the bug in miniplayer
+[33mfab17b9[m fixed song loading time and resolve bugs in songstream Bloc and control center song notification
+[33madde47b[m Refactor SongStream Bloc and added custom AudioPlayerHandler for control center music controls
+[33ma74d573[m minor bug fixes
+[33m2e9461b[m minor changes and bug fixes
+[33m192f9ed[m minor changes
+[33me1b3ddd[m added network status monitoring
+[33m9b09c3f[m fix minor bugs in music slab
+[33m965bf17[m added "deeplink" and minor bug fixes
+[33mdc155c8[m added share option and app icon
+[33md7b05b6[m fix audo player instance error
+[33mb39b43d[m fix the "Bloc context" error
+[33m9cdf47d[m minor bug fixes
+[33m9cad1a1[m bug fixes and minor improvements
+[33mf08390a[m minor bug fixes
+[33mefa4f30[m minor bug fixes
+[33mce94798[m added OAuth "google signIn"
+[33mcc7303d[m implement remove recently played feature and minor UI changes
+[33me65a704[m added recent played and working on OAuth
+[33m69e2a84[m working on database and OAuth
+[33mf702c2e[m minor changes
+[33mbcebc5c[m Merge branch 'main' of https://github.com/AKSHAYK0UL/Nex-Music
+[33m5f06a98[m fix the miniplayer progress bar
+[33m33a2b69[m Delete .vscode directory
+[33mc35bf6b[m added play next option
+[33m7db1961[m minor bug fixes
+[33m33513d3[m working on recent tab and minor bug fixes
+[33m420d299[m added play next and previous song functionality
+[33maed194f[m minor bug fixes
+[33mc66d38e[m added  search functionality
+[33mfe95c5d[m bug fixes and performance improvements
+[33mcd0b878[m working on search functionality
+[33mac3f6a0[m working on search functionality
+[33mcc79069[m working on song search functionality and minor bug fixes
+[33ma1a2611[m added background support and minor bug fixes
+[33m20b7bac[m working on song search functionality
+[33m338fcff[m minor bug fixes
+[33m7d25dfb[m minor bug fixes
+[33m0304ef6[m working on audio player
+[33m16a4f67[m added music slab, made minor UI changes, working on audio player functionality
+[33mc6fd660[m working on audio player functionality and minor UI improvements
+[33ma8b3829[m working on music slab
+[33mef3dd55[m fix bug when loading songs from the playlist and make changes to the UI
+[33ma3012f8[m implemented pagination for fetching songs from the playlist and made some adjustments to the UI
+[33m6afefe1[m fixed minor bugs related to UI components
+[33mf69be12[m initial commit
