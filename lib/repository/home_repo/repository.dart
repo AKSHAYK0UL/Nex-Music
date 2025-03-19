@@ -1,4 +1,5 @@
 import 'package:dart_ytmusic_api/types.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
@@ -12,12 +13,15 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 class Repository {
   final YoutubeExplode _yt;
   final DataProvider _dataProvider;
+  final HiveDataBaseSingleton _dbInstance;
 
-  Repository({
-    required DataProvider dataProvider,
-    required YoutubeExplode yt,
-  })  : _dataProvider = dataProvider,
-        _yt = yt;
+  Repository(
+      {required DataProvider dataProvider,
+      required YoutubeExplode yt,
+      required HiveDataBaseSingleton dbInstance})
+      : _dataProvider = dataProvider,
+        _yt = yt,
+        _dbInstance = dbInstance;
 
 //cancel all ongoing request
   void cancelRequest() {
@@ -27,10 +31,10 @@ class Repository {
 //using records
   Future<({List<Songmodel> quickPicks, List<PlayListmodel> playlist})>
       homeScreenSongsList() async {
+    final quality = await _dbInstance.getData;
     final networkData = await _dataProvider.homeScreenSongs;
     final quickPicks = await RepositoryHelperFunction.getQuickPicks(
-      networkData.quickPicks,
-    );
+        networkData.quickPicks, quality.thumbnailQuality);
     final playlist =
         RepositoryHelperFunction.getPlaylists(networkData.homeSectionData);
 
@@ -117,6 +121,8 @@ class Repository {
 
 //seach in songs
   Future<List<Songmodel>> searchSong(String inputText) async {
+    final quality = await _dbInstance.getData;
+
     final searchResults = await _dataProvider.searchSong(inputText);
     List<Songmodel> songs = [];
     for (var i = 0; i < searchResults.length; i++) {
@@ -126,7 +132,9 @@ class Repository {
           vId: song.videoId,
           songName: song.name,
           artist: song.artist,
-          thumbnail: await getThumbnailUsingUrl(song.videoId),
+          thumbnail: quality.thumbnailQuality == ThumbnailQuality.low
+              ? getThumbnail(song.thumbnails)
+              : await getThumbnailUsingUrl(song.videoId),
           duration: timeFormate(song.duration ?? 0),
         ),
       );
@@ -168,8 +176,11 @@ class Repository {
 
   //get artist Songs
   Future<List<Songmodel>> getArtistSongs(String artistId) async {
+    final quality = await _dbInstance.getData;
+
     final artistSongs = await _dataProvider.getArtistSongs(artistId);
-    return RepositoryHelperFunction.getQuickPicks(artistSongs);
+    return RepositoryHelperFunction.getQuickPicks(
+        artistSongs, quality.thumbnailQuality);
   }
 
   //get artist album

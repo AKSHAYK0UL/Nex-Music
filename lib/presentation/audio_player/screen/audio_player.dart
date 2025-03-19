@@ -2,18 +2,37 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
+import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/player.dart';
 import 'package:nex_music/presentation/audio_player/widget/streambuilder.dart';
 import 'package:share_plus/share_plus.dart';
 
-class AudioPlayerScreen extends StatelessWidget {
+class AudioPlayerScreen extends StatefulWidget {
   static const routeName = "/audioplayer";
   const AudioPlayerScreen({super.key});
+
+  @override
+  State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
+}
+
+class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
+  final HiveDataBaseSingleton _dataBaseSingleton =
+      HiveDataBaseSingleton.instance;
+  ThumbnailQuality quality = ThumbnailQuality.low;
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final data = await _dataBaseSingleton.getData;
+      quality = data.thumbnailQuality;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +106,7 @@ class AudioPlayerScreen extends StatelessWidget {
                           borderRadius:
                               BorderRadius.circular(screenSize * 0.0131),
                           child: Transform.scale(
-                            scaleX: 1.78,
+                            scaleX: quality == ThumbnailQuality.low ? 1 : 1.78,
                             scaleY: 1.0,
                             child: cacheImage(
                               imageUrl: songData.thumbnail,

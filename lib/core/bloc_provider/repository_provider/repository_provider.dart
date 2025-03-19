@@ -4,6 +4,7 @@ import 'package:dart_ytmusic_api/yt_music.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/enum/collection_enum.dart';
 import 'package:nex_music/network_provider/home_data/auth_provider.dart';
 import 'package:nex_music/network_provider/home_data/dataprovider.dart';
@@ -38,6 +39,7 @@ class RepositoryProviderClass {
             youtubeExplode: YoutubeExplode(),
           ),
           yt: YoutubeExplode(),
+          dbInstance: HiveDataBaseSingleton.instance,
         ),
       );
 

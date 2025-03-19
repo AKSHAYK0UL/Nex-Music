@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
 import 'package:nex_music/bloc/quality_bloc/bloc/quality_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
@@ -21,6 +22,12 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
       ValueNotifier<ThumbnailQuality>(ThumbnailQuality.high);
   final ValueNotifier<AudioQuality> audioQualityNotifier =
       ValueNotifier<AudioQuality>(AudioQuality.high);
+
+  @override
+  void initState() {
+    context.read<QualityBloc>().add(GetQualityEvent());
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -47,7 +54,11 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
           }
           if (state is QualityDataState) {
             print("THUMBNAIL : ${state.data.thumbnailQuality}");
+
             print("AUDIOSTREAM : ${state.data.audioQuality}");
+            final data = state.data;
+            thumbnailQualityNotifier.value = data.thumbnailQuality;
+            audioQualityNotifier.value = data.audioQuality;
           }
         },
         child: Padding(
@@ -72,7 +83,9 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           fixedSize: const Size(360, 47),
         ),
-        onPressed: () {
+        onPressed: () async {
+          await DefaultCacheManager().emptyCache();
+          if (!context.mounted) return;
           context.read<QualityBloc>().add(
                 SaveQualityEvent(
                   hiveQuality: HiveQuality(

@@ -68,12 +68,8 @@ dependencies:
   hive_ce_flutter: ^2.1.0
   path_provider: ^2.1.5
   http: ^1.3.0
-<<<<<<< HEAD
+  flutter_cache_manager: ^3.4.1
   
-  
-=======
->>>>>>> c369219eb22f24aac098b98a10db839c0a2caa9c
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

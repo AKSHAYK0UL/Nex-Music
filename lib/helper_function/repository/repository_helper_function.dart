@@ -10,7 +10,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 class RepositoryHelperFunction {
   // Get QuickPicks
   static Future<List<Songmodel>> getQuickPicks(
-      List<SongDetailed> quickPicks) async {
+      List<SongDetailed> quickPicks, ThumbnailQuality quality) async {
     List<Songmodel> songsList = [];
     for (var i = 0; i < quickPicks.length; i++) {
       final quickPicksDataObj = quickPicks[i];
@@ -19,7 +19,9 @@ class RepositoryHelperFunction {
           vId: quickPicksDataObj.videoId,
           songName: quickPicksDataObj.name,
           artist: quickPicksDataObj.artist,
-          thumbnail: await getThumbnailUsingUrl(quickPicksDataObj.videoId),
+          thumbnail: quickPicks == ThumbnailQuality.low
+              ? getThumbnail(quickPicksDataObj.thumbnails)
+              : await getThumbnailUsingUrl(quickPicksDataObj.videoId),
           duration: timeFormate(quickPicksDataObj.duration ?? 0),
         ),
       );
