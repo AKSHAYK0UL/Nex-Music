@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
@@ -9,6 +10,7 @@ Route slideTransitionRoute({
   required BuildContext context,
   required Songmodel songData,
   required SongMiniPlayerRoute route,
+  required ThumbnailQuality quality,
 }) {
   return PageRouteBuilder(
     settings: RouteSettings(
@@ -17,6 +19,7 @@ Route slideTransitionRoute({
         "songindex": context.read<SongstreamBloc>().getFirstSongPlayedIndex,
         'songdata': songData,
         'route': route,
+        "quality": quality,
       },
     ),
     pageBuilder: (context, animation, _) => const AudioPlayerScreen(),

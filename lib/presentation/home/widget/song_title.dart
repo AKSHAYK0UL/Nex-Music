@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 
 import 'package:nex_music/core/ui_component/cacheimage.dart';
+import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 import 'package:nex_music/presentation/home/widget/long_press_options.dart';
 
-class SongTitle extends StatelessWidget {
+class SongTitle extends StatefulWidget {
   final Songmodel songData;
   final int songIndex;
   final bool showDelete;
@@ -18,6 +20,24 @@ class SongTitle extends StatelessWidget {
     required this.songIndex,
     required this.showDelete,
   });
+
+  @override
+  State<SongTitle> createState() => _SongTitleState();
+}
+
+class _SongTitleState extends State<SongTitle> {
+  ThumbnailQuality quality = ThumbnailQuality.low;
+  final HiveDataBaseSingleton _dataBaseSingleton =
+      HiveDataBaseSingleton.instance;
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final data = await _dataBaseSingleton.getData;
+      setState(() {});
+      quality = data.thumbnailQuality;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,40 +51,43 @@ class SongTitle extends StatelessWidget {
         onLongPress: () {
           showLongPressOptions(
             context: context,
-            songData: songData,
+            songData: widget.songData,
             screenSize: screenSize,
-            showDelete: showDelete,
+            showDelete: widget.showDelete,
           );
         },
         onTap: () {
           Navigator.of(context)
               .pushNamed(AudioPlayerScreen.routeName, arguments: {
-            "songindex": songIndex,
-            "songdata": songData,
-            "route": SongMiniPlayerRoute.songRoute
+            "songindex": widget.songIndex,
+            "songdata": widget.songData,
+            "route": SongMiniPlayerRoute.songRoute,
+            "quality": quality,
           });
         },
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(screenSize * 0.0106),
           child: Transform.scale(
-            scaleX: 1.78,
+            scaleX: quality == ThumbnailQuality.low ? 1 : 1.78,
             scaleY: 1.0,
             child: cacheImage(
-              imageUrl: songData.thumbnail,
+              imageUrl: widget.songData.thumbnail,
               width: screenSize * 0.0755,
               height: screenSize * 0.0733,
             ),
           ),
         ),
         title: animatedText(
-          text: songData.songName,
+          text: widget.songData.songName,
           style: Theme.of(context).textTheme.titleSmall!,
         ),
         subtitle: animatedText(
-          text: songData.artist.name,
+          text: widget.songData.artist.name,
           style: Theme.of(context).textTheme.bodySmall!,
         ),
-        trailing: songData.duration.isNotEmpty ? Text(songData.duration) : null,
+        trailing: widget.songData.duration.isNotEmpty
+            ? Text(widget.songData.duration)
+            : null,
       ),
     );
   }

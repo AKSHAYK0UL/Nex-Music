@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
+import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
 class Videostab extends StatefulWidget {
@@ -36,9 +37,7 @@ class _VideostabState extends State<Videostab> {
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
         if (state is LoadingState) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return loadingDisk();
         }
         if (state is VideosResultState) {
           return SingleChildScrollView(

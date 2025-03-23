@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
+import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/presentation/search/widgets/artistgridview.dart';
 
 class ArtistTab extends StatefulWidget {
@@ -34,9 +35,7 @@ class _ArtistTabState extends State<ArtistTab> {
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
         if (state is LoadingState) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return loadingDisk();
         }
         if (state is ArtistDataState) {
           return SingleChildScrollView(

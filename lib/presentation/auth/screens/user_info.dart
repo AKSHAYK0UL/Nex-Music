@@ -2,10 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
-import 'package:nex_music/core/ui_component/signing_out_loading.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
 import 'package:nex_music/presentation/auth/widgets/user_info_title.dart';
-import 'package:nex_music/presentation/setting/screen/settting.dart';
 
 class UserInfo extends StatelessWidget {
   static const routeName = "/userinfo";
@@ -22,46 +20,6 @@ class UserInfo extends StatelessWidget {
           "Account Detail",
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text("Are You Sure?"),
-                  content: const Text("Are you sure you want to Sign Out?"),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("No"),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const SigningOutLoading()));
-                      },
-                      child: const Text("Yes"),
-                    )
-                  ],
-                ),
-              );
-            },
-            icon: Icon(
-              Icons.logout,
-              color: Colors.red,
-              size: screenSize.height * 0.0329,
-            ),
-          ),
-          IconButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .pushNamed(QualitySettingsScreen.routeName);
-              },
-              icon: const Icon(Icons.settings)),
-        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
-import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
@@ -13,37 +12,9 @@ import 'package:nex_music/presentation/audio_player/widget/player.dart';
 import 'package:nex_music/presentation/audio_player/widget/streambuilder.dart';
 import 'package:share_plus/share_plus.dart';
 
-ThumbnailQuality quality = ThumbnailQuality.low;
-
-class AudioPlayerScreen extends StatefulWidget {
+class AudioPlayerScreen extends StatelessWidget {
   static const routeName = "/audioplayer";
   const AudioPlayerScreen({super.key});
-
-  @override
-  State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
-}
-
-class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
-  final HiveDataBaseSingleton _dataBaseSingleton =
-      HiveDataBaseSingleton.instance;
-  @override
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final data = await _dataBaseSingleton.getData;
-      quality = data.thumbnailQuality;
-    });
-    super.initState();
-  }
-
-  // @override
-  // void didChangeDependencies() {
-  //   // TODO: implement didChangeDependencies
-  //   WidgetsBinding.instance.addPostFrameCallback((_) async {
-  //     final data = await _dataBaseSingleton.getData;
-  //     quality = data.thumbnailQuality;
-  //   });
-  //   super.didChangeDependencies();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +24,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     Songmodel songData = routeData["songdata"] as Songmodel;
     final route = routeData["route"] as SongMiniPlayerRoute;
     final songIndex = routeData["songindex"] as int;
+    final quality = routeData["quality"] as ThumbnailQuality;
     print("THUMBNAIL : $quality");
 
     return Scaffold(

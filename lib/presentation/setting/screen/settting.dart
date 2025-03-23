@@ -73,36 +73,65 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
               const SizedBox(height: 35),
               buildQualityOptions(context, AudioQuality.values,
                   audioQualityNotifier, 'Audio Quality'),
+              const Spacer(),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentColor,
+                  foregroundColor: backgroundColor,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  fixedSize: const Size(double.maxFinite, 50),
+                ),
+                onPressed: () async {
+                  context
+                      .read<sb.SongstreamBloc>()
+                      .add(sb.CloseMiniPlayerEvent());
+                  await DefaultCacheManager().emptyCache();
+
+                  if (!context.mounted) return;
+                  context.read<QualityBloc>().add(
+                        SaveQualityEvent(
+                          hiveQuality: HiveQuality(
+                              thumbnailQuality: thumbnailQualityNotifier.value,
+                              audioQuality: audioQualityNotifier.value),
+                        ),
+                      );
+                  context
+                      .read<hs.HomesectionBloc>()
+                      .add(hs.GetHomeSectonDataEvent());
+                },
+                child: const Text("Apply"),
+              ),
             ],
           ),
         ),
       ),
-      persistentFooterButtons: [
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: accentColor,
-            foregroundColor: backgroundColor,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            fixedSize: const Size(double.maxFinite, 50),
-          ),
-          onPressed: () async {
-            context.read<sb.SongstreamBloc>().add(sb.CloseMiniPlayerEvent());
-            await DefaultCacheManager().emptyCache();
+      // persistentFooterButtons: [
+      //   ElevatedButton(
+      //     style: ElevatedButton.styleFrom(
+      //       backgroundColor: accentColor,
+      //       foregroundColor: backgroundColor,
+      //       shape:
+      //           RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      //       fixedSize: const Size(double.maxFinite, 50),
+      //     ),
+      //     onPressed: () async {
+      //       context.read<sb.SongstreamBloc>().add(sb.CloseMiniPlayerEvent());
+      //       await DefaultCacheManager().emptyCache();
 
-            if (!context.mounted) return;
-            context.read<QualityBloc>().add(
-                  SaveQualityEvent(
-                    hiveQuality: HiveQuality(
-                        thumbnailQuality: thumbnailQualityNotifier.value,
-                        audioQuality: audioQualityNotifier.value),
-                  ),
-                );
-            context.read<hs.HomesectionBloc>().add(hs.GetHomeSectonDataEvent());
-          },
-          child: const Text("Apply"),
-        ),
-      ],
+      //       if (!context.mounted) return;
+      //       context.read<QualityBloc>().add(
+      //             SaveQualityEvent(
+      //               hiveQuality: HiveQuality(
+      //                   thumbnailQuality: thumbnailQualityNotifier.value,
+      //                   audioQuality: audioQualityNotifier.value),
+      //             ),
+      //           );
+      //       context.read<hs.HomesectionBloc>().add(hs.GetHomeSectonDataEvent());
+      //     },
+      //     child: const Text("Apply"),
+      //   ),
+      // ],
     );
   }
 }

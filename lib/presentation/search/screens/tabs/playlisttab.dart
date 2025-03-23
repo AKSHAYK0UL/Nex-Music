@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart';
+import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/presentation/home/widget/playlistgridview.dart';
 
 class PlaylistTab extends StatefulWidget {
@@ -36,9 +37,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
         if (state is LoadingState) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return loadingDisk();
         }
         if (state is PlaylistDataState) {
           return SingleChildScrollView(

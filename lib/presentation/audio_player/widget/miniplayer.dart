@@ -2,17 +2,37 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
+import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/route.dart';
 import 'package:nex_music/model/songmodel.dart';
 
-class MiniPlayer extends StatelessWidget {
+ThumbnailQuality quality = ThumbnailQuality.low;
+
+class MiniPlayer extends StatefulWidget {
   final double screenSize;
 
   const MiniPlayer({super.key, required this.screenSize});
+
+  @override
+  State<MiniPlayer> createState() => _MiniPlayerState();
+}
+
+class _MiniPlayerState extends State<MiniPlayer> {
+  final HiveDataBaseSingleton _dataBaseSingleton =
+      HiveDataBaseSingleton.instance;
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final data = await _dataBaseSingleton.getData;
+      quality = data.thumbnailQuality;
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +61,7 @@ class MiniPlayer extends StatelessWidget {
                   context: context,
                   songData: songData!,
                   route: SongMiniPlayerRoute.miniPlayerRoute,
+                  quality: quality,
                 ),
               );
             },
@@ -52,16 +73,18 @@ class MiniPlayer extends StatelessWidget {
                     side: BorderSide(color: backgroundColor, width: 2),
                   ),
                   contentPadding: EdgeInsets.only(
-                      left: screenSize * 0.0356, right: screenSize * 0.00527),
+                      left: widget.screenSize * 0.0356,
+                      right: widget.screenSize * 0.00527),
                   leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(screenSize * 0.0106),
+                    borderRadius:
+                        BorderRadius.circular(widget.screenSize * 0.0106),
                     child: Transform.scale(
-                      scaleX: 1.78,
+                      scaleX: quality == ThumbnailQuality.low ? 1 : 1.78,
                       scaleY: 1.0,
                       child: cacheImage(
                         imageUrl: songData.thumbnail,
-                        width: screenSize * 0.0755,
-                        height: screenSize * 0.0733,
+                        width: widget.screenSize * 0.0755,
+                        height: widget.screenSize * 0.0733,
                       ),
                     ),
                   ),
@@ -80,10 +103,10 @@ class MiniPlayer extends StatelessWidget {
                       state is LoadingState
                           ? Container(
                               margin: EdgeInsets.only(
-                                  top: screenSize * 0.0131,
-                                  right: screenSize * 0.0131),
-                              height: screenSize * 0.0395,
-                              width: screenSize * 0.0395,
+                                  top: widget.screenSize * 0.0131,
+                                  right: widget.screenSize * 0.0131),
+                              height: widget.screenSize * 0.0395,
+                              width: widget.screenSize * 0.0395,
                               child: Center(
                                 child: CircularProgressIndicator(
                                   color: textColor,
@@ -96,7 +119,7 @@ class MiniPlayer extends StatelessWidget {
                                     ? CupertinoIcons.pause_circle_fill
                                     : CupertinoIcons.play_circle_fill,
                                 color: textColor,
-                                size: screenSize * 0.0520,
+                                size: widget.screenSize * 0.0520,
                               ),
                               onPressed: () {
                                 context
@@ -108,7 +131,7 @@ class MiniPlayer extends StatelessWidget {
                         icon: Icon(
                           Icons.skip_next,
                           color: textColor,
-                          size: screenSize * 0.0500,
+                          size: widget.screenSize * 0.0500,
                         ),
                         onPressed: () {
                           context
@@ -166,7 +189,7 @@ class MiniPlayer extends StatelessWidget {
                           value: sliderValue,
                           backgroundColor: textColor,
                           color: accentColor,
-                          minHeight: screenSize * 0.00395,
+                          minHeight: widget.screenSize * 0.00395,
                         ),
                       ),
                     );

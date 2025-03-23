@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart' as songbloc;
-import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/core/ui_component/search_bar.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/search/screens/search_result_tab.dart';
@@ -20,12 +20,6 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   late final _searchFieldKey = GlobalKey<SearchFieldState>();
-  // @override
-  // void initState() {
-  //   context.read<SearchBloc>().add(LoadRecentSearchEvent());
-
-  //   super.initState();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +29,9 @@ class _SearchScreenState extends State<SearchScreen> {
       listenWhen: (previous, current) => previous != current,
       listener: (context, state) {
         if (state is songbloc.LoadingState) {
-          context.read<SearchBloc>().add(AddRecentSearchEvent(
-              search: state.query)); //add query to recent search list
+          context
+              .read<SearchBloc>()
+              .add(AddRecentSearchEvent(search: state.query));
           Navigator.of(context).pushNamed(
             SearchResultTab.routeName,
             arguments: state.query,
@@ -64,11 +59,12 @@ class _SearchScreenState extends State<SearchScreen> {
           builder: (context, state) {
             print("Current STATE is $state");
             if (state is LoadingState) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: accentColor,
-                ),
-              );
+              // return Center(
+              //   child: CircularProgressIndicator(
+              //     color: accentColor,
+              //   ),
+              // );
+              return loadingDisk();
             }
             if (state is LoadedRecentSearchState) {
               return ListView.builder(

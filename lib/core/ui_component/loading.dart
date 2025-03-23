@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 
 class Loading extends StatelessWidget {
@@ -9,9 +10,7 @@ class Loading extends StatelessWidget {
     final screenSize = MediaQuery.sizeOf(context).height;
 
     return Scaffold(
-      body: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      body: loadingDisk(),
       bottomNavigationBar: MiniPlayer(screenSize: screenSize),
     );
   }

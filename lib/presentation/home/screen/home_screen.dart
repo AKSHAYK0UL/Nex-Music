@@ -10,8 +10,6 @@ import 'package:nex_music/presentation/home/widget/drawer.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
-import 'package:nex_music/presentation/auth/screens/user_info.dart' as info;
-import 'package:nex_music/presentation/setting/screen/settting.dart';
 
 class HomeScreen extends StatefulWidget {
   final User currentUser;
@@ -56,7 +54,9 @@ class _HomeScreenState extends State<HomeScreen> {
               .read<ss.SongstreamBloc>() //store the quicks picks
               .add(ss.StoreQuickPicksSongsEvent(quickPicks: state.quickPicks));
           return Scaffold(
-            endDrawer: const BuildDrawer(),
+            endDrawer: BuildDrawer(
+              currentUser: widget.currentUser,
+            ),
             appBar: AppBar(
               actions: [
                 IconButton(
@@ -72,39 +72,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 Builder(builder: (context) {
                   return IconButton(
                     onPressed: () {
-                      // Open the end drawer
                       Scaffold.of(context).openEndDrawer();
                     },
                     icon: Icon(
-                      Icons.menu, // or any icon you prefer for the drawer
+                      Icons.menu,
                       size: screenSize * 0.0369,
                       color: Colors.white,
                     ),
                   );
                 })
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).pushNamed(info.UserInfo.routeName,
-                //         arguments: widget.currentUser);
-                //   },
-                //   icon: Icon(
-                //     size: screenSize * 0.0369,
-                //     Icons.person,
-                //     color: Colors.white,
-                //   ),
-                // ),
-                // IconButton(
-                //   onPressed: () {
-                //     Navigator.of(context).pushNamed(
-                //       QualitySettingsScreen.routeName,
-                //     );
-                //   },
-                //   icon: Icon(
-                //     size: screenSize * 0.0369,
-                //     Icons.settings,
-                //     color: Colors.white,
-                //   ),
-                // ),
               ],
               title: Padding(
                 padding: EdgeInsets.only(left: screenSize * 0.0158),
