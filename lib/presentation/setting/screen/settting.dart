@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart' as hs;
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as sb;
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
 import 'package:nex_music/bloc/quality_bloc/bloc/quality_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
@@ -75,27 +77,32 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
           ),
         ),
       ),
-      floatingActionButton: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: accentColor,
-          foregroundColor: backgroundColor,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          fixedSize: const Size(360, 47),
+      persistentFooterButtons: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: accentColor,
+            foregroundColor: backgroundColor,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            fixedSize: const Size(double.maxFinite, 50),
+          ),
+          onPressed: () async {
+            context.read<sb.SongstreamBloc>().add(sb.CloseMiniPlayerEvent());
+            await DefaultCacheManager().emptyCache();
+
+            if (!context.mounted) return;
+            context.read<QualityBloc>().add(
+                  SaveQualityEvent(
+                    hiveQuality: HiveQuality(
+                        thumbnailQuality: thumbnailQualityNotifier.value,
+                        audioQuality: audioQualityNotifier.value),
+                  ),
+                );
+            context.read<hs.HomesectionBloc>().add(hs.GetHomeSectonDataEvent());
+          },
+          child: const Text("Apply"),
         ),
-        onPressed: () async {
-          await DefaultCacheManager().emptyCache();
-          if (!context.mounted) return;
-          context.read<QualityBloc>().add(
-                SaveQualityEvent(
-                  hiveQuality: HiveQuality(
-                      thumbnailQuality: thumbnailQualityNotifier.value,
-                      audioQuality: audioQualityNotifier.value),
-                ),
-              );
-        },
-        child: const Text("Apply"),
-      ),
+      ],
     );
   }
 }

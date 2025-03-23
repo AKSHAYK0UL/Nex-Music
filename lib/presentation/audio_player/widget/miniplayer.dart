@@ -18,6 +18,9 @@ class MiniPlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<SongstreamBloc, SongstreamState>(
       builder: (context, state) {
+        if (state is CloseMiniPlayerState) {
+          return const SizedBox();
+        }
         Songmodel? songData;
 
         // Handle PlayingState or PausedState

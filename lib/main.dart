@@ -136,7 +136,8 @@ class MyApp extends StatelessWidget {
             create: (context) => SongDialogBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
-            create: (context) => AuthBloc(context.read<AuthRepository>()),
+            create: (context) =>
+                AuthBloc(context.read<AuthRepository>(), dbInstance),
           ),
           BlocProvider(
             create: (context) => UserLoggedBloc(

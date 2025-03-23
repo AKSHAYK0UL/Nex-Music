@@ -13,6 +13,8 @@ import 'package:nex_music/presentation/audio_player/widget/player.dart';
 import 'package:nex_music/presentation/audio_player/widget/streambuilder.dart';
 import 'package:share_plus/share_plus.dart';
 
+ThumbnailQuality quality = ThumbnailQuality.low;
+
 class AudioPlayerScreen extends StatefulWidget {
   static const routeName = "/audioplayer";
   const AudioPlayerScreen({super.key});
@@ -24,7 +26,6 @@ class AudioPlayerScreen extends StatefulWidget {
 class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   final HiveDataBaseSingleton _dataBaseSingleton =
       HiveDataBaseSingleton.instance;
-  ThumbnailQuality quality = ThumbnailQuality.low;
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -34,6 +35,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     super.initState();
   }
 
+  // @override
+  // void didChangeDependencies() {
+  //   // TODO: implement didChangeDependencies
+  //   WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //     final data = await _dataBaseSingleton.getData;
+  //     quality = data.thumbnailQuality;
+  //   });
+  //   super.didChangeDependencies();
+  // }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
@@ -42,6 +53,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     Songmodel songData = routeData["songdata"] as Songmodel;
     final route = routeData["route"] as SongMiniPlayerRoute;
     final songIndex = routeData["songindex"] as int;
+    print("THUMBNAIL : $quality");
 
     return Scaffold(
       body: SafeArea(

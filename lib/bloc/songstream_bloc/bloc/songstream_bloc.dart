@@ -1179,10 +1179,10 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   // Close the mini player
   void _closeMiniPlayer(
-      CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) {
+      CloseMiniPlayerEvent event, Emitter<SongstreamState> emit) async {
     // _audioPlayerHandler.onNotificationDeleted();
-    _audioPlayerHandler.stop();
-    _audioPlayer.pause();
+    // _audioPlayerHandler.stop();
+    await _audioPlayer.pause();
     _isPlaying = false;
     emit(CloseMiniPlayerState());
   }

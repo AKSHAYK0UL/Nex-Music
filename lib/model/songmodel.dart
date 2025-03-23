@@ -10,7 +10,7 @@ class Songmodel extends Equatable {
   final String duration;
   final Timestamp? timestamp;
 
-  Songmodel({
+  const Songmodel({
     required this.vId,
     required this.songName,
     required this.artist,
