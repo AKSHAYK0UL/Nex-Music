@@ -29,8 +29,10 @@ class DataProvider {
     final fetchedData = await Future.wait(
       [
         _ytMusic.getHomeSections(),
-        _ytMusic.searchSongs(
-            'Latest songs from "Karan Aujla", "Navaan Sandhu", "Yo Yo Honey Singh"'),
+
+        _ytMusic.searchSongs("Trending latest Songs"),
+        // _ytMusic.searchSongs(
+        //     'Latest songs from "Karan Aujla", "Navaan Sandhu", "Yo Yo Honey Singh"'),
       ],
     );
 

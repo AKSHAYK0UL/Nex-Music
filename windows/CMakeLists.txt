@@ -10,6 +10,9 @@ set(BINARY_NAME "nex_music")
 # versions of CMake.
 cmake_policy(VERSION 3.14...3.25)
 
+# Enable URL launching
+add_definitions(-DURL_LAUNCHER_ENABLE=1)
+
 # Define build configuration option.
 get_property(IS_MULTICONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(IS_MULTICONFIG)

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,7 +26,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _dbInstance.save(HiveQuality(
           thumbnailQuality: ThumbnailQuality.low,
           audioQuality: AudioQuality.high));
-      await _authRepository.googleSignIn();
+      if (Platform.isAndroid) {
+        await _authRepository.googleSignIn();
+      } else {
+        await _authRepository.googleDesktopSignIn();
+      }
 
       emit(SuccessState());
     } on FirebaseAuthException catch (e) {

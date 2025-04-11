@@ -5,8 +5,8 @@ Widget loadingDisk() {
   return Center(
     child: Lottie.asset(
       "assets/loadingdisk.json",
-      height: 125,
-      width: 125,
+      height: 115,
+      width: 115,
     ),
   );
 }
