@@ -1,4 +1,4 @@
-# NEX Music (Music Streaming App)
+# 🎧 Nex Music (Cross-Platform Music Streaming App)
 
 <table>
   <tr>
@@ -67,29 +67,50 @@
   </tr>
 </table>
 
-## Overview
+---
 
-NEX Music is an ad-free, cross-platform music streaming app built with Flutter, offering smooth playback and seamless cross-device sync.
+## 🚀 Overview
 
-## Key Features
+**Nex Music** is a sleek, ad-free, and cross-platform music streaming app built with **Flutter**, allowing users to stream from YouTube/YouTube Music, create playlists, and sync data across devices with ease.
 
-- <span style="font-size:1.2em;"><strong>YouTube Playback:</strong></span> Stream songs directly from YouTube/YouTube Music.
-- **Song Caching:** Cache songs during playback for uninterrupted listening.
-- **Background Music:** Enjoy continuous playback even when the app is minimized.
-- **Playlist Creation:** Easily create and manage your custom playlists.
-- **Bookmarks:** Save your favorite artists and albums for quick access.
-- **Easy Import:** Import songs, playlists, albums, and artists via sharing from YouTube/YouTube Music.
-- **Streaming & Artwork Quality Control:** Adjust stream quality to match your network conditions and customize artwork quality.
-- **Google OAuth Registration:** Register using Google OAuth for secure access and seamless cross-device syncing.
-- **Ad-Free Experience:** Enjoy music without any interruptions from advertisements.
+---
 
-## Tech Stack
+## 🎵 Features
 
-- <span style="font-size:1.2em;"><strong>Frontend:</strong></span> Flutter (supports Android and Windows)
-- **State Management:** Flutter BLoC
-- **Architecture:** BLoC Pattern
-- **Backend/Sync:** Firebase (for authentication, data storage, and real-time synchronization)
-  
-## Project Status
+- 🔴 **YouTube Playback** – Stream songs directly from YouTube or YouTube Music.
+- 💾 **Song Caching** – Cache songs while playing for offline-friendly playback.
+- 🎧 **Background Music Support** – Continue listening even when minimized or in the background.
+- 📝 **Create & Manage Playlists** – Personalized music library at your fingertips.
+- 📌 **Bookmarks** – Save your favorite artists, albums, and songs.
+- ⚙️ **Streaming Quality Control** – Fine-tune stream and artwork quality based on your preferences and network.
+- 🔐 **Google OAuth Login** – Secure authentication and real-time sync across devices.
+- ❌ **No Ads** – 100% uninterrupted music experience.
 
-**Note:** This project is still under development.
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Flutter |
+| **State Management** | BLoC |
+| **Architecture** | BLoC Pattern |
+| **Backend & Sync** | Firebase (Authentication, Firestore, Real-time Sync) |
+
+---
+
+## 📱 Platforms
+
+- ✅ Android  
+- ✅ Windows (Under Development)  
+- ❌ iOS (Coming Soon)  
+- ❌ macOS (Coming Soon)
+
+---
+
+## 🚧 Project Status
+
+🛠 **Currently in active development.**  
+Expect regular updates, new features, and improvements over time!
+
+---
