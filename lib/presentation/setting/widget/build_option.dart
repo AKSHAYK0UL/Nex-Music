@@ -37,6 +37,7 @@ Widget buildQualityOptions<T>(BuildContext context, List<T> values,
                   trailing: Radio<T>(
                     value: quality,
                     groupValue: selectedQuality,
+                    hoverColor: Colors.white12,
                     onChanged: (value) {
                       if (value != null) {
                         notifier.value = value;

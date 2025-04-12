@@ -31,7 +31,7 @@ import 'package:nex_music/core/services/hive/hive__adapter_model/hive_registrar.
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/theme.dart';
 import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
-import 'package:nex_music/presentation/home/navbar/navbar.dart';
+import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
 import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';

@@ -1101,6 +1101,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  sidebar_with_animation:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: b53567a42b4ba3793a3cf00d478bdba0ecce33d7
+      resolved-ref: b53567a42b4ba3793a3cf00d478bdba0ecce33d7
+      url: "https://github.com/anandnet/animated_side_bar.git"
+    source: git
+    version: "0.0.3"
   sky_engine:
     dependency: transitive
     description: flutter

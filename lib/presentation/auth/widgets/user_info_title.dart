@@ -6,10 +6,15 @@ Widget buildUserInfo(
     required String title,
     required String data,
     required Size screenSize}) {
+  bool isSmallScreen = screenSize.width < 451;
+
   return Container(
+    width: isSmallScreen ? double.infinity : screenSize.width * 0.309,
     margin: EdgeInsets.symmetric(
         horizontal: screenSize.height * 0.0197,
-        vertical: screenSize.height * 0.0091),
+        vertical: isSmallScreen
+            ? screenSize.height * 0.0091
+            : screenSize.height * 0.0020),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -46,6 +46,9 @@ class _AuthScreenState extends State<AuthScreen>
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isSmallScreen = screenWidth < 451;
+
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -61,80 +64,117 @@ class _AuthScreenState extends State<AuthScreen>
                   child: Column(
                     children: [
                       SizedBox(
-                        height: screenSize * 0.131,
+                        height: isSmallScreen
+                            ? screenSize * 0.131
+                            : screenSize * 0.200,
                       ),
-                      Text(
-                        'EMBRACE THE RHYTHM, STEP IN, AND LET THE MUSIC FLOW',
-                        style: GoogleFonts.sixtyfour(
-                          color: accentColor,
-                          textStyle: Theme.of(context).textTheme.headlineLarge,
-                          letterSpacing: 0,
+                      SizedBox(
+                        width: isSmallScreen
+                            ? double.infinity
+                            : screenSize * 0.640,
+                        child: Text(
+                          'EMBRACE THE RHYTHM, STEP IN, AND LET THE MUSIC FLOW',
+                          style: GoogleFonts.sixtyfour(
+                            color: accentColor,
+                            textStyle:
+                                Theme.of(context).textTheme.headlineLarge,
+                            letterSpacing: 0,
+                          ),
                         ),
                       ),
                       SizedBox(
                         height: screenSize * 0.141,
                       ),
-                      BlocBuilder<AuthBloc, AuthState>(
-                        buildWhen: (previous, current) => previous != current,
-                        builder: (context, state) {
-                          return ElevatedButton.icon(
-                            onPressed: state is LoadingState
-                                ? null
-                                : () {
-                                    context
-                                        .read<AuthBloc>()
-                                        .add(GoogleSignInEvent());
-                                  },
-                            label: state is LoadingState
-                                ? const Text(" Signing In")
-                                : Text("${'\t' * 1} Continue with Google"),
-                            icon: state is LoadingState
-                                ? SizedBox(
-                                    width: screenSize * 0.070,
-                                    height: screenSize * 0.065,
-                                    child: LoadingIndicator(
-                                      indicatorType: Indicator.pacman,
-                                      colors: [accentColor],
-                                      strokeWidth: 1,
+                      SizedBox(
+                        width: isSmallScreen
+                            ? double.infinity
+                            : screenSize * 0.640,
+                        child: BlocBuilder<AuthBloc, AuthState>(
+                          buildWhen: (previous, current) => previous != current,
+                          builder: (context, state) {
+                            return ElevatedButton.icon(
+                              onPressed: state is LoadingState
+                                  ? null
+                                  : () {
+                                      context
+                                          .read<AuthBloc>()
+                                          .add(GoogleSignInEvent());
+                                    },
+                              label: state is LoadingState
+                                  ? const Text(" Signing In")
+                                  : Text("${'\t' * 1} Continue with Google"),
+                              icon: state is LoadingState
+                                  ? SizedBox(
+                                      width: screenSize * 0.070,
+                                      height: screenSize * 0.065,
+                                      child: LoadingIndicator(
+                                        indicatorType: Indicator.pacman,
+                                        colors: [accentColor],
+                                        strokeWidth: 1,
+                                      ),
+                                    )
+                                  : Icon(
+                                      FontAwesomeIcons.google,
+                                      size: screenSize * 0.0263,
                                     ),
-                                  )
-                                : Icon(
-                                    FontAwesomeIcons.google,
-                                    size: screenSize * 0.0263,
-                                  ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: secondaryColor,
-                              textStyle: Theme.of(context).textTheme.labelLarge,
-                              foregroundColor: textColor,
-                              iconColor: textColor,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      screenSize * 0.0329),
-                                  side: BorderSide(
-                                      color: Colors.blueGrey,
-                                      width: screenSize * 0.00197)),
-                              minimumSize:
-                                  Size(screenSize * 1, screenSize * 0.0659),
-                              disabledBackgroundColor: secondaryColor,
-                              disabledForegroundColor: textColor,
-                              disabledIconColor: textColor,
-                            ),
-                          );
-                        },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: secondaryColor,
+                                textStyle:
+                                    Theme.of(context).textTheme.labelLarge,
+                                foregroundColor: textColor,
+                                iconColor: textColor,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                        screenSize * 0.0329),
+                                    side: BorderSide(
+                                        color: Colors.blueGrey,
+                                        width: screenSize * 0.00197)),
+                                minimumSize:
+                                    Size(screenSize * 1, screenSize * 0.0659),
+                                disabledBackgroundColor: secondaryColor,
+                                disabledForegroundColor: textColor,
+                                disabledIconColor: textColor,
+                              ),
+                            );
+                          },
+                        ),
                       ),
                       SizedBox(
                         height: screenSize * 0.0171,
                       ),
-                      RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                                text: "By continuing, you agree to our ",
-                                style:
-                                    Theme.of(context).textTheme.displaySmall),
-                            TextSpan(
-                                text: "User Agreement",
+                      SizedBox(
+                        width: 480,
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                  text: "By continuing, you agree to our ",
+                                  style:
+                                      Theme.of(context).textTheme.displaySmall),
+                              TextSpan(
+                                  text: "User Agreement",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .displayMedium
+                                      ?.copyWith(
+                                        decoration: TextDecoration.underline,
+                                        decorationStyle:
+                                            TextDecorationStyle.solid,
+                                        decorationColor: Colors.white,
+                                        decorationThickness: 1,
+                                      ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      userAgreement();
+                                    }),
+                              TextSpan(
+                                text:
+                                    " and acknowledge that you understand the ",
+                                style: Theme.of(context).textTheme.displaySmall,
+                              ),
+                              TextSpan(
+                                text: "Privacy Policy",
                                 style: Theme.of(context)
                                     .textTheme
                                     .displayMedium
@@ -147,29 +187,11 @@ class _AuthScreenState extends State<AuthScreen>
                                     ),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    userAgreement();
-                                  }),
-                            TextSpan(
-                              text: " and acknowledge that you understand the ",
-                              style: Theme.of(context).textTheme.displaySmall,
-                            ),
-                            TextSpan(
-                              text: "Privacy Policy",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .displayMedium
-                                  ?.copyWith(
-                                    decoration: TextDecoration.underline,
-                                    decorationStyle: TextDecorationStyle.solid,
-                                    decorationColor: Colors.white,
-                                    decorationThickness: 1,
-                                  ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  privacyPolicy();
-                                },
-                            ),
-                          ],
+                                    privacyPolicy();
+                                  },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       SizedBox(

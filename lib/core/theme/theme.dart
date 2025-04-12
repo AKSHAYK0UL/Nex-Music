@@ -8,6 +8,7 @@ import 'package:nex_music/core/theme/navbartheme.dart';
 import 'package:nex_music/core/theme/segmentedbutton_theme.dart';
 import 'package:nex_music/core/theme/slidertheme.dart';
 import 'package:nex_music/core/theme/snackbartheme.dart';
+import 'package:nex_music/core/theme/tabbartheme.dart';
 import 'package:nex_music/core/theme/texttheme.dart';
 
 ThemeData themeData(BuildContext context) {
@@ -25,5 +26,6 @@ ThemeData themeData(BuildContext context) {
     sliderTheme: sliderTheme(),
     segmentedButtonTheme: segmentedButtonTheme(context),
     dialogTheme: dialogTheme(screenSize),
+    tabBarTheme: tabBarTheme,
   );
 }
