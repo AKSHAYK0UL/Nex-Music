@@ -29,43 +29,33 @@ class UserInfoDesktop extends StatelessWidget {
                       padding: EdgeInsets.only(right: screenSize.width * 0.010),
                       child: Lottie.asset(
                         "assets/accountdesktop.json",
-                        height: screenSize.height * 0.605,
-                        width: screenSize.height * 0.612,
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
                   VerticalDivider(
                     thickness: 1.5,
-                    indent: 10,
-                    endIndent: 10,
+                    indent: 15,
+                    endIndent: 15,
                     color: accentColor,
                   ),
                   Expanded(
                     flex: 1,
-                    // width: screenSize.width * 0.309,
                     child: Column(
+                      mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Expanded(
-                          flex: 1,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                    screenSize.height * 0.100),
-                                child: CircleAvatar(
-                                  backgroundColor: secondaryColor,
-                                  radius: screenSize.height * 0.100,
-                                  child: Lottie.asset(
-                                    "assets/userinfo.json",
-                                    repeat: false,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ],
+                        ClipRRect(
+                          borderRadius:
+                              BorderRadius.circular(screenSize.height * 0.100),
+                          child: CircleAvatar(
+                            backgroundColor: secondaryColor,
+                            radius: screenSize.height * 0.100,
+                            child: Lottie.asset(
+                              "assets/userinfo.json",
+                              repeat: false,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                         Align(

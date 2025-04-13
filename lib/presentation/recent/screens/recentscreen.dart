@@ -50,8 +50,7 @@ class _RecentScreenState extends State<RecentScreen> {
                       context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
                           songlist:
                               recentSongs)); //load recent songs in the playlist
-                      showSnackbar(
-                          context, screenSize, "Now playing your recent songs");
+                      showSnackbar(context, "Now playing your recent songs");
                     } else {
                       context.read<SongstreamBloc>().add(CleanPlaylistEvent());
                     }

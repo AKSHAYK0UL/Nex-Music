@@ -9,9 +9,9 @@ Widget buildUserInfo(
   bool isSmallScreen = screenSize.width < 451;
 
   return Container(
-    width: isSmallScreen ? double.infinity : screenSize.width * 0.309,
+    // width: isSmallScreen ? double.infinity : screenSize.width * 0.309,
     margin: EdgeInsets.symmetric(
-        horizontal: screenSize.height * 0.0197,
+        horizontal: screenSize.width * 0.0100,
         vertical: isSmallScreen
             ? screenSize.height * 0.0091
             : screenSize.height * 0.0020),

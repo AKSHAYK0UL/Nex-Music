@@ -54,7 +54,7 @@ class _PlayerState extends State<Player> {
       listener: (context, state) {
         if (state is ErrorState) {
           context.read<SongstreamBloc>().add(PauseEvent());
-          showSnackbar(context, widget.screenSize, state.errorMessage);
+          showSnackbar(context, state.errorMessage);
         }
       },
       builder: (context, state) {

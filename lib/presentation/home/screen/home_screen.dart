@@ -10,6 +10,7 @@ import 'package:nex_music/presentation/home/widget/drawer.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
+import 'package:nex_music/presentation/search/widgets/desktop_searchbar.dart';
 
 class HomeScreen extends StatefulWidget {
   final User currentUser;
@@ -32,6 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    bool isSmallScreen = screenWidth < 451;
+
     return BlocBuilder<HomesectionBloc, HomesectionState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
@@ -69,25 +73,29 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white,
                   ),
                 ),
-                Builder(builder: (context) {
-                  return IconButton(
-                    onPressed: () {
-                      Scaffold.of(context).openEndDrawer();
-                    },
-                    icon: Icon(
-                      Icons.menu,
-                      size: screenSize * 0.0369,
-                      color: Colors.white,
-                    ),
-                  );
-                })
+                if (isSmallScreen)
+                  Builder(builder: (context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openEndDrawer();
+                      },
+                      icon: Icon(
+                        Icons.menu,
+                        size: screenSize * 0.0369,
+                        color: Colors.white,
+                      ),
+                    );
+                  })
               ],
-              title: Padding(
-                padding: EdgeInsets.only(left: screenSize * 0.0158),
-                child: const Text(
-                  "Quick Picks",
-                ),
-              ),
+              title: isSmallScreen
+                  ? Padding(
+                      padding: EdgeInsets.only(left: screenSize * 0.0158),
+                      child: const Text(
+                        "Quick Picks",
+                      ),
+                    )
+                  : DesktopSearchBar(),
+              centerTitle: isSmallScreen ? false : true,
             ),
             body: SingleChildScrollView(
               child: Padding(
@@ -97,6 +105,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (!isSmallScreen)
+                      AppBar(
+                        title: const Text(
+                          "Quick Picks",
+                        ),
+
+                        actions: const [SizedBox()], //to hide the drawer icon
+                      ),
                     SizedBox(
                       height: screenSize * 0.440, //435
                       child: ListView.builder(

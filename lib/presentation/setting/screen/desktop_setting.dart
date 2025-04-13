@@ -28,16 +28,16 @@ class DesktopSetting extends StatelessWidget {
                       padding: EdgeInsets.only(right: screenSize.width * 0.010),
                       child: Lottie.asset(
                         "assets/setting.json",
-                        height: screenSize.height * 0.605,
-                        width: screenSize.height * 0.612,
+                        // height: screenSize.height * 0.605,
+                        // width: screenSize.height * 0.612,
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
                   VerticalDivider(
                     thickness: 1.5,
-                    indent: 10,
-                    endIndent: 10,
+                    indent: 15,
+                    endIndent: 15,
                     color: accentColor,
                   ),
                   const Expanded(

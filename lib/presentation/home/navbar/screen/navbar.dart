@@ -76,6 +76,17 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeDependencies() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    // On small screens (e.g., mobile), index 4 is only accessible via the Drawer.
+    // Reset to index 0 to avoid showing an inaccessible screen.
+    if (screenWidth < 451 && _selectedIndex == 4) {
+      _selectedIndex = 0;
+    }
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     streamSubscriptionUri?.cancel();
@@ -128,7 +139,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
                   BlocListener<dp.DeeplinkBloc, dp.DeeplinkState>(
                     listener: (context, state) {
                       if (state is dp.ErrorState) {
-                        showSnackbar(context, screenSize, state.errorMessage);
+                        showSnackbar(context, state.errorMessage);
                       }
                       if (state is dp.DeeplinkSongDataState) {
                         Navigator.of(context).pushNamed(

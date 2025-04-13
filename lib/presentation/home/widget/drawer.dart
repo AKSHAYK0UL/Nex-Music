@@ -61,7 +61,7 @@ class BuildDrawer extends StatelessWidget {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text("Are You Sure?"),
-                    content: const Text("Are you sure you want to Sign Out?"),
+                    content: const Text("Do you want to Logout?"),
                     actions: [
                       TextButton(
                         onPressed: () {

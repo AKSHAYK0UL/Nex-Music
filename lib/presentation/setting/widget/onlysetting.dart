@@ -39,11 +39,12 @@ class _QualitySettingState extends State<QualitySetting> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
+    bool isSmallScreen = screenSize.width < 451;
 
     return BlocListener<QualityBloc, QualityState>(
       listener: (context, state) {
         if (state is SuccessState) {
-          showSnackbar(context, screenSize.height, "Changes Applied");
+          showSnackbar(context, "Changes Applied");
         }
         if (state is ErrorState) {
           print(state.errorMassage);
@@ -70,7 +71,8 @@ class _QualitySettingState extends State<QualitySetting> {
                 backgroundColor: accentColor,
                 foregroundColor: backgroundColor,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                    borderRadius:
+                        BorderRadius.circular(isSmallScreen ? 12 : 30)),
                 fixedSize: const Size(double.maxFinite, 50),
               ),
               onPressed: () async {

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/signing_out_loading.dart';
 import 'package:sidebar_with_animation/animated_side_bar.dart';
 
 // Custom scroll behavior that disables scrolling.
@@ -45,7 +46,7 @@ class NavRail extends StatelessWidget {
             sideBarColor: secondaryColor,
             splashColor: backgroundColor,
             animatedContainerColor: backgroundColor,
-            selectedIconColor: accentColor,
+            selectedIconColor: secondaryColor,
             unselectedIconColor: textColor,
             dividerColor: Colors.white,
             hoverColor: Colors.white10,
@@ -87,8 +88,54 @@ class NavRail extends StatelessWidget {
             top: 50,
             left: 105,
             child: Text(
-              " Nex Music",
+              "Nex Music",
               style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 48,
+          left: 40,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(
+              overlayColor: Colors.white10,
+            ),
+            label: Text(
+              isSmallScreen ? "" : "Logout",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: Colors.red),
+            ),
+            onPressed: () {
+              showDialog(
+                barrierDismissible: false,
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Are You Sure?"),
+                  content: const Text("Do you want to Logout?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("No"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const SigningOutLoading()));
+                      },
+                      child: const Text("Yes"),
+                    )
+                  ],
+                ),
+              );
+            },
+            icon: const Icon(
+              Icons.logout_sharp,
+              size: 26,
+              color: Colors.red,
             ),
           ),
         ),

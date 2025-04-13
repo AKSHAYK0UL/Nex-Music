@@ -59,7 +59,7 @@ Future<void> showLongPressOptions({
                 context
                     .read<SongstreamBloc>()
                     .add(AddToPlayNextEvent(songData: songData));
-                showSnackbar(context, screenSize, "Added to Play Next");
+                showSnackbar(context, "Added to Play Next");
                 Navigator.of(context).pop();
               },
               label: Text(
