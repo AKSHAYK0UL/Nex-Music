@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart' as songbloc;
+import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/core/ui_component/search_bar.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
@@ -42,6 +43,7 @@ class _SearchScreenState extends State<SearchScreen> {
         appBar: AppBar(
           title: SearchField(
             key: _searchFieldKey,
+            inputBorder: buildUnderlineInputBorder,
             onTextChanges: (text) {
               if (text.isEmpty) {
                 context.read<SearchBloc>().add(LoadRecentSearchEvent());
@@ -57,7 +59,6 @@ class _SearchScreenState extends State<SearchScreen> {
         body: BlocBuilder<SearchBloc, SearchState>(
           buildWhen: (previous, current) => previous != current,
           builder: (context, state) {
-            print("Current STATE is $state");
             if (state is LoadingState) {
               // return Center(
               //   child: CircularProgressIndicator(
@@ -113,4 +114,13 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
     );
   }
+}
+
+UnderlineInputBorder get buildUnderlineInputBorder {
+  return UnderlineInputBorder(
+    borderSide: BorderSide(
+      width: 2,
+      color: secondaryColor,
+    ),
+  );
 }

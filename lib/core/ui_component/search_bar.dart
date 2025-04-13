@@ -8,6 +8,7 @@ import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 
 class SearchField extends StatefulWidget {
+  final InputBorder inputBorder;
   final void Function(String) onTextChanges;
   final String hintText;
 
@@ -15,6 +16,7 @@ class SearchField extends StatefulWidget {
     super.key,
     required this.onTextChanges,
     required this.hintText,
+    required this.inputBorder,
   });
 
   @override
@@ -53,7 +55,7 @@ class SearchFieldState extends State<SearchField> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
-
+    final isSmallScreen = MediaQuery.sizeOf(context).width < 451;
     return Container(
       color: backgroundColor,
       padding: EdgeInsets.symmetric(
@@ -61,50 +63,78 @@ class SearchFieldState extends State<SearchField> {
       child: TextField(
         focusNode: _focusNode,
         decoration: InputDecoration(
+          prefix: const Padding(
+            padding: EdgeInsets.only(left: 10),
+          ),
           suffixIcon: ValueListenableBuilder<TextEditingValue>(
             valueListenable: _controller,
-            builder: (context, value, child) => IconButton(
-              onPressed: value.text.isEmpty
-                  ? null
-                  : () {
-                      _controller.clear();
-                    },
-              icon: Icon(
-                Icons.cancel,
-                color: value.text.isEmpty ? Colors.grey.shade500 : textColor,
-              ),
-            ),
+            builder: (context, value, child) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Visibility(
+                      visible: !isSmallScreen,
+                      child: SizedBox(
+                          height: 35,
+                          child: VerticalDivider(
+                              thickness: 2,
+                              indent: 0,
+                              endIndent: 0,
+                              color: _focusNode.hasFocus
+                                  ? accentColor
+                                  : Colors.grey.shade500)),
+                    ),
+                    IconButton(
+                      onPressed: value.text.isEmpty
+                          ? null
+                          : () {
+                              _controller.clear();
+                            },
+                      icon: Icon(
+                        Icons.cancel,
+                        color: value.text.isEmpty
+                            ? Colors.grey.shade500
+                            : textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
           hintText: widget.hintText,
           hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: _focusNode.hasFocus ? textColor : Colors.grey.shade500,
               ),
-          border: UnderlineInputBorder(
+          border: widget.inputBorder.copyWith(
             borderSide: BorderSide(
               width: 2,
-              color: secondaryColor,
+              color: Colors.grey.shade600,
             ),
           ),
-          enabledBorder: UnderlineInputBorder(
+          enabledBorder: widget.inputBorder.copyWith(
             borderSide: BorderSide(
               width: 2,
-              color: secondaryColor,
+              color: Colors.grey.shade600,
             ),
           ),
-          focusedBorder: UnderlineInputBorder(
+          focusedBorder: widget.inputBorder.copyWith(
             borderSide: BorderSide(
               width: 2,
-              color: textColor,
+              color: accentColor,
             ),
           ),
-          focusedErrorBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(
+          focusedErrorBorder: widget.inputBorder.copyWith(
+            borderSide: const BorderSide(
               width: 2,
               color: Colors.red,
             ),
           ),
         ),
-        autofocus: true,
+        autofocus: isSmallScreen,
         cursorColor: textColor,
         cursorHeight: screenSize * 0.0329,
         style: Theme.of(context).textTheme.bodyMedium,
