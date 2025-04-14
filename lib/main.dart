@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
@@ -41,10 +42,15 @@ import 'package:nex_music/utils/audioutils/audio_handler.dart';
 import 'package:path_provider/path_provider.dart';
 
 final audioPlayer = AudioPlayer(); //global audioplayer  instance
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await Hive.initFlutter();
   // Hive.registerAdapter(HiveQualityAdapter());
+  JustAudioMediaKit.bufferSize = 8 * 1024 * 1024; // 8 MB
+  JustAudioMediaKit.title = 'Nex Music';
+  JustAudioMediaKit.protocolWhitelist = const ['http', 'https'];
+
   final dir = await getApplicationDocumentsDirectory();
   Hive
     ..init(dir.path)

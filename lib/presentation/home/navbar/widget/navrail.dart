@@ -104,7 +104,7 @@ class NavRail extends StatelessWidget {
               isSmallScreen ? "" : "Logout",
               style: Theme.of(context)
                   .textTheme
-                  .bodyMedium
+                  .titleMedium
                   ?.copyWith(color: Colors.red),
             ),
             onPressed: () {

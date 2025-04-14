@@ -88,14 +88,17 @@ class SearchFieldState extends State<SearchField> {
                                   : Colors.grey.shade500)),
                     ),
                     IconButton(
-                      onPressed: value.text.isEmpty
-                          ? null
-                          : () {
-                              _controller.clear();
-                            },
+                      onPressed:
+                          value.text.isEmpty && !FocusScope.of(context).hasFocus
+                              ? null
+                              : () {
+                                  _controller.clear();
+                                  FocusScope.of(context).unfocus();
+                                },
                       icon: Icon(
                         Icons.cancel,
-                        color: value.text.isEmpty
+                        color: value.text.isEmpty &&
+                                !FocusScope.of(context).hasFocus
                             ? Colors.grey.shade500
                             : textColor,
                       ),

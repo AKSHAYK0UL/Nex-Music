@@ -36,35 +36,51 @@
 //     );
 // }
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 
 void showSnackbar(BuildContext context, String message) {
+  final double screenHeght = MediaQuery.sizeOf(context).height;
+
   final double screenWidth = MediaQuery.sizeOf(context).width;
   bool isSmallScreen = screenWidth < 451;
 
   final double snackBarWidth =
       isSmallScreen ? screenWidth * 0.65 : screenWidth * 0.211;
-
-  ScaffoldMessenger.of(context)
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            message,
-            maxLines: 1,
+  if (Platform.isWindows) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              message,
+              maxLines: 1,
+            ),
           ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          behavior: SnackBarBehavior.floating,
+          elevation: 2,
+          width: snackBarWidth,
+          backgroundColor: backgroundColor,
+          showCloseIcon: true,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-        ),
-        behavior: SnackBarBehavior.floating,
-        elevation: 2,
-        width: snackBarWidth,
-        backgroundColor: backgroundColor,
-        showCloseIcon: true,
-      ),
+      );
+  } else {
+    Fluttertoast.cancel();
+    Fluttertoast.showToast(
+      backgroundColor: secondaryColor,
+      msg: message,
+      gravity: ToastGravity.BOTTOM,
+      toastLength: Toast.LENGTH_SHORT,
+      fontSize: screenHeght * 0.0200,
+      textColor: textColor,
     );
+  }
 }

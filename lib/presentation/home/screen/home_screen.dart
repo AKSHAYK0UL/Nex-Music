@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
@@ -118,8 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (!isSmallScreen)
                             AppBar(
                               title: const Text(
-                                "Quick Picks",
-                              ),
+                                  // "Quick Picks",
+                                  "Discover"),
 
                               actions: const [
                                 SizedBox()
@@ -147,7 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "Playlists For You",
+                                  //"Playlists For You",
+                                  "Recommended playlists",
                                   style: Theme.of(context).textTheme.titleLarge,
                                 ),
                                 GestureDetector(
