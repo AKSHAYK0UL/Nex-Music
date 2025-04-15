@@ -529,7 +529,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
     });
 
-//windows specific code
+    //windows specific code
     // Windows-specific loop handling
     _audioPlayer.positionStream.listen((position) {
       if (Platform.isWindows &&
@@ -740,13 +740,26 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
 //Runs every time a song finishes playing.
+/*
+if(addToPlayNextQueue.isNotEmpty){
+final firstSong = queue.first();//get first song
+queue.removeFirst()
+ add(GetSongUrlOnShuffleEvent(
+          songData: firstSong);
+
+}
+
+
+
+
+ */
   void _onSongCompleted(
       SongCompletedEvent event, Emitter<SongstreamState> emit) {
-    if (_audioPlayer.loopMode == LoopMode.one) {
-      if (Platform.isWindows) {
-        _audioPlayer.seek(Duration.zero);
-        _audioPlayer.play();
-      }
+    // if (_audioPlayer.loopMode == LoopMode.one) {
+    if (_audioPlayer.loopMode == LoopMode.one && Platform.isWindows) {
+      _audioPlayer.seek(Duration.zero);
+      _audioPlayer.play();
+      // }
     } else if (_playlistSongs.isNotEmpty) {
       _currentSongIndex = (_currentSongIndex + 1) < _playlistSongs.length
           ? _currentSongIndex + 1

@@ -28,10 +28,12 @@ class SongColumView extends StatelessWidget {
                 rowIndex * 4 + columnIndex; // Calculate the actual index
             if (index < quickPicksLength) {
               final songData = quickPicks[index];
-              return SongTitle(
-                songData: songData,
-                songIndex: index,
-                showDelete: false,
+              return SizedBox(
+                child: SongTitle(
+                  songData: songData,
+                  songIndex: index,
+                  showDelete: false,
+                ),
               );
             } else {
               return const SizedBox();

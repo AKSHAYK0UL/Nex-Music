@@ -42,19 +42,29 @@ class _SongTitleState extends State<SongTitle> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    bool isSmallScreen = screenWidth < 451;
 
     return Container(
       margin: EdgeInsets.all(screenSize * 0.00395),
       child: ListTile(
+        contentPadding: EdgeInsets.only(
+          left: screenWidth * 0.0105,
+          right: isSmallScreen ? screenWidth * 0.0105 : 1,
+          top: isSmallScreen ? 0 : screenSize * 0.0132,
+          bottom: isSmallScreen ? 0 : screenSize * 0.0132,
+        ),
         splashColor: Colors.transparent,
         //TODO: onLongPress show [Play next song, Add to playlist, Show more songs from the same artist]
         onLongPress: () {
-          showLongPressOptions(
-            context: context,
-            songData: widget.songData,
-            screenSize: screenSize,
-            showDelete: widget.showDelete,
-          );
+          if (isSmallScreen) {
+            showLongPressOptions(
+              context: context,
+              songData: widget.songData,
+              screenSize: screenSize,
+              showDelete: widget.showDelete,
+            );
+          }
         },
         onTap: () {
           Navigator.of(context)
@@ -65,15 +75,23 @@ class _SongTitleState extends State<SongTitle> {
             "quality": quality,
           });
         },
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(screenSize * 0.0106),
+        leading: Container(
+          margin: EdgeInsets.symmetric(
+              horizontal: isSmallScreen ? 0 : screenWidth * 0.0039375),
           child: Transform.scale(
-            scaleX: quality == ThumbnailQuality.low ? 1 : 1.78,
-            scaleY: 1.0,
-            child: cacheImage(
-              imageUrl: widget.songData.thumbnail,
-              width: screenSize * 0.0755,
-              height: screenSize * 0.0733,
+            scaleX: isSmallScreen ? 1 : 1.33,
+            scaleY: isSmallScreen ? 1 : 1.33,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(screenSize * 0.0106),
+              child: Transform.scale(
+                scaleX: quality == ThumbnailQuality.low ? 1 : 1.78,
+                scaleY: 1.0,
+                child: cacheImage(
+                  imageUrl: widget.songData.thumbnail,
+                  width: screenSize * 0.0755,
+                  height: screenSize * 0.0733,
+                ),
+              ),
             ),
           ),
         ),
@@ -85,9 +103,21 @@ class _SongTitleState extends State<SongTitle> {
           text: widget.songData.artist.name,
           style: Theme.of(context).textTheme.bodySmall!,
         ),
-        trailing: widget.songData.duration.isNotEmpty
-            ? Text(widget.songData.duration)
-            : null,
+        // trailing: widget.songData.duration.isNotEmpty
+        //     ? Text(widget.songData.duration)
+        //     : null,
+        trailing: isSmallScreen
+            ? null
+            : IconButton(
+                onPressed: () {
+                  showLongPressOptions(
+                    context: context,
+                    songData: widget.songData,
+                    screenSize: screenSize,
+                    showDelete: widget.showDelete,
+                  );
+                },
+                icon: const Icon(Icons.more_vert)),
       ),
     );
   }
