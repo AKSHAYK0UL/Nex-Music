@@ -8,6 +8,7 @@ import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart' as dp;
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/applink_function/uri_parser.dart';
+import 'package:nex_music/main.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/navbar/widget/navbarwidget.dart';
@@ -124,6 +125,11 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
               NavRail(
                 selectedIndex: _selectedIndex,
                 onTap: (index) {
+                  if (overlayEntry != null && overlayEntry!.mounted) {
+                    overlayEntry?.remove();
+                    overlayEntry = null;
+                  }
+
                   setState(() {
                     _selectedIndex = index;
                   });

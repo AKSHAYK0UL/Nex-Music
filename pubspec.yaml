@@ -87,6 +87,7 @@ dependencies:
   #     url: https://github.com/anandnet/just_audio_media_kit.git
   #     ref: 06de226da469f5c55dd780b215bcc45a0d6269fb
   media_kit_libs_windows_audio: any
+  bitsdojo_window: ^0.1.6
 
 
   

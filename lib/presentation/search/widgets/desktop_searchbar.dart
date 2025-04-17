@@ -43,24 +43,26 @@ class _DesktopSearchBarState extends State<DesktopSearchBar> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 700,
-            height: 72,
-            child: SearchField(
-              key: _searchFieldKey,
-              inputBorder: buildOutlineInputBorder,
-              hintText: "Search songs, albums, artists...",
-              onTextChanges: (value) {
-                setState(() {
-                  _showSuggestions = value.isNotEmpty;
-                });
-                if (value.isEmpty) {
-                  context.read<SearchBloc>().add(LoadRecentSearchEvent());
-                } else {
-                  context
-                      .read<SearchBloc>()
-                      .add(SearchSongSuggestionEvent(inputQuery: value));
-                }
-              },
+            child: SizedBox(
+              width: 700,
+              height: 56,
+              child: SearchField(
+                key: _searchFieldKey,
+                inputBorder: buildOutlineInputBorder,
+                hintText: "Search songs, albums, artists...",
+                onTextChanges: (value) {
+                  setState(() {
+                    _showSuggestions = value.isNotEmpty;
+                  });
+                  if (value.isEmpty) {
+                    context.read<SearchBloc>().add(LoadRecentSearchEvent());
+                  } else {
+                    context
+                        .read<SearchBloc>()
+                        .add(SearchSongSuggestionEvent(inputQuery: value));
+                  }
+                },
+              ),
             ),
           ),
           // Suggestion / recent search container

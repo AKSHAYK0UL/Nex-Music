@@ -42,6 +42,7 @@ import 'package:nex_music/utils/audioutils/audio_handler.dart';
 import 'package:path_provider/path_provider.dart';
 
 final audioPlayer = AudioPlayer(); //global audioplayer  instance
+OverlayEntry? overlayEntry;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +71,16 @@ Future<void> main() async {
     ),
   );
   final dbinstance = HiveDataBaseSingleton.instance;
+
+  //for windows title bar
+  // doWhenWindowReady(() {
+  //   // final initialSize = Size(800, 600);
+  //   // appWindow.minSize = initialSize;
+  //   // appWindow.size = initialSize;
+  //   appWindow.alignment = Alignment.center;
+  //   appWindow.title = "Nex Music";
+  //   appWindow.show();
+  // });
   runApp(MyApp(
     myAudioHandler: audioHandler,
     dbInstance: dbinstance,

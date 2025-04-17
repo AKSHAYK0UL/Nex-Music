@@ -58,8 +58,8 @@ class SearchFieldState extends State<SearchField> {
     final isSmallScreen = MediaQuery.sizeOf(context).width < 451;
     return Container(
       color: backgroundColor,
-      padding: EdgeInsets.symmetric(
-          horizontal: screenSize * 0.0131, vertical: screenSize * 0.00659),
+      // padding: EdgeInsets.symmetric(
+      //     horizontal: screenSize * 0.0131, vertical: screenSize * 0.00659),
       child: TextField(
         focusNode: _focusNode,
         decoration: InputDecoration(

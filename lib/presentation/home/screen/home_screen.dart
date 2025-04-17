@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
 import 'package:nex_music/core/ui_component/loading.dart';
@@ -27,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
+
     super.initState();
   }
 
@@ -171,20 +171,34 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(
-                            height: screenSize * 0.345,
-                            child: ListView.builder(
+                          if (isSmallScreen)
+                            SizedBox(
+                              height: screenSize * 0.345,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: state.playlist.length >= 6
+                                    ? 6
+                                    : state.playlist.length,
+                                itemBuilder: (context, index) {
+                                  final playlistData = state.playlist[index];
+                                  return HomePlaylist(playList: playlistData);
+                                },
+                              ),
+                            ),
+                          if (!isSmallScreen)
+                            GridView.builder(
                               shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: state.playlist.length >= 6
-                                  ? 6
-                                  : state.playlist.length,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: state.playlist.length,
+                              gridDelegate:
+                                  const SliverGridDelegateWithMaxCrossAxisExtent(
+                                      maxCrossAxisExtent: 300),
                               itemBuilder: (context, index) {
                                 final playlistData = state.playlist[index];
                                 return HomePlaylist(playList: playlistData);
                               },
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -198,6 +212,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   left: 0,
                   right: 0,
                   child: DesktopSearchBar(),
+                  // child: Row(
+                  //   mainAxisAlignment: MainAxisAlignment.end,
+                  //   children: [
+                  //     const SizedBox(
+                  //       width: 130,
+                  //     ),
+                  //     const DesktopSearchBar(),
+                  //     // Expanded(child: Container()),
+                  //     const SizedBox(
+                  //       width: 130,
+                  //     ),
+                  //     // WindowTitleBarBox(
+                  //     //   child: WindowsButton(),
+                  //     // ),
+                  //   ],
                 ),
               ),
             ],

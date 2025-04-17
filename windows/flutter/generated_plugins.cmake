@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
+  bitsdojo_window_windows
   cloud_firestore
   connectivity_plus
   desktop_webview_auth
