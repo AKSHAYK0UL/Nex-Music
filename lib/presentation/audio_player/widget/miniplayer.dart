@@ -9,7 +9,10 @@ import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/route.dart';
+import 'package:nex_music/main.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/presentation/audio_player/widget/overlay_audio_player.dart';
+import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
 
 ThumbnailQuality quality = ThumbnailQuality.low;
 
@@ -36,6 +39,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    bool isSmallScreen = MediaQuery.sizeOf(context).width < 451;
     return BlocBuilder<SongstreamBloc, SongstreamState>(
       builder: (context, state) {
         if (state is CloseMiniPlayerState) {
@@ -56,14 +60,33 @@ class _MiniPlayerState extends State<MiniPlayer> {
         if (songData != null) {
           return GestureDetector(
             onTap: () {
-              Navigator.of(context).push(
-                slideTransitionRoute(
-                  context: context,
-                  songData: songData!,
-                  route: SongMiniPlayerRoute.miniPlayerRoute,
-                  quality: quality,
-                ),
-              );
+              if (isSmallScreen) {
+                Navigator.of(context).push(
+                  slideTransitionRoute(
+                    context: context,
+                    songData: songData!,
+                    route: SongMiniPlayerRoute.miniPlayerRoute,
+                    quality: quality,
+                  ),
+                );
+              } else {
+                overlayEntry = OverlayEntry(
+                  builder: (context) => OverlaySongPlayer(
+                    key: overlayPlayerKey,
+                    route: SongMiniPlayerRoute.miniPlayerRoute,
+                    songData: songData!,
+                    songIndex:
+                        context.read<SongstreamBloc>().getFirstSongPlayedIndex,
+                    quality: quality,
+                    onClose: () {
+                      overlayEntry?.remove();
+                      overlayEntry = null;
+                    },
+                  ),
+                );
+
+                Overlay.of(context).insert(overlayEntry!);
+              }
             },
             child: Stack(
               children: [

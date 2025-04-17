@@ -142,35 +142,52 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(left: screenSize * 0.0106),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  //"Playlists For You",
-                                  "Recommended playlists",
-                                  style: Theme.of(context).textTheme.titleLarge,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.of(context)
-                                        .pushNamed(ShowAllPlaylists.routeName);
-                                  },
-                                  child: Container(
-                                    color: Colors.transparent,
-                                    width: screenSize * 0.080,
-                                    alignment: Alignment.topRight,
-                                    child: Icon(
-                                      Icons.arrow_forward_ios,
-                                      color: Colors.white,
-                                      size: screenSize * 0.0290,
+                          if (isSmallScreen)
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(left: screenSize * 0.0106),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    //"Playlists For You",
+                                    "Recommended playlists",
+                                    style:
+                                        Theme.of(context).textTheme.titleLarge,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).pushNamed(
+                                          ShowAllPlaylists.routeName);
+                                    },
+                                    child: Container(
+                                      color: Colors.transparent,
+                                      width: screenSize * 0.080,
+                                      alignment: Alignment.topRight,
+                                      child: Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Colors.white,
+                                        size: screenSize * 0.0290,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
+                          if (!isSmallScreen)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: screenSize * 0.0106,
+                                top: screenSize * 0.0206,
+                                bottom: screenSize * 0.0100,
+                              ),
+                              child: Text(
+                                //"Playlists For You",
+                                "Recommended playlists",
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                            ),
                           if (isSmallScreen)
                             SizedBox(
                               height: screenSize * 0.345,
@@ -212,21 +229,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   left: 0,
                   right: 0,
                   child: DesktopSearchBar(),
-                  // child: Row(
-                  //   mainAxisAlignment: MainAxisAlignment.end,
-                  //   children: [
-                  //     const SizedBox(
-                  //       width: 130,
-                  //     ),
-                  //     const DesktopSearchBar(),
-                  //     // Expanded(child: Container()),
-                  //     const SizedBox(
-                  //       width: 130,
-                  //     ),
-                  //     // WindowTitleBarBox(
-                  //     //   child: WindowsButton(),
-                  //     // ),
-                  //   ],
                 ),
               ),
             ],

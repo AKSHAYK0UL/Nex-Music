@@ -173,7 +173,10 @@ import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/main.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 import 'package:nex_music/presentation/audio_player/widget/desktop_audio_player.dart';
+import 'package:nex_music/presentation/audio_player/widget/overlay_audio_player.dart';
+import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
 import 'package:nex_music/presentation/home/widget/long_press_options.dart';
 
 class SongTitle extends StatefulWidget {
@@ -193,11 +196,6 @@ class SongTitle extends StatefulWidget {
 }
 
 class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
-  // Overlay & animation fields
-  // OverlayEntry? _overlayEntry;
-  late final AnimationController _animController;
-  late final Animation<Offset> _slideAnim;
-
   // Thumbnail quality from Hive
   ThumbnailQuality quality = ThumbnailQuality.low;
   final HiveDataBaseSingleton _dataBaseSingleton =
@@ -206,20 +204,6 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
-    // Initialize the animation controller & tween
-    _animController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-
-    _slideAnim = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animController,
-      curve: Curves.easeOut,
-    ));
 
     // Load saved thumbnail quality
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -230,58 +214,22 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
     });
   }
 
-  @override
-  void dispose() {
-    _animController.dispose();
-    super.dispose();
-  }
-
   void _showOverlay(BuildContext context) {
     overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        // Anchor at bottom-center
-        bottom: 0,
-        left: (MediaQuery.of(context).size.width - 950) / 2,
-        width: 1240,
-        height: 800,
-        child: SlideTransition(
-          position: _slideAnim,
-          child: Material(
-            elevation: 8,
-            borderRadius: BorderRadius.circular(8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Display song info
-                DesktopAudioPlayer(
-                    songData: widget.songData,
-                    route: SongMiniPlayerRoute.songRoute,
-                    songIndex: widget.songIndex,
-                    quality: quality),
-                //
-
-                const Spacer(),
-                // Close button
-                ElevatedButton(
-                  onPressed: _removeOverlay,
-                  child: const Text('Close'),
-                ),
-              ],
-            ),
-          ),
-        ),
+      builder: (context) => OverlaySongPlayer(
+        key: overlayPlayerKey,
+        route: SongMiniPlayerRoute.songRoute,
+        songData: widget.songData,
+        songIndex: widget.songIndex,
+        quality: quality,
+        onClose: () {
+          overlayEntry?.remove();
+          overlayEntry = null;
+        },
       ),
     );
 
     Overlay.of(context).insert(overlayEntry!);
-    _animController.forward();
-  }
-
-  void _removeOverlay() {
-    _animController.reverse().then((_) {
-      overlayEntry?.remove();
-      overlayEntry = null;
-    });
   }
 
   @override
@@ -310,7 +258,19 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
             );
           }
         },
-        onTap: () => _showOverlay(context),
+        onTap: () {
+          if (isSmallScreen) {
+            Navigator.of(context)
+                .pushNamed(AudioPlayerScreen.routeName, arguments: {
+              "songindex": widget.songIndex,
+              "songdata": widget.songData,
+              "route": SongMiniPlayerRoute.songRoute,
+              "quality": quality,
+            });
+          } else {
+            _showOverlay(context);
+          }
+        },
         leading: Container(
           margin: EdgeInsets.only(
             left: isSmallScreen ? screenWidth * 0.025 : screenWidth * 0.0039375,
