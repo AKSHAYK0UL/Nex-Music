@@ -24,7 +24,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(LoadingState());
     try {
       await _dbInstance.save(HiveQuality(
-          thumbnailQuality: ThumbnailQuality.low,
+          thumbnailQuality: Platform.isAndroid
+              ? ThumbnailQuality.low
+              : ThumbnailQuality.medium,
           audioQuality: AudioQuality.high));
       if (Platform.isAndroid) {
         await _authRepository.googleSignIn();

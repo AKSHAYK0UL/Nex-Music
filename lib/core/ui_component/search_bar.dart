@@ -57,7 +57,10 @@ class SearchFieldState extends State<SearchField> {
     final screenSize = MediaQuery.sizeOf(context).height;
     final isSmallScreen = MediaQuery.sizeOf(context).width < 451;
     return Container(
+      height: 57,
       color: backgroundColor,
+      padding: EdgeInsets.symmetric(
+          horizontal: screenSize * 0.0180), // Add padding here
       // padding: EdgeInsets.symmetric(
       //     horizontal: screenSize * 0.0131, vertical: screenSize * 0.00659),
       child: TextField(
@@ -88,19 +91,24 @@ class SearchFieldState extends State<SearchField> {
                                   : Colors.grey.shade500)),
                     ),
                     IconButton(
-                      onPressed:
-                          value.text.isEmpty && !FocusScope.of(context).hasFocus
-                              ? null
-                              : () {
-                                  _controller.clear();
-                                  FocusScope.of(context).unfocus();
-                                },
+                      //value.text.isEmpty && !FocusScope.of(context).hasFocus
+                      // ? null
+                      // :
+                      onPressed: () {
+                        if (_focusNode.hasFocus) {
+                          _controller.clear();
+                          FocusScope.of(context).unfocus();
+                        } else {
+                          Navigator.of(context).pop();
+                        }
+                      },
                       icon: Icon(
                         Icons.cancel,
-                        color: value.text.isEmpty &&
-                                !FocusScope.of(context).hasFocus
-                            ? Colors.grey.shade500
-                            : textColor,
+                        color: textColor,
+                        // color: value.text.isEmpty &&
+                        //         !FocusScope.of(context).hasFocus
+                        //     ? Colors.grey.shade500
+                        //     : textColor,
                       ),
                     ),
                   ],

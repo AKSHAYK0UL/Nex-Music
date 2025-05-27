@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
+import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
+import 'package:nex_music/presentation/auth/screens/user_info.dart' as user;
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
 import 'package:nex_music/presentation/home/widget/drawer.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/search/widgets/desktop_searchbar.dart';
+import 'package:nex_music/presentation/setting/screen/settting.dart';
 
 class HomeScreen extends StatefulWidget {
   final User currentUser;
@@ -84,16 +87,59 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       if (isSmallScreen)
                         Builder(builder: (context) {
-                          return IconButton(
-                            onPressed: () {
-                              Scaffold.of(context).openEndDrawer();
-                            },
-                            icon: Icon(
-                              Icons.menu,
-                              size: screenSize * 0.0369,
-                              color: Colors.white,
-                            ),
-                          );
+                          return PopupMenuButton(
+                              shape: RoundedRectangleBorder(
+                                side:
+                                    BorderSide(color: accentColor, width: 1.5),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              color: secondaryColor,
+                              constraints: const BoxConstraints(
+                                  maxHeight: 150,
+                                  maxWidth: 130,
+                                  minHeight: 110,
+                                  minWidth: 130),
+                              itemBuilder: (context) => [
+                                    PopupMenuItem(
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          const Icon(
+                                            Icons.person,
+                                          ),
+                                          Text(
+                                            "Profile",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium,
+                                          ),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        Navigator.of(context).pushNamed(
+                                            user.UserInfo.routeName,
+                                            arguments: widget.currentUser);
+                                      },
+                                    ),
+                                    PopupMenuItem(
+                                      child: Row(
+                                        spacing: 10,
+                                        children: [
+                                          const Icon(Icons.settings),
+                                          Text(
+                                            "Setting",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium,
+                                          ),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        Navigator.of(context).pushNamed(
+                                            QualitySettingsScreen.routeName);
+                                      },
+                                    ),
+                                  ]);
                         })
                     ],
                     title: Visibility(

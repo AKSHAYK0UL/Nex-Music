@@ -40,75 +40,96 @@ class _SearchScreenState extends State<SearchScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: SearchField(
-            key: _searchFieldKey,
-            inputBorder: buildUnderlineInputBorder,
-            onTextChanges: (text) {
-              if (text.isEmpty) {
-                context.read<SearchBloc>().add(LoadRecentSearchEvent());
-              } else {
-                context
-                    .read<SearchBloc>()
-                    .add(SearchSongSuggestionEvent(inputQuery: text));
-              }
-            },
-            hintText: "Search songs, albums, artists...",
+        // appBar: AppBar(
+        //   automaticallyImplyLeading: false,
+        //   title: SearchField(
+        //     key: _searchFieldKey,
+        //     inputBorder: outlineInputBorder,
+        //     onTextChanges: (text) {
+        //       if (text.isEmpty) {
+        //         context.read<SearchBloc>().add(LoadRecentSearchEvent());
+        //       } else {
+        //         context
+        //             .read<SearchBloc>()
+        //             .add(SearchSongSuggestionEvent(inputQuery: text));
+        //       }
+        //     },
+        //     hintText: "Search songs, albums, artists...",
+        //   ),
+        // ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 15,
+              ),
+              SearchField(
+                key: _searchFieldKey,
+                inputBorder: outlineInputBorder,
+                onTextChanges: (text) {
+                  if (text.isEmpty) {
+                    context.read<SearchBloc>().add(LoadRecentSearchEvent());
+                  } else {
+                    context
+                        .read<SearchBloc>()
+                        .add(SearchSongSuggestionEvent(inputQuery: text));
+                  }
+                },
+                hintText: "Search songs, albums, artists...",
+              ),
+              BlocBuilder<SearchBloc, SearchState>(
+                buildWhen: (previous, current) => previous != current,
+                builder: (context, state) {
+                  if (state is LoadingState) {
+                    return Expanded(child: Center(child: loadingDisk()));
+                  }
+                  if (state is LoadedRecentSearchState) {
+                    return ListView.builder(
+                        itemCount: state.recentSerach.length,
+                        reverse: true,
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          final recentSearch = state.recentSerach[index];
+                          return RecentSearchTitle(
+                            text: recentSearch,
+                            size: screenSize,
+                            onSuggestionSelected: (selectedText) {
+                              _searchFieldKey.currentState
+                                  ?.setText(selectedText);
+                            },
+                          );
+                        });
+                  }
+                  if (state is ErrorState) {
+                    return Center(child: Text(state.errorMessage));
+                  }
+                  if (state is SearchSuggestionResultState) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: screenSize * 0.0105,
+                          vertical: screenSize * 0.0200),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: state.searchSuggestions.length,
+                        itemBuilder: (context, index) {
+                          final suggestion = state.searchSuggestions[index];
+                          return SuggestionTitle(
+                            text: suggestion,
+                            size: screenSize,
+                            onSuggestionSelected: (selectedText) {
+                              _searchFieldKey.currentState
+                                  ?.setText(selectedText);
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  }
+                  return const SizedBox();
+                },
+              ),
+            ],
           ),
-        ),
-        body: BlocBuilder<SearchBloc, SearchState>(
-          buildWhen: (previous, current) => previous != current,
-          builder: (context, state) {
-            if (state is LoadingState) {
-              // return Center(
-              //   child: CircularProgressIndicator(
-              //     color: accentColor,
-              //   ),
-              // );
-              return loadingDisk();
-            }
-            if (state is LoadedRecentSearchState) {
-              return ListView.builder(
-                  itemCount: state.recentSerach.length,
-                  reverse: true,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    final recentSearch = state.recentSerach[index];
-                    return RecentSearchTitle(
-                      text: recentSearch,
-                      size: screenSize,
-                      onSuggestionSelected: (selectedText) {
-                        _searchFieldKey.currentState?.setText(selectedText);
-                      },
-                    );
-                  });
-            }
-            if (state is ErrorState) {
-              return Center(child: Text(state.errorMessage));
-            }
-            if (state is SearchSuggestionResultState) {
-              return Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: screenSize * 0.0105,
-                    vertical: screenSize * 0.0200),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: state.searchSuggestions.length,
-                  itemBuilder: (context, index) {
-                    final suggestion = state.searchSuggestions[index];
-                    return SuggestionTitle(
-                      text: suggestion,
-                      size: screenSize,
-                      onSuggestionSelected: (selectedText) {
-                        _searchFieldKey.currentState?.setText(selectedText);
-                      },
-                    );
-                  },
-                ),
-              );
-            }
-            return const SizedBox();
-          },
         ),
         bottomNavigationBar: MiniPlayer(screenSize: screenSize),
       ),
@@ -116,11 +137,12 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 }
 
-UnderlineInputBorder get buildUnderlineInputBorder {
-  return UnderlineInputBorder(
+OutlineInputBorder get outlineInputBorder {
+  return OutlineInputBorder(
+    borderRadius: BorderRadius.circular(25),
     borderSide: BorderSide(
       width: 2,
-      color: secondaryColor,
+      color: accentColor,
     ),
   );
 }

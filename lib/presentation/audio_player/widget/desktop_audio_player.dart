@@ -179,14 +179,14 @@ class DesktopAudioPlayer extends StatelessWidget {
                             SizedBox(
                               width: screenSize * 0.550,
                               child: animatedText(
-                                  text: songData.songName.padLeft(14, " "),
+                                  text: "  ${songData.songName}",
                                   style:
                                       Theme.of(context).textTheme.titleLarge!),
                             ),
                             SizedBox(
                               width: screenSize * 0.550,
                               child: animatedText(
-                                text: songData.artist.name.padLeft(16, " "),
+                                text: "  ${songData.artist.name}",
                                 style: Theme.of(context).textTheme.titleMedium!,
                               ),
                             ),

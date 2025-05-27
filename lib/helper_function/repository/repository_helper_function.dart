@@ -69,8 +69,7 @@ class RepositoryHelperFunction {
           songName: playlistSongsData.name,
           artist: playlistSongsData.artist,
           thumbnail: getThumbnail(playlistSongsData.thumbnails),
-          duration:
-              songsDuration[i] == 0 ? "" : timeFormate(songsDuration[i] - 1),
+          duration: songsDuration[i] == 0 ? "" : timeFormate(songsDuration[i]),
         ),
       );
     }
@@ -136,8 +135,7 @@ class RepositoryHelperFunction {
         songName: songfull.name,
         artist: songfull.artist,
         thumbnail: getThumbnail(songfull.thumbnails),
-        duration:
-            songfull.duration == 0 ? "" : timeFormate(songfull.duration - 1));
+        duration: songfull.duration == 0 ? "" : timeFormate(songfull.duration));
   }
 
   //VideoFull to SongModel
@@ -148,7 +146,7 @@ class RepositoryHelperFunction {
         artist: videofull.artist,
         thumbnail: getThumbnail(videofull.thumbnails),
         duration:
-            videofull.duration == 0 ? "" : timeFormate(videofull.duration - 1));
+            videofull.duration == 0 ? "" : timeFormate(videofull.duration));
   }
 
   static AudioOnlyStreamInfo selectStream(

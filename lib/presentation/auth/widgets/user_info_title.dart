@@ -11,7 +11,9 @@ Widget buildUserInfo(
   return Container(
     // width: isSmallScreen ? double.infinity : screenSize.width * 0.309,
     margin: EdgeInsets.symmetric(
-        horizontal: screenSize.width * 0.0100,
+        horizontal: isSmallScreen
+            ? screenSize.height * 0.0197
+            : screenSize.width * 0.0100,
         vertical: isSmallScreen
             ? screenSize.height * 0.0091
             : screenSize.height * 0.0020),
