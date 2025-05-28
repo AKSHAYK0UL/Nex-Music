@@ -1,5 +1,6 @@
 import 'package:app_links/app_links.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -12,6 +13,8 @@ import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart';
+import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
+import 'package:nex_music/bloc/favorites_songs_bloc/bloc/favorites_songs_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
@@ -93,6 +96,7 @@ class MyApp extends StatelessWidget {
   MyApp({super.key, required this.myAudioHandler, required this.dbInstance});
   final repositoryProviderClassInstance = RepositoryProviderClass(
       firebaseAuthInstance: FirebaseAuth.instance,
+      firebaseFirestore: FirebaseFirestore.instance,
       connectivity: Connectivity());
 
   final applink = AppLinks();
@@ -155,6 +159,13 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) =>
                 AuthBloc(context.read<AuthRepository>(), dbInstance),
+          ),
+          BlocProvider(
+            create: (context) => FavoritesBloc(context.read<DbRepository>()),
+          ),
+          BlocProvider(
+            create: (context) =>
+                FavoritesSongsBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
             create: (context) => UserLoggedBloc(

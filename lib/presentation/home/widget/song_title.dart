@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';

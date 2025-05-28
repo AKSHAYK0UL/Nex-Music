@@ -11,6 +11,7 @@ import 'package:nex_music/helper_function/applink_function/uri_parser.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/audio_player/widget/overlay_audio_player.dart';
+import 'package:nex_music/presentation/favorites/screen/favorites_screen.dart';
 import 'package:nex_music/presentation/home/navbar/widget/navbarwidget.dart';
 import 'package:nex_music/presentation/home/navbar/widget/navrail.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
@@ -70,8 +71,8 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
     screens = [
       HomeScreen(currentUser: currentUser), // Home
       const RecentScreen(), // Recent
-      HomeScreen(currentUser: currentUser), // Favorites
       HomeScreen(currentUser: currentUser), // Playlist
+      const FavoritesScreen(), // Favorites
       DesktopSettingTab(
         //setting for large screen device only
         currentUser: currentUser,

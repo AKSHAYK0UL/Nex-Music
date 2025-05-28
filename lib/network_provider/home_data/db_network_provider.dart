@@ -1,28 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:nex_music/enum/collection_enum.dart';
+import 'package:nex_music/constants/const.dart';
 
 class DbNetworkProvider {
   final FirebaseFirestore _firestoreInstance;
-  late Map<CollectionEnum, String> _collections;
+  // late Map<CollectionEnum, String> _collections;
   late String _userId;
-  late CollectionReference _recentPlayedCollection;
-  final String _usersCollection = "users";
 
   DbNetworkProvider({
     required FirebaseFirestore firestoreInstance,
     required String userId,
-    required Map<CollectionEnum, String> collections,
+    // required Map<CollectionEnum, String> collections,
   }) : _firestoreInstance = firestoreInstance {
-    _initialize(userId, collections);
+    _initialize(userId);
   }
 
-  void _initialize(String userId, Map<CollectionEnum, String> collections) {
+  late CollectionReference _recentPlayedCollection;
+  void _initialize(String userId) {
     _userId = userId;
-    _collections = collections;
+    // _collections = collections;
     _recentPlayedCollection = _firestoreInstance
-        .collection(_usersCollection)
+        .collection(userCollection)
         .doc(_userId)
-        .collection(_collections[CollectionEnum.recentPlayed]!);
+        .collection(recentsCollection);
+    // .collection(_collections[CollectionEnum.recentPlayed]!);
   }
 
   Future<void> addToRecentPlayedCollection(Map<String, dynamic> songMap) async {

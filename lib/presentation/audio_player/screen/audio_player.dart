@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
@@ -12,9 +13,26 @@ import 'package:nex_music/presentation/audio_player/widget/player.dart';
 import 'package:nex_music/presentation/audio_player/widget/streambuilder.dart';
 import 'package:share_plus/share_plus.dart';
 
-class AudioPlayerScreen extends StatelessWidget {
+class AudioPlayerScreen extends StatefulWidget {
   static const routeName = "/audioplayer";
   const AudioPlayerScreen({super.key});
+
+  @override
+  State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
+}
+
+class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final routeData =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+      Songmodel songData = routeData["songdata"] as Songmodel;
+      context.read<FavoritesBloc>().add(IsFavoritesEvent(vId: songData.vId));
+    });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +87,10 @@ class AudioPlayerScreen extends StatelessWidget {
                 child: BlocBuilder<SongstreamBloc, SongstreamState>(
                   buildWhen: (previous, current) => previous != current,
                   builder: (context, state) {
+                    context
+                        .read<FavoritesBloc>()
+                        .add(IsFavoritesEvent(vId: songData.vId));
+
                     if (state is LoadingState) {
                       songData = state.songData;
                     }
@@ -147,14 +169,62 @@ class AudioPlayerScreen extends StatelessWidget {
                     ),
                     Column(
                       children: [
-                        IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            CupertinoIcons.heart_fill,
-                            color: textColor,
-                            size: screenSize * 0.0395,
-                          ),
+                        BlocBuilder<FavoritesBloc, FavoritesState>(
+                          buildWhen: (previous, current) => previous != current,
+                          builder: (context, state) {
+                            bool isFavorite = false;
+                            if (state is IsFavoritesState) {
+                              isFavorite = state.isFavorites;
+                            }
+
+                            return IconButton(
+                              onPressed: () {
+                                if (isFavorite) {
+                                  context.read<FavoritesBloc>().add(
+                                      RemoveFromFavoritesEvent(
+                                          vId: songData.vId));
+                                } else {
+                                  context
+                                      .read<FavoritesBloc>()
+                                      .add(AddToFavoritesEvent(song: songData));
+                                }
+                              },
+                              icon: Icon(
+                                isFavorite
+                                    ? CupertinoIcons.heart_fill
+                                    : CupertinoIcons.heart,
+                                color: textColor,
+                                size: screenSize * 0.0395,
+                              ),
+                            );
+                          },
                         ),
+
+                        // BlocBuilder<FavoritesBloc, FavoritesState>(
+                        //   buildWhen: (previous, current) => previous != current,
+                        //   builder: (context, state) {
+                        //     return IconButton(
+                        //       onPressed: () {
+                        //         if (context.read<FavoritesBloc>().isFav) {
+                        //           context.read<FavoritesBloc>().add(
+                        //               RemoveFromFavoritesEvent(
+                        //                   vId: songData.vId));
+                        //         } else {
+                        //           context
+                        //               .read<FavoritesBloc>()
+                        //               .add(AddToFavoritesEvent(song: songData));
+                        //         }
+                        //       },
+                        //       icon: Icon(
+                        //         state is IsFavoritesState && state.isFavorites
+                        //             ? CupertinoIcons.heart_fill
+                        //             : CupertinoIcons.heart,
+                        //         color: textColor,
+                        //         size: screenSize * 0.0395,
+                        //       ),
+                        //     );
+                        //   },
+                        // ),
                       ],
                     )
                   ],

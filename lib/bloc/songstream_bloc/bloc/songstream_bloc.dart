@@ -445,6 +445,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   final AudioPlayer _audioPlayer;
   final DbRepository _dbRepository;
   final HiveDataBaseSingleton _dbInstance;
+
   bool _isPlaying = false;
   Songmodel? _songData;
   Duration songDuration = Duration.zero;
