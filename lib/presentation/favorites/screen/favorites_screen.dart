@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/favorites_songs_bloc/bloc/favorites_songs_bloc.dart';
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
 class FavoritesScreen extends StatefulWidget {
@@ -11,7 +15,7 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  // ValueNotifier<bool> switchState = ValueNotifier(false);
+  ValueNotifier<bool> switchState = ValueNotifier(false);
   @override
   void initState() {
     context.read<FavoritesSongsBloc>().add(GetFavoritesEvent());
@@ -21,7 +25,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
-    // List<Songmodel> recentSongs = [];
+    List<Songmodel> recentSongs = [];
     return Scaffold(
       appBar: AppBar(
         title: Padding(
@@ -31,35 +35,35 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        // actions: [
-        //   ValueListenableBuilder(
-        //     valueListenable: switchState,
-        //     builder: (__, ___, _) {
-        //       return Padding(
-        //         padding: EdgeInsets.only(right: screenSize * 0.0131),
-        //         child: IconButton(
-        //           onPressed: () {
-        //             switchState.value = !switchState.value;
-        //             if (switchState.value) {
-        //               context.read<SongstreamBloc>().add(ResetPlaylistEvent());
-        //               context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
-        //                   songlist:
-        //                       recentSongs)); //load recent songs in the playlist
-        //               showSnackbar(context, "Now playing your recent songs");
-        //             } else {
-        //               context.read<SongstreamBloc>().add(CleanPlaylistEvent());
-        //             }
-        //           },
-        //           icon: Icon(
-        //             Icons.queue_music,
-        //             size: screenSize * 0.038,
-        //             color: switchState.value ? accentColor : Colors.grey,
-        //           ),
-        //         ),
-        //       );
-        //     },
-        //   )
-        // ],
+        actions: [
+          ValueListenableBuilder(
+            valueListenable: switchState,
+            builder: (__, ___, _) {
+              return Padding(
+                padding: EdgeInsets.only(right: screenSize * 0.0131),
+                child: IconButton(
+                  onPressed: () {
+                    switchState.value = !switchState.value;
+                    if (switchState.value) {
+                      context.read<SongstreamBloc>().add(ResetPlaylistEvent());
+                      context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
+                          songlist:
+                              recentSongs)); //load recent songs in the playlist
+                      showSnackbar(context, "Now playing your favorite songs");
+                    } else {
+                      context.read<SongstreamBloc>().add(CleanPlaylistEvent());
+                    }
+                  },
+                  icon: Icon(
+                    Icons.queue_music,
+                    size: screenSize * 0.038,
+                    color: switchState.value ? accentColor : Colors.grey,
+                  ),
+                ),
+              );
+            },
+          )
+        ],
       ),
       body: BlocBuilder<FavoritesSongsBloc, FavoritesSongsState>(
         buildWhen: (previous, current) => previous != current,

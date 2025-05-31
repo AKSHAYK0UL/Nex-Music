@@ -84,44 +84,48 @@ class _SearchScreenState extends State<SearchScreen> {
                     return Expanded(child: Center(child: loadingDisk()));
                   }
                   if (state is LoadedRecentSearchState) {
-                    return ListView.builder(
-                        itemCount: state.recentSerach.length,
-                        reverse: true,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          final recentSearch = state.recentSerach[index];
-                          return RecentSearchTitle(
-                            text: recentSearch,
-                            size: screenSize,
-                            onSuggestionSelected: (selectedText) {
-                              _searchFieldKey.currentState
-                                  ?.setText(selectedText);
-                            },
-                          );
-                        });
+                    return Expanded(
+                      child: ListView.builder(
+                          itemCount: state.recentSerach.length,
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) {
+                            int rIndex = state.recentSerach.length - index - 1;
+                            final recentSearch = state.recentSerach[rIndex];
+                            return RecentSearchTitle(
+                              text: recentSearch,
+                              size: screenSize,
+                              onSuggestionSelected: (selectedText) {
+                                _searchFieldKey.currentState
+                                    ?.setText(selectedText);
+                              },
+                            );
+                          }),
+                    );
                   }
                   if (state is ErrorState) {
                     return Center(child: Text(state.errorMessage));
                   }
                   if (state is SearchSuggestionResultState) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenSize * 0.0105,
-                          vertical: screenSize * 0.0200),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: state.searchSuggestions.length,
-                        itemBuilder: (context, index) {
-                          final suggestion = state.searchSuggestions[index];
-                          return SuggestionTitle(
-                            text: suggestion,
-                            size: screenSize,
-                            onSuggestionSelected: (selectedText) {
-                              _searchFieldKey.currentState
-                                  ?.setText(selectedText);
-                            },
-                          );
-                        },
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenSize * 0.0105,
+                            vertical: screenSize * 0.0200),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: state.searchSuggestions.length,
+                          itemBuilder: (context, index) {
+                            final suggestion = state.searchSuggestions[index];
+                            return SuggestionTitle(
+                              text: suggestion,
+                              size: screenSize,
+                              onSuggestionSelected: (selectedText) {
+                                _searchFieldKey.currentState
+                                    ?.setText(selectedText);
+                              },
+                            );
+                          },
+                        ),
                       ),
                     );
                   }
