@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
 
 void modalsheet(BuildContext context) {
   showModalBottomSheet(
@@ -25,22 +24,4 @@ void modalsheet(BuildContext context) {
       );
     },
   );
-}
-
-class ModalsheetIconButton extends StatelessWidget {
-  const ModalsheetIconButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        modalsheet(context);
-      },
-      icon: Icon(
-        Icons.expand_less,
-        size: 28,
-        color: textColor,
-      ),
-    );
-  }
 }

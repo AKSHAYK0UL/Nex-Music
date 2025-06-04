@@ -26,6 +26,7 @@ import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_logged_bloc/bloc/user_logged_bloc.dart';
+import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/constants/const.dart';
 import 'package:nex_music/core/bloc_provider/repository_provider/repository_provider.dart';
@@ -167,6 +168,9 @@ class MyApp extends StatelessWidget {
             create: (context) =>
                 FavoritesSongsBloc(context.read<DbRepository>()),
           ),
+          BlocProvider(
+              create: (context) =>
+                  UserPlaylistBloc(context.read<DbRepository>())),
           BlocProvider(
             create: (context) => UserLoggedBloc(
               repositoryProviderClassInstance.getFirebaseAuthInstance,

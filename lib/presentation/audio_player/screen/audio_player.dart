@@ -396,6 +396,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
@@ -674,85 +675,24 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   ],
                 ),
                 SizedBox(height: screenSize * 0.0240),
-                // Align(
-                //   alignment: Alignment.center,
-                //   child: IconButton(
-                //     onPressed: () {
-                //       showModalBottomSheet(
-                //         context: context,
-                //         useRootNavigator: true,
-                //         isScrollControlled: true,
-                //         backgroundColor: Colors.transparent,
-                //         builder: (context) {
-                //           return Container(
-                //             color: Colors.red,
-                //             width: double.infinity,
-                //             height: 200,
-                //             child: const Column(
-                //               children: [
-                //                 SizedBox(height: 16),
-                //                 Text("View Artist",
-                //                     style: TextStyle(color: Colors.white)),
-                //                 SizedBox(height: 12),
-                //                 Text("Add to Playlist",
-                //                     style: TextStyle(color: Colors.white)),
-                //                 SizedBox(height: 12),
-                //                 Text("Download",
-                //                     style: TextStyle(color: Colors.white)),
-                //               ],
-                //             ),
-                //           );
-                //         },
-                //       );
-                //     },
-                //     icon: Icon(
-                //       Icons.expand_less,
-                //       size: screenSize * 0.0593,
-                //       color: textColor,
-                //     ),
-                //   ),
-                // ),
-
                 Align(
                   alignment: Alignment.center,
-                  child: Builder(
-                    builder: (bottomSheetContext) {
-                      return IconButton(
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: bottomSheetContext,
-                            useRootNavigator: true,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder: (bottomSheetContext) {
-                              return Container(
-                                color: Colors.red,
-                                width: double.infinity,
-                                height: 200,
-                                child: const Column(
-                                  children: [
-                                    SizedBox(height: 16),
-                                    Text("View Artist",
-                                        style: TextStyle(color: Colors.white)),
-                                    SizedBox(height: 12),
-                                    Text("Add to Playlist",
-                                        style: TextStyle(color: Colors.white)),
-                                    SizedBox(height: 12),
-                                    Text("Download",
-                                        style: TextStyle(color: Colors.white)),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        icon: Icon(
-                          Icons.expand_less,
-                          size: screenSize * 0.0593,
-                          color: textColor,
-                        ),
-                      );
+                  child: IconButton(
+                    onPressed: () {
+                      // modalsheet(context);
+                      print("ADD TO USER PLAYLIST @@@");
+                      context
+                          .read<UserPlaylistBloc>()
+                          .add(AddSongToUserPlaylistEvent(
+                            playlistName: "xyz songs",
+                            songData: songData,
+                          ));
                     },
+                    icon: Icon(
+                      Icons.expand_less,
+                      size: screenSize * 0.0593,
+                      color: textColor,
+                    ),
                   ),
                 ),
               ],

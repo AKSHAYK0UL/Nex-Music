@@ -7,7 +7,6 @@ import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/presentation/auth/screens/user_info.dart' as user;
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
-import 'package:nex_music/presentation/home/widget/drawer.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
@@ -67,9 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   FocusScope.of(context).unfocus();
                 },
                 child: Scaffold(
-                  endDrawer: BuildDrawer(
-                    currentUser: widget.currentUser,
-                  ),
                   appBar: AppBar(
                     actions: [
                       if (!isSmallScreen) const SizedBox(),

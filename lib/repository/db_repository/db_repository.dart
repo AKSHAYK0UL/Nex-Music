@@ -2,15 +2,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/network_provider/home_data/db_network_provider.dart';
 import 'package:nex_music/network_provider/home_data/favorites_db_provider.dart';
+import 'package:nex_music/network_provider/home_data/playlist_db_provide.dart';
 
 class DbRepository {
   final DbNetworkProvider _dbDataProvider;
   final FavoritesDBProvider _favoritesDBProvider;
+  final PlaylistDbProvider _playlistDbProvider;
   DbRepository(
       {required DbNetworkProvider dbDataProvider,
-      required FavoritesDBProvider favoritesDBProvider})
+      required FavoritesDBProvider favoritesDBProvider,
+      required PlaylistDbProvider playlistDbProvider})
       : _dbDataProvider = dbDataProvider,
-        _favoritesDBProvider = favoritesDBProvider;
+        _favoritesDBProvider = favoritesDBProvider,
+        _playlistDbProvider = playlistDbProvider;
 
   //Add recent Played
   Future<void> addToRecentPlayedCollection(Songmodel songData) async {
@@ -75,5 +79,40 @@ class DbRepository {
         return Songmodel.fromJson(doc.data() as Map<String, dynamic>);
       }).toList();
     });
+  }
+
+  //playlistDbProvider
+
+  Future<void> createPlaylistCollection(String playlistName) async {
+    try {
+      await _playlistDbProvider.createUserPlaylistCollection(playlistName);
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  //get user playlists
+  Stream<List<String>> getUserPlaylist() {
+    final x = _playlistDbProvider.getUserPlaylists();
+    return x.map((querySnapshot) {
+      return querySnapshot.docs.map((doc) {
+        return doc.id;
+      }).toList();
+    });
+  }
+  //add
+
+  Future<void> addSongToPlaylist(
+      String playlistName, Songmodel songdata) async {
+    try {
+      await _playlistDbProvider.addSongToPlaylist(
+          playlistName, songdata.toJson());
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
   }
 }
