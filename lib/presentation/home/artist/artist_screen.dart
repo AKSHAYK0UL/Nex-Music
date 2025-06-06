@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
+import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
@@ -52,6 +53,7 @@ class _ArtistScreenState extends State<ArtistScreen> {
                   songData: songData,
                   songIndex: index,
                   showDelete: false,
+                  tabRouteENUM: TabRouteENUM.other,
                 ),
               );
             },

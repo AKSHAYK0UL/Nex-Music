@@ -396,11 +396,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
-import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
-import 'package:nex_music/core/ui_component/modalsheet.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -497,12 +495,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                           height: screenSize * 0.410,
                           width: screenSize * 0.448,
                           decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(screenSize * 0.0131),
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(screenSize * 0.0131),
+                                topRight: Radius.circular(screenSize * 0.0131)),
                           ),
                           child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(screenSize * 0.0131),
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(screenSize * 0.0131),
+                                topRight: Radius.circular(screenSize * 0.0131)),
                             child: Transform.scale(
                               scaleX:
                                   quality == ThumbnailQuality.low ? 1 : 1.78,
@@ -519,78 +519,164 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     },
                   ),
                 ),
-                SizedBox(height: screenSize * 0.0380),
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: screenSize * 0.0329),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: screenSize * 0.356,
-                            child: BlocBuilder<SongstreamBloc, SongstreamState>(
-                              buildWhen: (previous, current) =>
-                                  previous != current,
-                              builder: (context, state) {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    animatedText(
-                                      text: songData.songName,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge!,
-                                    ),
-                                    SizedBox(height: screenSize * 0.0050),
-                                    animatedText(
-                                      text: songData.artist.name,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium!,
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      BlocBuilder<FavoritesBloc, FavoritesState>(
-                        buildWhen: (previous, current) => previous != current,
-                        builder: (context, state) {
-                          bool isFavorite = false;
-                          if (state is IsFavoritesState) {
-                            isFavorite = state.isFavorites;
-                          }
-                          return IconButton(
-                            onPressed: () {
-                              if (isFavorite) {
-                                context.read<FavoritesBloc>().add(
-                                    RemoveFromFavoritesEvent(
-                                        vId: songData.vId));
-                              } else {
-                                context
-                                    .read<FavoritesBloc>()
-                                    .add(AddToFavoritesEvent(song: songData));
-                              }
-                            },
-                            icon: Icon(
-                              isFavorite
-                                  ? CupertinoIcons.heart_fill
-                                  : CupertinoIcons.heart,
-                              color: textColor,
-                              size: screenSize * 0.0395,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                //
+                Container(
+                  margin: EdgeInsets.symmetric(horizontal: screenSize * 0.0331),
+                  decoration: BoxDecoration(
+                    color: secondaryColor,
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(screenSize * 0.0131),
+                        bottomRight: Radius.circular(screenSize * 0.0131)),
                   ),
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.person,
+                            color: textColor,
+                            size: screenSize * 0.0395,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.download,
+                            color: textColor,
+                            size: screenSize * 0.0395,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {},
+                          icon: Icon(
+                            Icons.playlist_add,
+                            color: textColor,
+                            size: screenSize * 0.0395,
+                          ),
+                        )
+                      ]),
                 ),
-                SizedBox(height: screenSize * 0.0400),
+                //
+                // SizedBox(height: screenSize * 0.0380),
+                SizedBox(height: screenSize * 0.0080),
+
+                Padding(
+                  padding: EdgeInsets.only(left: screenSize * 0.0229),
+                  //
+                  child: ListTile(
+                    minVerticalPadding: 5,
+                    tileColor: backgroundColor,
+                    title: BlocBuilder<SongstreamBloc, SongstreamState>(
+                      buildWhen: (previous, current) => previous != current,
+                      builder: (context, state) {
+                        return animatedText(
+                          text: songData.songName,
+                          style: Theme.of(context).textTheme.titleLarge!,
+                        );
+                      },
+                    ),
+                    subtitle: BlocBuilder<SongstreamBloc, SongstreamState>(
+                      buildWhen: (previous, current) => previous != current,
+                      builder: (context, state) {
+                        return animatedText(
+                          text: songData.artist.name,
+                          style: Theme.of(context).textTheme.titleMedium!,
+                        );
+                      },
+                    ),
+                    trailing: BlocBuilder<FavoritesBloc, FavoritesState>(
+                      buildWhen: (previous, current) => previous != current,
+                      builder: (context, state) {
+                        bool isFavorite = false;
+                        if (state is IsFavoritesState) {
+                          isFavorite = state.isFavorites;
+                        }
+                        return IconButton(
+                          onPressed: () {
+                            if (isFavorite) {
+                              context.read<FavoritesBloc>().add(
+                                  RemoveFromFavoritesEvent(vId: songData.vId));
+                            } else {
+                              context
+                                  .read<FavoritesBloc>()
+                                  .add(AddToFavoritesEvent(song: songData));
+                            }
+                          },
+                          icon: Icon(
+                            isFavorite
+                                ? CupertinoIcons.heart_fill
+                                : CupertinoIcons.heart,
+                            color: textColor,
+                            size: screenSize * 0.0395,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  //
+                  // child: Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //     SizedBox(
+                  //       width: screenSize * 0.356,
+                  //       child: BlocBuilder<SongstreamBloc, SongstreamState>(
+                  //         buildWhen: (previous, current) => previous != current,
+                  //         builder: (context, state) {
+                  //           return Column(
+                  //             crossAxisAlignment: CrossAxisAlignment.start,
+                  //             children: [
+                  //               animatedText(
+                  //                 text: songData.songName,
+                  //                 style:
+                  //                     Theme.of(context).textTheme.titleLarge!,
+                  //               ),
+                  //               SizedBox(height: screenSize * 0.0050),
+                  //               animatedText(
+                  //                 text: songData.artist.name,
+                  //                 style:
+                  //                     Theme.of(context).textTheme.titleMedium!,
+                  //               ),
+                  //             ],
+                  //           );
+                  //         },
+                  //       ),
+                  //     ),
+                  //     BlocBuilder<FavoritesBloc, FavoritesState>(
+                  //       buildWhen: (previous, current) => previous != current,
+                  //       builder: (context, state) {
+                  //         bool isFavorite = false;
+                  //         if (state is IsFavoritesState) {
+                  //           isFavorite = state.isFavorites;
+                  //         }
+                  //         return IconButton(
+                  //           onPressed: () {
+                  //             if (isFavorite) {
+                  //               context.read<FavoritesBloc>().add(
+                  //                   RemoveFromFavoritesEvent(
+                  //                       vId: songData.vId));
+                  //             } else {
+                  //               context
+                  //                   .read<FavoritesBloc>()
+                  //                   .add(AddToFavoritesEvent(song: songData));
+                  //             }
+                  //           },
+                  //           icon: Icon(
+                  //             isFavorite
+                  //                 ? CupertinoIcons.heart_fill
+                  //                 : CupertinoIcons.heart,
+                  //             color: textColor,
+                  //             size: screenSize * 0.0395,
+                  //           ),
+                  //         );
+                  //       },
+                  //     ),
+                  //   ],
+                  // ),
+                ),
+                // SizedBox(height: screenSize * 0.0400),
+                SizedBox(height: screenSize * 0.0200),
+
                 StreamBuilderWidget(screenSize: screenSize),
                 SizedBox(height: screenSize * 0.0150),
                 Row(
@@ -675,26 +761,26 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   ],
                 ),
                 SizedBox(height: screenSize * 0.0240),
-                Align(
-                  alignment: Alignment.center,
-                  child: IconButton(
-                    onPressed: () {
-                      // modalsheet(context);
-                      print("ADD TO USER PLAYLIST @@@");
-                      context
-                          .read<UserPlaylistBloc>()
-                          .add(AddSongToUserPlaylistEvent(
-                            playlistName: "xyz songs",
-                            songData: songData,
-                          ));
-                    },
-                    icon: Icon(
-                      Icons.expand_less,
-                      size: screenSize * 0.0593,
-                      color: textColor,
-                    ),
-                  ),
-                ),
+                // Align(
+                //   alignment: Alignment.center,
+                //   child: IconButton(
+                //     onPressed: () {
+                //       // modalsheet(context);
+                //       // print("ADD TO USER PLAYLIST @@@");
+                //       // context
+                //       //     .read<UserPlaylistBloc>()
+                //       //     .add(AddSongToUserPlaylistEvent(
+                //       //       playlistName: "xyz songs",
+                //       //       songData: songData,
+                //       //     ));
+                //     },
+                //     icon: Icon(
+                //       Icons.expand_less,
+                //       size: screenSize * 0.0593,
+                //       color: textColor,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ],

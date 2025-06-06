@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nex_music/enum/tab_route.dart';
 
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
@@ -33,6 +34,7 @@ class SongColumView extends StatelessWidget {
                   songData: songData,
                   songIndex: index,
                   showDelete: false,
+                  tabRouteENUM: TabRouteENUM.other,
                 ),
               );
             } else {

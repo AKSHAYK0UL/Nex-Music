@@ -4,6 +4,7 @@ import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
@@ -101,6 +102,7 @@ class _RecentScreenState extends State<RecentScreen> {
                           songData: songData,
                           songIndex: index,
                           showDelete: true,
+                          tabRouteENUM: TabRouteENUM.recent,
                         );
                       },
                     );

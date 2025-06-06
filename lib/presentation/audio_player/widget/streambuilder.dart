@@ -27,7 +27,7 @@ class StreamBuilderWidget extends StatelessWidget {
         final duration = context.read<SongstreamBloc>().songDuration;
 
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0310),
+          padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0388),
           child: ProgressBar(
             progress: position ?? Duration.zero,
             buffered: bufferedPosition ?? Duration.zero,

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
+import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
 class SongsTab extends StatelessWidget {
@@ -39,6 +40,7 @@ class SongsTab extends StatelessWidget {
                     songData: songData,
                     songIndex: index,
                     showDelete: false,
+                    tabRouteENUM: TabRouteENUM.other,
                   );
                 },
               ),

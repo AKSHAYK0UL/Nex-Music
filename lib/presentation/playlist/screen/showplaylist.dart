@@ -7,6 +7,7 @@ import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
@@ -194,6 +195,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                               songData: songData,
                               songIndex: index,
                               showDelete: false,
+                              tabRouteENUM: TabRouteENUM.other,
                             );
                           } else {
                             return Transform.scale(

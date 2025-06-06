@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
+import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
 class Videostab extends StatefulWidget {
@@ -56,6 +57,7 @@ class _VideostabState extends State<Videostab> {
                     songData: songData,
                     songIndex: index,
                     showDelete: false,
+                    tabRouteENUM: TabRouteENUM.other,
                   );
                 },
               ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -14,6 +16,7 @@ Future<void> showLongPressOptions({
   required Songmodel songData,
   required double screenSize,
   required bool showDelete,
+  required TabRouteENUM tabRouteENUM,
 }) async {
   showDialog(
     context: context,
@@ -121,9 +124,15 @@ Future<void> showLongPressOptions({
                       if (showDelete)
                         TextButton.icon(
                           onPressed: () {
-                            context.read<SongDialogBloc>().add(
-                                RemoveFromRecentlyPlayedEvent(
-                                    vId: songData.vId));
+                            if (tabRouteENUM == TabRouteENUM.recent) {
+                              context.read<SongDialogBloc>().add(
+                                  RemoveFromRecentlyPlayedEvent(
+                                      vId: songData.vId));
+                            } else if (tabRouteENUM == TabRouteENUM.favorites) {
+                              print("FAV REMOVE @@");
+                              context.read<FavoritesBloc>().add(
+                                  RemoveFromFavoritesEvent(vId: songData.vId));
+                            }
                             Navigator.of(context).pop();
                           },
                           label: animatedText(
@@ -248,8 +257,18 @@ Future<void> showLongPressOptions({
                   if (showDelete)
                     TextButton.icon(
                       onPressed: () {
-                        context.read<SongDialogBloc>().add(
-                            RemoveFromRecentlyPlayedEvent(vId: songData.vId));
+                        // context.read<SongDialogBloc>().add(
+                        //     RemoveFromRecentlyPlayedEvent(vId: songData.vId));
+                        // Navigator.of(context).pop();
+                        if (tabRouteENUM == TabRouteENUM.recent) {
+                          context.read<SongDialogBloc>().add(
+                              RemoveFromRecentlyPlayedEvent(vId: songData.vId));
+                        } else if (tabRouteENUM == TabRouteENUM.favorites) {
+                          print("FAV REMOVE @@");
+                          context
+                              .read<FavoritesBloc>()
+                              .add(RemoveFromFavoritesEvent(vId: songData.vId));
+                        }
                         Navigator.of(context).pop();
                       },
                       label: animatedText(

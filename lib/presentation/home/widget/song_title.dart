@@ -5,6 +5,7 @@ import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
+import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/main.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
@@ -16,12 +17,14 @@ class SongTitle extends StatefulWidget {
   final Songmodel songData;
   final int songIndex;
   final bool showDelete;
+  final TabRouteENUM tabRouteENUM;
 
   const SongTitle({
     super.key,
     required this.songData,
     required this.songIndex,
     required this.showDelete,
+    required this.tabRouteENUM,
   });
 
   @override
@@ -88,6 +91,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
               songData: widget.songData,
               screenSize: screenSize,
               showDelete: widget.showDelete,
+              tabRouteENUM: widget.tabRouteENUM,
             );
           }
         },
@@ -153,6 +157,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
                     songData: widget.songData,
                     screenSize: screenSize,
                     showDelete: widget.showDelete,
+                    tabRouteENUM: widget.tabRouteENUM,
                   );
                 },
                 icon: const Icon(Icons.more_vert),
