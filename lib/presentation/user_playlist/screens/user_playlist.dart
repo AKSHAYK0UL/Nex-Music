@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
+import 'package:nex_music/presentation/user_playlist/screens/user_playlist_songs.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/show_dialog.dart';
 
 class UserPlaylist extends StatefulWidget {
@@ -41,7 +42,7 @@ class _UserPlaylistState extends State<UserPlaylist> {
           if (state is UserPlaylistDataState) {
             print("UserPlaylistDataState @@@");
 
-            return StreamBuilder(
+            return StreamBuilder<List<String>>(
                 stream: state.data,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -55,11 +56,20 @@ class _UserPlaylistState extends State<UserPlaylist> {
                   } else if (snapshot.data!.isEmpty) {
                     return const Center(child: Text('No Playlist'));
                   }
-                  final x = snapshot.data;
+                  final data = snapshot.data;
                   return ListView.builder(
-                      itemCount: x!.length,
+                      itemCount: data!.length,
                       itemBuilder: (context, index) {
-                        return Text(x[index]);
+                        return ListTile(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                                UserPlaylistSongs.routeName,
+                                arguments: data[index]);
+                          },
+                          title: Text(
+                            data[index],
+                          ),
+                        );
                       });
                 });
           }

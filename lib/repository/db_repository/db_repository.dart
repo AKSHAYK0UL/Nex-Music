@@ -95,15 +95,15 @@ class DbRepository {
 
   //get user playlists
   Stream<List<String>> getUserPlaylist() {
-    final x = _playlistDbProvider.getUserPlaylists();
-    return x.map((querySnapshot) {
+    final data = _playlistDbProvider.getUserPlaylists();
+    return data.map((querySnapshot) {
       return querySnapshot.docs.map((doc) {
         return doc.id;
       }).toList();
     });
   }
-  //add
 
+  //add
   Future<void> addSongToPlaylist(
       String playlistName, Songmodel songdata) async {
     try {
@@ -114,5 +114,15 @@ class DbRepository {
     } catch (_) {
       rethrow;
     }
+  }
+
+  //get UserPlaylist songs
+  Stream<List<Songmodel>> getUserPlaylistSongs(String playlistName) {
+    final data = _playlistDbProvider.getUserPlaylistSongs(playlistName);
+    return data.map((querySnapshot) {
+      return querySnapshot.docs.map((doc) {
+        return Songmodel.fromJson(doc.data() as Map<String, dynamic>);
+      }).toList();
+    });
   }
 }

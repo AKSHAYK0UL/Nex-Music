@@ -17,3 +17,9 @@ final class UserPlaylistErrorState extends UserPlaylistState {
 
   UserPlaylistErrorState({required this.errorMessage});
 }
+
+final class UserPlaylistSongsDataState extends UserPlaylistState {
+  final Stream<List<Songmodel>> data;
+
+  UserPlaylistSongsDataState({required this.data});
+}

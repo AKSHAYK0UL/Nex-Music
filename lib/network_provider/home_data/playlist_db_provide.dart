@@ -47,12 +47,21 @@ class PlaylistDbProvider {
     try {
       await _playlistCollection
           .doc(playlistName)
-          .collection('songs')
+          .collection(userPlaylistSongs)
           .add(songData);
     } on FirebaseException catch (_) {
       rethrow;
     } catch (_) {
       rethrow;
     }
+  }
+
+  //get Playlist songs
+  Stream<QuerySnapshot> getUserPlaylistSongs(String playlistName) {
+    return _playlistCollection
+        .doc(playlistName)
+        .collection(userPlaylistSongs)
+        .orderBy('timestamp', descending: true)
+        .snapshots();
   }
 }
