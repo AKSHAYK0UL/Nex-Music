@@ -398,6 +398,7 @@ import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_dialog.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/quality.dart';
@@ -549,168 +550,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                             size: screenSize * 0.0395,
                           ),
                         ),
-                        // IconButton(
-                        //   onPressed: () {
-                        //     print("ADD TO PLAYLIST #@@@");
-                        //     showDialog(
-                        //       context: context,
-                        //       builder: (context) {
-                        //         return AlertDialog(
-                        //           content: SizedBox(
-                        //             height: 200,
-                        //             width: double
-                        //                 .maxFinite, // optional: control width
-                        //             child: BlocBuilder<UserPlaylistBloc,
-                        //                 UserPlaylistState>(
-                        //               buildWhen: (previous, current) =>
-                        //                   previous != current,
-                        //               builder: (context, state) {
-                        //                 if (state is UserPlaylistDataState) {
-                        //                   return StreamBuilder<List<String>>(
-                        //                     stream: state.data,
-                        //                     builder: (context, snapshot) {
-                        //                       if (snapshot.connectionState ==
-                        //                           ConnectionState.waiting) {
-                        //                         return const Center(
-                        //                             child:
-                        //                                 CircularProgressIndicator());
-                        //                       } else if (snapshot.hasError) {
-                        //                         return Center(
-                        //                             child: Text(snapshot.error
-                        //                                 .toString()));
-                        //                       } else if (!snapshot.hasData ||
-                        //                           snapshot.data!.isEmpty) {
-                        //                         return const Center(
-                        //                             child: Text('No Playlist'));
-                        //                       }
-
-                        //                       final playlists = snapshot.data!;
-                        //                       return ListView.builder(
-                        //                         itemCount: playlists.length,
-                        //                         itemBuilder: (context, index) {
-                        //                           return Text(playlists[index]);
-                        //                         },
-                        //                       );
-                        //                     },
-                        //                   );
-                        //                 }
-                        //                 return const SizedBox();
-                        //               },
-                        //             ),
-                        //           ),
-                        //         );
-                        //       },
-                        //     );
-                        //   },
-                        //   icon: Icon(
-                        //     Icons.playlist_add,
-                        //     color: textColor,
-                        //     size: screenSize * 0.0395,
-                        //   ),
-                        // )
-
                         IconButton(
                           onPressed: () {
-                            context
-                                .read<UserPlaylistBloc>()
-                                .add(GetUserPlaylistsEvent());
-
-                            final Songmodel currentSong =
-                                songData; // Capture the current song data
-
-                            showDialog(
-                              context:
-                                  context, // This is the main screen's context
-                              builder: (dialogContext) {
-                                // Use BlocProvider.value to provide the existing UserPlaylistBloc
-                                // to the dialog's widget tree.
-                                return BlocProvider.value(
-                                  value: BlocProvider.of<UserPlaylistBloc>(
-                                      context),
-                                  child: AlertDialog(
-                                    title: const Text('Select Playlist'),
-                                    content: SizedBox(
-                                      height: 200,
-                                      width: double.maxFinite,
-                                      child: BlocBuilder<UserPlaylistBloc,
-                                          UserPlaylistState>(
-                                        builder: (context, state) {
-                                          // Explicitly handle the loading state
-                                          if (state
-                                                  is UserPlaylistLoadingState ||
-                                              state is UserPlaylistInitial) {
-                                            return const Center(
-                                                child:
-                                                    CircularProgressIndicator());
-                                          }
-
-                                          // Handle the data state
-                                          if (state is UserPlaylistDataState) {
-                                            return StreamBuilder<List<String>>(
-                                              stream: state.data,
-                                              builder: (context, snapshot) {
-                                                if (snapshot.connectionState ==
-                                                    ConnectionState.waiting) {
-                                                  return const Center(
-                                                      child:
-                                                          CircularProgressIndicator());
-                                                }
-                                                if (snapshot.hasError) {
-                                                  return Center(
-                                                      child: Text(
-                                                          'Error: ${snapshot.error}'));
-                                                }
-                                                if (!snapshot.hasData ||
-                                                    snapshot.data!.isEmpty) {
-                                                  return const Center(
-                                                      child: Text(
-                                                          'No Playlists Found'));
-                                                }
-
-                                                final playlists =
-                                                    snapshot.data!;
-                                                return ListView.builder(
-                                                  itemCount: playlists.length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    final playlistName =
-                                                        playlists[index];
-                                                    return ListTile(
-                                                      title: Text(playlistName),
-                                                      onTap: () {
-                                                        context
-                                                            .read<
-                                                                UserPlaylistBloc>()
-                                                            .add(
-                                                              AddSongToUserPlaylistEvent(
-                                                                playlistName:
-                                                                    playlistName,
-                                                                songData:
-                                                                    currentSong,
-                                                              ),
-                                                            );
-                                                        // Close the dialog
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    );
-                                                  },
-                                                );
-                                              },
-                                            );
-                                          }
-
-                                          // Fallback for any other states
-                                          return const Center(
-                                              child: Text(
-                                                  'Something went wrong.'));
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
+                            showAddToPlaylistDialog(context, songData);
                           },
                           icon: Icon(
                             Icons.playlist_add,
@@ -777,65 +619,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       },
                     ),
                   ),
-                  //
-                  // child: Row(
-                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //   children: [
-                  //     SizedBox(
-                  //       width: screenSize * 0.356,
-                  //       child: BlocBuilder<SongstreamBloc, SongstreamState>(
-                  //         buildWhen: (previous, current) => previous != current,
-                  //         builder: (context, state) {
-                  //           return Column(
-                  //             crossAxisAlignment: CrossAxisAlignment.start,
-                  //             children: [
-                  //               animatedText(
-                  //                 text: songData.songName,
-                  //                 style:
-                  //                     Theme.of(context).textTheme.titleLarge!,
-                  //               ),
-                  //               SizedBox(height: screenSize * 0.0050),
-                  //               animatedText(
-                  //                 text: songData.artist.name,
-                  //                 style:
-                  //                     Theme.of(context).textTheme.titleMedium!,
-                  //               ),
-                  //             ],
-                  //           );
-                  //         },
-                  //       ),
-                  //     ),
-                  //     BlocBuilder<FavoritesBloc, FavoritesState>(
-                  //       buildWhen: (previous, current) => previous != current,
-                  //       builder: (context, state) {
-                  //         bool isFavorite = false;
-                  //         if (state is IsFavoritesState) {
-                  //           isFavorite = state.isFavorites;
-                  //         }
-                  //         return IconButton(
-                  //           onPressed: () {
-                  //             if (isFavorite) {
-                  //               context.read<FavoritesBloc>().add(
-                  //                   RemoveFromFavoritesEvent(
-                  //                       vId: songData.vId));
-                  //             } else {
-                  //               context
-                  //                   .read<FavoritesBloc>()
-                  //                   .add(AddToFavoritesEvent(song: songData));
-                  //             }
-                  //           },
-                  //           icon: Icon(
-                  //             isFavorite
-                  //                 ? CupertinoIcons.heart_fill
-                  //                 : CupertinoIcons.heart,
-                  //             color: textColor,
-                  //             size: screenSize * 0.0395,
-                  //           ),
-                  //         );
-                  //       },
-                  //     ),
-                  //   ],
-                  // ),
                 ),
                 // SizedBox(height: screenSize * 0.0400),
                 SizedBox(height: screenSize * 0.0200),
@@ -923,27 +706,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: screenSize * 0.0240),
-                // Align(
-                //   alignment: Alignment.center,
-                //   child: IconButton(
-                //     onPressed: () {
-                //       // modalsheet(context);
-                //       // print("ADD TO USER PLAYLIST @@@");
-                //       // context
-                //       //     .read<UserPlaylistBloc>()
-                //       //     .add(AddSongToUserPlaylistEvent(
-                //       //       playlistName: "xyz songs",
-                //       //       songData: songData,
-                //       //     ));
-                //     },
-                //     icon: Icon(
-                //       Icons.expand_less,
-                //       size: screenSize * 0.0593,
-                //       color: textColor,
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ],

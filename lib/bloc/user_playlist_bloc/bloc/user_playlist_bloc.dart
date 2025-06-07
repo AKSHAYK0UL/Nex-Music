@@ -12,7 +12,6 @@ class UserPlaylistBloc extends Bloc<UserPlaylistEvent, UserPlaylistState> {
     on<CreatePlaylistEvent>(_createPlaylist);
     on<GetUserPlaylistsEvent>(_userPlaylist);
     on<AddSongToUserPlaylistEvent>(_addToUserPlaylist);
-    // on<GetuserPlaylistSongsEvent>(_getuserPlaylistSongs);//moved to userplaylistsongbloc
   }
   Future<void> _createPlaylist(
       CreatePlaylistEvent event, Emitter<UserPlaylistState> emit) async {
@@ -49,17 +48,4 @@ class UserPlaylistBloc extends Bloc<UserPlaylistEvent, UserPlaylistState> {
       emit(UserPlaylistErrorState(errorMessage: e.toString()));
     }
   }
-
-  // void _getuserPlaylistSongs(
-  //     GetuserPlaylistSongsEvent event, Emitter<UserPlaylistState> emit) {
-  //   emit(UserPlaylistLoadingState());
-  //   try {
-  //     final data = _dbRepository.getUserPlaylistSongs(event.playlistName);
-  //     emit(UserPlaylistSongsDataState(data: data));
-  //   } on FirebaseAuthException catch (e) {
-  //     emit(UserPlaylistErrorState(errorMessage: e.toString()));
-  //   } catch (e) {
-  //     emit(UserPlaylistErrorState(errorMessage: e.toString()));
-  //   }
-  // }
 }

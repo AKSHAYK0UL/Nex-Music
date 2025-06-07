@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/presentation/user_playlist/screens/user_playlist_songs.dart';
-import 'package:nex_music/presentation/user_playlist/widgets/show_dialog.dart';
+import 'package:nex_music/presentation/user_playlist/widgets/show_create_playlist_dialog.dart';
 
 class UserPlaylist extends StatefulWidget {
   const UserPlaylist({super.key});
@@ -26,12 +26,15 @@ class _UserPlaylistState extends State<UserPlaylist> {
       appBar: AppBar(
         title: Padding(
           padding: EdgeInsets.only(left: screenSize * 0.0131),
-          child: Text("Playlist"),
+          child: Text(
+            "Playlist",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
         ),
         actions: [
           IconButton(
               onPressed: () {
-                showDialogBox(context);
+                showCreatePlaylistDialog(context);
               },
               icon: const Icon(Icons.add))
         ],
@@ -40,8 +43,6 @@ class _UserPlaylistState extends State<UserPlaylist> {
         buildWhen: (previous, current) => previous != current,
         builder: (context, state) {
           if (state is UserPlaylistDataState) {
-            print("UserPlaylistDataState @@@");
-
             return StreamBuilder<List<String>>(
                 stream: state.data,
                 builder: (context, snapshot) {

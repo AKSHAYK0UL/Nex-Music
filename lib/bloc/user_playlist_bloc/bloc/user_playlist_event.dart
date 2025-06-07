@@ -17,9 +17,3 @@ final class AddSongToUserPlaylistEvent extends UserPlaylistEvent {
   AddSongToUserPlaylistEvent(
       {required this.playlistName, required this.songData});
 }
-
-// final class GetuserPlaylistSongsEvent extends UserPlaylistEvent {
-//   final String playlistName;
-
-//   GetuserPlaylistSongsEvent({required this.playlistName});
-// }
