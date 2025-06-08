@@ -19,6 +19,7 @@ Future<void> showLongPressOptions({
   required double screenSize,
   required bool showDelete,
   required TabRouteENUM tabRouteENUM,
+  String? playlistName,
 }) async {
   showDialog(
     context: context,
@@ -56,7 +57,10 @@ Future<void> showLongPressOptions({
                         if (!context.mounted) return;
                         Navigator.of(context).pop();
                       },
-                      icon: const Icon(Icons.share),
+                      icon: Icon(
+                        Icons.share,
+                        color: textColor,
+                      ),
                     ),
                   ),
                   content: Column(
@@ -86,10 +90,12 @@ Future<void> showLongPressOptions({
                         icon: Icon(
                           Icons.play_arrow,
                           color: textColor,
+                          size: screenSize * 0.0320,
                         ),
                       ),
                       TextButton.icon(
                         onPressed: () {
+                          Navigator.of(context).pop();
                           showAddToPlaylistDialog(context, songData);
                         },
                         label: Text(
@@ -106,6 +112,7 @@ Future<void> showLongPressOptions({
                         icon: Icon(
                           Icons.playlist_add,
                           color: textColor,
+                          size: screenSize * 0.0320,
                         ),
                       ),
                       TextButton.icon(
@@ -123,6 +130,7 @@ Future<void> showLongPressOptions({
                         icon: Icon(
                           Icons.person,
                           color: textColor,
+                          size: screenSize * 0.0320,
                         ),
                       ),
                       if (showDelete)
@@ -133,13 +141,14 @@ Future<void> showLongPressOptions({
                                   RemoveFromRecentlyPlayedEvent(
                                       vId: songData.vId));
                             } else if (tabRouteENUM == TabRouteENUM.favorites) {
-                              print("FAV REMOVE @@");
                               context.read<FavoritesBloc>().add(
                                   RemoveFromFavoritesEvent(vId: songData.vId));
                             } else if (tabRouteENUM == TabRouteENUM.playlist) {
+                              print(" DeleteSongUserPlaylistEvent @@@");
+
                               context.read<UserPlaylistBloc>().add(
                                   DeleteSongUserPlaylistEvent(
-                                      playlistName: "englist songs",
+                                      playlistName: playlistName ?? "",
                                       vId: songData.vId));
                             }
                             Navigator.of(context).pop();
@@ -160,6 +169,7 @@ Future<void> showLongPressOptions({
                           icon: Icon(
                             Icons.delete,
                             color: boldOrange,
+                            size: screenSize * 0.0320,
                           ),
                         ),
                     ],
@@ -226,10 +236,12 @@ Future<void> showLongPressOptions({
                     icon: Icon(
                       Icons.play_arrow,
                       color: textColor,
+                      size: screenSize * 0.0320,
                     ),
                   ),
                   TextButton.icon(
                     onPressed: () {
+                      Navigator.of(context).pop();
                       showAddToPlaylistDialog(context, songData);
                     },
                     label: Text(
@@ -246,6 +258,7 @@ Future<void> showLongPressOptions({
                     icon: Icon(
                       Icons.playlist_add,
                       color: textColor,
+                      size: screenSize * 0.0320,
                     ),
                   ),
                   TextButton.icon(
@@ -263,27 +276,24 @@ Future<void> showLongPressOptions({
                     icon: Icon(
                       Icons.person,
                       color: textColor,
+                      size: screenSize * 0.0320,
                     ),
                   ),
                   if (showDelete)
                     TextButton.icon(
                       onPressed: () {
-                        // context.read<SongDialogBloc>().add(
-                        //     RemoveFromRecentlyPlayedEvent(vId: songData.vId));
-                        // Navigator.of(context).pop();
                         if (tabRouteENUM == TabRouteENUM.recent) {
                           context.read<SongDialogBloc>().add(
                               RemoveFromRecentlyPlayedEvent(vId: songData.vId));
                         } else if (tabRouteENUM == TabRouteENUM.favorites) {
-                          print("FAV REMOVE @@");
                           context
                               .read<FavoritesBloc>()
                               .add(RemoveFromFavoritesEvent(vId: songData.vId));
                         } else if (tabRouteENUM == TabRouteENUM.playlist) {
-                          //TODO: playlist name
                           context.read<UserPlaylistBloc>().add(
                               DeleteSongUserPlaylistEvent(
-                                  playlistName: "", vId: songData.vId));
+                                  playlistName: playlistName ?? "",
+                                  vId: songData.vId));
                         }
                         Navigator.of(context).pop();
                       },
@@ -303,6 +313,7 @@ Future<void> showLongPressOptions({
                       icon: Icon(
                         Icons.delete,
                         color: boldOrange,
+                        size: screenSize * 0.0320,
                       ),
                     ),
                 ],

@@ -45,66 +45,113 @@ class _UserPlaylistState extends State<UserPlaylist> {
         buildWhen: (previous, current) => previous != current,
         builder: (context, state) {
           if (state is UserPlaylistDataState) {
-            return StreamBuilder<List<String>>(
-                stream: state.data,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text(snapshot.error.toString()),
-                    );
-                  } else if (snapshot.data!.isEmpty) {
-                    return const Center(child: Text('No Playlist'));
-                  }
-                  final data = snapshot.data;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0),
-                    child: ListView.builder(
-                        itemCount: data!.length,
-                        itemBuilder: (context, index) {
-                          final playlistName = data[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 5),
-                            child: ListTile(
-                              splashColor: Colors.transparent,
-                              contentPadding: const EdgeInsets.all(12),
-                              onTap: () {
-                                Navigator.of(context).pushNamed(
-                                    UserPlaylistSongs.routeName,
-                                    arguments: playlistName);
-                              },
-                              leading: CircleAvatar(
-                                radius: 25,
-                                backgroundColor: backgroundColor,
-                                child: Icon(
-                                  Icons.library_music,
-                                  color: accentColor,
-                                  size: 25,
-                                ),
+            return Padding(
+              padding: EdgeInsets.only(
+                right: screenSize * 0.0131,
+                left: screenSize * 0.0131,
+                top: screenSize * 0.0131,
+              ),
+              child: StreamBuilder<List<String>>(
+                  stream: state.data,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (snapshot.hasError) {
+                      return Center(
+                        child: Text(snapshot.error.toString()),
+                      );
+                    } else if (snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No Playlist found!'));
+                    }
+                    final data = snapshot.data;
+                    return ListView.builder(
+                      itemCount: data!.length,
+                      itemBuilder: (context, index) {
+                        final playlistName = data[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 6.0),
+                          child: ListTile(
+                            splashColor: Colors.transparent,
+                            contentPadding: const EdgeInsets.all(12),
+                            onTap: () {
+                              Navigator.of(context).pushNamed(
+                                  UserPlaylistSongs.routeName,
+                                  arguments: playlistName);
+                            },
+                            leading: CircleAvatar(
+                              radius: 25,
+                              backgroundColor: backgroundColor,
+                              child: Icon(
+                                Icons.library_music,
+                                color: accentColor,
+                                size: 25,
                               ),
-                              title: animatedText(
-                                  text: playlistName,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium!),
-                              trailing: IconButton(
-                                  onPressed: () {
-                                    context.read<UserPlaylistBloc>().add(
-                                        DeleteUserPlaylistEvent(
-                                            playlistName: playlistName));
-                                  },
-                                  icon: Icon(
-                                    Icons.delete,
-                                    color: boldOrange,
-                                  )),
                             ),
-                          );
-                        }),
-                  );
-                });
+                            title: animatedText(
+                                text: playlistName,
+                                style:
+                                    Theme.of(context).textTheme.titleMedium!),
+                            trailing: IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: Text("Delete Playlist",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleLarge),
+                                        content: Text(
+                                          "Are you sure you want to delete this playlist? It will be deleted permanently.",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text("Close",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium
+                                                    ?.copyWith(
+                                                        color: textColor)),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              context
+                                                  .read<UserPlaylistBloc>()
+                                                  .add(DeleteUserPlaylistEvent(
+                                                      playlistName:
+                                                          playlistName));
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text("Delete",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium
+                                                    ?.copyWith(
+                                                        color: boldOrange)),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: Icon(
+                                  Icons.delete,
+                                  color: boldOrange,
+                                )),
+                          ),
+                        );
+                      },
+                    );
+                  }),
+            );
           }
           return const SizedBox();
         },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/show_create_playlist_dialog.dart';
@@ -23,7 +24,8 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Select Playlist'),
+              Text('Select Playlist',
+                  style: Theme.of(context).textTheme.titleLarge),
               IconButton(
                 onPressed: () {
                   showCreatePlaylistDialog(context);
@@ -76,13 +78,32 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
                               },
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 14),
+                                    horizontal: 16, vertical: 8),
                                 margin: const EdgeInsets.symmetric(vertical: 4),
                                 decoration: BoxDecoration(
                                   color: secondaryColor,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Text(playlistName),
+                                child: Row(
+                                  spacing: 15,
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 25,
+                                      backgroundColor: backgroundColor,
+                                      child: Icon(
+                                        Icons.library_music,
+                                        color: accentColor,
+                                        size: 25,
+                                      ),
+                                    ),
+                                    animatedText(
+                                      text: playlistName,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!,
+                                    )
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -92,7 +113,7 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
                   );
                 }
 
-                return const Center(child: Text('Something went wrong.'));
+                return const SizedBox();
               },
             ),
           ),
@@ -103,10 +124,7 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
               },
               child: Text(
                 "Close ",
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(color: boldOrange),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
           ],

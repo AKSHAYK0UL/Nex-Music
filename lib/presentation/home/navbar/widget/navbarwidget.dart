@@ -46,6 +46,12 @@ class NavBarWidget extends StatelessWidget {
                   : CupertinoIcons.heart),
               label: 'Favorites',
             ),
+            BottomNavigationBarItem(
+              icon: Icon(selectedIndex == 4
+                  ? Icons.download
+                  : Icons.download_outlined),
+              label: 'Saved',
+            ),
           ],
           currentIndex: selectedIndex,
           onTap: onTap,

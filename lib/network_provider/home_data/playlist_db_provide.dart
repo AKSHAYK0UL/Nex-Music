@@ -45,10 +45,17 @@ class PlaylistDbProvider {
   Future<void> addSongToPlaylist(
       String playlistName, Map<String, dynamic> songData) async {
     try {
-      await _playlistCollection
+      final querySnapshot = await _playlistCollection
           .doc(playlistName)
           .collection(userPlaylistSongs)
-          .add(songData);
+          .where('v_id', isEqualTo: songData['v_id'])
+          .get();
+      if (querySnapshot.docs.isEmpty) {
+        await _playlistCollection
+            .doc(playlistName)
+            .collection(userPlaylistSongs)
+            .add(songData);
+      }
     } on FirebaseException catch (_) {
       rethrow;
     } catch (_) {

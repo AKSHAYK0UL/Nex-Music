@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart' as dp;
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/applink_function/uri_parser.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
@@ -74,6 +75,8 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
       const RecentScreen(), // Recent
       const UserPlaylist(), // Playlist
       const FavoritesScreen(), // Favorites
+      const FavoritesScreen(), // downloads
+
       DesktopSettingTab(
         //setting for large screen device only
         currentUser: currentUser,
@@ -175,6 +178,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   MiniPlayer(screenSize: screenSize),
+                  Divider(thickness: 3, color: secondaryColor),
                   NavBarWidget(
                     screenSize: screenSize,
                     selectedIndex: _selectedIndex,

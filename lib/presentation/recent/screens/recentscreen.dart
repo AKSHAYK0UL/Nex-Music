@@ -17,6 +17,7 @@ class RecentScreen extends StatefulWidget {
 
 class _RecentScreenState extends State<RecentScreen> {
   ValueNotifier<bool> switchState = ValueNotifier(false);
+  List<Songmodel> recentSongs = [];
   @override
   void initState() {
     context.read<RecentplayedBloc>().add(GetRecentPlayedEvent());
@@ -27,7 +28,6 @@ class _RecentScreenState extends State<RecentScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
-    List<Songmodel> recentSongs = [];
     return Scaffold(
       appBar: AppBar(
         title: Padding(

@@ -34,10 +34,7 @@ Future<void> showCreatePlaylistDialog(BuildContext context) {
             },
             child: Text(
               "Close",
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(color: boldOrange),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
           TextButton(

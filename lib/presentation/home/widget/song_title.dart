@@ -18,6 +18,7 @@ class SongTitle extends StatefulWidget {
   final int songIndex;
   final bool showDelete;
   final TabRouteENUM tabRouteENUM;
+  final String? playlistName;
 
   const SongTitle({
     super.key,
@@ -25,6 +26,7 @@ class SongTitle extends StatefulWidget {
     required this.songIndex,
     required this.showDelete,
     required this.tabRouteENUM,
+    this.playlistName,
   });
 
   @override
@@ -92,6 +94,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
               screenSize: screenSize,
               showDelete: widget.showDelete,
               tabRouteENUM: widget.tabRouteENUM,
+              playlistName: widget.playlistName,
             );
           }
         },
@@ -158,6 +161,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
                     screenSize: screenSize,
                     showDelete: widget.showDelete,
                     tabRouteENUM: widget.tabRouteENUM,
+                    playlistName: widget.playlistName,
                   );
                 },
                 icon: const Icon(Icons.more_vert),

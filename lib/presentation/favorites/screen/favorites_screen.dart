@@ -17,6 +17,8 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   ValueNotifier<bool> switchState = ValueNotifier(false);
+  List<Songmodel> favoritesSongs = [];
+
   @override
   void initState() {
     context.read<FavoritesSongsBloc>().add(GetFavoritesEvent());
@@ -26,7 +28,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
-    List<Songmodel> recentSongs = [];
     return Scaffold(
       appBar: AppBar(
         title: Padding(
@@ -49,7 +50,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       context.read<SongstreamBloc>().add(ResetPlaylistEvent());
                       context.read<SongstreamBloc>().add(GetSongPlaylistEvent(
                           songlist:
-                              recentSongs)); //load recent songs in the playlist
+                              favoritesSongs)); //load recent songs in the playlist
                       showSnackbar(context, "Now playing your favorite songs");
                     } else {
                       context.read<SongstreamBloc>().add(CleanPlaylistEvent());
@@ -90,13 +91,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(child: Text('No Favorite songs'));
                   } else {
-                    final recentData = snapshot.data!;
-                    // recentSongs = recentData;
+                    final songsData = snapshot.data!;
+                    favoritesSongs = songsData;
                     return ListView.builder(
                       shrinkWrap: true,
-                      itemCount: recentData.length,
+                      itemCount: songsData.length,
                       itemBuilder: (context, index) {
-                        final songData = recentData[index];
+                        final songData = songsData[index];
                         return SongTitle(
                           songData: songData,
                           songIndex: index,
