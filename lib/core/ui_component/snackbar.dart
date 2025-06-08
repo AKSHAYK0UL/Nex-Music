@@ -60,6 +60,7 @@ void showSnackbar(BuildContext context, String message) {
             child: Text(
               message,
               maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           shape: RoundedRectangleBorder(

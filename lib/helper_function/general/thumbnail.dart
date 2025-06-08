@@ -2,12 +2,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:dart_ytmusic_api/types.dart';
 
-String getThumbnail(List<ThumbnailFull> thumbnails) {
-  final len = thumbnails.length;
-  print("Thumbnails URL :-> ${thumbnails[len - 1].url}");
-  String thumbnail = thumbnails.last.url;
-  return thumbnail;
-}
+String getThumbnail(List<ThumbnailFull> thumbnails) => thumbnails.last.url;
 
 Future<String> getThumbnailUsingUrl(String videoId) async {
   // List of resolutions in preferred order.
@@ -27,7 +22,7 @@ Future<String> getThumbnailUsingUrl(String videoId) async {
         return url;
       }
     } catch (e) {
-      // If an exception occurs, we continue to the next resolution.
+      // If an exception occurs, continue to the next resolution.
       continue;
     }
   }

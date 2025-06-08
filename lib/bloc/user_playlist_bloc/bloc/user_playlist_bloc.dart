@@ -12,6 +12,8 @@ class UserPlaylistBloc extends Bloc<UserPlaylistEvent, UserPlaylistState> {
     on<CreatePlaylistEvent>(_createPlaylist);
     on<GetUserPlaylistsEvent>(_userPlaylist);
     on<AddSongToUserPlaylistEvent>(_addToUserPlaylist);
+    on<DeleteUserPlaylistEvent>(_deleteUserPlaylist);
+    on<DeleteSongUserPlaylistEvent>(_deleteSongUserPlaylist);
   }
   Future<void> _createPlaylist(
       CreatePlaylistEvent event, Emitter<UserPlaylistState> emit) async {
@@ -42,6 +44,28 @@ class UserPlaylistBloc extends Bloc<UserPlaylistEvent, UserPlaylistState> {
     // emit(UserPlaylistLoadingState());
     try {
       await _dbRepository.addSongToPlaylist(event.playlistName, event.songData);
+    } on FirebaseAuthException catch (e) {
+      emit(UserPlaylistErrorState(errorMessage: e.toString()));
+    } catch (e) {
+      emit(UserPlaylistErrorState(errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _deleteUserPlaylist(
+      DeleteUserPlaylistEvent event, Emitter<UserPlaylistState> emit) async {
+    try {
+      await _dbRepository.deleteUserPlaylist(event.playlistName);
+    } on FirebaseAuthException catch (e) {
+      emit(UserPlaylistErrorState(errorMessage: e.toString()));
+    } catch (e) {
+      emit(UserPlaylistErrorState(errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _deleteSongUserPlaylist(DeleteSongUserPlaylistEvent event,
+      Emitter<UserPlaylistState> emit) async {
+    try {
+      await _dbRepository.deleteSongUserPlaylist(event.playlistName, event.vId);
     } on FirebaseAuthException catch (e) {
       emit(UserPlaylistErrorState(errorMessage: e.toString()));
     } catch (e) {

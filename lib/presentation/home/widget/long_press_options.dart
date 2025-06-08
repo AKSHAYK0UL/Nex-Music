@@ -3,12 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_dialog.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> showLongPressOptions({
@@ -87,7 +89,9 @@ Future<void> showLongPressOptions({
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          showAddToPlaylistDialog(context, songData);
+                        },
                         label: Text(
                           "Add to Playlist",
                           style: Theme.of(context).textTheme.labelMedium!,
@@ -132,6 +136,11 @@ Future<void> showLongPressOptions({
                               print("FAV REMOVE @@");
                               context.read<FavoritesBloc>().add(
                                   RemoveFromFavoritesEvent(vId: songData.vId));
+                            } else if (tabRouteENUM == TabRouteENUM.playlist) {
+                              context.read<UserPlaylistBloc>().add(
+                                  DeleteSongUserPlaylistEvent(
+                                      playlistName: "englist songs",
+                                      vId: songData.vId));
                             }
                             Navigator.of(context).pop();
                           },
@@ -220,7 +229,9 @@ Future<void> showLongPressOptions({
                     ),
                   ),
                   TextButton.icon(
-                    onPressed: () {},
+                    onPressed: () {
+                      showAddToPlaylistDialog(context, songData);
+                    },
                     label: Text(
                       "Add to Playlist",
                       style: Theme.of(context).textTheme.labelMedium!,
@@ -268,6 +279,11 @@ Future<void> showLongPressOptions({
                           context
                               .read<FavoritesBloc>()
                               .add(RemoveFromFavoritesEvent(vId: songData.vId));
+                        } else if (tabRouteENUM == TabRouteENUM.playlist) {
+                          //TODO: playlist name
+                          context.read<UserPlaylistBloc>().add(
+                              DeleteSongUserPlaylistEvent(
+                                  playlistName: "", vId: songData.vId));
                         }
                         Navigator.of(context).pop();
                       },

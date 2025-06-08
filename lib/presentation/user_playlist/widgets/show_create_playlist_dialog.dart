@@ -25,6 +25,7 @@ Future<void> showCreatePlaylistDialog(BuildContext context) {
                 .bodyMedium
                 ?.copyWith(color: Colors.grey),
           ),
+          autofocus: true,
         ),
         actions: [
           TextButton(

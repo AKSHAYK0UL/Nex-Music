@@ -17,3 +17,16 @@ final class AddSongToUserPlaylistEvent extends UserPlaylistEvent {
   AddSongToUserPlaylistEvent(
       {required this.playlistName, required this.songData});
 }
+
+final class DeleteUserPlaylistEvent extends UserPlaylistEvent {
+  final String playlistName;
+
+  DeleteUserPlaylistEvent({required this.playlistName});
+}
+
+final class DeleteSongUserPlaylistEvent extends UserPlaylistEvent {
+  final String playlistName;
+  final String vId;
+
+  DeleteSongUserPlaylistEvent({required this.playlistName, required this.vId});
+}

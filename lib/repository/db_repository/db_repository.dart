@@ -125,4 +125,26 @@ class DbRepository {
       }).toList();
     });
   }
+
+  //delete user playlist
+  Future<void> deleteUserPlaylist(String playlistName) async {
+    try {
+      await _playlistDbProvider.deleteUserPlaylist(playlistName);
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  //delete song from the user playlist
+  Future<void> deleteSongUserPlaylist(String playlistName, vId) async {
+    try {
+      await _playlistDbProvider.deleteSongUserPlaylist(playlistName, vId);
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
 }

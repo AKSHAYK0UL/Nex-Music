@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
+import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/presentation/user_playlist/screens/user_playlist_songs.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/show_create_playlist_dialog.dart';
 
@@ -58,20 +60,50 @@ class _UserPlaylistState extends State<UserPlaylist> {
                     return const Center(child: Text('No Playlist'));
                   }
                   final data = snapshot.data;
-                  return ListView.builder(
-                      itemCount: data!.length,
-                      itemBuilder: (context, index) {
-                        return ListTile(
-                          onTap: () {
-                            Navigator.of(context).pushNamed(
-                                UserPlaylistSongs.routeName,
-                                arguments: data[index]);
-                          },
-                          title: Text(
-                            data[index],
-                          ),
-                        );
-                      });
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: ListView.builder(
+                        itemCount: data!.length,
+                        itemBuilder: (context, index) {
+                          final playlistName = data[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 5),
+                            child: ListTile(
+                              splashColor: Colors.transparent,
+                              contentPadding: const EdgeInsets.all(12),
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                    UserPlaylistSongs.routeName,
+                                    arguments: playlistName);
+                              },
+                              leading: CircleAvatar(
+                                radius: 25,
+                                backgroundColor: backgroundColor,
+                                child: Icon(
+                                  Icons.library_music,
+                                  color: accentColor,
+                                  size: 25,
+                                ),
+                              ),
+                              title: animatedText(
+                                  text: playlistName,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium!),
+                              trailing: IconButton(
+                                  onPressed: () {
+                                    context.read<UserPlaylistBloc>().add(
+                                        DeleteUserPlaylistEvent(
+                                            playlistName: playlistName));
+                                  },
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: boldOrange,
+                                  )),
+                            ),
+                          );
+                        }),
+                  );
                 });
           }
           return const SizedBox();

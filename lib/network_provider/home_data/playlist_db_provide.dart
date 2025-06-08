@@ -64,4 +64,34 @@ class PlaylistDbProvider {
         .orderBy('timestamp', descending: true)
         .snapshots();
   }
+
+  //delete playlist
+  Future<void> deleteUserPlaylist(String playlistName) async {
+    try {
+      await _playlistCollection.doc(playlistName).delete();
+    } on FirebaseException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  //delete song from the playlist
+  Future<void> deleteSongUserPlaylist(String playlistName, vId) async {
+    try {
+      final querySnapshot = await _playlistCollection
+          .doc(playlistName)
+          .collection(userPlaylistSongs)
+          .where('v_id', isEqualTo: vId)
+          .get();
+
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+    } on FirebaseException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
 }

@@ -50,7 +50,7 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                         child: Text(snapshot.error.toString()),
                       );
                     } else if (snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No Playlist'));
+                      return const Center(child: Text('No Songs'));
                     }
                     final songData = snapshot.data;
                     return ListView.builder(

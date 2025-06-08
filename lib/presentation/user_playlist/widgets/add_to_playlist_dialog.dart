@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/show_create_playlist_dialog.dart';
 
@@ -70,6 +71,7 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
                                         songData: currentSong,
                                       ),
                                     );
+                                showSnackbar(context, "Added to $playlistName");
                                 Navigator.of(context).pop();
                               },
                               child: Container(
