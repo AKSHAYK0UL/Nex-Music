@@ -39,6 +39,8 @@ class RecentSearchTitle extends StatelessWidget {
         margin: EdgeInsets.only(top: size * 0.00329),
         child: ListTile(
           tileColor: backgroundColor,
+          contentPadding:
+              EdgeInsets.only(left: size * 0.0160, right: size * 0.0030),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(0),
           ),

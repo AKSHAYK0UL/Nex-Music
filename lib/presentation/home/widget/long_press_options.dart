@@ -95,8 +95,15 @@ Future<void> showLongPressOptions({
                       ),
                       TextButton.icon(
                         onPressed: () {
+                          //uses the root navigator's context (which persists after popping your current route).
+                          final rootContext =
+                              Navigator.of(context, rootNavigator: true)
+                                  .context;
+
                           Navigator.of(context).pop();
-                          showAddToPlaylistDialog(context, songData);
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            showAddToPlaylistDialog(rootContext, songData);
+                          });
                         },
                         label: Text(
                           "Add to Playlist",
@@ -241,8 +248,14 @@ Future<void> showLongPressOptions({
                   ),
                   TextButton.icon(
                     onPressed: () {
+                      //uses the root navigator's context (which persists after popping your current route).
+                      final rootContext =
+                          Navigator.of(context, rootNavigator: true).context;
+
                       Navigator.of(context).pop();
-                      showAddToPlaylistDialog(context, songData);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        showAddToPlaylistDialog(rootContext, songData);
+                      });
                     },
                     label: Text(
                       "Add to Playlist",

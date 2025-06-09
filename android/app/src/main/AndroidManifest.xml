@@ -15,7 +15,7 @@
         android:usesCleartextTraffic="true"
         android:enableOnBackInvokedCallback="true">
 
-        <!-- Main Activity -->
+        <!-- Main launcher activity -->
         <activity
             android:name="com.ryanheise.audioservice.AudioServiceActivity"
             android:exported="true"
@@ -25,12 +25,12 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
 
-            <!-- This meta-data is used to set the window background until Flutter initializes -->
+            <!-- Background for splash -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@drawable/ic_notification" />
 
-            <!-- Deep Link / Intent Filters -->
+            <!-- Deep links -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -42,13 +42,14 @@
                 <data android:scheme="https" android:host="youtube.com" />
             </intent-filter>
 
+            <!-- Share intent -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
             </intent-filter>
 
-            <!-- Example for a custom deep link -->
+            <!-- Custom deep link -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -56,38 +57,27 @@
                 <data android:scheme="flutterDeepLink" android:host="flutter-deep-link" />
             </intent-filter>
 
+            <!-- Launcher intent -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- AudioService to manage background playback and notifications -->
-        <!-- <service
+        <!-- Audio service background playback -->
+        <service
             android:name="com.ryanheise.audioservice.AudioService"
             android:enabled="true"
-            android:stopWithTask="false" 
+            android:stopWithTask="false"
             android:foregroundServiceType="mediaPlayback"
             android:exported="true"
             tools:ignore="Instantiatable">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
-        </service> -->
-        <service
-  android:name="com.ryanheise.audioservice.AudioService"
-  android:enabled="true"
-  android:stopWithTask="false" 
-  android:foregroundServiceType="mediaPlayback"
-  android:exported="true"
-  tools:ignore="Instantiatable">
-  
-  <intent-filter>
-    <action android:name="android.media.browse.MediaBrowserService" />
-  </intent-filter>
-</service>
+        </service>
 
-        <!-- Receiver to handle media button events -->
+        <!-- Media button receiver -->
         <receiver
             android:name="com.ryanheise.audioservice.MediaButtonReceiver"
             android:exported="true"
@@ -97,17 +87,18 @@
             </intent-filter>
         </receiver>
 
-        <!-- Flutter Generated Plugin Registrant -->
+        <!-- Flutter embedding version -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
 
-    <!-- Query required for Process Text support -->
+    <!-- Required for process text support -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
             <data android:mimeType="text/plain" />
         </intent>
     </queries>
+
 </manifest>

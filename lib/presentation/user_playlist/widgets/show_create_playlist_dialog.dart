@@ -13,7 +13,7 @@ Future<void> showCreatePlaylistDialog(BuildContext context) {
     builder: (context) {
       return AlertDialog(
         title: Text(
-          "Enter Playlist Name",
+          "Playlist Name",
           style: Theme.of(context).textTheme.titleMedium,
         ),
         content: TextField(

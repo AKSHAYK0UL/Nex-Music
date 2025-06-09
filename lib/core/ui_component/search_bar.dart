@@ -57,114 +57,135 @@ class SearchFieldState extends State<SearchField> {
     final screenSize = MediaQuery.sizeOf(context).height;
     final isSmallScreen = MediaQuery.sizeOf(context).width < 451;
     return Container(
-      height: 57,
+      height: 55, //57
       color: backgroundColor,
       padding: EdgeInsets.symmetric(
-          horizontal: screenSize * 0.0180), // Add padding here
+          horizontal: screenSize * 0.0100), // Add padding here
       // padding: EdgeInsets.symmetric(
       //     horizontal: screenSize * 0.0131, vertical: screenSize * 0.00659),
-      child: TextField(
-        focusNode: _focusNode,
-        decoration: InputDecoration(
-          prefix: const Padding(
-            padding: EdgeInsets.only(left: 10),
-          ),
-          suffixIcon: ValueListenableBuilder<TextEditingValue>(
-            valueListenable: _controller,
-            builder: (context, value, child) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Visibility(
-                      visible: !isSmallScreen,
-                      child: SizedBox(
-                          height: 35,
-                          child: VerticalDivider(
-                              thickness: 2,
-                              indent: 0,
-                              endIndent: 0,
-                              color: _focusNode.hasFocus
-                                  ? accentColor
-                                  : Colors.grey.shade500)),
-                    ),
-                    IconButton(
-                      //value.text.isEmpty && !FocusScope.of(context).hasFocus
-                      // ? null
-                      // :
-                      onPressed: () {
-                        if (_focusNode.hasFocus) {
-                          _controller.clear();
-                          FocusScope.of(context).unfocus();
-                        } else {
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      icon: Icon(
-                        Icons.cancel,
-                        color: textColor,
-                        // color: value.text.isEmpty &&
-                        //         !FocusScope.of(context).hasFocus
-                        //     ? Colors.grey.shade500
-                        //     : textColor,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-          hintText: widget.hintText,
-          hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: _focusNode.hasFocus ? textColor : Colors.grey.shade500,
+      child: Row(
+        spacing: screenSize * 0.0130,
+        children: [
+          CircleAvatar(
+            backgroundColor: secondaryColor,
+            radius: 26,
+            child: IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: Icon(
+                Icons.arrow_back,
+                color: textColor,
+                size: 28,
               ),
-          border: widget.inputBorder.copyWith(
-            borderSide: BorderSide(
-              width: 2,
-              color: Colors.grey.shade600,
             ),
           ),
-          enabledBorder: widget.inputBorder.copyWith(
-            borderSide: BorderSide(
-              width: 2,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          focusedBorder: widget.inputBorder.copyWith(
-            borderSide: BorderSide(
-              width: 2,
-              color: accentColor,
-            ),
-          ),
-          focusedErrorBorder: widget.inputBorder.copyWith(
-            borderSide: const BorderSide(
-              width: 2,
-              color: Colors.red,
-            ),
-          ),
-        ),
-        autofocus: isSmallScreen,
-        cursorColor: textColor,
-        cursorHeight: screenSize * 0.0329,
-        style: Theme.of(context).textTheme.bodyMedium,
-        controller: _controller,
-        textInputAction: TextInputAction.search,
-        onSubmitted: (value) {
-          context
-              .read<SongBloc>()
-              .add(SeachInSongEvent(inputText: _controller.text.trim()));
-          //reset the state
-          context.read<VideoBloc>().add(SetStateToInitialEvent());
+          Expanded(
+            child: TextField(
+              focusNode: _focusNode,
+              decoration: InputDecoration(
+                prefix: const Padding(
+                  padding: EdgeInsets.only(left: 10),
+                ),
+                suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _controller,
+                  builder: (context, value, child) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Visibility(
+                            visible: !isSmallScreen,
+                            child: SizedBox(
+                                height: 35,
+                                child: VerticalDivider(
+                                    thickness: 2,
+                                    indent: 0,
+                                    endIndent: 0,
+                                    color: _focusNode.hasFocus
+                                        ? accentColor
+                                        : Colors.grey.shade500)),
+                          ),
+                          IconButton(
+                            //value.text.isEmpty && !FocusScope.of(context).hasFocus
+                            // ? null
+                            // :
+                            onPressed: () {
+                              if (_focusNode.hasFocus) {
+                                _controller.clear();
+                                // FocusScope.of(context).unfocus();
+                              }
+                            },
+                            icon: Icon(
+                              Icons.cancel,
+                              // color: textColor,
+                              color: value.text.isEmpty ||
+                                      !FocusScope.of(context).hasFocus
+                                  ? Colors.grey.shade500
+                                  : textColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                hintText: widget.hintText,
+                hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: _focusNode.hasFocus
+                          ? textColor
+                          : Colors.grey.shade500,
+                    ),
+                border: widget.inputBorder.copyWith(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                enabledBorder: widget.inputBorder.copyWith(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                focusedBorder: widget.inputBorder.copyWith(
+                  borderSide: BorderSide(
+                    width: 2,
+                    color: accentColor,
+                  ),
+                ),
+                focusedErrorBorder: widget.inputBorder.copyWith(
+                  borderSide: const BorderSide(
+                    width: 2,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+              autofocus: isSmallScreen,
+              cursorColor: textColor,
+              cursorHeight: screenSize * 0.0329,
+              style: Theme.of(context).textTheme.bodyMedium,
+              controller: _controller,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (value) {
+                context
+                    .read<SongBloc>()
+                    .add(SeachInSongEvent(inputText: _controller.text.trim()));
+                //reset the state
+                context.read<VideoBloc>().add(SetStateToInitialEvent());
 
-          //reset the state
-          context
-              .read<pl.SearchedplaylistBloc>()
-              .add(pl.SetStateToInitialEvent());
-          //reset the state
-          context.read<ArtistBloc>().add(SetStateToinitialEvent());
-        },
+                //reset the state
+                context
+                    .read<pl.SearchedplaylistBloc>()
+                    .add(pl.SetStateToInitialEvent());
+                //reset the state
+                context.read<ArtistBloc>().add(SetStateToinitialEvent());
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

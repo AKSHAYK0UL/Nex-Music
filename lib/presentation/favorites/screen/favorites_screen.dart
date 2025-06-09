@@ -32,9 +32,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       appBar: AppBar(
         title: Padding(
           padding: EdgeInsets.only(left: screenSize * 0.0131),
-          child: Text(
+          child: const Text(
             "Favorites",
-            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
         actions: [

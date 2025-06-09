@@ -39,10 +39,7 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          playlistName,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        title: Text(playlistName),
         actions: [
           ValueListenableBuilder(
             valueListenable: switchState,

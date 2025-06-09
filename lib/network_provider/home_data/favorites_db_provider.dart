@@ -27,6 +27,7 @@ class FavoritesDBProvider {
 //when playing the song from the search just search the curr song id with the fav db songs id
   Future<void> addToFavorites(Map<String, dynamic> songMap) async {
     try {
+      songMap["timestamp"] = FieldValue.serverTimestamp();
       await _favoritesCollection.add(songMap);
     } on FirebaseException catch (_) {
       rethrow;

@@ -28,10 +28,7 @@ class _UserPlaylistState extends State<UserPlaylist> {
       appBar: AppBar(
         title: Padding(
           padding: EdgeInsets.only(left: screenSize * 0.0131),
-          child: Text(
-            "Playlist",
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          child: const Text("Playlist"),
         ),
         actions: [
           IconButton(
@@ -102,12 +99,12 @@ class _UserPlaylistState extends State<UserPlaylist> {
                                         title: Text("Delete Playlist",
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .titleLarge),
+                                                .titleMedium),
                                         content: Text(
                                           "Are you sure you want to delete this playlist? It will be deleted permanently.",
                                           style: Theme.of(context)
                                               .textTheme
-                                              .bodyMedium,
+                                              .titleSmall,
                                         ),
                                         actions: [
                                           TextButton(

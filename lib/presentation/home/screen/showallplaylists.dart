@@ -14,7 +14,7 @@ class ShowAllPlaylists extends StatelessWidget {
     final screenSize = MediaQuery.sizeOf(context).height;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Playlists For You"),
+        title: const Text("Recommended playlists"),
       ),
       body: BlocBuilder<HomesectionBloc, HomesectionState>(
         buildWhen: (previous, current) => previous != current,

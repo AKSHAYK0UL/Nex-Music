@@ -32,9 +32,8 @@ class _RecentScreenState extends State<RecentScreen> {
       appBar: AppBar(
         title: Padding(
           padding: EdgeInsets.only(left: screenSize * 0.0131),
-          child: Text(
+          child: const Text(
             "Recent",
-            style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
         actions: [

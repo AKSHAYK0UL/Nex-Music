@@ -85,21 +85,27 @@ class _SearchScreenState extends State<SearchScreen> {
                   }
                   if (state is LoadedRecentSearchState) {
                     return Expanded(
-                      child: ListView.builder(
-                          itemCount: state.recentSerach.length,
-                          shrinkWrap: true,
-                          itemBuilder: (context, index) {
-                            int rIndex = state.recentSerach.length - index - 1;
-                            final recentSearch = state.recentSerach[rIndex];
-                            return RecentSearchTitle(
-                              text: recentSearch,
-                              size: screenSize,
-                              onSuggestionSelected: (selectedText) {
-                                _searchFieldKey.currentState
-                                    ?.setText(selectedText);
-                              },
-                            );
-                          }),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenSize * 0.0105,
+                            vertical: screenSize * 0.0200),
+                        child: ListView.builder(
+                            itemCount: state.recentSerach.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              int rIndex =
+                                  state.recentSerach.length - index - 1;
+                              final recentSearch = state.recentSerach[rIndex];
+                              return RecentSearchTitle(
+                                text: recentSearch,
+                                size: screenSize,
+                                onSuggestionSelected: (selectedText) {
+                                  _searchFieldKey.currentState
+                                      ?.setText(selectedText);
+                                },
+                              );
+                            }),
+                      ),
                     );
                   }
                   if (state is ErrorState) {
@@ -143,7 +149,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
 OutlineInputBorder get outlineInputBorder {
   return OutlineInputBorder(
-    borderRadius: BorderRadius.circular(25),
+    borderRadius: BorderRadius.circular(27),
     borderSide: BorderSide(
       width: 2,
       color: accentColor,

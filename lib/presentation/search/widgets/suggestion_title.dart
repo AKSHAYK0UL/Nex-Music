@@ -38,6 +38,8 @@ class SuggestionTitle extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.only(top: size * 0.00329),
         child: ListTile(
+          contentPadding:
+              EdgeInsets.only(left: size * 0.0160, right: size * 0.0030),
           tileColor: backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(0),
