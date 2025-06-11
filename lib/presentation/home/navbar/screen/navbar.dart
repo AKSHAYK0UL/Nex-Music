@@ -18,6 +18,7 @@ import 'package:nex_music/presentation/home/navbar/widget/navrail.dart';
 import 'package:nex_music/presentation/home/screen/home_screen.dart';
 import 'package:nex_music/presentation/recent/screens/recentscreen.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/presentation/saved/screens/saved.dart';
 import 'package:nex_music/presentation/setting/screen/desktop_setting_tab.dart';
 import 'package:nex_music/presentation/user_playlist/screens/user_playlist.dart';
 
@@ -75,7 +76,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
       const RecentScreen(), // Recent
       const UserPlaylist(), // Playlist
       const FavoritesScreen(), // Favorites
-      const FavoritesScreen(), // downloads
+      const SavedSongs(), // downloads
 
       DesktopSettingTab(
         //setting for large screen device only

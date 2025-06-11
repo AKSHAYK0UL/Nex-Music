@@ -2,6 +2,7 @@ import 'package:app_links/app_links.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart';
+import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/favorites_songs_bloc/bloc/favorites_songs_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
@@ -36,10 +38,12 @@ import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_cl
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_registrar.g.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/theme.dart';
+import 'package:nex_music/network_provider/home_data/download_provider.dart';
 import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
 import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
 import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
+import 'package:nex_music/repository/downlaod_repository/download_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 
 import 'package:nex_music/secrets/firebase_options.dart';
@@ -175,6 +179,16 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) =>
                 UserPlaylistSongBloc(context.read<DbRepository>()),
+          ),
+          BlocProvider(
+            create: (context) => DownloadBloc(
+              context.read<Repository>(),
+              DownloadRepo(
+                DownloadProvider(
+                  dio: Dio(),
+                ),
+              ),
+            ),
           ),
           BlocProvider(
             create: (context) => UserLoggedBloc(

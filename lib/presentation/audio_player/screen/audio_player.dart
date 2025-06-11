@@ -394,6 +394,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
@@ -543,7 +544,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                           ),
                         ),
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context
+                                .read<DownloadBloc>()
+                                .add(DownloadSongEvent(songData: songData));
+                          },
                           icon: Icon(
                             Icons.download,
                             color: textColor,

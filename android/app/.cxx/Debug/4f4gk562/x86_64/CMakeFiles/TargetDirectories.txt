@@ -1,2 +1,0 @@
-E:/app_dev/nex_music/nex_music/android/app/.cxx/Debug/4f4gk562/x86_64/CMakeFiles/edit_cache.dir
-E:/app_dev/nex_music/nex_music/android/app/.cxx/Debug/4f4gk562/x86_64/CMakeFiles/rebuild_cache.dir
