@@ -128,6 +128,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
                   imageUrl: widget.songData.thumbnail,
                   width: screenSize * 0.0755,
                   height: screenSize * 0.0733,
+                  islocal: widget.songData.isLocal,
                 ),
               ),
             ),

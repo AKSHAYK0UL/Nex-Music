@@ -108,7 +108,6 @@ class Songmodel extends Equatable {
   final String duration;
   final Timestamp? timestamp;
 
-  // ✅ Add these for local support
   final bool isLocal;
   final String? localFilePath;
 

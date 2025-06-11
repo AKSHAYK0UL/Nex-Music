@@ -21,10 +21,25 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
     try {
       final url =
           await _repository.getSongUrl(event.songData.vId, AudioQuality.high);
-      final path = _downloadRepo.downloadSong(url.toString(), event.songData);
+
+      final downloadPercentageStream = _downloadRepo
+          .downloadSong(url.toString(), event.songData)
+          .asBroadcastStream();
+
       print("SONG DOWNLOAD STARTED @@@");
 
-      print("SONG PATH $path @@@");
+      await emit.forEach<double>(
+        downloadPercentageStream,
+        onData: (percentage) {
+          if (percentage >= 100.0) {
+            return DownloadInitial(); // Done
+          } else {
+            return DownloadPercantageStatusState(
+                percentageStream: downloadPercentageStream);
+          }
+        },
+        onError: (_, __) => DownloadInitial(),
+      );
     } catch (e) {
       print("SONG ERROR ${e.toString()} @@@");
     }

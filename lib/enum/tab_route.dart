@@ -1,1 +1,1 @@
-enum TabRouteENUM { recent, playlist, favorites, other }
+enum TabRouteENUM { recent, playlist, favorites, download, other }

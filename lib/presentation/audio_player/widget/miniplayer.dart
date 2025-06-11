@@ -108,6 +108,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
                         imageUrl: songData.thumbnail,
                         width: widget.screenSize * 0.0755,
                         height: widget.screenSize * 0.0733,
+                        islocal: songData.isLocal,
                       ),
                     ),
                   ),

@@ -512,10 +512,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                   quality == ThumbnailQuality.low ? 1 : 1.78,
                               scaleY: 1.0,
                               child: cacheImage(
-                                imageUrl: songData.thumbnail,
-                                width: screenSize * 0.448,
-                                height: screenSize * 0.410,
-                              ),
+                                  imageUrl: songData.thumbnail,
+                                  width: screenSize * 0.448,
+                                  height: screenSize * 0.410,
+                                  islocal: songData.isLocal),
                             ),
                           ),
                         ),
@@ -713,6 +713,37 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                 ),
               ],
             ),
+            const SizedBox(
+              height: 10,
+            ),
+            BlocBuilder<DownloadBloc, DownloadState>(
+              buildWhen: (previous, current) => previous != current,
+              builder: (context, state) {
+                if (state is DownloadPercantageStatusState) {
+                  return StreamBuilder<double>(
+                    stream: state.percentageStream,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator(
+                          color: accentColor,
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Text(
+                          "Error in Downloading",
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(color: boldOrange),
+                        );
+                      }
+                      return Text("Downloading ${snapshot.data!.toInt()} %");
+                    },
+                  );
+                }
+                return const SizedBox();
+              },
+            )
           ],
         ),
       ),
