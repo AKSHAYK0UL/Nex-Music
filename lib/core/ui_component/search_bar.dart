@@ -59,12 +59,11 @@ class SearchFieldState extends State<SearchField> {
     return Container(
       height: 55, //57
       color: backgroundColor,
-      padding: EdgeInsets.symmetric(
-          horizontal: screenSize * 0.0100), // Add padding here
+      padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0100),
       // padding: EdgeInsets.symmetric(
       //     horizontal: screenSize * 0.0131, vertical: screenSize * 0.00659),
       child: Row(
-        spacing: screenSize * 0.0130,
+        spacing: screenSize * 0.0080,
         children: [
           CircleAvatar(
             backgroundColor: secondaryColor,

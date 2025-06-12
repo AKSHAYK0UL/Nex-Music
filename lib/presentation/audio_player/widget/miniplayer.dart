@@ -102,7 +102,10 @@ class _MiniPlayerState extends State<MiniPlayer> {
                     borderRadius:
                         BorderRadius.circular(widget.screenSize * 0.0106),
                     child: Transform.scale(
-                      scaleX: quality == ThumbnailQuality.low ? 1 : 1.78,
+                      scaleX:
+                          quality == ThumbnailQuality.low && !songData.isLocal
+                              ? 1
+                              : 1.78,
                       scaleY: 1.0,
                       child: cacheImage(
                         imageUrl: songData.thumbnail,
@@ -163,18 +166,6 @@ class _MiniPlayerState extends State<MiniPlayer> {
                               .add(PlayNextSongEvent());
                         },
                       ),
-                      // IconButton(
-                      //   icon: Icon(
-                      //     Icons.close,
-                      //     color: Colors.red,
-                      //     size: screenSize * 0.0500,
-                      //   ),
-                      //   onPressed: () {
-                      //     context
-                      //         .read<SongstreamBloc>()
-                      //         .add(CloseMiniPlayerEvent());
-                      //   },
-                      // ),
                     ],
                   ),
                 ),

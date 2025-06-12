@@ -7,11 +7,13 @@ class DownloadRepo {
   DownloadRepo(this._downloadProvider);
 
   Stream<double> downloadSong(String url, Songmodel songData) {
-    return _downloadProvider.downloadSong(
-      url,
-      songData.songName,
-      songData.thumbnail,
-      songData,
-    );
+    try {
+      return _downloadProvider.downloadSong(
+        url,
+        songData.toJson(),
+      );
+    } catch (_) {
+      rethrow;
+    }
   }
 }

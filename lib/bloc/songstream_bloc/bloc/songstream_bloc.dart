@@ -954,7 +954,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       id: _songData!.vId,
       title: _songData!.songName,
       artist: _songData!.artist.name,
-      artUri: Uri.parse(_songData!.thumbnail),
+      artUri: _songData!.isLocal
+          ? Uri.file(_songData!.thumbnail)
+          : Uri.parse(_songData!.thumbnail),
       duration: songDuration,
     ));
 
@@ -976,7 +978,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
-      _dbRepository.addToRecentPlayedCollection(_songData!);
+      if (!_songData!.isLocal) {
+        _dbRepository.addToRecentPlayedCollection(_songData!);
+      }
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song: $e"));
@@ -993,7 +997,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       id: _songData!.vId,
       title: _songData!.songName,
       artist: _songData!.artist.name,
-      artUri: Uri.parse(_songData!.thumbnail),
+      artUri: _songData!.isLocal
+          ? Uri.file(_songData!.thumbnail)
+          : Uri.parse(_songData!.thumbnail),
       duration: songDuration,
     ));
 
@@ -1015,7 +1021,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
-      _dbRepository.addToRecentPlayedCollection(_songData!);
+      if (!_songData!.isLocal) {
+        _dbRepository.addToRecentPlayedCollection(_songData!);
+      }
       emit(PlayingState(songData: _songData!));
     } catch (e) {
       emit(ErrorState(errorMessage: "Error fetching song: $e"));

@@ -40,6 +40,7 @@ Future<void> showLongPressOptions({
                         imageUrl: songData.thumbnail,
                         width: screenSize * 0.0755,
                         height: screenSize * 0.0733,
+                        islocal: songData.isLocal,
                       ),
                     ),
                     title: animatedText(
@@ -95,7 +96,7 @@ Future<void> showLongPressOptions({
                       ),
                       TextButton.icon(
                         onPressed: () {
-                          //uses the root navigator's context (which persists after popping your current route).
+                          //using the root navigator's context (which persists after popping your current route).
                           final rootContext =
                               Navigator.of(context, rootNavigator: true)
                                   .context;
@@ -151,8 +152,6 @@ Future<void> showLongPressOptions({
                               context.read<FavoritesBloc>().add(
                                   RemoveFromFavoritesEvent(vId: songData.vId));
                             } else if (tabRouteENUM == TabRouteENUM.playlist) {
-                              print(" DeleteSongUserPlaylistEvent @@@");
-
                               context.read<UserPlaylistBloc>().add(
                                   DeleteSongUserPlaylistEvent(
                                       playlistName: playlistName ?? "",
@@ -196,6 +195,7 @@ Future<void> showLongPressOptions({
                     imageUrl: songData.thumbnail,
                     width: screenSize * 0.0755,
                     height: screenSize * 0.0733,
+                    islocal: songData.isLocal,
                   ),
                 ),
                 title: animatedText(
@@ -248,7 +248,7 @@ Future<void> showLongPressOptions({
                   ),
                   TextButton.icon(
                     onPressed: () {
-                      //uses the root navigator's context (which persists after popping your current route).
+                      //using the root navigator's context (which persists after popping your current route).
                       final rootContext =
                           Navigator.of(context, rootNavigator: true).context;
 

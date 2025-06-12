@@ -2,6 +2,7 @@ import 'package:app_links/app_links.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -38,6 +39,7 @@ import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_cl
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_registrar.g.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/theme.dart';
+import 'package:nex_music/helper_function/storage_permission/storage_permission.dart';
 import 'package:nex_music/network_provider/home_data/download_provider.dart';
 import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
 import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
@@ -188,6 +190,7 @@ class MyApp extends StatelessWidget {
                   dio: Dio(),
                 ),
               ),
+              StoragePermission(DeviceInfoPlugin()),
             ),
           ),
           BlocProvider(

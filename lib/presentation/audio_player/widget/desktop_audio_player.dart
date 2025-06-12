@@ -75,11 +75,12 @@ class DesktopAudioPlayer extends StatelessWidget {
                                 imageUrl: songData.thumbnail,
                                 width: screenSize * 0.548,
                                 height: screenSize * 0.510,
+                                islocal: songData.isLocal,
                               ),
                             ),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 50,
                         ),
                         Column(
@@ -173,7 +174,7 @@ class DesktopAudioPlayer extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            SizedBox(
+                            const SizedBox(
                               height: 20,
                             ),
                             SizedBox(
