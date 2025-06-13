@@ -36,22 +36,28 @@ Stream<List<Songmodel>> loadDownloadedSongsStream() async* {
 
     if (file is File && file.path.endsWith('.json')) {
       try {
+        // final mp3Path = '$basePath.mp3';
         final jsonData = jsonDecode(await file.readAsString());
         final basePath = file.path.replaceAll('.json', '');
-        final mp3Path = '$basePath.mp3';
-        final jpgPath = '$basePath.jpg';
 
-        final hasMp3 = File(mp3Path).existsSync();
-        final hasJpg = File(jpgPath).existsSync();
+        final isM4a =
+            jsonData['audioCodec']?.toString().contains('mp') ?? false;
+        final audioExtension = isM4a ? 'm4a' : 'opus';
 
-        if (!hasMp3) debugPrint("Missing MP3: $mp3Path");
-        if (!hasJpg) debugPrint("Missing JPG: $jpgPath");
+        final audioPath = '$basePath.$audioExtension';
+        final imagePath = '$basePath.jpg';
 
-        if (hasMp3 && hasJpg) {
+        final hasAudioFile = File(audioPath).existsSync();
+        final hasJpg = File(imagePath).existsSync();
+
+        if (!hasAudioFile) debugPrint("Missing Audio File: $audioPath");
+        if (!hasJpg) debugPrint("Missing JPG: $imagePath");
+
+        if (hasAudioFile && hasJpg) {
           final song = Songmodel.fromJson(jsonData).copyWith(
-            thumbnail: jpgPath,
+            thumbnail: imagePath,
             isLocal: true,
-            localFilePath: mp3Path,
+            localFilePath: audioPath,
           );
           songs.add(song);
           debugPrint('Loaded song: ${song.songName}');

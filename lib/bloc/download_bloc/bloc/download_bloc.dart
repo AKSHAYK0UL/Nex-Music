@@ -24,11 +24,11 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
     try {
       final isGranted = await _storagePermission.requestStoragePermission();
       if (isGranted) {
-        final url =
+        final songRawInfo =
             await _repository.getSongUrl(event.songData.vId, AudioQuality.high);
 
         final downloadPercentageStream = _downloadRepo
-            .downloadSong(url.toString(), event.songData)
+            .downloadSong(songRawInfo, event.songData)
             .asBroadcastStream();
 
         await emit.forEach<double>(
@@ -53,7 +53,8 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
           },
           onError: (error, __) {
             if (error is FileExistException) {
-              emit(DownloadErrorState(errorMessage: error.message.toString()));
+              // emit(DownloadErrorState(errorMessage: error.message.toString()));
+              return DownloadErrorState(errorMessage: error.message.toString());
             }
             return DownloadErrorState(errorMessage: error.toString());
           },

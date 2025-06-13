@@ -7,6 +7,7 @@ import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart' as dp;
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/ui_component/global_download_indicator.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/applink_function/uri_parser.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
@@ -172,6 +173,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
             ),
           ],
         ),
+
         // Only show a bottom navigation bar for small screens.
         bottomNavigationBar: isSmallScreen
             ? Column(
@@ -193,6 +195,7 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
               )
             : // Hide MiniPlayer when overlay is mounted
             MiniPlayer(screenSize: screenSize),
+        floatingActionButton: const GlobalDownloadIndicator(),
       ),
     );
   }

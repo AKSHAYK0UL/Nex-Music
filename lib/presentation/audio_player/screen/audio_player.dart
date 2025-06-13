@@ -163,7 +163,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                               songData: songData));
                                     },
                               icon: Icon(
-                                Icons.download,
+                                Icons.downloading_sharp,
                                 color: state is DownloadPercantageStatusState
                                     ? Colors.grey.shade700
                                     : textColor,

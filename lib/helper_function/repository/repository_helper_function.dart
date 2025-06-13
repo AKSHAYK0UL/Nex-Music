@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:dart_ytmusic_api/types.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
@@ -149,13 +151,24 @@ class RepositoryHelperFunction {
             videofull.duration == 0 ? "" : timeFormate(videofull.duration));
   }
 
+//list of audio codecs
+  static List<String> audioCodecsFormate(
+      UnmodifiableListView<AudioOnlyStreamInfo> audioStreams) {
+    List<String> audioCodecs = [];
+    for (var stream in audioStreams) {
+      audioCodecs.add(stream.audioCodec);
+    }
+    return audioCodecs;
+  }
+
   static AudioOnlyStreamInfo selectStream(
       List<AudioOnlyStreamInfo> streams, AudioQuality quality) {
     switch (quality) {
       case AudioQuality.high:
-        // Prefer itag 251 or 140 for high quality.
+        // Prefer itag 141, 251 or 140 for high quality.
         return streams.lastWhere(
-          (stream) => stream.tag == 251 || stream.tag == 140,
+          (stream) =>
+              stream.tag == 141 || stream.tag == 251 || stream.tag == 140,
           orElse: () => streams.first,
         );
       case AudioQuality.medium:

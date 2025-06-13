@@ -47,12 +47,11 @@ import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/downlaod_repository/download_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
-
 import 'package:nex_music/secrets/firebase_options.dart';
 import 'package:nex_music/utils/audioutils/audio_handler.dart';
 import 'package:path_provider/path_provider.dart';
 
-final audioPlayer = AudioPlayer(); //global audioplayer  instance
+final audioPlayer = AudioPlayer(); //global audioplayer instance
 OverlayEntry? overlayEntry;
 
 Future<void> main() async {

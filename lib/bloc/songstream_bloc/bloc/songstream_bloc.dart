@@ -965,9 +965,13 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         await _audioPlayer.setFilePath(_songData!.localFilePath!);
       } else {
         final qualityInfo = await _dbInstance.getData;
-        final songUrl = await _repository.getSongUrl(
+        final songRawInfo = await _repository.getSongUrl(
             _songData!.vId, qualityInfo.audioQuality);
-        await _audioPlayer.setUrl(songUrl.toString());
+        await _audioPlayer.setUrl(
+          songRawInfo.url.toString(),
+          initialPosition: const Duration(seconds: 0),
+          // headers: {"Range": "bytes=0-${songRawInfo.totalBytes}"},
+        );
       }
 
       if (Platform.isWindows) {
@@ -1008,9 +1012,13 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         await _audioPlayer.setFilePath(_songData!.localFilePath!);
       } else {
         final qualityInfo = await _dbInstance.getData;
-        final songUrl = await _repository.getSongUrl(
+        final songRawInfo = await _repository.getSongUrl(
             _songData!.vId, qualityInfo.audioQuality);
-        await _audioPlayer.setUrl(songUrl.toString());
+        await _audioPlayer.setUrl(
+          songRawInfo.url.toString(),
+          initialPosition: const Duration(seconds: 0),
+          // headers: {"Range": "bytes=0-${songRawInfo.totalBytes}"},
+        );
       }
 
       if (Platform.isWindows) {

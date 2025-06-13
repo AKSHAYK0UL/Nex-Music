@@ -6,6 +6,7 @@ import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/helper_function/repository/repository_helper_function.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/playlistmodel.dart';
+import 'package:nex_music/model/song_raw_data.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/network_provider/home_data/dataprovider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -95,24 +96,44 @@ class Repository {
     return RepositoryHelperFunction.convertVideoFullToSongModel(videoFull);
   }
 
-//get audio stream
-  // Future<Uri> getSongUrl(String songId) async {
-  //   final manifest = await _dataProvider.songStreamUrl(songId);
-
-  //   return manifest.audioOnly.withHighestBitrate().url;
-  // }
-
-  Future<Uri> getSongUrl(String songId, AudioQuality quality) async {
+  Future<SongRawData> getSongUrl(String songId, AudioQuality quality) async {
     final manifest = await _dataProvider.songStreamUrl(songId);
+
     final audioStreams = manifest.audioOnly;
 
-    // Select the stream based on the desired quality.
+    final totalbytes = audioStreams.withHighestBitrate().size.totalBytes;
     final selectedStream =
         RepositoryHelperFunction.selectStream(audioStreams, quality);
-    print("STREAM BITRATE : ${selectedStream.bitrate.kiloBitsPerSecond}");
+    final audioCodecs =
+        RepositoryHelperFunction.audioCodecsFormate(audioStreams);
 
-    return selectedStream.url;
+    print("STREAM BITRATE : ${selectedStream.bitrate.kiloBitsPerSecond}");
+    print(
+        "audioStreams.withHighestBitrate() ${audioStreams.withHighestBitrate().bitrate.kiloBitsPerSecond} @@@@@@@@@2");
+    return SongRawData(
+        url: selectedStream.url, codecs: audioCodecs, totalBytes: totalbytes);
   }
+
+  // Future<Uri> getSongUrl(String songId, AudioQuality quality) async {
+  //   final manifest = await _dataProvider.songStreamUrl(songId);
+  //   final audioStreams = manifest.audioOnly;
+  //   // for (var stream in audioStreams) {
+  //   //   // print("SONG CODEC ${stream.container.name}");
+  //   //   // print("SONG QualityLabel ${stream.qualityLabel}");
+  //   //   print('Codec: ${stream.audioCodec}');
+  //   //   print('Container: ${stream.container.name}');
+  //   // print('Bitrate: ${stream.bitrate.kiloBitsPerSecond} kbps');
+  //   // }
+
+  //   // Select the stream based on the desired quality.
+  //   final selectedStream =
+  //       RepositoryHelperFunction.selectStream(audioStreams, quality);
+  //   final audioCodecs =
+  //       RepositoryHelperFunction.audioCodecsFormate(audioStreams);
+  //   print("STREAM BITRATE : ${selectedStream.bitrate.kiloBitsPerSecond}");
+
+  //   return selectedStream.url;
+  // }
 
   //Search suggestion
   Future<List<String>> searchSuggetion(String query) async {

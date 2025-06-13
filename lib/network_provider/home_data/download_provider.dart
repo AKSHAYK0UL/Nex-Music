@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nex_music/core/exceptions/file_exist.dart';
+import 'package:nex_music/model/song_raw_data.dart';
 import 'package:path_provider/path_provider.dart';
 
 class DownloadProvider {
@@ -18,7 +19,8 @@ class DownloadProvider {
   }
 
   Stream<double> downloadSong(
-    String songUrl,
+    SongRawData songRawInfo,
+    String actualDownformat,
     Map<String, dynamic> songDataMap,
   ) {
     final fileName = songDataMap["song_name"] + songDataMap["v_id"];
@@ -44,7 +46,7 @@ class DownloadProvider {
         }
 
         final basePath = "${downloadDir.path}/$fileName";
-        final songFilePath = "$basePath.mp3";
+        final songFilePath = "$basePath.$actualDownformat";
         final thumbnailFilePath = "$basePath.jpg";
         final metadataFilePath = "$basePath.json";
 
@@ -53,9 +55,11 @@ class DownloadProvider {
         // Download song
         if (!await File(songFilePath).exists()) {
           await _dio.download(
-            songUrl,
+            songRawInfo.url.toString(),
             songFilePath,
             deleteOnError: true,
+            options: Options(
+                headers: {"Range": 'bytes=0-${songRawInfo.totalBytes}'}),
             onReceiveProgress: (received, total) {
               if (total > 0) {
                 final percent = (received / total) * 100;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
@@ -137,6 +138,32 @@ Future<void> showLongPressOptions({
                         ),
                         icon: Icon(
                           Icons.person,
+                          color: textColor,
+                          size: screenSize * 0.0320,
+                        ),
+                      ),
+                      TextButton.icon(
+                        onPressed: () {
+                          context
+                              .read<DownloadBloc>()
+                              .add(DownloadSongEvent(songData: songData));
+
+                          // showSnackbar(context, "Downloading...");
+                          Navigator.of(context).pop();
+                        },
+                        label: Text(
+                          "Download",
+                          style: Theme.of(context).textTheme.labelMedium!,
+                        ),
+                        style: TextButton.styleFrom(
+                          alignment: Alignment.centerLeft,
+                          overlayColor: backgroundColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: Icon(
+                          Icons.downloading_sharp,
                           color: textColor,
                           size: screenSize * 0.0320,
                         ),
@@ -290,6 +317,41 @@ Future<void> showLongPressOptions({
                       Icons.person,
                       color: textColor,
                       size: screenSize * 0.0320,
+                    ),
+                  ),
+                  BlocListener<DownloadBloc, DownloadState>(
+                    listener: (context, state) {
+                      if (state is DownloadErrorState) {
+                        showSnackbar(context, state.errorMessage);
+                      }
+                      if (state is DownloadPercantageStatusState) {
+                        showSnackbar(context, "Downloading...");
+                      }
+                    },
+                    child: TextButton.icon(
+                      onPressed: () {
+                        context
+                            .read<DownloadBloc>()
+                            .add(DownloadSongEvent(songData: songData));
+
+                        Navigator.of(context).pop();
+                      },
+                      label: Text(
+                        "Download",
+                        style: Theme.of(context).textTheme.labelMedium!,
+                      ),
+                      style: TextButton.styleFrom(
+                        alignment: Alignment.centerLeft,
+                        overlayColor: backgroundColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.downloading_sharp,
+                        color: textColor,
+                        size: screenSize * 0.0320,
+                      ),
                     ),
                   ),
                   if (showDelete)
