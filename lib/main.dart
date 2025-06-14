@@ -20,6 +20,7 @@ import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/favorites_songs_bloc/bloc/favorites_songs_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
+import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/bloc/quality_bloc/bloc/quality_bloc.dart';
 import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
@@ -41,6 +42,7 @@ import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/theme.dart';
 import 'package:nex_music/helper_function/storage_permission/storage_permission.dart';
 import 'package:nex_music/network_provider/home_data/download_provider.dart';
+
 import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
 import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
 import 'package:nex_music/repository/auth_repository/auth_repository.dart';
@@ -49,6 +51,7 @@ import 'package:nex_music/repository/downlaod_repository/download_repository.dar
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/secrets/firebase_options.dart';
 import 'package:nex_music/utils/audioutils/audio_handler.dart';
+import 'package:nex_music/wrapper/global_download_listener.dart';
 import 'package:path_provider/path_provider.dart';
 
 final audioPlayer = AudioPlayer(); //global audioplayer instance
@@ -193,6 +196,16 @@ class MyApp extends StatelessWidget {
             ),
           ),
           BlocProvider(
+            create: (context) => OfflineSongsBloc(
+              DownloadRepo(
+                DownloadProvider(
+                  dio: Dio(),
+                ),
+              ),
+              StoragePermission(DeviceInfoPlugin()),
+            ),
+          ),
+          BlocProvider(
             create: (context) => UserLoggedBloc(
               repositoryProviderClassInstance.getFirebaseAuthInstance,
             ),
@@ -210,9 +223,15 @@ class MyApp extends StatelessWidget {
           BlocProvider(create: (context) => QualityBloc(dbInstance)),
         ],
         child: MaterialApp(
+          // navigatorObservers: [routeObserver],
           debugShowCheckedModeBanner: false,
           title: 'Nex Music',
           theme: themeData(context),
+          builder: (context, child) {
+            return GlobalDownloadListenerWrapper(
+              child: child!,
+            );
+          },
           home: BlocSelector<UserLoggedBloc, UserLoggedState, bool>(
             selector: (state) {
               return state is LoggedInState;

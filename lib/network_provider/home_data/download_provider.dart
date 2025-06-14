@@ -81,8 +81,11 @@ class DownloadProvider {
           try {
             await _dio.download(thumbnailUrl, thumbnailFilePath);
           } catch (e) {
-            debugPrint("Failed to download thumbnail: $e");
-            controller.addError("Failed to download thumbnail");
+            // debugPrint("Failed to download thumbnail: $e");
+            debugPrint('File already exists: $thumbnailFilePath');
+
+            controller.addError(FileExistException());
+            // controller.addError("Failed to download thumbnail");
           }
         }
 
@@ -91,16 +94,19 @@ class DownloadProvider {
           try {
             await File(metadataFilePath).writeAsString(jsonEncode(metadata));
           } catch (e) {
-            debugPrint("Failed to write metadata: $e");
-            controller.addError("Failed to write metadata");
+            // debugPrint("Failed to write metadata: $e");
+            // controller.addError("Failed to write metadata");
+            debugPrint('File already exists: $metadataFilePath');
+
+            controller.addError(FileExistException());
           }
         }
 
         controller.add(100.0);
         await controller.close();
       } catch (e) {
-        debugPrint('Download failed: $e');
-        controller.addError("Download failed");
+        debugPrint('Download Error: $e');
+        controller.addError("Download Error");
         await controller.close();
       }
     }();

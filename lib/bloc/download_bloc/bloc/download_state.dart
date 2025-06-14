@@ -18,6 +18,8 @@ final class DownloadPercantageStatusState extends DownloadState {
   }
 }
 
+final class DownloadCompletedState extends DownloadState {}
+
 final class DownloadErrorState extends DownloadState {
   final String errorMessage;
 

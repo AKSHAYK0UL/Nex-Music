@@ -1,3 +1,4 @@
+import 'package:nex_music/helper_function/load_offline_songs/loadsong.dart';
 import 'package:nex_music/model/song_raw_data.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/network_provider/home_data/download_provider.dart';
@@ -20,5 +21,9 @@ class DownloadRepo {
     } catch (_) {
       rethrow;
     }
+  }
+
+  Stream<List<Songmodel>> get loadOfflineSongs {
+    return loadDownloadedSongsStream(); //helper function
   }
 }

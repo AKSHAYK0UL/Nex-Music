@@ -40,23 +40,6 @@ class _SearchScreenState extends State<SearchScreen> {
         }
       },
       child: Scaffold(
-        // appBar: AppBar(
-        //   automaticallyImplyLeading: false,
-        //   title: SearchField(
-        //     key: _searchFieldKey,
-        //     inputBorder: outlineInputBorder,
-        //     onTextChanges: (text) {
-        //       if (text.isEmpty) {
-        //         context.read<SearchBloc>().add(LoadRecentSearchEvent());
-        //       } else {
-        //         context
-        //             .read<SearchBloc>()
-        //             .add(SearchSongSuggestionEvent(inputQuery: text));
-        //       }
-        //     },
-        //     hintText: "Search songs, albums, artists...",
-        //   ),
-        // ),
         body: SafeArea(
           child: Column(
             children: [

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
+import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
@@ -342,6 +343,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
               },
               buildWhen: (previous, current) => previous != current,
               builder: (context, state) {
+                if (state is DownloadCompletedState) {
+                  context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
+                }
                 if (state is DownloadPercantageStatusState) {
                   return StreamBuilder<double>(
                     stream: state.percentageStream,

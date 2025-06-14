@@ -9,7 +9,7 @@ class StoragePermission {
     this._deviceInfoPlugin,
   );
   //request
-  Future<bool> requestStoragePermission() async {
+  Future<bool> get requestStoragePermission async {
     if (Platform.isAndroid) {
       final androidInfo = await _deviceInfoPlugin.androidInfo;
       final sdkInt = androidInfo.version.sdkInt;
@@ -24,6 +24,19 @@ class StoragePermission {
       return true;
     }
   }
-  //TODO:
+
   //check
+  Future<bool> get checkStoragePermissionStatus async {
+    if (Platform.isAndroid) {
+      final androidInfo = await _deviceInfoPlugin.androidInfo;
+      final sdkInt = androidInfo.version.sdkInt;
+      if (sdkInt >= 33) {
+        return await Permission.audio.isGranted;
+      } else {
+        return await Permission.storage.isGranted;
+      }
+    } else {
+      return true;
+    }
+  }
 }

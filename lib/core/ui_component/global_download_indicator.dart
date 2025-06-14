@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
+import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 
@@ -13,6 +13,9 @@ class GlobalDownloadIndicator extends StatelessWidget {
     return BlocBuilder<DownloadBloc, DownloadState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
+        if (state is DownloadCompletedState) {
+          context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
+        }
         if (state is DownloadPercantageStatusState) {
           return SizedBox(
             height: 70,
@@ -26,16 +29,6 @@ class GlobalDownloadIndicator extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // CircleAvatar(
-                  //   radius: 29,
-                  //   child: ClipRRect(
-                  //     borderRadius: BorderRadius.circular(50),
-                  //     child: Image.network(
-                  //       state.songData.thumbnail,
-                  //       fit: BoxFit.fill,
-                  //     ),
-                  //   ),
-                  // ),
                   Container(
                     width: 56, // slightly less than FAB size
                     height: 56,

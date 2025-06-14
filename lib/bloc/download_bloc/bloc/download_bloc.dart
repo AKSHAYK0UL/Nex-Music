@@ -22,7 +22,7 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
   Future<void> _downloadSong(
       DownloadSongEvent event, Emitter<DownloadState> emit) async {
     try {
-      final isGranted = await _storagePermission.requestStoragePermission();
+      final isGranted = await _storagePermission.requestStoragePermission;
       if (isGranted) {
         final songRawInfo =
             await _repository.getSongUrl(event.songData.vId, AudioQuality.high);
@@ -35,7 +35,7 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
           downloadPercentageStream,
           onData: (percentage) {
             if (percentage >= 100.0) {
-              return DownloadInitial(); // Done
+              return DownloadCompletedState(); // Done
             } else {
               if (state is DownloadPercantageStatusState) {
                 final currentState = state as DownloadPercantageStatusState;

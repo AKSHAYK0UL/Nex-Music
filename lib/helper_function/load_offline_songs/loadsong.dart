@@ -6,12 +6,6 @@ import 'package:nex_music/model/songmodel.dart';
 import 'package:path_provider/path_provider.dart';
 
 Stream<List<Songmodel>> loadDownloadedSongsStream() async* {
-  // if (Platform.isAndroid && !await _checkReadPermission()) {
-  //   debugPrint(' Read permission denied');
-  //   yield [];
-  //   return;
-  // }
-
   final Directory? externalDir = await getExternalStorageDirectory();
   if (externalDir == null) {
     debugPrint('External storage directory not found');
@@ -36,7 +30,6 @@ Stream<List<Songmodel>> loadDownloadedSongsStream() async* {
 
     if (file is File && file.path.endsWith('.json')) {
       try {
-        // final mp3Path = '$basePath.mp3';
         final jsonData = jsonDecode(await file.readAsString());
         final basePath = file.path.replaceAll('.json', '');
 
