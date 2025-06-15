@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
+import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
@@ -142,31 +143,45 @@ Future<void> showLongPressOptions({
                           size: screenSize * 0.0320,
                         ),
                       ),
-                      TextButton.icon(
-                        onPressed: () {
-                          context
-                              .read<DownloadBloc>()
-                              .add(DownloadSongEvent(songData: songData));
+                      BlocBuilder<DownloadBloc, DownloadState>(
+                        buildWhen: (previous, current) => previous != current,
+                        builder: (context, state) {
+                          return TextButton.icon(
+                            onPressed: state is DownloadPercantageStatusState
+                                ? null
+                                : () {
+                                    context.read<DownloadBloc>().add(
+                                        DownloadSongEvent(songData: songData));
 
-                          // showSnackbar(context, "Downloading...");
-                          Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                  },
+                            label: Text(
+                              "Download",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(
+                                      color:
+                                          state is DownloadPercantageStatusState
+                                              ? Colors.grey.shade700
+                                              : textColor),
+                            ),
+                            style: TextButton.styleFrom(
+                              alignment: Alignment.centerLeft,
+                              overlayColor: backgroundColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: Icon(
+                              Icons.downloading_sharp,
+                              color: state is DownloadPercantageStatusState
+                                  ? Colors.grey.shade700
+                                  : textColor,
+                              size: screenSize * 0.0320,
+                            ),
+                          );
                         },
-                        label: Text(
-                          "Download",
-                          style: Theme.of(context).textTheme.labelMedium!,
-                        ),
-                        style: TextButton.styleFrom(
-                          alignment: Alignment.centerLeft,
-                          overlayColor: backgroundColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        icon: Icon(
-                          Icons.downloading_sharp,
-                          color: textColor,
-                          size: screenSize * 0.0320,
-                        ),
                       ),
                       if (showDelete)
                         TextButton.icon(
@@ -183,6 +198,12 @@ Future<void> showLongPressOptions({
                                   DeleteSongUserPlaylistEvent(
                                       playlistName: playlistName ?? "",
                                       vId: songData.vId));
+                            } else if (tabRouteENUM == TabRouteENUM.download) {
+                              context
+                                  .read<OfflineSongsBloc>()
+                                  .add(DeleteDownloadedSongEvent(
+                                    songData: songData,
+                                  ));
                             }
                             Navigator.of(context).pop();
                           },
@@ -319,41 +340,53 @@ Future<void> showLongPressOptions({
                       size: screenSize * 0.0320,
                     ),
                   ),
-                  BlocListener<DownloadBloc, DownloadState>(
-                    listener: (context, state) {
-                      if (state is DownloadErrorState) {
-                        showSnackbar(context, state.errorMessage);
-                      }
-                      if (state is DownloadPercantageStatusState) {
-                        showSnackbar(context, "Downloading...");
-                      }
-                    },
-                    child: TextButton.icon(
-                      onPressed: () {
-                        context
-                            .read<DownloadBloc>()
-                            .add(DownloadSongEvent(songData: songData));
+                  tabRouteENUM == TabRouteENUM.download
+                      ? const SizedBox()
+                      : BlocConsumer<DownloadBloc, DownloadState>(
+                          listener: (context, state) {
+                          if (state is DownloadErrorState) {
+                            showSnackbar(context, state.errorMessage);
+                          }
+                          if (state is DownloadPercantageStatusState) {
+                            showSnackbar(context, "Downloading...");
+                          }
+                        }, builder: (context, state) {
+                          return TextButton.icon(
+                            onPressed: state is DownloadPercantageStatusState
+                                ? null
+                                : () {
+                                    context.read<DownloadBloc>().add(
+                                        DownloadSongEvent(songData: songData));
 
-                        Navigator.of(context).pop();
-                      },
-                      label: Text(
-                        "Download",
-                        style: Theme.of(context).textTheme.labelMedium!,
-                      ),
-                      style: TextButton.styleFrom(
-                        alignment: Alignment.centerLeft,
-                        overlayColor: backgroundColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      icon: Icon(
-                        Icons.downloading_sharp,
-                        color: textColor,
-                        size: screenSize * 0.0320,
-                      ),
-                    ),
-                  ),
+                                    Navigator.of(context).pop();
+                                  },
+                            label: Text(
+                              "Download",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(
+                                      color:
+                                          state is DownloadPercantageStatusState
+                                              ? Colors.grey.shade700
+                                              : textColor),
+                            ),
+                            style: TextButton.styleFrom(
+                              alignment: Alignment.centerLeft,
+                              overlayColor: backgroundColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            icon: Icon(
+                              Icons.downloading_sharp,
+                              color: state is DownloadPercantageStatusState
+                                  ? Colors.grey.shade700
+                                  : textColor,
+                              size: screenSize * 0.0320,
+                            ),
+                          );
+                        }),
                   if (showDelete)
                     TextButton.icon(
                       onPressed: () {
@@ -369,6 +402,12 @@ Future<void> showLongPressOptions({
                               DeleteSongUserPlaylistEvent(
                                   playlistName: playlistName ?? "",
                                   vId: songData.vId));
+                        } else if (tabRouteENUM == TabRouteENUM.download) {
+                          context.read<OfflineSongsBloc>().add(
+                                DeleteDownloadedSongEvent(
+                                  songData: songData,
+                                ),
+                              );
                         }
                         Navigator.of(context).pop();
                       },

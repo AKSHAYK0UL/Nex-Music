@@ -14,6 +14,7 @@ class OfflineSongsBloc extends Bloc<OfflineSongsEvent, OfflineSongsState> {
   OfflineSongsBloc(this._downloadRepo, this._storagePermission)
       : super(OfflineSongsInitial()) {
     on<LoadOfflineSongsEvent>(_loadOfflineSongs);
+    on<DeleteDownloadedSongEvent>(_deleteDownloadedSong);
   }
   //load
   Future<void> _loadOfflineSongs(
@@ -39,5 +40,16 @@ class OfflineSongsBloc extends Bloc<OfflineSongsEvent, OfflineSongsState> {
       emit(OfflineSongsErrorState(errorMessage: e.toString()));
     }
   }
+
   //delete
+  Future<void> _deleteDownloadedSong(
+      DeleteDownloadedSongEvent event, Emitter<OfflineSongsState> emit) async {
+    try {
+      await _downloadRepo.deleteDownLoadedSong(event.songData);
+      add(LoadOfflineSongsEvent());
+    } catch (e) {
+      print("DELETE ERROR ${e.toString()}@@@@@");
+      emit(OfflineSongsErrorState(errorMessage: e.toString()));
+    }
+  }
 }

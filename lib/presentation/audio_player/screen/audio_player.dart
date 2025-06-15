@@ -135,7 +135,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                 ),
                 //
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: screenSize * 0.0331),
+                  margin: EdgeInsets.symmetric(horizontal: screenSize * 0.0328),
                   decoration: BoxDecoration(
                     color: secondaryColor,
                     borderRadius: BorderRadius.only(

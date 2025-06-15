@@ -373,6 +373,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:audio_service/audio_service.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
@@ -440,6 +441,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
 
     _initializeAudioPlayerListeners();
+    _initAudioSession();
   }
 
   Stream<AudioPlayerStream> get getAudioPlayerStreamData =>
@@ -474,7 +476,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         }
       }
     });
-
+    //windows specific code
+    // Windows-specific loop handling
     _audioPlayer.positionStream.listen((position) {
       if (Platform.isWindows &&
           _audioPlayer.loopMode == LoopMode.one &&
@@ -485,7 +488,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         }
       }
     });
-
+    //auto play song
     if (Platform.isWindows) {
       _audioPlayer.playbackEventStream.listen((event) {
         if (!_isPlaying && _songLoaded) {
@@ -495,11 +498,52 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     }
   }
 
+  Future<void> _initAudioSession() async {
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration.music());
+
+    session.becomingNoisyEventStream.listen((ext) {
+      // Headphones disconnected, pause audio
+      if (_isPlaying) {
+        add(PauseEvent());
+      }
+    });
+    session.interruptionEventStream.listen((event) {
+      if (event.type == AudioInterruptionType.pause) {
+        if (_isPlaying) {
+          add(PauseEvent());
+        }
+      } else if (event.type == AudioInterruptionType.duck) {
+        //TODO
+        // Lower the volume
+      } else if (event.type == AudioInterruptionType.unknown) {
+        //TODO
+        // Unknown interruption
+      }
+    });
+
+    // session.interruptionEventStream.listen((event) {
+    //   if (event.begin) {
+    //     // Interruption began (e.g. phone call), pause playback
+    //     if (_isPlaying) {
+    //       add(PauseEvent());
+    //     }
+    //   } else if (event.end && event.resume) {
+    //     // Interruption ended and we can resume
+    //     if (!_isPlaying) {
+    //       add(PlayEvent());
+    //     }
+    //   }
+    // });
+  }
+
+// Grab the song URL, update the "Recently Played" list and start playing.
+// (I know the function name isn’t ideal)
   Future<void> _getSongUrl(
       GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
     _resetAudioPlayer();
-    emit(LoadingState(songData: event.songData));
     _songData = event.songData;
+    emit(LoadingState(songData: _songData!));
     _firstSongPlayedIndex = event.songIndex;
     _currentSongIndex++;
     _playlistSongs.insert(_currentSongIndex, _songData!);
@@ -516,6 +560,11 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
     try {
       if (_songData!.isLocal && _songData!.localFilePath != null) {
+        //test
+        // _audioPlayer.pause();
+        // add(PauseEvent());
+        // _isPlaying = false;
+        //test
         await _audioPlayer.setFilePath(_songData!.localFilePath!);
       } else {
         final qualityInfo = await _dbInstance.getData;
@@ -548,11 +597,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     }
   }
 
+// Do exactly what [_getSongUrl] does, but with extra spice shuffle mode activated.
   Future<void> _getSongUrlOnShuffle(
       GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
     _resetAudioPlayerWhenOnShuffle();
-    emit(LoadingState(songData: event.songData));
     _songData = event.songData;
+    emit(LoadingState(songData: _songData!));
 
     _audioPlayerHandler.setMediaItem(MediaItem(
       id: _songData!.vId,
@@ -598,6 +648,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     }
   }
 
+//emit pause/play state
   void _togglePlayPause(PlayPauseEvent event, Emitter<SongstreamState> emit) {
     _isPlaying ? add(PauseEvent()) : add(PlayEvent());
   }
@@ -626,6 +677,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         : PausedState(songData: _songData!));
   }
 
+  //Mute Audio Player
   void _toggleMute(MuteEvent event, Emitter<SongstreamState> emit) {
     final volume = _audioPlayer.volume;
     _isMute = !_isMute;
@@ -643,6 +695,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   void _playNextSong(PlayNextSongEvent event, Emitter<SongstreamState> emit) {
     _currentSongIndex = (_currentSongIndex + 1) % _playlistSongs.length;
     add(GetSongUrlOnShuffleEvent(songData: _playlistSongs[_currentSongIndex]));
+    // //test
+    // _currentSongIndex = (_currentSongIndex + 1) < _playlistSongs.length
+    //     ? _currentSongIndex + 1
+    //     : 0;
+    // add(GetSongUrlOnShuffleEvent(songData: _playlistSongs[_currentSongIndex]));
+    // //test
   }
 
   void _playPreviousSong(
@@ -679,6 +737,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _audioPlayer.seek(Duration.zero);
   }
 
+// Refresh the UI when the app returns from the dead [background or recent apps].
   void _updateUIFromBackground(
       UpdateUIEvent event, Emitter<SongstreamState> emit) {
     if (state.runtimeType != CloseMiniPlayerState) {
@@ -694,14 +753,22 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   void _addToPlayNext(AddToPlayNextEvent event, Emitter<SongstreamState> emit) {
+    // final insertIndex =
+    //     (_currentSongIndex >= 0 && _currentSongIndex < _playlistSongs.length)
+    //         ? _currentSongIndex + 1
+    //         : _playlistSongs.length;
+    // _playlistSongs.insert(insertIndex, event.songData);
+    // if (_currentSongIndex >= insertIndex) _currentSongIndex++;
     final insertIndex =
         (_currentSongIndex >= 0 && _currentSongIndex < _playlistSongs.length)
             ? _currentSongIndex + 1
             : _playlistSongs.length;
+
     _playlistSongs.insert(insertIndex, event.songData);
     if (_currentSongIndex >= insertIndex) _currentSongIndex++;
   }
 
+//emit loading state with currentsong data
   void _loading(LoadingEvent event, Emitter<SongstreamState> emit) =>
       emit(LoadingState(songData: _songData!));
 

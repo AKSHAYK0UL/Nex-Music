@@ -110,6 +110,7 @@ class Songmodel extends Equatable {
 
   final bool isLocal;
   final String? localFilePath;
+  final String? audioFormat;
 
   const Songmodel({
     required this.vId,
@@ -120,6 +121,7 @@ class Songmodel extends Equatable {
     this.timestamp,
     this.isLocal = false,
     this.localFilePath,
+    this.audioFormat,
   });
 
   factory Songmodel.fromJson(Map<String, dynamic> json) {
@@ -133,15 +135,15 @@ class Songmodel extends Equatable {
     }
 
     return Songmodel(
-      vId: json["v_id"],
-      songName: json["song_name"],
-      artist: ArtistBasic.fromMap(json["artist"]),
-      thumbnail: json["thumbnail"],
-      duration: json["duration"],
-      timestamp: ts,
-      isLocal: json["isLocal"] ?? false,
-      localFilePath: json["localFilePath"],
-    );
+        vId: json["v_id"],
+        songName: json["song_name"],
+        artist: ArtistBasic.fromMap(json["artist"]),
+        thumbnail: json["thumbnail"],
+        duration: json["duration"],
+        timestamp: ts,
+        isLocal: json["isLocal"] ?? false,
+        localFilePath: json["localFilePath"],
+        audioFormat: json["audioformat"]);
   }
 
   Map<String, dynamic> toJson() {
@@ -154,6 +156,7 @@ class Songmodel extends Equatable {
       "timestamp": timestamp?.toDate().toIso8601String(),
       "isLocal": isLocal,
       "localFilePath": localFilePath,
+      "audioformat": audioFormat,
     };
   }
 
@@ -166,6 +169,7 @@ class Songmodel extends Equatable {
     Timestamp? timestamp,
     bool? isLocal,
     String? localFilePath,
+    String? audioFormat,
   }) {
     return Songmodel(
       vId: vId ?? this.vId,
@@ -176,6 +180,7 @@ class Songmodel extends Equatable {
       timestamp: timestamp ?? this.timestamp,
       isLocal: isLocal ?? this.isLocal,
       localFilePath: localFilePath ?? this.localFilePath,
+      audioFormat: audioFormat ?? this.audioFormat,
     );
   }
 
@@ -189,5 +194,6 @@ class Songmodel extends Equatable {
         timestamp,
         isLocal,
         localFilePath,
+        audioFormat,
       ];
 }

@@ -51,6 +51,7 @@ Stream<List<Songmodel>> loadDownloadedSongsStream() async* {
             thumbnail: imagePath,
             isLocal: true,
             localFilePath: audioPath,
+            audioFormat: audioExtension,
           );
           songs.add(song);
           debugPrint('Loaded song: ${song.songName}');

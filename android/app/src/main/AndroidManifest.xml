@@ -7,6 +7,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+        <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage"/>
+
     
 
  <!-- For Android 10 to 12 (API 29 to 32) -->
@@ -20,6 +23,11 @@
 <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+<!-- Testing media permissions -->
+
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+<uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+<uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
 
 
 
@@ -29,7 +37,6 @@
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
-
         android:enableOnBackInvokedCallback="true">
         
 
@@ -47,6 +54,9 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@drawable/ic_notification" />
+                 <meta-data
+              android:name="io.flutter.embedding.android.EnableImpeller"
+              android:value="true" />
 
             <!-- Deep links -->
             <intent-filter android:autoVerify="true">
