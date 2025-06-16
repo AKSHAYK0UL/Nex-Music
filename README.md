@@ -19,10 +19,10 @@
   </tr>
    <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/62bdab4b-8ce9-4b61-a933-c7d632151d3f" alt="NEX Music Screenshot 5" width="300" />
+      <img src="https://github.com/user-attachments/assets/c0296ebb-f028-42f7-9b27-1b8a4abe3be6" alt="NEX Music Screenshot 5" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/6ac46d94-53d1-47bd-b257-c712ffda2018" alt="NEX Music Screenshot 6" width="300" />
+      <img src="https://github.com/user-attachments/assets/4642f458-4359-45ef-8ae9-ce79dab18649" alt="NEX Music Screenshot 6" width="300" />
     </td>
   </tr>
    <tr>
@@ -30,9 +30,22 @@
       <img src="https://github.com/user-attachments/assets/62c96cb5-04a6-44fe-b420-56583ded3e43" alt="NEX Music Screenshot 5" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/d377f0e6-13d6-4b1a-98ff-f6824a2a7894" alt="NEX Music Screenshot 6" width="300" />
+      <img src="https://github.com/user-attachments/assets/951199fc-f06c-4ddc-a2a4-09814e21cb94" alt="NEX Music Screenshot 6" width="300" />
     </td>
   </tr>
+
+
+ <tr>
+    <td align="center" style="padding: 20px;">
+      <img src="https://github.com/user-attachments/assets/d377f0e6-13d6-4b1a-98ff-f6824a2a7894" alt="NEX Music Screenshot 5" width="300" />
+    </td>
+    <td align="center" style="padding: 20px;">
+      <img src="https://github.com/user-attachments/assets/1e503c25-46ae-4691-8f4d-9120b3649ff2" alt="NEX Music Screenshot 6" width="300" />
+    </td>
+  </tr>
+
+
+  
   <tr>
     <td align="center" style="padding: 20px;">
       <img src="https://github.com/user-attachments/assets/b0e0492d-5756-4c2a-84d7-cb136129817c" alt="NEX Music Screenshot 7" width="300" />
@@ -62,7 +75,7 @@
       <img src="https://github.com/user-attachments/assets/4da79677-1cee-468a-8d86-ddad6ff1d5f7" alt="NEX Music Screenshot 13" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/20b9ffda-97e8-4f57-93d0-8dc6e972f0c1" alt="NEX Music Screenshot 14" width="300" />
+      <img src="https://github.com/user-attachments/assets/3cddca62-5152-4d10-bdb6-365f740f5ba2" alt="NEX Music Screenshot 14" width="300" />
     </td>
   </tr>
   <tr>
@@ -87,9 +100,9 @@
 
 - 🔴 **YouTube Playback** – Stream songs directly from YouTube or YouTube Music.
 - 💾 **Song Caching** – Cache songs while playing for offline-friendly playback.
+- 📥 **Offline Downloads** – Download songs and access them anytime, even without an internet connection.
 - 🎧 **Background Music Support** – Continue listening even when minimized or in the background.
 - 📝 **Create & Manage Playlists** – Personalized music library at your fingertips.
-- 📌 **Bookmarks** – Save your favorite artists, albums, and songs.
 - ⚙️ **Streaming Quality Control** – Fine-tune stream and artwork quality based on your preferences and network.
 - 🔐 **Google OAuth Login** – Secure authentication and real-time sync across devices.
 - ❌ **No Ads** – 100% uninterrupted music experience.
