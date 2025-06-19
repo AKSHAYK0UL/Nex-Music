@@ -5,7 +5,7 @@ import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 
-Future<void> showCreatePlaylistDialog(BuildContext context) {
+Future<void> showCreatePlaylistDialog(BuildContext context) async {
   TextEditingController playlistNameController = TextEditingController();
 
   return showDialog(

@@ -11,6 +11,7 @@ import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 import 'package:nex_music/presentation/audio_player/widget/overlay_audio_player.dart';
 import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
+import 'package:nex_music/presentation/home/widget/longpress_options_bottom_sheet.dart';
 import 'package:nex_music/presentation/home/widget/long_press_options.dart';
 
 class SongTitle extends StatefulWidget {
@@ -88,7 +89,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
         splashColor: Colors.transparent,
         onLongPress: () {
           if (isSmallScreen) {
-            showLongPressOptions(
+            showBottomOptionSheet(
               context: context,
               songData: widget.songData,
               screenSize: screenSize,
@@ -96,6 +97,14 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
               tabRouteENUM: widget.tabRouteENUM,
               playlistName: widget.playlistName,
             );
+            // showLongPressOptions(
+            //   context: context,
+            //   songData: widget.songData,
+            //   screenSize: screenSize,
+            //   showDelete: widget.showDelete,
+            //   tabRouteENUM: widget.tabRouteENUM,
+            //   playlistName: widget.playlistName,
+            // );
           }
         },
         onTap: () {

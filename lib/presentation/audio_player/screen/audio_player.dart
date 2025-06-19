@@ -9,7 +9,7 @@ import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/presentation/audio_player/widget/download_bar.dart';
-import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_dialog.dart';
+import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/quality.dart';
@@ -175,7 +175,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                         ),
                         IconButton(
                           onPressed: () {
-                            showAddToPlaylistDialog(context, songData);
+                            // showAddToPlaylistDialog(context, songData);
+                            addToPlayListBottomSheet(
+                                context, songData, screenSize);
                           },
                           icon: Icon(
                             Icons.playlist_add,

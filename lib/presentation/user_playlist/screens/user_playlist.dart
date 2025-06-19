@@ -4,7 +4,7 @@ import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/presentation/user_playlist/screens/user_playlist_songs.dart';
-import 'package:nex_music/presentation/user_playlist/widgets/show_create_playlist_dialog.dart';
+import 'package:nex_music/presentation/user_playlist/widgets/create_playlistmodalsheet.dart';
 
 class UserPlaylist extends StatefulWidget {
   const UserPlaylist({super.key});
@@ -33,7 +33,8 @@ class _UserPlaylistState extends State<UserPlaylist> {
         actions: [
           IconButton(
               onPressed: () {
-                showCreatePlaylistDialog(context);
+                // showCreatePlaylistDialog(context);
+                createPlaylistBottomSheet(context, screenSize);
               },
               icon: const Icon(Icons.add))
         ],

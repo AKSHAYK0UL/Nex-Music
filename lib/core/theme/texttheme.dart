@@ -55,6 +55,11 @@ TextTheme textTheme(BuildContext context, double screenSize) {
     ),
     displayMedium: TextStyle(
       color: textColor,
+      fontSize: screenSize * 0.0230,
+      fontWeight: FontWeight.w600,
+    ),
+    displayLarge: TextStyle(
+      color: textColor,
       fontSize: screenSize * 0.0183,
       fontWeight: FontWeight.bold,
     ),
