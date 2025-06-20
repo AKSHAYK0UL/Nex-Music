@@ -20,6 +20,14 @@ class AudioPlayerHandler extends BaseAudioHandler {
   @override
   Future<void> pause() => _player.pause();
 
+//TODO:
+  @override
+  Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {}
+
+//TODO:
+  @override
+  Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {}
+
   @override
   Future<void> seek(Duration position) => _player.seek(position);
 

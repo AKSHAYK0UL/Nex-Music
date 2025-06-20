@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nex_music/core/theme/appbartheme.dart';
 import 'package:nex_music/core/theme/chiptheme.dart';
 import 'package:nex_music/core/theme/dialogtheme.dart';
+import 'package:nex_music/core/theme/elevatedbutton.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/theme/listtiletheme.dart';
 import 'package:nex_music/core/theme/navbartheme.dart';
@@ -27,5 +28,6 @@ ThemeData themeData(BuildContext context) {
     segmentedButtonTheme: segmentedButtonTheme(context),
     dialogTheme: dialogTheme(screenSize),
     tabBarTheme: tabBarTheme,
+    elevatedButtonTheme: elevatedButtonTheme(),
   );
 }

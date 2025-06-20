@@ -12,7 +12,8 @@ import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
-import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_dialog.dart';
+import 'package:nex_music/presentation/home/widget/bottom_sheet_button.dart';
+import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> showBottomOptionSheet({
@@ -82,7 +83,12 @@ Future<void> showBottomOptionSheet({
                 thickness: 1.5,
               ),
               //content
-              TextButton.icon(
+
+              bottomSheetButton(
+                context: context,
+                label: "Play Next",
+                icon: Icons.play_circle_outlined,
+                screenSize: screenSize,
                 onPressed: () {
                   context
                       .read<SongstreamBloc>()
@@ -90,69 +96,29 @@ Future<void> showBottomOptionSheet({
                   showSnackbar(context, "Added to Play Next");
                   Navigator.of(context).pop();
                 },
-                label: Text(
-                  "Play Next",
-                  style: Theme.of(context).textTheme.displayMedium!,
-                ),
-                style: TextButton.styleFrom(
-                  alignment: Alignment.centerLeft,
-                  overlayColor: backgroundColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: Icon(
-                  Icons.play_circle_outlined,
-                  color: textColor,
-                  size: screenSize * 0.0360,
-                ),
               ),
-              TextButton.icon(
-                onPressed: () {
-                  //using the root navigator's context (which persists after popping your current route).
-                  final rootContext =
-                      Navigator.of(context, rootNavigator: true).context;
 
+              bottomSheetButton(
+                context: context,
+                label: "Add to Playlist",
+                icon: Icons.playlist_add,
+                screenSize: screenSize,
+                onPressed: () {
                   Navigator.of(context).pop();
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    showAddToPlaylistDialog(rootContext, songData);
+                    addToPlayListBottomSheet(context, songData, screenSize);
                   });
                 },
-                label: Text(
-                  "Add to Playlist",
-                  style: Theme.of(context).textTheme.displayMedium!,
-                ),
-                style: TextButton.styleFrom(
-                  alignment: Alignment.centerLeft,
-                  overlayColor: backgroundColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: Icon(
-                  Icons.playlist_add,
-                  color: textColor,
-                  size: screenSize * 0.0360,
-                ),
               ),
-              TextButton.icon(
+
+              bottomSheetButton(
+                context: context,
+                label: "View Artist (${songData.artist.name})",
+                icon: Icons.person,
+                screenSize: screenSize,
                 onPressed: () {},
-                label: animatedText(
-                    text: "View Artist (${songData.artist.name})",
-                    style: Theme.of(context).textTheme.displayMedium!),
-                style: TextButton.styleFrom(
-                  alignment: Alignment.centerLeft,
-                  overlayColor: backgroundColor,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                icon: Icon(
-                  Icons.person,
-                  color: textColor,
-                  size: screenSize * 0.0360,
-                ),
               ),
+
               tabRouteENUM == TabRouteENUM.download
                   ? const SizedBox()
                   : BlocConsumer<DownloadBloc, DownloadState>(
@@ -160,11 +126,21 @@ Future<void> showBottomOptionSheet({
                       if (state is DownloadErrorState) {
                         showSnackbar(context, state.errorMessage);
                       }
-                      if (state is DownloadPercantageStatusState) {
-                        showSnackbar(context, "Downloading...");
-                      }
+                      // if (state is DownloadPercantageStatusState) {
+                      //   showSnackbar(context, "Downloading...");
+                      // }
                     }, builder: (context, state) {
-                      return TextButton.icon(
+                      return bottomSheetButton(
+                        context: context,
+                        label: "Download",
+                        icon: Icons.downloading_sharp,
+                        screenSize: screenSize,
+                        color: state is DownloadPercantageStatusState
+                            ? Colors.grey.shade700
+                            : textColor,
+                        labelColor: state is DownloadPercantageStatusState
+                            ? Colors.grey.shade700
+                            : textColor,
                         onPressed: state is DownloadPercantageStatusState
                             ? null
                             : () {
@@ -174,34 +150,16 @@ Future<void> showBottomOptionSheet({
 
                                 Navigator.of(context).pop();
                               },
-                        label: Text(
-                          "Download",
-                          style: Theme.of(context)
-                              .textTheme
-                              .displayMedium
-                              ?.copyWith(
-                                  color: state is DownloadPercantageStatusState
-                                      ? Colors.grey.shade700
-                                      : textColor),
-                        ),
-                        style: TextButton.styleFrom(
-                          alignment: Alignment.centerLeft,
-                          overlayColor: backgroundColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        icon: Icon(
-                          Icons.downloading_sharp,
-                          color: state is DownloadPercantageStatusState
-                              ? Colors.grey.shade700
-                              : textColor,
-                          size: screenSize * 0.0360,
-                        ),
                       );
                     }),
               if (showDelete)
-                TextButton.icon(
+                bottomSheetButton(
+                  context: context,
+                  label: "Remove Song",
+                  icon: Icons.delete,
+                  screenSize: screenSize,
+                  color: boldOrange,
+                  labelColor: boldOrange,
                   onPressed: () {
                     if (tabRouteENUM == TabRouteENUM.recent) {
                       context.read<SongDialogBloc>().add(
@@ -224,24 +182,6 @@ Future<void> showBottomOptionSheet({
                     }
                     Navigator.of(context).pop();
                   },
-                  label: animatedText(
-                      text: "Remove Song",
-                      style: Theme.of(context)
-                          .textTheme
-                          .displayMedium!
-                          .copyWith(color: boldOrange)),
-                  style: TextButton.styleFrom(
-                    alignment: Alignment.centerLeft,
-                    overlayColor: backgroundColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  icon: Icon(
-                    Icons.delete,
-                    color: boldOrange,
-                    size: screenSize * 0.0360,
-                  ),
                 ),
             ],
           ),
