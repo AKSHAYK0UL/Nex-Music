@@ -67,14 +67,32 @@ Future<void> showBottomOptionSheet({
                   text: songData.artist.name,
                   style: Theme.of(context).textTheme.bodySmall!,
                 ),
-                trailing: IconButton(
-                  onPressed: () async {
-                    await Share.share(
-                        "https://music.youtube.com/watch?v=${songData.vId}");
-                    if (!context.mounted) return;
-                    Navigator.of(context).pop();
-                  },
-                  icon: const Icon(Icons.share),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        await Share.share(
+                            "https://music.youtube.com/watch?v=${songData.vId}");
+                        if (!context.mounted) return;
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(
+                        Icons.share,
+                        size: screenSize * 0.035,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(
+                        Icons.close,
+                        size: screenSize * 0.037,
+                        color: boldOrange,
+                      ),
+                    )
+                  ],
                 ),
               ),
 
@@ -104,10 +122,10 @@ Future<void> showBottomOptionSheet({
                 icon: Icons.playlist_add,
                 screenSize: screenSize,
                 onPressed: () {
+                  final rootContext =
+                      Navigator.of(context, rootNavigator: true).context;
                   Navigator.of(context).pop();
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    addToPlayListBottomSheet(context, songData, screenSize);
-                  });
+                  addToPlayListBottomSheet(rootContext, songData, screenSize);
                 },
               ),
 

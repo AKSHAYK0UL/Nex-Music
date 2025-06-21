@@ -9,27 +9,30 @@ Future<void> createPlaylistBottomSheet(
   TextEditingController playlistNameController = TextEditingController();
 
   return showModalBottomSheet(
-      isScrollControlled: false,
-      context: context,
-      backgroundColor: secondaryColor,
-      builder: (context) {
-        return AnimatedPadding(
-          duration: const Duration(milliseconds: 150),
-          padding:
-              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: Container(
-            padding: EdgeInsets.symmetric(
-                horizontal: screenSize * 0.015, vertical: screenSize * 0.012),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: secondaryColor,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(screenSize * 0.015),
-                  topRight: Radius.circular(screenSize * 0.015)),
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: secondaryColor,
+    builder: (context) {
+      return AnimatedPadding(
+        duration: const Duration(milliseconds: 150),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: screenSize * 0.015,
+            vertical: screenSize * 0.012,
+          ),
+          decoration: BoxDecoration(
+            color: secondaryColor,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(screenSize * 0.015),
+              topRight: Radius.circular(screenSize * 0.015),
             ),
+          ),
+          child: SafeArea(
+            top: false,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   "Playlist Name",
@@ -49,43 +52,36 @@ Future<void> createPlaylistBottomSheet(
                   ),
                   autofocus: true,
                 ),
-                SizedBox(
-                  height: screenSize * 0.0150,
-                ),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      label: Text(
-                        "Close",
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      icon: Icon(
-                        Icons.close,
-                        color: textColor,
-                        size: screenSize * 0.030,
-                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(Icons.close,
+                          color: boldOrange, size: screenSize * 0.030),
+                      label: Text("Close",
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(color: boldOrange)),
                     ),
                     ElevatedButton.icon(
                       onPressed: () {
                         final playlistName = playlistNameController.text.trim();
-
                         if (playlistName.isNotEmpty) {
                           context.read<UserPlaylistBloc>().add(
-                                CreatePlaylistEvent(playlistName: playlistName),
-                              );
+                              CreatePlaylistEvent(playlistName: playlistName));
                           showSnackbar(
                               context, "Playlist created successfully");
                           Navigator.of(context).pop();
                         } else {
-                          //n
                           showSnackbar(
                               context, "Playlist name cannot be empty");
                         }
                       },
+                      icon: Icon(Icons.done,
+                          color: accentColor, size: screenSize * 0.030),
                       label: Text(
                         "Done",
                         style: Theme.of(context)
@@ -93,25 +89,20 @@ Future<void> createPlaylistBottomSheet(
                             .titleMedium
                             ?.copyWith(color: accentColor),
                       ),
-                      icon: Icon(
-                        Icons.done,
-                        color: accentColor,
-                        size: screenSize * 0.030,
-                      ),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-        );
-      });
+        ),
+      );
+    },
+  );
 }
 
 UnderlineInputBorder get _underlineInputBorder {
   return UnderlineInputBorder(
-    borderSide: BorderSide(
-      color: accentColor,
-    ),
+    borderSide: BorderSide(color: accentColor, width: 1.7),
   );
 }

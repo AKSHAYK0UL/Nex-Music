@@ -32,7 +32,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
           ),
           bottom: ButtonsTabBar(
             splashColor: backgroundColor,
-            backgroundColor: Colors.white38,
+            backgroundColor: Colors.white24,
             unselectedBackgroundColor: secondaryColor,
             width: screenSize / 8,
             contentCenter: true,

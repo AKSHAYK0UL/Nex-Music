@@ -521,27 +521,23 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         // Unknown interruption
       }
     });
-
-    // session.interruptionEventStream.listen((event) {
-    //   if (event.begin) {
-    //     // Interruption began (e.g. phone call), pause playback
-    //     if (_isPlaying) {
-    //       add(PauseEvent());
-    //     }
-    //   } else if (event.end && event.resume) {
-    //     // Interruption ended and we can resume
-    //     if (!_isPlaying) {
-    //       add(PlayEvent());
-    //     }
-    //   }
-    // });
   }
 
 // Grab the song URL, update the "Recently Played" list and start playing.
-// (I know the function name isn’t ideal)
+// (I know the function name isn’t ideal
   Future<void> _getSongUrl(
       GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
+    print("SONG ID ${event.songData.vId}@@@");
+    if (_songData != null && event.songData.vId == _songData!.vId) {
+      _audioPlayer.seek(Duration.zero);
+      _audioPlayer.play();
+      _isPlaying = true;
+      _songLoaded = true;
+      return;
+    }
+
     _resetAudioPlayer();
+
     _songData = event.songData;
     emit(LoadingState(songData: _songData!));
     _firstSongPlayedIndex = event.songIndex;

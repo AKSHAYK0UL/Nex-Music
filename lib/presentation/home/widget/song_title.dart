@@ -115,6 +115,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
               "songdata": widget.songData,
               "route": SongMiniPlayerRoute.songRoute,
               "quality": quality,
+              "tabroute": widget.tabRouteENUM,
             });
           } else {
             _showOverlay(context);

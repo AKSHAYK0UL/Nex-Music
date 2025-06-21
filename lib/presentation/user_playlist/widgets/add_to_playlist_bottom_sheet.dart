@@ -32,15 +32,27 @@ Future<void> addToPlayListBottomSheet(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(' Select Playlist',
                         style: Theme.of(context).textTheme.titleLarge),
+                    const Spacer(),
                     IconButton(
                       onPressed: () {
                         createPlaylistBottomSheet(context, screenSize);
                       },
-                      icon: Icon(Icons.add, color: textColor),
+                      icon: Icon(Icons.add,
+                          size: screenSize * 0.037, color: textColor),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(
+                        Icons.close,
+                        size: screenSize * 0.037,
+                        color: boldOrange,
+                      ),
                     ),
                   ],
                 ),

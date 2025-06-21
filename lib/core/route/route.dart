@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
+import 'package:nex_music/presentation/audio_player/screen/song_video.dart';
 import 'package:nex_music/presentation/auth/screens/user_info.dart';
 import 'package:nex_music/presentation/home/artist/artist_full.dart';
 import 'package:nex_music/presentation/search/screens/search_result_tab.dart';
@@ -19,4 +20,5 @@ Map<String, WidgetBuilder> routes = {
   UserInfo.routeName: (context) => const UserInfo(),
   QualitySettingsScreen.routeName: (context) => const QualitySettingsScreen(),
   UserPlaylistSongs.routeName: (context) => const UserPlaylistSongs(),
+  SongVideo.routeName: (context) => const SongVideo(),
 };
