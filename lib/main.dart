@@ -29,6 +29,7 @@ import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/bloc/think_bloc/bloc/think_bloc.dart';
 import 'package:nex_music/bloc/user_logged_bloc/bloc/user_logged_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_songs_bloc/bloc/user_playlist_song_bloc.dart';
@@ -204,6 +205,9 @@ class MyApp extends StatelessWidget {
               ),
               StoragePermission(DeviceInfoPlugin()),
             ),
+          ),
+          BlocProvider(
+            create: (context) => ThinkBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
             create: (context) => UserLoggedBloc(

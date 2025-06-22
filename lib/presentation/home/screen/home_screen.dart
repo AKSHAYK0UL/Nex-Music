@@ -289,6 +289,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
+import 'package:nex_music/bloc/think_bloc/bloc/think_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/presentation/auth/screens/user_info.dart' as user;
@@ -313,6 +314,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
+
+    //TODO:
+    //Test THINK
+    context.read<ThinkBloc>().add(LoadRecentSongsInThink());
+    //Test THINK
 
     super.initState();
   }
