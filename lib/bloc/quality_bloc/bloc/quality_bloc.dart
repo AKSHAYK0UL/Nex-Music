@@ -26,7 +26,7 @@ class QualityBloc extends Bloc<QualityEvent, QualityState> {
       GetQualityEvent event, Emitter<QualityState> emit) async {
     emit(LoadingState());
     try {
-      final data = await _dataBaseSingleton.getData;
+      final data = _dataBaseSingleton.getData;
       emit(QualityDataState(data: data));
     } catch (e) {
       emit(ErrorState(errorMassage: e.toString()));

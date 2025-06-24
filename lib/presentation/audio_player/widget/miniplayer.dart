@@ -31,7 +31,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final data = await _dataBaseSingleton.getData;
+      final data = _dataBaseSingleton.getData;
       quality = data.thumbnailQuality;
     });
     super.initState();

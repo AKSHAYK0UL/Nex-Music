@@ -46,7 +46,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
 
     // Load saved thumbnail quality
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final data = await _dataBaseSingleton.getData;
+      final data = _dataBaseSingleton.getData;
       setState(() {
         quality = data.thumbnailQuality;
       });

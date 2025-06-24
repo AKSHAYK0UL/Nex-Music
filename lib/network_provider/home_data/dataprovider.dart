@@ -24,12 +24,12 @@ class DataProvider {
       ({
         List<yt.HomeSection> homeSectionData,
         List<yt.SongDetailed> quickPicks
-      })> get homeScreenSongs async {
+      })> homeScreenSongs(String inputPrompt) async {
     await _ytMusic.initialize();
     final fetchedData = await Future.wait(
       [
         _ytMusic.getHomeSections(),
-        _ytMusic.searchSongs("latest Trending Songs"),
+        _ytMusic.searchSongs(inputPrompt),
       ],
     );
 

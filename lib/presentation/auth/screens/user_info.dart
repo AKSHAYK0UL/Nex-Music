@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
-import 'package:nex_music/core/ui_component/signing_out_loading.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
 import 'package:nex_music/presentation/auth/widgets/user_info_title.dart';
 
@@ -14,49 +13,49 @@ class UserInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
     final currentUser = ModalRoute.of(context)?.settings.arguments as User;
-    bool isSmallScreen = screenSize.width < 451;
+    // bool isSmallScreen = screenSize.width < 451;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Profile",
+          "Account",
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        actions: [
-          if (isSmallScreen)
-            IconButton(
-              onPressed: () {
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Are You Sure"),
-                    content: const Text("Do you want to Logout?"),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text("No"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const SigningOutLoading()));
-                        },
-                        child: const Text("Yes"),
-                      )
-                    ],
-                  ),
-                );
-              },
-              icon: const Icon(
-                Icons.logout,
-                size: 27,
-                color: Colors.red,
-              ),
-            ),
-        ],
+        // actions: [
+        //   if (isSmallScreen)
+        //     IconButton(
+        //       onPressed: () {
+        //         showDialog(
+        //           barrierDismissible: false,
+        //           context: context,
+        //           builder: (context) => AlertDialog(
+        //             title: const Text("Are You Sure"),
+        //             content: const Text("Do you want to Logout?"),
+        //             actions: [
+        //               TextButton(
+        //                 onPressed: () {
+        //                   Navigator.of(context).pop();
+        //                 },
+        //                 child: const Text("No"),
+        //               ),
+        //               TextButton(
+        //                 onPressed: () {
+        //                   Navigator.of(context).push(MaterialPageRoute(
+        //                       builder: (context) => const SigningOutLoading()));
+        //                 },
+        //                 child: const Text("Yes"),
+        //               )
+        //             ],
+        //           ),
+        //         );
+        //       },
+        //       icon: const Icon(
+        //         Icons.logout,
+        //         size: 27,
+        //         color: Colors.red,
+        //       ),
+        //     ),
+        // ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

@@ -31,9 +31,9 @@ class Repository {
 
 //using records
   Future<({List<Songmodel> quickPicks, List<PlayListmodel> playlist})>
-      homeScreenSongsList() async {
-    final quality = await _dbInstance.getData;
-    final networkData = await _dataProvider.homeScreenSongs;
+      homeScreenSongsList(String inputPrompt) async {
+    final quality = _dbInstance.getData;
+    final networkData = await _dataProvider.homeScreenSongs(inputPrompt);
     final quickPicks = await RepositoryHelperFunction.getQuickPicks(
         networkData.quickPicks, quality.thumbnailQuality);
     final playlist =

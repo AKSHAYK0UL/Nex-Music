@@ -16,25 +16,56 @@ class HiveDataBaseSingleton {
 
   //Save [add task]
   Future<void> save(HiveQuality data) async {
-    final box = getBox;
-    if (box.isEmpty) {
-      await box.add(HiveQuality(
-          thumbnailQuality: data.thumbnailQuality,
-          audioQuality: data.audioQuality));
-    } else {
-      await box.putAt(
-          0,
-          HiveQuality(
-              thumbnailQuality: data.thumbnailQuality,
-              audioQuality: data.audioQuality));
+    try {
+      final box = getBox;
+
+      if (box.isEmpty) {
+        await box.add(HiveQuality(
+            thumbnailQuality: data.thumbnailQuality,
+            audioQuality: data.audioQuality));
+      } else {
+        await box.putAt(
+            0,
+            HiveQuality(
+                thumbnailQuality: data.thumbnailQuality,
+                audioQuality: data.audioQuality));
+      }
+    } catch (_) {
+      rethrow;
     }
   }
 
   //get
-  Future<HiveQuality> get getData async {
+  HiveQuality get getData {
     final box = getBox;
     return HiveQuality(
         thumbnailQuality: box.values.first.thumbnailQuality,
         audioQuality: box.values.first.audioQuality);
+  }
+
+  // THINK Box
+  Box<bool> get getThinkBox {
+    final box = Hive.box<bool>(thinkBox);
+    return box;
+  }
+
+//update
+  Future<void> saveRecommendation(bool value) async {
+    try {
+      final box = getThinkBox;
+      if (box.isEmpty) {
+        await box.add(value);
+      } else {
+        await box.putAt(0, value);
+      }
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  //status
+  bool get recommendationStatus {
+    final box = getThinkBox;
+    return box.values.first;
   }
 }

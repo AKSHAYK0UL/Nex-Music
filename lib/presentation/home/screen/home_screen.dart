@@ -289,15 +289,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
-import 'package:nex_music/bloc/think_bloc/bloc/think_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
-import 'package:nex_music/presentation/auth/screens/user_info.dart' as user;
+import 'package:nex_music/core/ui_component/signing_out_loading.dart';
+import 'package:nex_music/presentation/home/screen/setting.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
-import 'package:nex_music/presentation/setting/screen/settting.dart';
 
 class HomeScreen extends StatefulWidget {
   final User currentUser;
@@ -314,11 +313,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
-
-    //TODO:
-    //Test THINK
-    context.read<ThinkBloc>().add(LoadRecentSongsInThink());
-    //Test THINK
 
     super.initState();
   }
@@ -387,19 +381,56 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Row(
                             spacing: 10,
                             children: [
-                              const Icon(
-                                Icons.person,
+                              Icon(
+                                Icons.logout,
+                                size: 27,
+                                color: boldOrange,
                               ),
-                              Text(
-                                "Profile",
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
+                              Text("Logout",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(color: boldOrange))
+                              // const Icon(
+                              //   Icons.person,
+                              // ),
+                              // Text(
+                              //   "Profile",
+                              //   style: Theme.of(context).textTheme.titleMedium,
+                              // ),
                             ],
                           ),
                           onTap: () {
-                            Navigator.of(context).pushNamed(
-                                user.UserInfo.routeName,
-                                arguments: widget.currentUser);
+                            // Navigator.of(context).pushNamed(
+                            //     user.UserInfo.routeName,
+                            //     arguments: widget.currentUser);
+                            //  if (isSmallScreen)
+
+                            showDialog(
+                              barrierDismissible: false,
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text("Are You Sure"),
+                                content: const Text("Do you want to Logout?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text("No"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const SigningOutLoading()));
+                                    },
+                                    child: const Text("Yes"),
+                                  )
+                                ],
+                              ),
+                            );
                           },
                         ),
                         PopupMenuItem(
@@ -414,8 +445,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                           onTap: () {
-                            Navigator.of(context)
-                                .pushNamed(QualitySettingsScreen.routeName);
+                            Navigator.of(context).pushNamed(Setting.routeName,
+                                arguments: widget.currentUser);
+                            // Navigator.of(context)
+                            //     .pushNamed(QualitySettingsScreen.routeName);
                           },
                         ),
                       ],

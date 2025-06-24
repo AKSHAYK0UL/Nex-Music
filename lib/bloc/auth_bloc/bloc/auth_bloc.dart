@@ -23,11 +23,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       GoogleSignInEvent event, Emitter<AuthState> emit) async {
     emit(LoadingState());
     try {
-      await _dbInstance.save(HiveQuality(
-          thumbnailQuality: Platform.isAndroid
-              ? ThumbnailQuality.low
-              : ThumbnailQuality.medium,
-          audioQuality: AudioQuality.high));
+      await Future.wait([
+        _dbInstance.save(HiveQuality(
+            thumbnailQuality: Platform.isAndroid
+                ? ThumbnailQuality.low
+                : ThumbnailQuality.medium,
+            audioQuality: AudioQuality.high)),
+        _dbInstance.saveRecommendation(false),
+      ]);
+      // await _dbInstance.save(HiveQuality(
+      //     thumbnailQuality: Platform.isAndroid
+      //         ? ThumbnailQuality.low
+      //         : ThumbnailQuality.medium,
+      //     audioQuality: AudioQuality.high));
+
       if (Platform.isAndroid) {
         await _authRepository.googleSignIn();
       } else {
