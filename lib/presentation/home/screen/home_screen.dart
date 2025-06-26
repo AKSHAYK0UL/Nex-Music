@@ -381,9 +381,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Row(
                             spacing: 10,
                             children: [
+                              const Icon(Icons.settings),
+                              Text(
+                                "Setting",
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            Navigator.of(context).pushNamed(Setting.routeName,
+                                arguments: widget.currentUser);
+                            // Navigator.of(context)
+                            //     .pushNamed(QualitySettingsScreen.routeName);
+                          },
+                        ),
+                        PopupMenuItem(
+                          child: Row(
+                            spacing: 10,
+                            children: [
                               Icon(
                                 Icons.logout,
-                                size: 27,
                                 color: boldOrange,
                               ),
                               Text("Logout",
@@ -431,24 +448,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                             );
-                          },
-                        ),
-                        PopupMenuItem(
-                          child: Row(
-                            spacing: 10,
-                            children: [
-                              const Icon(Icons.settings),
-                              Text(
-                                "Setting",
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                            ],
-                          ),
-                          onTap: () {
-                            Navigator.of(context).pushNamed(Setting.routeName,
-                                arguments: widget.currentUser);
-                            // Navigator.of(context)
-                            //     .pushNamed(QualitySettingsScreen.routeName);
                           },
                         ),
                       ],

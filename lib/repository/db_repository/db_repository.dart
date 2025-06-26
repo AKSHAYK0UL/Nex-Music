@@ -3,18 +3,23 @@ import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/network_provider/home_data/db_network_provider.dart';
 import 'package:nex_music/network_provider/home_data/favorites_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/playlist_db_provide.dart';
+import 'package:nex_music/network_provider/home_data/think_provide.dart';
 
 class DbRepository {
   final DbNetworkProvider _dbDataProvider;
   final FavoritesDBProvider _favoritesDBProvider;
   final PlaylistDbProvider _playlistDbProvider;
-  DbRepository(
-      {required DbNetworkProvider dbDataProvider,
-      required FavoritesDBProvider favoritesDBProvider,
-      required PlaylistDbProvider playlistDbProvider})
-      : _dbDataProvider = dbDataProvider,
+  final ThinkProvide _thinkProvide;
+
+  DbRepository({
+    required DbNetworkProvider dbDataProvider,
+    required FavoritesDBProvider favoritesDBProvider,
+    required PlaylistDbProvider playlistDbProvider,
+    required ThinkProvide thinkProvide,
+  })  : _dbDataProvider = dbDataProvider,
         _favoritesDBProvider = favoritesDBProvider,
-        _playlistDbProvider = playlistDbProvider;
+        _playlistDbProvider = playlistDbProvider,
+        _thinkProvide = thinkProvide;
 
   //Add recent Played
   Future<void> addToRecentPlayedCollection(Songmodel songData) async {
@@ -141,6 +146,28 @@ class DbRepository {
   Future<void> deleteSongUserPlaylist(String playlistName, vId) async {
     try {
       await _playlistDbProvider.deleteSongUserPlaylist(playlistName, vId);
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  //THINK Recommendation data
+  Future<void> saveTHINKRecommendationData(String data) async {
+    try {
+      await _thinkProvide.saveThinkRecommendationData(data);
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  //THINK Recommendation data
+  Future<String> get getTHINKRecommendationData async {
+    try {
+      return await _thinkProvide.getThinkRecommendationData;
     } on FirebaseAuthException catch (_) {
       rethrow;
     } catch (_) {

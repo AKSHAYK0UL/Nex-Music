@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/enum/quality.dart';
+import 'package:nex_music/secrets/THINK_repo/THINK_repo.dart';
 import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 
 part 'auth_event.dart';
@@ -14,7 +15,10 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _authRepository;
   final HiveDataBaseSingleton _dbInstance;
-  AuthBloc(this._authRepository, this._dbInstance) : super(AuthInitial()) {
+  final ThinkRepo _thinkRepo;
+
+  AuthBloc(this._authRepository, this._dbInstance, this._thinkRepo)
+      : super(AuthInitial()) {
     on<GoogleSignInEvent>(_googleSignIn);
     on<SignOutEvent>(_signOut);
   }
@@ -30,6 +34,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 : ThumbnailQuality.medium,
             audioQuality: AudioQuality.high)),
         _dbInstance.saveRecommendation(false),
+        _thinkRepo.saveTHINKInitialData(),
       ]);
       // await _dbInstance.save(HiveQuality(
       //     thumbnailQuality: Platform.isAndroid

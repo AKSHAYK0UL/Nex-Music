@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
-import 'package:nex_music/repository/THINK_repo/THINK_repo.dart';
+import 'package:nex_music/secrets/THINK_repo/THINK_repo.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/secrets/think_key.dart';
 
@@ -22,10 +22,10 @@ class HomesectionBloc extends Bloc<HomesectionEvent, HomesectionState> {
       GetHomeSectonDataEvent event, Emitter<HomesectionState> emit) async {
     emit(LoadingState());
     try {
-      //
       String inputPrompt = DEFAULT_PROMPT;
       if (_hiveDataBaseSingleton.recommendationStatus) {
-        inputPrompt = await _thinkRepo.getTHINKInputPrompt;
+        inputPrompt = await _thinkRepo.getTHINKRecommendation;
+        print("######## THINK DATA $inputPrompt ###############");
       }
       final homeSectionData = await repository.homeScreenSongsList(inputPrompt);
       final playlistsSet = homeSectionData.playlist.toSet();

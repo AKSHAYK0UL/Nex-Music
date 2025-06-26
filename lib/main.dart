@@ -29,6 +29,7 @@ import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/bloc/think_bloc/bloc/think_bloc.dart';
 import 'package:nex_music/bloc/user_logged_bloc/bloc/user_logged_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_songs_bloc/bloc/user_playlist_song_bloc.dart';
@@ -45,7 +46,7 @@ import 'package:nex_music/network_provider/home_data/download_provider.dart';
 
 import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
 import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
-import 'package:nex_music/repository/THINK_repo/THINK_repo.dart';
+import 'package:nex_music/secrets/THINK_repo/THINK_repo.dart';
 import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/downlaod_repository/download_repository.dart';
@@ -172,8 +173,13 @@ class MyApp extends StatelessWidget {
             create: (context) => SongDialogBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
-            create: (context) =>
-                AuthBloc(context.read<AuthRepository>(), dbInstance),
+            create: (context) => AuthBloc(
+              context.read<AuthRepository>(),
+              dbInstance,
+              ThinkRepo(
+                dbRepository: context.read<DbRepository>(),
+              ),
+            ),
           ),
           BlocProvider(
             create: (context) => FavoritesBloc(context.read<DbRepository>()),
@@ -210,10 +216,9 @@ class MyApp extends StatelessWidget {
               StoragePermission(DeviceInfoPlugin()),
             ),
           ),
-          // BlocProvider(
-          //   create: (context) => ThinkBloc(
-          //       ThinkRepo(dbRepository: context.read<DbRepository>())),
-          // ),
+          BlocProvider(
+              create: (context) => ThinkBloc(
+                  ThinkRepo(dbRepository: context.read<DbRepository>()))),
           BlocProvider(
             create: (context) => UserLoggedBloc(
               repositoryProviderClassInstance.getFirebaseAuthInstance,
