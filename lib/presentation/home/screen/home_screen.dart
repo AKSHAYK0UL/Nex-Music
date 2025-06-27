@@ -292,11 +292,11 @@ import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
 import 'package:nex_music/core/ui_component/signing_out_loading.dart';
-import 'package:nex_music/presentation/home/screen/setting.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
+import 'package:nex_music/presentation/setting/screen/phone_setting.dart';
 
 class HomeScreen extends StatefulWidget {
   final User currentUser;
@@ -354,6 +354,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               actions: [
                 IconButton(
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   onPressed: () {
                     Navigator.of(context).pushNamed(SearchScreen.routeName);
                   },

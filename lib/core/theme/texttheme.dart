@@ -50,7 +50,7 @@ TextTheme textTheme(BuildContext context, double screenSize) {
     ),
     displaySmall: TextStyle(
       color: textColor,
-      fontSize: screenSize * 0.0183,
+      fontSize: screenSize * 0.0180,
       fontWeight: FontWeight.normal,
     ),
     displayMedium: TextStyle(

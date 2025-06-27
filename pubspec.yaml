@@ -95,12 +95,6 @@ dependencies:
   audio_session: ^0.2.2
   # youtube_player_flutter: ^9.1.1
   youtube_player_iframe: ^5.2.1
-  splayer:
-    git:
-      url: https://github.com/AKSHAYK0UL/splayer.git
-      ref: 4bb3c400fd311a0351fb103d5d6a24e0830cc324
-  google_generative_ai: ^0.4.7
-  
 
 
 

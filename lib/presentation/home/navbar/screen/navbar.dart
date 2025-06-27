@@ -225,7 +225,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart' as dp;
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
-import 'package:nex_music/bloc/think_bloc/bloc/think_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/global_download_indicator.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
@@ -270,13 +269,6 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ThinkBloc>().add(
-          UpdateTHINKRecommendationEvent()); //update when the app is launched
-
-      Timer.periodic(const Duration(minutes: 10), (_) {
-        context.read<ThinkBloc>().add(
-            UpdateTHINKRecommendationEvent()); //update after every 10 minutes
-      });
       context.read<ConnectivityBloc>().add(CheckConnectivityStatusEvent());
 
       streamSubscriptionUri = widget.appLinks.uriLinkStream.listen((uri) {

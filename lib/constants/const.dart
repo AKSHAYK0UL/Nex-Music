@@ -1,5 +1,3 @@
-const String thinkBackGroundTask = "ThinkBackGroundTask";
-//--------------------------------------------------------
 const qualitySettingsBox = "qualitysettingsbox";
 const thinkBox = "thinkbox";
 const userCollection = "users";

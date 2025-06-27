@@ -65,7 +65,7 @@ class _AuthScreenState extends State<AuthScreen>
                     children: [
                       SizedBox(
                         height: isSmallScreen
-                            ? screenSize * 0.131
+                            ? screenSize * 0.121
                             : screenSize * 0.200,
                       ),
                       SizedBox(
@@ -83,7 +83,7 @@ class _AuthScreenState extends State<AuthScreen>
                         ),
                       ),
                       SizedBox(
-                        height: screenSize * 0.141,
+                        height: screenSize * 0.121,
                       ),
                       SizedBox(
                         width: isSmallScreen
@@ -140,11 +140,12 @@ class _AuthScreenState extends State<AuthScreen>
                         ),
                       ),
                       SizedBox(
-                        height: screenSize * 0.0171,
+                        height: screenSize * 0.0280,
                       ),
                       SizedBox(
-                        width: 480,
+                        width: screenWidth * 0.900,
                         child: RichText(
+                          maxLines: 2,
                           textAlign: TextAlign.center,
                           text: TextSpan(
                             children: [
@@ -154,16 +155,15 @@ class _AuthScreenState extends State<AuthScreen>
                                       Theme.of(context).textTheme.displaySmall),
                               TextSpan(
                                   text: "User Agreement",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .displayMedium
-                                      ?.copyWith(
-                                        decoration: TextDecoration.underline,
-                                        decorationStyle:
-                                            TextDecorationStyle.solid,
-                                        decorationColor: Colors.white,
-                                        decorationThickness: 1,
-                                      ),
+                                  style: TextStyle(
+                                    color: textColor,
+                                    fontSize: screenSize * 0.0200,
+                                    fontWeight: FontWeight.w600,
+                                    decoration: TextDecoration.underline,
+                                    decorationStyle: TextDecorationStyle.solid,
+                                    decorationColor: Colors.white,
+                                    decorationThickness: 1,
+                                  ),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       userAgreement();
@@ -175,16 +175,25 @@ class _AuthScreenState extends State<AuthScreen>
                               ),
                               TextSpan(
                                 text: "Privacy Policy",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .displayMedium
-                                    ?.copyWith(
-                                      decoration: TextDecoration.underline,
-                                      decorationStyle:
-                                          TextDecorationStyle.solid,
-                                      decorationColor: Colors.white,
-                                      decorationThickness: 1,
-                                    ),
+                                style: TextStyle(
+                                  color: textColor,
+                                  fontSize: screenSize * 0.0200,
+                                  fontWeight: FontWeight.w600,
+                                  decoration: TextDecoration.underline,
+                                  decorationStyle: TextDecorationStyle.solid,
+                                  decorationColor: Colors.white,
+                                  decorationThickness: 1,
+                                ),
+                                // style: Theme.of(context)
+                                //     .textTheme
+                                //     .displayMedium
+                                //     ?.copyWith(
+                                //       decoration: TextDecoration.underline,
+                                //       decorationStyle:
+                                //           TextDecorationStyle.solid,
+                                //       decorationColor: Colors.white,
+                                //       decorationThickness: 1,
+                                //     ),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
                                     privacyPolicy();
@@ -195,7 +204,7 @@ class _AuthScreenState extends State<AuthScreen>
                         ),
                       ),
                       SizedBox(
-                        height: screenSize * 0.010,
+                        height: screenSize * 0.020,
                       ),
                     ],
                   ),

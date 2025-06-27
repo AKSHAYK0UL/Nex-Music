@@ -160,11 +160,8 @@ class Songmodel extends Equatable {
     };
   }
 
-  Map<String, dynamic> toJsonTHINK() {
-    return {
-      "song_name": songName,
-      "artist": artist.name,
-    };
+  String forRecommendation() {
+    return artist.name.trim();
   }
 
   Songmodel copyWith({
