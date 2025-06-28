@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nex_music/core/theme/hexcolor.dart';
 
 Widget buildQualityOptions<T>(BuildContext context, List<T> values,
     ValueNotifier<T> notifier, String title) {
@@ -35,6 +36,12 @@ Widget buildQualityOptions<T>(BuildContext context, List<T> values,
                   shape: RoundedRectangleBorder(borderRadius: borderRadius),
                   title: Text(quality.toString().split('.').last.toUpperCase()),
                   trailing: Radio<T>(
+                    overlayColor: WidgetStateColor.resolveWith((_) {
+                      return accentColor;
+                    }),
+                    fillColor: WidgetStateColor.resolveWith((_) {
+                      return accentColor;
+                    }),
                     value: quality,
                     groupValue: selectedQuality,
                     hoverColor: Colors.white12,

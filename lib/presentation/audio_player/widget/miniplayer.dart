@@ -98,20 +98,23 @@ class _MiniPlayerState extends State<MiniPlayer> {
                   contentPadding: EdgeInsets.only(
                       left: widget.screenSize * 0.0356,
                       right: widget.screenSize * 0.00527),
-                  leading: ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(widget.screenSize * 0.0106),
-                    child: Transform.scale(
-                      scaleX:
-                          quality == ThumbnailQuality.low && !songData.isLocal
-                              ? 1
-                              : 1.78,
-                      scaleY: 1.0,
-                      child: cacheImage(
-                        imageUrl: songData.thumbnail,
-                        width: widget.screenSize * 0.0755,
-                        height: widget.screenSize * 0.0733,
-                        islocal: songData.isLocal,
+                  leading: SizedBox(
+                    width: widget.screenSize * 0.0755,
+                    height: widget.screenSize * 0.0733,
+                    child: ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(widget.screenSize * 0.0106),
+                      child: Transform.scale(
+                        scaleX:
+                            quality == ThumbnailQuality.low && !songData.isLocal
+                                ? 1
+                                : 1.10,
+                        child: cacheImage(
+                          imageUrl: songData.thumbnail,
+                          width: widget.screenSize * 0.0755,
+                          height: widget.screenSize * 0.0733,
+                          islocal: songData.isLocal,
+                        ),
                       ),
                     ),
                   ),

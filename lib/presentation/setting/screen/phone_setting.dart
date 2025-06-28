@@ -19,6 +19,8 @@ class Setting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final User routeData = ModalRoute.of(context)?.settings.arguments as User;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Setting"),
@@ -44,10 +46,13 @@ class Setting extends StatelessWidget {
             valueListenable: _recommendationNotifier,
             builder: (context, value, _) {
               return Container(
-                margin: EdgeInsets.symmetric(horizontal: 12, vertical: 04),
+                margin: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.030,
+                    vertical: screenHeight * 0.0055),
                 child: SwitchListTile(
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.050,
+                      vertical: screenHeight * 0.0130),
                   secondary: CircleAvatar(
                     radius: 23,
                     backgroundColor: backgroundColor,
@@ -59,8 +64,7 @@ class Setting extends StatelessWidget {
                   ),
                   activeTrackColor: accentColor,
                   inactiveTrackColor: backgroundColor,
-                  thumbColor: WidgetStateProperty.resolveWith(
-                      (Set<WidgetState> states) {
+                  thumbColor: WidgetStateProperty.resolveWith((_) {
                     return value ? backgroundColor : accentColor;
                   }),
                   title: Text(

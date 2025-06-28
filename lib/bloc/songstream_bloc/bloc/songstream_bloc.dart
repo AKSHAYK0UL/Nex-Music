@@ -528,7 +528,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   Future<void> _getSongUrl(
       GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
     print("SONG ID ${event.songData.vId}@@@");
-    if (_songData != null && event.songData.vId == _songData!.vId) {
+    if (_songData != null &&
+        event.songData.vId == _songData!.vId &&
+        event.songData.isLocal == _songData!.isLocal) {
       _audioPlayer.seek(Duration.zero);
       _audioPlayer.play();
       _isPlaying = true;

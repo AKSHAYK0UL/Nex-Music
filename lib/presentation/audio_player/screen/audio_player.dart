@@ -8,7 +8,6 @@ import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
-// import 'package:nex_music/presentation/audio_player/screen/song_video.dart';
 import 'package:nex_music/presentation/audio_player/widget/download_bar.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
@@ -121,8 +120,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                           width: screenSize * 0.448,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(screenSize * 0.0131),
-                                topRight: Radius.circular(screenSize * 0.0131)),
+                              topLeft: Radius.circular(screenSize * 0.0131),
+                              topRight: Radius.circular(screenSize * 0.0131),
+                            ),
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.only(
@@ -132,14 +132,26 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                               scaleX: quality == ThumbnailQuality.low &&
                                       !songData.isLocal
                                   ? 1
-                                  : 1.78,
-                              scaleY: 1.0,
+                                  : 1.10,
                               child: cacheImage(
                                   imageUrl: songData.thumbnail,
                                   width: screenSize * 0.448,
                                   height: screenSize * 0.410,
                                   islocal: songData.isLocal),
                             ),
+
+                            // child: Transform.scale(
+                            //   scaleX: quality == ThumbnailQuality.low &&
+                            //           !songData.isLocal
+                            //       ? 1
+                            //       : 1.78,
+                            //   scaleY: 1.0,
+                            //   child: cacheImage(
+                            //       imageUrl: songData.thumbnail,
+                            //       width: screenSize * 0.448,
+                            //       height: screenSize * 0.410,
+                            //       islocal: songData.isLocal),
+                            // ),
                           ),
                         ),
                       );

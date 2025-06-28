@@ -14,10 +14,15 @@ class PhoneSettingOptionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 12, vertical: 04),
+      margin: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.030, vertical: screenHeight * 0.0055),
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        contentPadding: EdgeInsets.symmetric(
+            horizontal: screenWidth * 0.050, vertical: screenHeight * 0.0130),
+        splashColor: Colors.transparent,
         tileColor: secondaryColor,
         leading: CircleAvatar(
           radius: 23,

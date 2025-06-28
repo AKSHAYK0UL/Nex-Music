@@ -42,9 +42,10 @@ class DownloadBar extends StatelessWidget {
                   : 1.78,
               scaleY: 1.0,
               child: cacheImage(
-                  imageUrl: songData.thumbnail,
-                  width: screenSize * 0.200,
-                  height: screenSize * 0.200),
+                imageUrl: songData.thumbnail,
+                width: screenSize * 0.200,
+                height: screenSize * 0.200,
+              ),
             ),
           ),
         ),

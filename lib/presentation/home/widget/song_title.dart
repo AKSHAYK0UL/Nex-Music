@@ -122,24 +122,21 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
           }
         },
         leading: Container(
+          width: screenSize * 0.0755,
+          height: screenSize * 0.0733,
           margin: EdgeInsets.only(
             left: isSmallScreen ? screenWidth * 0.025 : screenWidth * 0.0039375,
             right: !isSmallScreen ? screenWidth * 0.004 : 0,
           ),
-          child: Transform.scale(
-            scaleX: isSmallScreen ? 1 : 1.33,
-            scaleY: isSmallScreen ? 1 : 1.33,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(screenSize * 0.0106),
-              child: Transform.scale(
-                scaleX: quality == ThumbnailQuality.low ? 1 : 1.78,
-                scaleY: 1.0,
-                child: cacheImage(
-                  imageUrl: widget.songData.thumbnail,
-                  width: screenSize * 0.0755,
-                  height: screenSize * 0.0733,
-                  islocal: widget.songData.isLocal,
-                ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(screenSize * 0.0106),
+            child: Transform.scale(
+              scaleX: quality == ThumbnailQuality.low ? 1 : 1.10,
+              child: cacheImage(
+                imageUrl: widget.songData.thumbnail,
+                width: screenSize * 0.0755,
+                height: screenSize * 0.0733,
+                islocal: widget.songData.isLocal,
               ),
             ),
           ),
