@@ -39,7 +39,8 @@ dependencies:
   # just_audio: ^0.9.46
 
   flutter_bloc: ^8.1.6
-  dart_ytmusic_api: ^1.0.8
+  # dart_ytmusic_api: ^1.0.8
+  dart_ytmusic_api: ^1.2.1
   hexcolor: ^3.0.1
   cached_network_image: ^3.4.1
   lottie: ^3.2.0

@@ -100,16 +100,16 @@ class DataProvider {
     return await _ytMusic.searchArtists(inputText);
   }
 
+  //search Albums
+  Future<List<AlbumDetailed>> searchAlbums(String inputText) async {
+    return await _ytMusic.searchAlbums(inputText);
+  }
+
   //get Artist songs
   Future<List<yt.SongDetailed>> getArtistSongs(String artistId) async {
     return await _ytMusic.getArtistSongs(artistId);
   }
 
-  //get Artist videos
-  //TODO:
-  // Future<void> getArtistVideos(String artistId) async {
-  //   await _ytMusic.getArtistAlbums(artistId);
-  // }
   //get artist album
   Future<List<AlbumDetailed>> getArtistAlbums(String artistId) async {
     return await _ytMusic.getArtistAlbums(artistId);

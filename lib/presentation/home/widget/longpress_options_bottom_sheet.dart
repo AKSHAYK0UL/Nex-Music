@@ -11,7 +11,9 @@ import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
+import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/presentation/home/artist/artist_full.dart';
 import 'package:nex_music/presentation/home/widget/bottom_sheet_button.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
 import 'package:share_plus/share_plus.dart';
@@ -50,13 +52,17 @@ Future<void> showBottomOptionSheet({
                 contentPadding: EdgeInsets.symmetric(
                     horizontal: screenSize * 0.0050,
                     vertical: screenSize * 0.00005),
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(screenSize * 0.0106),
-                  child: cacheImage(
-                    imageUrl: songData.thumbnail,
-                    width: screenSize * 0.0755,
-                    height: screenSize * 0.0733,
-                    islocal: songData.isLocal,
+                leading: SizedBox(
+                  width: screenSize * 0.0755,
+                  height: screenSize * 0.0733,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(screenSize * 0.0106),
+                    child: cacheImage(
+                      imageUrl: songData.thumbnail,
+                      width: screenSize * 0.0755,
+                      height: screenSize * 0.0733,
+                      islocal: songData.isLocal,
+                    ),
                   ),
                 ),
                 title: animatedText(
@@ -134,7 +140,12 @@ Future<void> showBottomOptionSheet({
                 label: "View Artist (${songData.artist.name})",
                 icon: Icons.person,
                 screenSize: screenSize,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).pushNamed(ArtistFullScreen.routeName,
+                      arguments: ArtistModel(
+                          artist: songData.artist,
+                          thumbnail: songData.thumbnail));
+                },
               ),
 
               tabRouteENUM == TabRouteENUM.download

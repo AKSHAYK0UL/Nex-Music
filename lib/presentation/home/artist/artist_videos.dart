@@ -1,29 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
+import 'package:nex_music/bloc/full_artist_video_bloc/bloc/full_artist_video_bloc_bloc.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
-class ArtistScreen extends StatefulWidget {
+class ArtistVideos extends StatefulWidget {
   final ArtistModel artist;
-  const ArtistScreen({required this.artist, super.key});
-
+  const ArtistVideos({required this.artist, super.key});
   @override
-  State<ArtistScreen> createState() => _ArtistScreenState();
+  State<ArtistVideos> createState() => _ArtistVideosState();
 }
 
-class _ArtistScreenState extends State<ArtistScreen> {
+class _ArtistVideosState extends State<ArtistVideos> {
   @override
   void initState() {
-    final currentState = context.read<FullArtistSongBloc>().state;
-    if (currentState.runtimeType != ArtistSongsState) {
+    final currentState = context.read<FullArtistVideoBloc>().state;
+    if (currentState.runtimeType != ArtistVideosDataState) {
       context
-          .read<FullArtistSongBloc>()
-          .add(GetArtistSongsEvent(artistId: widget.artist.artist.artistId!));
+          .read<FullArtistVideoBloc>()
+          .add(GetArtistVideosEvent(inputText: widget.artist.artist.name));
     }
-
     super.initState();
   }
 
@@ -31,10 +29,10 @@ class _ArtistScreenState extends State<ArtistScreen> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
 
-    return BlocBuilder<FullArtistSongBloc, FullArtistSongState>(
+    return BlocBuilder<FullArtistVideoBloc, FullArtistVideoBlocState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
-        if (state is LoadingStata) {
+        if (state is LoadingState) {
           return loadingDisk();
         }
         if (state is ErrorState) {
@@ -42,11 +40,11 @@ class _ArtistScreenState extends State<ArtistScreen> {
             child: Text(state.errorMessage),
           );
         }
-        if (state is ArtistSongsState) {
+        if (state is ArtistVideosDataState) {
           return ListView.builder(
-            itemCount: state.artistSongs.length,
+            itemCount: state.artistVidoes.length,
             itemBuilder: (context, index) {
-              final songData = state.artistSongs[index];
+              final songData = state.artistVidoes[index];
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0131),
                 child: SongTitle(

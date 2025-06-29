@@ -107,33 +107,9 @@ class Repository {
     final audioCodecs =
         RepositoryHelperFunction.audioCodecsFormate(audioStreams);
 
-    print("STREAM BITRATE : ${selectedStream.bitrate.kiloBitsPerSecond}");
-    print(
-        "audioStreams.withHighestBitrate() ${audioStreams.withHighestBitrate().bitrate.kiloBitsPerSecond} @@@@@@@@@2");
     return SongRawData(
         url: selectedStream.url, codecs: audioCodecs, totalBytes: totalbytes);
   }
-
-  // Future<Uri> getSongUrl(String songId, AudioQuality quality) async {
-  //   final manifest = await _dataProvider.songStreamUrl(songId);
-  //   final audioStreams = manifest.audioOnly;
-  //   // for (var stream in audioStreams) {
-  //   //   // print("SONG CODEC ${stream.container.name}");
-  //   //   // print("SONG QualityLabel ${stream.qualityLabel}");
-  //   //   print('Codec: ${stream.audioCodec}');
-  //   //   print('Container: ${stream.container.name}');
-  //   // print('Bitrate: ${stream.bitrate.kiloBitsPerSecond} kbps');
-  //   // }
-
-  //   // Select the stream based on the desired quality.
-  //   final selectedStream =
-  //       RepositoryHelperFunction.selectStream(audioStreams, quality);
-  //   final audioCodecs =
-  //       RepositoryHelperFunction.audioCodecsFormate(audioStreams);
-  //   print("STREAM BITRATE : ${selectedStream.bitrate.kiloBitsPerSecond}");
-
-  //   return selectedStream.url;
-  // }
 
   //Search suggestion
   Future<List<String>> searchSuggetion(String query) async {
@@ -142,7 +118,7 @@ class Repository {
 
 //seach in songs
   Future<List<Songmodel>> searchSong(String inputText) async {
-    final quality = await _dbInstance.getData;
+    final quality = _dbInstance.getData;
 
     final searchResults = await _dataProvider.searchSong(inputText);
     List<Songmodel> songs = [];
@@ -197,16 +173,24 @@ class Repository {
 
   //get artist Songs
   Future<List<Songmodel>> getArtistSongs(String artistId) async {
-    final quality = await _dbInstance.getData;
+    final quality = _dbInstance.getData;
 
     final artistSongs = await _dataProvider.getArtistSongs(artistId);
     return RepositoryHelperFunction.getQuickPicks(
         artistSongs, quality.thumbnailQuality);
   }
 
+//search albums
+  Future<List<PlayListmodel>> searchAlbums(String inputText) async {
+    final albums = await _dataProvider.searchAlbums(inputText);
+    return RepositoryHelperFunction.albumsToPlaylist(albums);
+  }
+
   //get artist album
-  Future<List<PlayListmodel>> getArtistAlbums(String artistId) async {
-    final albums = await _dataProvider.getArtistAlbums(artistId);
+  Future<List<PlayListmodel>> getArtistAlbums(ArtistModel artist) async {
+    List<AlbumDetailed> albums =
+        await _dataProvider.getArtistAlbums(artist.artist.artistId ?? "");
+
     return RepositoryHelperFunction.albumsToPlaylist(albums);
   }
 }

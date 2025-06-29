@@ -8,7 +8,9 @@ import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/download_bar.dart';
+import 'package:nex_music/presentation/home/artist/artist_full.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
@@ -171,7 +173,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(
+                                ArtistFullScreen.routeName,
+                                arguments: ArtistModel(
+                                    artist: songData.artist,
+                                    thumbnail: songData.thumbnail));
+                          },
                           icon: Icon(
                             Icons.person,
                             color: textColor,

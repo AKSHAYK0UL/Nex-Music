@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
+import 'package:nex_music/presentation/search/screens/tabs/albumtab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/artisttab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/playlisttab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/songstab.dart';
@@ -23,7 +24,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
     final screenSize = MediaQuery.sizeOf(context).height;
     return DefaultTabController(
       initialIndex: 0,
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: animatedText(
@@ -47,6 +48,9 @@ class _SearchResultTabState extends State<SearchResultTab> {
                 text: "Videos",
               ),
               Tab(
+                text: "Ablums",
+              ),
+              Tab(
                 text: "Playlists",
               ),
               Tab(
@@ -61,6 +65,10 @@ class _SearchResultTabState extends State<SearchResultTab> {
             screenSize: screenSize,
           ),
           Videostab(
+            inputText: searchText,
+            screenSize: screenSize,
+          ),
+          AlbumTab(
             inputText: searchText,
             screenSize: screenSize,
           ),
