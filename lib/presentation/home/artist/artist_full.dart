@@ -1,21 +1,20 @@
 import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/full_artist_album_bloc/bloc/fullartistalbum_bloc.dart';
-import 'package:nex_music/bloc/full_artist_playlist_bloc/bloc/full_artist_playlist_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
-import 'package:nex_music/bloc/full_artist_video_bloc/bloc/full_artist_video_bloc_bloc.dart';
+
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/model/artistmodel.dart';
+import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/artist/artist_album.dart';
 import 'package:nex_music/presentation/home/artist/artist_playlist.dart';
 import 'package:nex_music/presentation/home/artist/artist_songs.dart';
 import 'package:nex_music/presentation/home/artist/artist_videos.dart';
 
 class ArtistFullScreen extends StatefulWidget {
-  static const routeName = "/artistfullscreen";
-  const ArtistFullScreen({super.key});
+  final ArtistModel artist;
+  const ArtistFullScreen({required this.artist, super.key});
 
   @override
   State<ArtistFullScreen> createState() => _ArtistFullScreenState();
@@ -24,13 +23,9 @@ class ArtistFullScreen extends StatefulWidget {
 class _ArtistFullScreenState extends State<ArtistFullScreen> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final artist = ModalRoute.of(context)?.settings.arguments as ArtistModel;
-
-      context
-          .read<FullArtistSongBloc>()
-          .add(GetArtistSongsEvent(artistId: artist.artist.artistId!));
-    });
+    context
+        .read<FullArtistSongBloc>()
+        .add(GetArtistSongsEvent(artistId: widget.artist.artist.artistId!));
     super.initState();
   }
 
@@ -38,72 +33,84 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
 
-    final artist = ModalRoute.of(context)?.settings.arguments as ArtistModel;
-
     return DefaultTabController(
       initialIndex: 0,
       length: 4,
-      child: PopScope(
-        canPop: true,
-        onPopInvokedWithResult: (_, __) {
-          context
-              .read<FullArtistVideoBloc>()
-              .add(SetFullArtistVideoBlocInitialEvent());
-          context
-              .read<FullArtistAlbumBloc>()
-              .add(SetFullartistalbumInitialEvent());
-          context
-              .read<FullArtistPlaylistBloc>()
-              .add(SetFullArtistPlaylistInitialEvent());
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            title: animatedText(
-                text: artist.artist.name,
-                style: Theme.of(context).textTheme.titleLarge!),
-            bottom: ButtonsTabBar(
-              splashColor: backgroundColor,
-              backgroundColor: Colors.white38,
-              unselectedBackgroundColor: secondaryColor,
-              width: screenSize / 8,
-              contentCenter: true,
-              elevation: 0,
-              labelStyle: Theme.of(context).textTheme.titleSmall,
-              unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
-              tabs: const [
-                Tab(
-                  text: "Songs",
-                ),
-                Tab(
-                  text: "Videos",
-                ),
-                Tab(
-                  text: "Albums",
-                ),
-                Tab(
-                  text: "Playlists",
-                ),
-              ],
-            ),
+      child: Scaffold(
+        appBar: AppBar(
+          title: animatedText(
+            text: widget.artist.artist.name,
+            style: Theme.of(context).textTheme.titleLarge!,
           ),
-          body: TabBarView(
-            children: [
-              ArtistSongs(
-                artist: artist,
-              ),
-              ArtistVideos(
-                artist: artist,
-              ),
-              ArtistAlbum(
-                artist: artist,
-              ),
-              ArtistPlaylist(
-                artist: artist,
-              ),
+          bottom: ButtonsTabBar(
+            splashColor: backgroundColor,
+            backgroundColor: Colors.white24,
+            unselectedBackgroundColor: secondaryColor,
+            width: screenSize / 8,
+            contentCenter: true,
+            elevation: 0,
+            labelStyle: Theme.of(context).textTheme.titleSmall,
+            unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
+            tabs: const [
+              Tab(text: "Songs"),
+              Tab(text: "Videos"),
+              Tab(text: "Albums"),
+              Tab(text: "Playlists"),
             ],
           ),
         ),
+        body: TabBarView(children: [
+          ArtistSongs(artist: widget.artist),
+          ArtistVideos(artist: widget.artist),
+          ArtistAlbum(artist: widget.artist),
+          ArtistPlaylist(artist: widget.artist)
+        ]),
+        bottomNavigationBar: MiniPlayer(screenSize: screenSize),
       ),
     );
+
+    // return Scaffold(
+    //   appBar: AppBar(
+    //     title: animatedText(
+    //       text: widget.artist.artist.name,
+    //       style: Theme.of(context).textTheme.titleLarge!,
+    //     ),
+    //     bottom: ButtonsTabBar(
+    //       splashColor: backgroundColor,
+    //       backgroundColor: Colors.white38,
+    //       unselectedBackgroundColor: secondaryColor,
+    //       width: screenSize / 8,
+    //       contentCenter: true,
+    //       elevation: 0,
+    //       labelStyle: Theme.of(context).textTheme.titleSmall,
+    //       unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
+    //       onTap: (index) {
+    //         setState(() {
+    //           _currentIndex = index;
+    //         });
+    //       },
+    //       // controller: TabController(
+    //       //   length: 4,
+    //       //   vsync: this,
+    //       //   initialIndex: _currentIndex,
+    //       // ),
+    //       tabs: const [
+    //         Tab(text: "Songs"),
+    //         Tab(text: "Videos"),
+    //         Tab(text: "Albums"),
+    //         Tab(text: "Playlists"),
+    //       ],
+    //     ),
+    //   ),
+    //   body: IndexedStack(
+    //     index: _currentIndex,
+    //     children: [
+    //       ArtistSongs(artist: widget.artist),
+    //       ArtistVideos(artist: widget.artist),
+    //       ArtistAlbum(artist: widget.artist),
+    //       ArtistPlaylist(artist: widget.artist),
+    //     ],
+    //   ),
+    // );
   }
 }

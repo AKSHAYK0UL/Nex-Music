@@ -11,9 +11,9 @@ import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
+import 'package:nex_music/helper_function/routefunc/artistview_route.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
-import 'package:nex_music/presentation/home/artist/artist_full.dart';
 import 'package:nex_music/presentation/home/widget/bottom_sheet_button.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
 import 'package:share_plus/share_plus.dart';
@@ -141,8 +141,10 @@ Future<void> showBottomOptionSheet({
                 icon: Icons.person,
                 screenSize: screenSize,
                 onPressed: () {
-                  Navigator.of(context).pushNamed(ArtistFullScreen.routeName,
-                      arguments: ArtistModel(
+                  Navigator.of(context).pop();
+                  artistViewRoute(
+                      context,
+                      ArtistModel(
                           artist: songData.artist,
                           thumbnail: songData.thumbnail));
                 },

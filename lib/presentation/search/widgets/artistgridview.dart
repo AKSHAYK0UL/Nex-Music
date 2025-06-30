@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
+import 'package:nex_music/helper_function/routefunc/artistview_route.dart';
 import 'package:nex_music/model/artistmodel.dart';
-import 'package:nex_music/presentation/home/artist/artist_full.dart';
 
 class ArtistGridView extends StatelessWidget {
   final ArtistModel artist;
@@ -17,8 +17,10 @@ class ArtistGridView extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context)
-            .pushNamed(ArtistFullScreen.routeName, arguments: artist);
+        artistViewRoute(
+          context,
+          artist,
+        );
       },
       child: Padding(
         padding: EdgeInsets.symmetric(

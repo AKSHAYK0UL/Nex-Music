@@ -48,7 +48,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
                 text: "Videos",
               ),
               Tab(
-                text: "Ablums",
+                text: "Albums",
               ),
               Tab(
                 text: "Playlists",

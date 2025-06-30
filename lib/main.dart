@@ -18,10 +18,6 @@ import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart';
 import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/favorites_songs_bloc/bloc/favorites_songs_bloc.dart';
-import 'package:nex_music/bloc/full_artist_album_bloc/bloc/fullartistalbum_bloc.dart';
-import 'package:nex_music/bloc/full_artist_playlist_bloc/bloc/full_artist_playlist_bloc.dart';
-import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
-import 'package:nex_music/bloc/full_artist_video_bloc/bloc/full_artist_video_bloc_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
@@ -169,21 +165,21 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) => RecentplayedBloc(context.read<DbRepository>()),
           ),
-          BlocProvider(
-            create: (context) => FullArtistSongBloc(context.read<Repository>()),
-          ),
-          BlocProvider(
-            create: (context) =>
-                FullArtistVideoBloc(context.read<Repository>()),
-          ),
-          BlocProvider(
-            create: (context) =>
-                FullArtistAlbumBloc(context.read<Repository>()),
-          ),
-          BlocProvider(
-            create: (context) =>
-                FullArtistPlaylistBloc(context.read<Repository>()),
-          ),
+          // BlocProvider(
+          //   create: (context) => FullArtistSongBloc(context.read<Repository>()),
+          // ),
+          // BlocProvider(
+          //   create: (context) =>
+          //       FullArtistVideoBloc(context.read<Repository>()),
+          // ),
+          // BlocProvider(
+          //   create: (context) =>
+          //       FullArtistAlbumBloc(context.read<Repository>()),
+          // ),
+          // BlocProvider(
+          //   create: (context) =>
+          //       FullArtistPlaylistBloc(context.read<Repository>()),
+          // ),
           BlocProvider(
             create: (context) => SongDialogBloc(context.read<DbRepository>()),
           ),
