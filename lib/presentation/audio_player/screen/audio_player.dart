@@ -57,9 +57,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(
-                  horizontal: screenSize * 0.026,
-                  vertical: screenSize * 0.00725),
+              padding: EdgeInsets.only(
+                left: screenSize * 0.026,
+                right: screenSize * 0.037,
+                top: screenSize * 0.00725,
+                bottom: screenSize * 0.00725,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
