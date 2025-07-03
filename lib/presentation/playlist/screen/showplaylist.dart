@@ -82,12 +82,13 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
           }
 
           // auto load data after every 89 sec
-          Future.delayed(const Duration(seconds: 89), () {
-            if (!context.mounted) return;
-            context.read<PlaylistBloc>().add(
-                  LoadMoreSongsEvent(playlistId: playlistData.playListId),
-                );
-          });
+
+          // Future.delayed(const Duration(seconds: 89), () {
+          //   if (!context.mounted) return;
+          context.read<PlaylistBloc>().add(
+                LoadMoreSongsEvent(playlistId: playlistData.playListId),
+              );
+          //  });
         }
         return previous != current;
       },

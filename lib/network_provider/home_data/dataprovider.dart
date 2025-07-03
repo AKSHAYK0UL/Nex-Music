@@ -45,19 +45,31 @@ class DataProvider {
     yield* songStream;
   }
 
-  Future<List<yt.SongFull>> getPlayListSongs(
-    List<String> songIds,
-  ) async {
-    final List<yt.SongFull> songs = [];
-    for (var i = 0; i < songIds.length; i++) {
-      final data = await _ytMusic.getSong(songIds[i]);
-      if (data.type == "SONG") {
-        songs.add(data);
-      }
-    }
+  // Future<List<yt.SongFull>> getPlayListSongs(
+  //   List<String> songIds,
+  // ) async {
+  //   final List<yt.SongFull> songs = [];
+  //   for (var i = 0; i < songIds.length; i++) {
+  //     final data = await _ytMusic.getSong(songIds[i]);
+  //     if (data.type == "SONG") {
+  //       songs.add(data);
+  //     }
+  //   }
 
-    return songs;
+  //   return songs;
+  // }
+
+  //Testing
+  Future<List<yt.SongFull>> getPlayListSongs(List<String> songIds) async {
+    final results =
+        await Future.wait(songIds.map((id) => _ytMusic.getSong(id)));
+    return results;
+    // .where((data) => data.type == "SONG")
+    // .cast<yt.SongFull>()
+    // .toList();
   }
+
+  //Testing
 
   // Future<StreamManifest> songStreamUrl(String songId) async {
   //   return await _youtubeExplode.videos.streamsClient.getManifest(songId);

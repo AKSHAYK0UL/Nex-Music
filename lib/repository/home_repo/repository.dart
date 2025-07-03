@@ -65,6 +65,9 @@ class Repository {
         .take(20)
         .toList();
 
+    // List<String> songIds = songStream.map((video) => video.id.value).toList();
+    // List<int> songsDuration =
+    //     songStream.map((video) => video.duration!.inSeconds).toList();
     int totalDurationInSeconds = songStream
         .map((video) => video.duration?.inSeconds ?? 0)
         .fold(0, (total, duration) => total + duration);

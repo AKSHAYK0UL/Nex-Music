@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
+import 'package:nex_music/bloc/full_artist_album_bloc/bloc/fullartistalbum_bloc.dart';
 import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart'
     as pl;
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
@@ -34,6 +35,10 @@ class RecentSearchTitle extends StatelessWidget {
             .add(pl.SetStateToInitialEvent());
         //reset the state
         context.read<ArtistBloc>().add(SetStateToinitialEvent());
+        //reset the state
+        context
+            .read<FullArtistAlbumBloc>()
+            .add(SetFullartistalbumInitialEvent());
       },
       child: Container(
         margin: EdgeInsets.only(top: size * 0.00329),
