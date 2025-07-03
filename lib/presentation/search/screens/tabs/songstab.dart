@@ -26,10 +26,12 @@ class SongsTab extends StatelessWidget {
         if (state is SongsResultState) {
           return SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.only(
-                  right: screenSize * 0.0131,
-                  left: screenSize * 0.0131,
-                  top: screenSize * 0.0131),
+              padding: EdgeInsets.symmetric(
+                horizontal: screenSize * 0.0131,
+                // right: screenSize * 0.0131,
+                // left: screenSize * 0.0131,
+                // top: screenSize * 0.0131,
+              ),
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: state.searchedSongs.length,

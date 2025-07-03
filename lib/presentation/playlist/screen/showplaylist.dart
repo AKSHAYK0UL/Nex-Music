@@ -123,7 +123,11 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                   ),
                   flexibleSpace: FlexibleSpaceBar(
                     background: Padding(
-                      padding: EdgeInsets.only(top: screenSize * 0.115),
+                      padding: EdgeInsets.only(
+                        top: screenSize * 0.115,
+                        left: screenSize * 0.008,
+                        right: screenSize * 0.008,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         crossAxisAlignment: CrossAxisAlignment.start,

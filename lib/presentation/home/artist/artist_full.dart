@@ -44,9 +44,10 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
           ),
           bottom: ButtonsTabBar(
             splashColor: backgroundColor,
-            backgroundColor: Colors.white24,
+            // backgroundColor: Colors.white24,
+            backgroundColor: Colors.blueGrey.shade600,
             unselectedBackgroundColor: secondaryColor,
-            width: screenSize / 8,
+            width: screenSize / 8.15,
             contentCenter: true,
             elevation: 0,
             labelStyle: Theme.of(context).textTheme.titleSmall,
@@ -68,49 +69,5 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
         bottomNavigationBar: MiniPlayer(screenSize: screenSize),
       ),
     );
-
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: animatedText(
-    //       text: widget.artist.artist.name,
-    //       style: Theme.of(context).textTheme.titleLarge!,
-    //     ),
-    //     bottom: ButtonsTabBar(
-    //       splashColor: backgroundColor,
-    //       backgroundColor: Colors.white38,
-    //       unselectedBackgroundColor: secondaryColor,
-    //       width: screenSize / 8,
-    //       contentCenter: true,
-    //       elevation: 0,
-    //       labelStyle: Theme.of(context).textTheme.titleSmall,
-    //       unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
-    //       onTap: (index) {
-    //         setState(() {
-    //           _currentIndex = index;
-    //         });
-    //       },
-    //       // controller: TabController(
-    //       //   length: 4,
-    //       //   vsync: this,
-    //       //   initialIndex: _currentIndex,
-    //       // ),
-    //       tabs: const [
-    //         Tab(text: "Songs"),
-    //         Tab(text: "Videos"),
-    //         Tab(text: "Albums"),
-    //         Tab(text: "Playlists"),
-    //       ],
-    //     ),
-    //   ),
-    //   body: IndexedStack(
-    //     index: _currentIndex,
-    //     children: [
-    //       ArtistSongs(artist: widget.artist),
-    //       ArtistVideos(artist: widget.artist),
-    //       ArtistAlbum(artist: widget.artist),
-    //       ArtistPlaylist(artist: widget.artist),
-    //     ],
-    //   ),
-    // );
   }
 }

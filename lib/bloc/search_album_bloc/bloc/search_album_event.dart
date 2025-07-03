@@ -5,6 +5,11 @@ sealed class SearchAlbumEvent extends Equatable {
   List<Object> get props => [];
 }
 
+final class SetStateToInitialSearchAlbumBlocEvent extends SearchAlbumEvent {
+  @override
+  List<Object> get props => [];
+}
+
 final class SearchAlbumsEvent extends SearchAlbumEvent {
   final String inputText;
 

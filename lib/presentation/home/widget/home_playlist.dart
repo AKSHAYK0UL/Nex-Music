@@ -32,6 +32,7 @@ class HomePlaylist extends StatelessWidget {
             imageUrl: playList.thumbnail,
             width: screenSize * 0.288,
             height: screenSize * 0.345,
+            isRecommendedPlaylist: true,
           ),
         ),
       ),

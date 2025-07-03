@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
 import 'package:nex_music/bloc/full_artist_album_bloc/bloc/fullartistalbum_bloc.dart';
+import 'package:nex_music/bloc/search_album_bloc/bloc/search_album_bloc.dart';
 import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart'
     as pl;
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
@@ -28,6 +29,11 @@ class RecentSearchTitle extends StatelessWidget {
 
         //reset the state
         context.read<VideoBloc>().add(SetStateToInitialEvent());
+
+//reset the state
+        context
+            .read<SearchAlbumBloc>()
+            .add(SetStateToInitialSearchAlbumBlocEvent());
 
         //reset the state
         context

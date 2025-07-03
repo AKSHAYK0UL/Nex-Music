@@ -43,10 +43,12 @@ class _VideostabState extends State<Videostab> {
         if (state is VideosResultState) {
           return SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.only(
-                  right: widget.screenSize * 0.0131,
-                  left: widget.screenSize * 0.0131,
-                  top: widget.screenSize * 0.0131),
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.screenSize * 0.0131,
+                // right: screenSize * 0.0131,
+                // left: screenSize * 0.0131,
+                // top: screenSize * 0.0131,
+              ),
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: state.searchedVideo.length,

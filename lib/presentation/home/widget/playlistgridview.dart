@@ -22,32 +22,28 @@ class PlaylistGridView extends StatelessWidget {
       },
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: screenSize * 0.0050, vertical: screenSize * 0.0050),
+          horizontal: screenSize * 0.0095,
+          vertical: screenSize * 0.0065,
+        ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(15),
-          child: Column(
-            children: [
-              Expanded(
-                child: GridTile(
-                  footer: Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: screenSize * 0.0110),
-                    color: Colors.black54,
-                    alignment: Alignment.center,
-                    height: screenSize * 0.0431,
-                    child: animatedText(
-                      text: playList.playlistName,
-                      style: Theme.of(context).textTheme.titleMedium!,
-                    ),
-                  ),
-                  child: cacheImage(
-                    imageUrl: playList.thumbnail,
-                    height: 0,
-                    width: double.infinity,
-                  ),
-                ),
+          child: GridTile(
+            footer: Container(
+              padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0110),
+              color: Colors.black54,
+              alignment: Alignment.center,
+              height: screenSize * 0.0431,
+              child: animatedText(
+                text: playList.playlistName,
+                style: Theme.of(context).textTheme.titleMedium!,
               ),
-            ],
+            ),
+            child: cacheImage(
+              imageUrl: playList.thumbnail,
+              height: 0,
+              width: double.infinity,
+              isRecommendedPlaylist: true,
+            ),
           ),
         ),
       ),

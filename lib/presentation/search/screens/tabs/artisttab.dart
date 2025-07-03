@@ -39,26 +39,20 @@ class _ArtistTabState extends State<ArtistTab> {
         }
         if (state is ArtistDataState) {
           return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.only(
-                  right: widget.screenSize * 0.0131,
-                  left: widget.screenSize * 0.0131,
-                  top: widget.screenSize * 0.0131),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: widget.screenSize * 0.00107,
-                ),
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: state.artists.length,
-                itemBuilder: (context, index) {
-                  final artistData = state.artists[index];
-                  return ArtistGridView(
-                    artist: artistData,
-                  );
-                },
+            child: GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: widget.screenSize * 0.00107,
               ),
+              physics: const NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: state.artists.length,
+              itemBuilder: (context, index) {
+                final artistData = state.artists[index];
+                return ArtistGridView(
+                  artist: artistData,
+                );
+              },
             ),
           );
         }

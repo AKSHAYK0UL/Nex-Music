@@ -10,7 +10,13 @@ class SearchAlbumBloc extends Bloc<SearchAlbumEvent, SearchAlbumState> {
   final Repository _repository;
 
   SearchAlbumBloc(this._repository) : super(SearchAlbumInitial()) {
+    on<SetStateToInitialSearchAlbumBlocEvent>(_setStateToInitial);
     on<SearchAlbumsEvent>(_searchAlbums);
+  }
+
+  void _setStateToInitial(SetStateToInitialSearchAlbumBlocEvent event,
+      Emitter<SearchAlbumState> emit) {
+    emit(SearchAlbumInitial());
   }
 
   Future<void> _searchAlbums(

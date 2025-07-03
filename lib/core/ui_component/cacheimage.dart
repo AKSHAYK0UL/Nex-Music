@@ -8,6 +8,7 @@ Widget cacheImage({
   required double width,
   required double height,
   bool islocal = false,
+  bool isRecommendedPlaylist = false,
 }) {
   return islocal
       ? Image.file(
@@ -15,21 +16,19 @@ Widget cacheImage({
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => Image.asset(
             "assets/imageplaceholder.png",
-            fit: BoxFit.cover,
+            fit: isRecommendedPlaylist ? BoxFit.fill : BoxFit.cover,
           ),
         )
       : CachedNetworkImage(
           imageUrl: imageUrl,
-          // height: height,
-          // width: 100,
-          fit: BoxFit.cover,
+          fit: isRecommendedPlaylist ? BoxFit.fill : BoxFit.cover,
           placeholder: (_, __) => Image.asset(
             "assets/imageplaceholder.png",
-            fit: BoxFit.cover,
+            fit: isRecommendedPlaylist ? BoxFit.fill : BoxFit.cover,
           ),
           errorWidget: (_, __, ___) => Image.asset(
             "assets/imageplaceholder.png",
-            fit: BoxFit.cover,
+            fit: isRecommendedPlaylist ? BoxFit.fill : BoxFit.cover,
           ),
         );
   // return islocal

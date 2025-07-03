@@ -24,7 +24,9 @@ class ArtistGridView extends StatelessWidget {
       },
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: screenSize * 0.0050, vertical: screenSize * 0.0050),
+          horizontal: screenSize * 0.0095,
+          vertical: screenSize * 0.0065,
+        ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(15),
           child: Column(
