@@ -28,11 +28,14 @@ class HomePlaylist extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(screenSize * 0.0132),
-          child: cacheImage(
-            imageUrl: playList.thumbnail,
-            width: screenSize * 0.288,
-            height: screenSize * 0.345,
-            isRecommendedPlaylist: true,
+          child: Hero(
+            tag: playList.playListId,
+            child: cacheImage(
+              imageUrl: playList.thumbnail,
+              width: screenSize * 0.288,
+              height: screenSize * 0.345,
+              isRecommendedPlaylist: true,
+            ),
           ),
         ),
       ),

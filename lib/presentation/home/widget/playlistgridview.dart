@@ -38,11 +38,14 @@ class PlaylistGridView extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium!,
               ),
             ),
-            child: cacheImage(
-              imageUrl: playList.thumbnail,
-              height: 0,
-              width: double.infinity,
-              isRecommendedPlaylist: true,
+            child: Hero(
+              tag: playList.playListId,
+              child: cacheImage(
+                imageUrl: playList.thumbnail,
+                height: 0,
+                width: double.infinity,
+                isRecommendedPlaylist: true,
+              ),
             ),
           ),
         ),
