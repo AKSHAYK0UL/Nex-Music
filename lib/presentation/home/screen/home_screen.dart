@@ -393,8 +393,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () {
                             Navigator.of(context).pushNamed(Setting.routeName,
                                 arguments: widget.currentUser);
-                            // Navigator.of(context)
-                            //     .pushNamed(QualitySettingsScreen.routeName);
                           },
                         ),
                         PopupMenuItem(
@@ -410,21 +408,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       .textTheme
                                       .titleMedium
                                       ?.copyWith(color: boldOrange))
-                              // const Icon(
-                              //   Icons.person,
-                              // ),
-                              // Text(
-                              //   "Profile",
-                              //   style: Theme.of(context).textTheme.titleMedium,
-                              // ),
                             ],
                           ),
                           onTap: () {
-                            // Navigator.of(context).pushNamed(
-                            //     user.UserInfo.routeName,
-                            //     arguments: widget.currentUser);
-                            //  if (isSmallScreen)
-
                             showDialog(
                               barrierDismissible: false,
                               context: context,

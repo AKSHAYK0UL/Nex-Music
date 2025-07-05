@@ -256,7 +256,6 @@ import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
-import 'package:nex_music/presentation/playlist/screen/playlist_loading.dart';
 import 'package:nex_music/presentation/playlist/widget/chipwidget.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -275,14 +274,14 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
   void initState() {
     context.read<ss.SongstreamBloc>().add(ss.CleanPlaylistEvent());
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final playlistData =
-          ModalRoute.of(context)?.settings.arguments as PlayListmodel;
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   final playlistData =
+    //       ModalRoute.of(context)?.settings.arguments as PlayListmodel;
 
-      context
-          .read<PlaylistBloc>()
-          .add(GetPlaylistEvent(playlistId: playlistData.playListId));
-    });
+    //   context
+    //       .read<PlaylistBloc>()
+    //       .add(GetPlaylistEvent(playlistId: playlistData.playListId));
+    // });
 
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
@@ -327,22 +326,14 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 );
           }
 
-          // auto load data after every 89 sec
-
-          // Future.delayed(const Duration(seconds: 89), () {
-          //   if (!context.mounted) return;
           context.read<PlaylistBloc>().add(
                 LoadMoreSongsEvent(playlistId: playlistData.playListId),
               );
-          //  });
         }
         return previous != current;
       },
       builder: (context, playlistState) {
-        if (playlistState is LoadingState) {
-          return PlaylistLoading(playlistData: playlistData);
-        }
-
+        //loading state handle in playlist_loading screen
         if (playlistState is ErrorState) {
           return Center(
             child: Text(
@@ -399,6 +390,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                             ),
                           ),
                           Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               ChipWidget(
                                 label: playlistState.totalSongs

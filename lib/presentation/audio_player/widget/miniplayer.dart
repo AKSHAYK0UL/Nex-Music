@@ -90,86 +90,92 @@ class _MiniPlayerState extends State<MiniPlayer> {
             },
             child: Stack(
               children: [
-                ListTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0),
-                    side: BorderSide(color: backgroundColor, width: 2),
-                  ),
-                  contentPadding: EdgeInsets.only(
-                      left: widget.screenSize * 0.0356,
-                      right: widget.screenSize * 0.00527),
-                  leading: SizedBox(
-                    width: widget.screenSize * 0.0755,
-                    height: widget.screenSize * 0.0733,
-                    child: ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(widget.screenSize * 0.0106),
-                      child: Transform.scale(
-                        scaleX:
-                            quality == ThumbnailQuality.low && !songData.isLocal
-                                ? 1
-                                : 1.10,
-                        child: cacheImage(
-                          imageUrl: songData.thumbnail,
-                          width: widget.screenSize * 0.0755,
-                          height: widget.screenSize * 0.0733,
-                          islocal: songData.isLocal,
+                Container(
+                  decoration: const BoxDecoration(
+                      border: Border(
+                          top: BorderSide(
+                    color: Colors.white10,
+                    width: 2,
+                  ))),
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0)),
+                    contentPadding: EdgeInsets.only(
+                        left: widget.screenSize * 0.0356,
+                        right: widget.screenSize * 0.00527),
+                    leading: SizedBox(
+                      width: widget.screenSize * 0.0755,
+                      height: widget.screenSize * 0.0733,
+                      child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(widget.screenSize * 0.0106),
+                        child: Transform.scale(
+                          scaleX: quality == ThumbnailQuality.low &&
+                                  !songData.isLocal
+                              ? 1
+                              : 1.10,
+                          child: cacheImage(
+                            imageUrl: songData.thumbnail,
+                            width: widget.screenSize * 0.0755,
+                            height: widget.screenSize * 0.0733,
+                            islocal: songData.isLocal,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  title: animatedText(
-                    text: songData.songName,
-                    style: Theme.of(context).textTheme.titleSmall!,
-                  ),
-                  subtitle: animatedText(
-                    text: songData.artist.name,
-                    style: Theme.of(context).textTheme.bodySmall!,
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      state is LoadingState
-                          ? Container(
-                              margin: EdgeInsets.only(
-                                  top: widget.screenSize * 0.0131,
-                                  right: widget.screenSize * 0.0131),
-                              height: widget.screenSize * 0.0395,
-                              width: widget.screenSize * 0.0395,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: textColor,
+                    title: animatedText(
+                      text: songData.songName,
+                      style: Theme.of(context).textTheme.titleSmall!,
+                    ),
+                    subtitle: animatedText(
+                      text: songData.artist.name,
+                      style: Theme.of(context).textTheme.bodySmall!,
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        state is LoadingState
+                            ? Container(
+                                margin: EdgeInsets.only(
+                                    top: widget.screenSize * 0.0131,
+                                    right: widget.screenSize * 0.0131),
+                                height: widget.screenSize * 0.0395,
+                                width: widget.screenSize * 0.0395,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: textColor,
+                                  ),
                                 ),
+                              )
+                            : IconButton(
+                                icon: Icon(
+                                  state is PlayingState
+                                      ? CupertinoIcons.pause_circle_fill
+                                      : CupertinoIcons.play_circle_fill,
+                                  color: textColor,
+                                  size: widget.screenSize * 0.0520,
+                                ),
+                                onPressed: () {
+                                  context
+                                      .read<SongstreamBloc>()
+                                      .add(PlayPauseEvent());
+                                },
                               ),
-                            )
-                          : IconButton(
-                              icon: Icon(
-                                state is PlayingState
-                                    ? CupertinoIcons.pause_circle_fill
-                                    : CupertinoIcons.play_circle_fill,
-                                color: textColor,
-                                size: widget.screenSize * 0.0520,
-                              ),
-                              onPressed: () {
-                                context
-                                    .read<SongstreamBloc>()
-                                    .add(PlayPauseEvent());
-                              },
-                            ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.skip_next,
-                          color: textColor,
-                          size: widget.screenSize * 0.0500,
+                        IconButton(
+                          icon: Icon(
+                            Icons.skip_next,
+                            color: textColor,
+                            size: widget.screenSize * 0.0500,
+                          ),
+                          onPressed: () {
+                            context
+                                .read<SongstreamBloc>()
+                                .add(PlayNextSongEvent());
+                          },
                         ),
-                        onPressed: () {
-                          context
-                              .read<SongstreamBloc>()
-                              .add(PlayNextSongEvent());
-                        },
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 StreamBuilder(

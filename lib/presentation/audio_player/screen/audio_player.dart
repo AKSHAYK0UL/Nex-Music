@@ -129,34 +129,46 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                               topRight: Radius.circular(screenSize * 0.0131),
                             ),
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(screenSize * 0.0131),
-                                topRight: Radius.circular(screenSize * 0.0131)),
-                            child: Transform.scale(
-                              scaleX: quality == ThumbnailQuality.low &&
-                                      !songData.isLocal
-                                  ? 1
-                                  : 1.10,
-                              child: cacheImage(
-                                  imageUrl: songData.thumbnail,
-                                  width: screenSize * 0.448,
-                                  height: screenSize * 0.410,
-                                  islocal: songData.isLocal),
+                          child: Card(
+                            elevation: 3,
+                            margin: EdgeInsets.zero,
+                            color: secondaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(screenSize * 0.0131),
+                                  topRight:
+                                      Radius.circular(screenSize * 0.0131)),
                             ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(screenSize * 0.0131),
+                                  topRight:
+                                      Radius.circular(screenSize * 0.0131)),
+                              child: Transform.scale(
+                                scaleX: quality == ThumbnailQuality.low &&
+                                        !songData.isLocal
+                                    ? 1
+                                    : 1.10,
+                                child: cacheImage(
+                                    imageUrl: songData.thumbnail,
+                                    width: screenSize * 0.448,
+                                    height: screenSize * 0.410,
+                                    islocal: songData.isLocal),
 
-                            // child: Transform.scale(
-                            //   scaleX: quality == ThumbnailQuality.low &&
-                            //           !songData.isLocal
-                            //       ? 1
-                            //       : 1.78,
-                            //   scaleY: 1.0,
-                            //   child: cacheImage(
-                            //       imageUrl: songData.thumbnail,
-                            //       width: screenSize * 0.448,
-                            //       height: screenSize * 0.410,
-                            //       islocal: songData.isLocal),
-                            // ),
+                                // child: Transform.scale(
+                                //   scaleX: quality == ThumbnailQuality.low &&
+                                //           !songData.isLocal
+                                //       ? 1
+                                //       : 1.78,
+                                //   scaleY: 1.0,
+                                //   child: cacheImage(
+                                //       imageUrl: songData.thumbnail,
+                                //       width: screenSize * 0.448,
+                                //       height: screenSize * 0.410,
+                                //       islocal: songData.isLocal),
+                                // ),
+                              ),
+                            ),
                           ),
                         ),
                       );
@@ -165,64 +177,75 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                 ),
                 //
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: screenSize * 0.0328),
+                  margin: EdgeInsets.symmetric(horizontal: screenSize * 0.0334),
                   decoration: BoxDecoration(
                     color: secondaryColor,
                     borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(screenSize * 0.0131),
                         bottomRight: Radius.circular(screenSize * 0.0131)),
                   ),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            artistViewRoute(
-                                context,
-                                ArtistModel(
-                                    artist: songData.artist,
-                                    thumbnail: songData.thumbnail));
-                          },
-                          icon: Icon(
-                            Icons.person,
-                            color: textColor,
-                            size: screenSize * 0.0395,
+                  child: Card(
+                    elevation: 3,
+                    margin: EdgeInsets.zero,
+                    color: secondaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(screenSize * 0.0131),
+                          bottomRight: Radius.circular(screenSize * 0.0131)),
+                    ),
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              artistViewRoute(
+                                  context,
+                                  ArtistModel(
+                                      artist: songData.artist,
+                                      thumbnail: songData.thumbnail));
+                            },
+                            icon: Icon(
+                              Icons.person,
+                              color: textColor,
+                              size: screenSize * 0.0395,
+                            ),
                           ),
-                        ),
-                        BlocBuilder<DownloadBloc, DownloadState>(
-                          builder: (context, state) {
-                            return IconButton(
-                              onPressed: state is DownloadPercantageStatusState
-                                  ? null
-                                  : () {
-                                      context.read<DownloadBloc>().add(
-                                          DownloadSongEvent(
-                                              songData: songData));
-                                    },
-                              icon: Icon(
-                                Icons.downloading_sharp,
-                                color: state is DownloadPercantageStatusState
-                                    ? Colors.grey.shade700
-                                    : textColor,
-                                size: screenSize * 0.0395,
-                              ),
-                            );
-                          },
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            // showAddToPlaylistDialog(context, songData);
-                            addToPlayListBottomSheet(
-                                context, songData, screenSize);
-                          },
-                          icon: Icon(
-                            Icons.playlist_add,
-                            color: textColor,
-                            size: screenSize * 0.0395,
+                          BlocBuilder<DownloadBloc, DownloadState>(
+                            builder: (context, state) {
+                              return IconButton(
+                                onPressed:
+                                    state is DownloadPercantageStatusState
+                                        ? null
+                                        : () {
+                                            context.read<DownloadBloc>().add(
+                                                DownloadSongEvent(
+                                                    songData: songData));
+                                          },
+                                icon: Icon(
+                                  Icons.downloading_sharp,
+                                  color: state is DownloadPercantageStatusState
+                                      ? Colors.grey.shade700
+                                      : textColor,
+                                  size: screenSize * 0.0395,
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                      ]),
+                          IconButton(
+                            onPressed: () {
+                              // showAddToPlaylistDialog(context, songData);
+                              addToPlayListBottomSheet(
+                                  context, songData, screenSize);
+                            },
+                            icon: Icon(
+                              Icons.playlist_add,
+                              color: textColor,
+                              size: screenSize * 0.0395,
+                            ),
+                          ),
+                        ]),
+                  ),
                 ),
                 //
                 // SizedBox(height: screenSize * 0.0380),

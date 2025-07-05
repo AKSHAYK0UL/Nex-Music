@@ -42,22 +42,30 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
             text: widget.artist.artist.name,
             style: Theme.of(context).textTheme.titleLarge!,
           ),
-          bottom: ButtonsTabBar(
-            splashColor: backgroundColor,
-            // backgroundColor: Colors.white24,
-            backgroundColor: Colors.blueGrey.shade600,
-            unselectedBackgroundColor: secondaryColor,
-            width: screenSize / 8.15,
-            contentCenter: true,
-            elevation: 0,
-            labelStyle: Theme.of(context).textTheme.titleSmall,
-            unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
-            tabs: const [
-              Tab(text: "Songs"),
-              Tab(text: "Videos"),
-              Tab(text: "Albums"),
-              Tab(text: "Playlists"),
-            ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(kMinInteractiveDimension),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: screenSize * 0.0115,
+              ),
+              child: ButtonsTabBar(
+                splashColor: backgroundColor,
+                // backgroundColor: Colors.white24,
+                backgroundColor: Colors.blueGrey.shade600,
+                unselectedBackgroundColor: secondaryColor,
+                width: screenSize / 8.15,
+                contentCenter: true,
+                elevation: 0,
+                labelStyle: Theme.of(context).textTheme.titleSmall,
+                unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
+                tabs: const [
+                  Tab(text: "Songs"),
+                  Tab(text: "Videos"),
+                  Tab(text: "Albums"),
+                  Tab(text: "Playlists"),
+                ],
+              ),
+            ),
           ),
         ),
         body: TabBarView(children: [

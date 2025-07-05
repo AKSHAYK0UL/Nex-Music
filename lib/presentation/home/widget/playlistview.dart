@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/model/playlistmodel.dart';
-import 'package:nex_music/presentation/playlist/screen/showplaylist.dart';
+import 'package:nex_music/presentation/playlist/screen/playlist_loading.dart';
 
 class PlaylistView extends StatelessWidget {
   final PlayListmodel playList;
@@ -17,8 +17,10 @@ class PlaylistView extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
+        // Navigator.of(context)
+        //     .pushNamed(ShowPlaylist.routeName, arguments: playList);
         Navigator.of(context)
-            .pushNamed(ShowPlaylist.routeName, arguments: playList);
+            .pushNamed(PlaylistLoading.routeName, arguments: playList);
       },
       child: Container(
         // width: 226,

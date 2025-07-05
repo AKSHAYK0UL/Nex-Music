@@ -53,6 +53,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
     });
   }
 
+//for large screen devices
   void _showOverlay(BuildContext context) {
     overlayEntry = OverlayEntry(
       builder: (context) => OverlaySongPlayer(
