@@ -14,26 +14,30 @@ class ChipWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context).height;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+
     return GestureDetector(
       onTap: () {
         onTap();
       },
       child: SizedBox(
-        width: screenSize * 0.161,
-        height: screenSize * 0.0721,
+        // width: screenSize * 0.161,
+        width: screenWidth * 0.290,
+
+        // height: screenHeight * 0.0721,
         child: Chip(
           label: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(label),
               SizedBox(
-                width: screenSize * 0.0105,
+                width: screenWidth * 0.0105,
               ),
               Icon(
                 icon,
                 color: textColor,
-                size: screenSize * 0.0316,
+                size: screenHeight * 0.0316,
               )
             ],
           ),

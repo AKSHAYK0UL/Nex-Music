@@ -13,7 +13,7 @@ import 'package:nex_music/presentation/user_playlist/screens/user_playlist_songs
 Map<String, WidgetBuilder> routes = {
   AudioPlayerScreen.routeName: (context) => const AudioPlayerScreen(),
   PlaylistLoading.routeName: (context) => const PlaylistLoading(),
-  ShowPlaylist.routeName: (context) => const ShowPlaylist(),
+  ShowPlaylist.routeName: (context) => ShowPlaylist(),
   ShowAllPlaylists.routeName: (context) => const ShowAllPlaylists(),
   SearchScreen.routeName: (context) => const SearchScreen(),
   SearchResultTab.routeName: (context) => const SearchResultTab(),

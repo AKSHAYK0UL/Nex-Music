@@ -91,12 +91,13 @@ class _MiniPlayerState extends State<MiniPlayer> {
             child: Stack(
               children: [
                 Container(
-                  decoration: const BoxDecoration(
-                      border: Border(
+                  decoration: BoxDecoration(
+                      color: secondaryColor,
+                      border: const Border(
                           top: BorderSide(
-                    color: Colors.white10,
-                    width: 2,
-                  ))),
+                        color: Colors.white10,
+                        width: 2,
+                      ))),
                   child: ListTile(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(0)),

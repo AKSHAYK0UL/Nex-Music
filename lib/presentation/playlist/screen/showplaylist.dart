@@ -244,6 +244,42 @@
 
 //=============================================================
 
+// final scrollController = ScrollController();
+
+// @override
+// void initState() {
+//   context.read<ss.SongstreamBloc>().add(ss.CleanPlaylistEvent());
+
+//   // WidgetsBinding.instance.addPostFrameCallback((_) {
+//   //   final playlistData =
+//   //       ModalRoute.of(context)?.settings.arguments as PlayListmodel;
+
+//   //   context
+//   //       .read<PlaylistBloc>()
+//   //       .add(GetPlaylistEvent(playlistId: playlistData.playListId));
+//   // });
+
+//   scrollController.addListener(() {
+//     if (scrollController.position.pixels >=
+//         scrollController.position.maxScrollExtent - 50) {
+//       final playlistData =
+//           ModalRoute.of(context)?.settings.arguments as PlayListmodel;
+
+//       context
+//           .read<PlaylistBloc>()
+//           .add(LoadMoreSongsEvent(playlistId: playlistData.playListId));
+//     }
+//   });
+
+//   super.initState();
+// }
+
+// @override
+// void dispose() {
+//   scrollController.dispose();
+//   super.dispose();
+// }
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -259,50 +295,11 @@ import 'package:nex_music/presentation/home/widget/song_title.dart';
 import 'package:nex_music/presentation/playlist/widget/chipwidget.dart';
 import 'package:share_plus/share_plus.dart';
 
-class ShowPlaylist extends StatefulWidget {
+// ignore: must_be_immutable
+class ShowPlaylist extends StatelessWidget {
   static const routeName = "/showplaylist";
-  const ShowPlaylist({super.key});
-
-  @override
-  State<ShowPlaylist> createState() => _ShowPlaylistState();
-}
-
-class _ShowPlaylistState extends State<ShowPlaylist> {
-  final scrollController = ScrollController();
-
-  @override
-  void initState() {
-    context.read<ss.SongstreamBloc>().add(ss.CleanPlaylistEvent());
-
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   final playlistData =
-    //       ModalRoute.of(context)?.settings.arguments as PlayListmodel;
-
-    //   context
-    //       .read<PlaylistBloc>()
-    //       .add(GetPlaylistEvent(playlistId: playlistData.playListId));
-    // });
-
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 50) {
-        final playlistData =
-            ModalRoute.of(context)?.settings.arguments as PlayListmodel;
-
-        context
-            .read<PlaylistBloc>()
-            .add(LoadMoreSongsEvent(playlistId: playlistData.playListId));
-      }
-    });
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    scrollController.dispose();
-    super.dispose();
-  }
+  ShowPlaylist({super.key});
+  ValueNotifier<bool> switchState = ValueNotifier(false);
 
   @override
   Widget build(BuildContext context) {
@@ -318,20 +315,17 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         : 0.0;
 
     return BlocBuilder<PlaylistBloc, PlaylistState>(
-      buildWhen: (previous, current) {
-        if (previous != current) {
-          if (current is PlaylistDataState) {
-            context.read<ss.SongstreamBloc>().add(
-                  ss.GetSongPlaylistEvent(songlist: current.playlistSongs),
-                );
-          }
-
-          context.read<PlaylistBloc>().add(
-                LoadMoreSongsEvent(playlistId: playlistData.playListId),
-              );
-        }
-        return previous != current;
-      },
+      buildWhen: (previous, current) => previous != current,
+      // buildWhen: (previous, current) {
+      //   if (previous != current) {
+      //     if (current is PlaylistDataState && switchState.value) {
+      //       context.read<ss.SongstreamBloc>().add(
+      //             ss.GetSongPlaylistEvent(songlist: current.playlistSongs),
+      //           );
+      //     }
+      //   }
+      //   return previous != current;
+      // },
       builder: (context, playlistState) {
         //loading state handle in playlist_loading screen
         if (playlistState is ErrorState) {
@@ -344,9 +338,12 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         }
 
         if (playlistState is PlaylistDataState) {
+          context.read<PlaylistBloc>().add(
+                LoadMoreSongsEvent(playlistId: playlistData.playListId),
+              );
           return Scaffold(
             body: CustomScrollView(
-              controller: scrollController,
+              // controller: scrollController,
               slivers: [
                 SliverAppBar(
                   titleSpacing: 0,
@@ -391,19 +388,46 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                           ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.start,
+                            spacing: 6,
                             children: [
                               ChipWidget(
                                 label: playlistState.totalSongs
                                     .toString()
-                                    .padLeft(10, ' '),
+                                    .padLeft(9, ' '),
                                 icon: Icons.music_note,
                                 onTap: () {},
                               ),
-                              ChipWidget(
-                                label: playlistState.playlistDuration,
-                                icon: Icons.alarm,
-                                onTap: () {},
+
+//
+
+                              ValueListenableBuilder(
+                                valueListenable: switchState,
+                                builder: (__, ___, _) {
+                                  return ChipWidget(
+                                    label: "Play",
+                                    icon: Icons.queue_music,
+                                    onTap: () {
+                                      switchState.value = !switchState.value;
+                                      if (switchState.value) {
+                                        context
+                                            .read<ss.SongstreamBloc>()
+                                            .add(ss.ResetPlaylistEvent());
+                                        context.read<ss.SongstreamBloc>().add(
+                                            ss.GetSongPlaylistEvent(
+                                                songlist: playlistState
+                                                    .playlistSongs)); //load recent songs in the playlist
+                                        showSnackbar(context,
+                                            "Now playing ${playlistData.playlistName} songs");
+                                      } else {
+                                        context
+                                            .read<ss.SongstreamBloc>()
+                                            .add(ss.CleanPlaylistEvent());
+                                      }
+                                    },
+                                  );
+                                },
                               ),
+
                               ChipWidget(
                                 label: "Share",
                                 icon: Icons.share,
