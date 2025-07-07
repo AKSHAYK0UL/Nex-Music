@@ -45,6 +45,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final routeData =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
     Songmodel songData = routeData["songdata"] as Songmodel;
@@ -76,18 +77,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       size: screenSize * 0.0493,
                     ),
                   ),
-                  // GestureDetector(
-                  //   onTap: () {
-                  //     context.read<SongstreamBloc>().add(PauseEvent());
-                  //     Navigator.of(context)
-                  //         .pushNamed(SongVideo.routeName, arguments: songData);
-                  //   },
-                  //   child: Icon(
-                  //     Icons.smart_display,
-                  //     color: textColor,
-                  //     size: screenSize * 0.0330,
-                  //   ),
-                  // ),
                   GestureDetector(
                     onTap: () async {
                       await Share.share(
@@ -121,8 +110,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       }
                       return Center(
                         child: Container(
-                          height: screenSize * 0.410,
-                          width: screenSize * 0.448,
+                          // height: screenSize * 0.410,
+                          width: screenWidth * 0.866,
+                          // width: screenSize * 0.448,
+
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(screenSize * 0.0131),
@@ -134,40 +125,107 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                             margin: EdgeInsets.zero,
                             color: secondaryColor,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(screenSize * 0.0131),
-                                  topRight:
-                                      Radius.circular(screenSize * 0.0131)),
+                              borderRadius: BorderRadius.all(
+                                  Radius.circular(screenSize * 0.0131)
+                                  // topLeft: Radius.circular(screenSize * 0.0131),
+                                  // topRight: Radius.circular(screenSize * 0.0131),
+                                  // bottomLeft:
+                                  ),
                             ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(screenSize * 0.0131),
-                                  topRight:
-                                      Radius.circular(screenSize * 0.0131)),
-                              child: Transform.scale(
-                                scaleX: quality == ThumbnailQuality.low &&
-                                        !songData.isLocal
-                                    ? 1
-                                    : 1.10,
-                                child: cacheImage(
-                                    imageUrl: songData.thumbnail,
-                                    width: screenSize * 0.448,
-                                    height: screenSize * 0.410,
-                                    islocal: songData.isLocal),
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: screenSize * 0.410,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(
+                                            screenSize * 0.0131),
+                                        topRight: Radius.circular(
+                                            screenSize * 0.0131)),
+                                    child: Transform.scale(
+                                      scaleX: quality == ThumbnailQuality.low &&
+                                              !songData.isLocal
+                                          ? 1
+                                          : 1.10,
+                                      child: cacheImage(
+                                          imageUrl: songData.thumbnail,
+                                          width: screenSize * 0.448,
+                                          height: screenSize * 0.410,
+                                          islocal: songData.isLocal),
 
-                                // child: Transform.scale(
-                                //   scaleX: quality == ThumbnailQuality.low &&
-                                //           !songData.isLocal
-                                //       ? 1
-                                //       : 1.78,
-                                //   scaleY: 1.0,
-                                //   child: cacheImage(
-                                //       imageUrl: songData.thumbnail,
-                                //       width: screenSize * 0.448,
-                                //       height: screenSize * 0.410,
-                                //       islocal: songData.isLocal),
-                                // ),
-                              ),
+                                      // child: Transform.scale(
+                                      //   scaleX: quality == ThumbnailQuality.low &&
+                                      //           !songData.isLocal
+                                      //       ? 1
+                                      //       : 1.78,
+                                      //   scaleY: 1.0,
+                                      //   child: cacheImage(
+                                      //       imageUrl: songData.thumbnail,
+                                      //       width: screenSize * 0.448,
+                                      //       height: screenSize * 0.410,
+                                      //       islocal: songData.isLocal),
+                                      // ),
+                                    ),
+                                  ),
+                                ),
+                                Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          artistViewRoute(
+                                              context,
+                                              ArtistModel(
+                                                  artist: songData.artist,
+                                                  thumbnail:
+                                                      songData.thumbnail));
+                                        },
+                                        icon: Icon(
+                                          Icons.person,
+                                          color: textColor,
+                                          size: screenSize * 0.0395,
+                                        ),
+                                      ),
+                                      BlocBuilder<DownloadBloc, DownloadState>(
+                                        builder: (context, state) {
+                                          return IconButton(
+                                            onPressed: state
+                                                    is DownloadPercantageStatusState
+                                                ? null
+                                                : () {
+                                                    context
+                                                        .read<DownloadBloc>()
+                                                        .add(DownloadSongEvent(
+                                                            songData:
+                                                                songData));
+                                                  },
+                                            icon: Icon(
+                                              Icons.downloading_sharp,
+                                              color: state
+                                                      is DownloadPercantageStatusState
+                                                  ? Colors.grey.shade700
+                                                  : textColor,
+                                              size: screenSize * 0.0395,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          // showAddToPlaylistDialog(context, songData);
+                                          addToPlayListBottomSheet(
+                                              context, songData, screenSize);
+                                        },
+                                        icon: Icon(
+                                          Icons.playlist_add,
+                                          color: textColor,
+                                          size: screenSize * 0.0395,
+                                        ),
+                                      ),
+                                    ]),
+                              ],
                             ),
                           ),
                         ),
@@ -175,80 +233,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     },
                   ),
                 ),
-                //
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: screenSize * 0.0338),
-                  decoration: BoxDecoration(
-                    color: secondaryColor,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(screenSize * 0.0131),
-                        bottomRight: Radius.circular(screenSize * 0.0131)),
-                  ),
-                  child: Card(
-                    elevation: 3,
-                    margin: EdgeInsets.zero,
-                    color: secondaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(screenSize * 0.0131),
-                          bottomRight: Radius.circular(screenSize * 0.0131)),
-                    ),
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          IconButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              artistViewRoute(
-                                  context,
-                                  ArtistModel(
-                                      artist: songData.artist,
-                                      thumbnail: songData.thumbnail));
-                            },
-                            icon: Icon(
-                              Icons.person,
-                              color: textColor,
-                              size: screenSize * 0.0395,
-                            ),
-                          ),
-                          BlocBuilder<DownloadBloc, DownloadState>(
-                            builder: (context, state) {
-                              return IconButton(
-                                onPressed:
-                                    state is DownloadPercantageStatusState
-                                        ? null
-                                        : () {
-                                            context.read<DownloadBloc>().add(
-                                                DownloadSongEvent(
-                                                    songData: songData));
-                                          },
-                                icon: Icon(
-                                  Icons.downloading_sharp,
-                                  color: state is DownloadPercantageStatusState
-                                      ? Colors.grey.shade700
-                                      : textColor,
-                                  size: screenSize * 0.0395,
-                                ),
-                              );
-                            },
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              // showAddToPlaylistDialog(context, songData);
-                              addToPlayListBottomSheet(
-                                  context, songData, screenSize);
-                            },
-                            icon: Icon(
-                              Icons.playlist_add,
-                              color: textColor,
-                              size: screenSize * 0.0395,
-                            ),
-                          ),
-                        ]),
-                  ),
-                ),
-                //
-                // SizedBox(height: screenSize * 0.0380),
+
                 SizedBox(height: screenSize * 0.0080),
 
                 Padding(

@@ -68,11 +68,13 @@ class Repository {
     // List<String> songIds = songStream.map((video) => video.id.value).toList();
     // List<int> songsDuration =
     //     songStream.map((video) => video.duration!.inSeconds).toList();
-    int totalDurationInSeconds = songStream
-        .map((video) => video.duration?.inSeconds ?? 0)
-        .fold(0, (total, duration) => total + duration);
 
-    String playListDuration = timeFormate(totalDurationInSeconds);
+    //No longer need
+    // int totalDurationInSeconds = songStream
+    //     .map((video) => video.duration?.inSeconds ?? 0)
+    //     .fold(0, (total, duration) => total + duration);
+
+    // String playListDuration = timeFormate(totalDurationInSeconds);
 
     final songsList = await _dataProvider.getPlayListSongs(songIds);
 
@@ -80,7 +82,7 @@ class Repository {
       playlistSongs:
           RepositoryHelperFunction.getSongsList(songsList, songsDuration),
       playlistSize: totalSongs,
-      playListDuration: playListDuration,
+      playListDuration: "",
     );
   }
 

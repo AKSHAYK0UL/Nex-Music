@@ -359,16 +359,17 @@ class ShowPlaylist extends StatelessWidget {
                     background: Padding(
                       padding: EdgeInsets.only(
                         top: screenSize * 0.115,
-                        left: screenSize * 0.015,
-                        right: screenSize * 0.015,
+                        left: screenSize * 0.010,
+                        right: screenSize * 0.010,
+                        bottom: screenSize * 0.015,
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            height: screenSize * 0.280,
-                            width: screenSize * 0.280,
+                            // height: screenSize * 0.280,
+                            // width: screenSize * 0.280,
                             decoration: BoxDecoration(
                               borderRadius:
                                   BorderRadius.circular(screenSize * 0.0131),
@@ -387,13 +388,12 @@ class ShowPlaylist extends StatelessWidget {
                             ),
                           ),
                           Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            spacing: 6,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               ChipWidget(
                                 label: playlistState.totalSongs
                                     .toString()
-                                    .padLeft(9, ' '),
+                                    .padLeft(8, ' '),
                                 icon: Icons.music_note,
                                 onTap: () {},
                               ),

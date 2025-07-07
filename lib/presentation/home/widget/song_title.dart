@@ -6,9 +6,9 @@ import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/enum/tab_route.dart';
+import 'package:nex_music/helper_function/route.dart';
 import 'package:nex_music/main.dart';
 import 'package:nex_music/model/songmodel.dart';
-import 'package:nex_music/presentation/audio_player/screen/audio_player.dart';
 import 'package:nex_music/presentation/audio_player/widget/overlay_audio_player.dart';
 import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
 import 'package:nex_music/presentation/home/widget/longpress_options_bottom_sheet.dart';
@@ -110,14 +110,23 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
         },
         onTap: () {
           if (isSmallScreen) {
-            Navigator.of(context)
-                .pushNamed(AudioPlayerScreen.routeName, arguments: {
-              "songindex": widget.songIndex,
-              "songdata": widget.songData,
-              "route": SongMiniPlayerRoute.songRoute,
-              "quality": quality,
-              "tabroute": widget.tabRouteENUM,
-            });
+            // Navigator.of(context)
+            //     .pushNamed(AudioPlayerScreen.routeName, arguments: {
+            //   "songindex": widget.songIndex,
+            //   "songdata": widget.songData,
+            //   "route": SongMiniPlayerRoute.songRoute,
+            //   "quality": quality,
+            //   "tabroute": widget.tabRouteENUM,
+            // });
+
+            Navigator.of(context).push(
+              slideTransitionRoute(
+                context: context,
+                songData: widget.songData,
+                route: SongMiniPlayerRoute.songRoute,
+                quality: quality,
+              ),
+            );
           } else {
             _showOverlay(context);
           }

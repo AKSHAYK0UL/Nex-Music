@@ -23,7 +23,7 @@ class ChipWidget extends StatelessWidget {
       },
       child: SizedBox(
         // width: screenSize * 0.161,
-        width: screenWidth * 0.290,
+        width: screenWidth * 0.270, // 0.290,
 
         // height: screenHeight * 0.0721,
         child: Chip(
