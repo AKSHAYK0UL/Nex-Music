@@ -44,12 +44,13 @@ import 'package:nex_music/helper_function/storage_permission/storage_permission.
 import 'package:nex_music/network_provider/home_data/download_provider.dart';
 
 import 'package:nex_music/presentation/auth/screens/auth_screen.dart';
-import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
+// import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
 import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/downlaod_repository/download_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/secrets/firebase_options.dart';
+import 'package:nex_music/presentation/splash/screens/splashscreen.dart';
 import 'package:nex_music/utils/audioutils/audio_handler.dart';
 import 'package:nex_music/wrapper/global_download_listener.dart';
 import 'package:path_provider/path_provider.dart';
@@ -258,7 +259,12 @@ class MyApp extends StatelessWidget {
             builder: (context, isloggedIn) {
               if (isloggedIn) {
                 // Display when the user is logged in
-                return NavBar(
+                // return NavBar(
+                //   appLinks: applink,
+                //   firebaseAuth:
+                //       repositoryProviderClassInstance.getFirebaseAuthInstance,
+                // );
+                return SplashScreen(
                   appLinks: applink,
                   firebaseAuth:
                       repositoryProviderClassInstance.getFirebaseAuthInstance,

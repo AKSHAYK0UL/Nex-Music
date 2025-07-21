@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
@@ -7,10 +8,12 @@ import 'package:nex_music/core/ui_component/snackbar.dart';
 
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/widget/song_title.dart';
 
 class SavedSongs extends StatefulWidget {
-  const SavedSongs({super.key});
+  final bool isoffline;
+  const SavedSongs({super.key, required this.isoffline});
 
   @override
   State<SavedSongs> createState() => _SavedSongsState();
@@ -37,6 +40,15 @@ class _SavedSongsState extends State<SavedSongs> {
           child: const Text("Saved"),
         ),
         actions: [
+          Visibility(
+            visible: widget.isoffline,
+            child: IconButton(
+                onPressed: () {
+                  context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
+                  context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
+                },
+                icon: const Icon(Icons.refresh)),
+          ),
           ValueListenableBuilder(
             valueListenable: switchState,
             builder: (__, ___, _) {
@@ -98,6 +110,12 @@ class _SavedSongsState extends State<SavedSongs> {
 
                   final songs = snapshot.data!;
                   downloadedSongs = songs;
+                  if (widget.isoffline) {
+                    context.read<SongstreamBloc>().add(ResetPlaylistEvent());
+                    context.read<SongstreamBloc>().add(
+                          GetSongPlaylistEvent(songlist: downloadedSongs),
+                        );
+                  }
                   return ListView.builder(
                     itemCount: songs.length,
                     itemBuilder: (context, index) {
@@ -116,6 +134,9 @@ class _SavedSongsState extends State<SavedSongs> {
           return const SizedBox();
         },
       ),
+      bottomNavigationBar: widget.isoffline
+          ? MiniPlayer(screenSize: screenSize)
+          : const SizedBox(),
     );
   }
 }

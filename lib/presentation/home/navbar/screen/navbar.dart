@@ -224,6 +224,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart' as dp;
+import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/global_download_indicator.dart';
@@ -326,6 +327,13 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
 
     setState(() {
       _selectedIndex = index;
+      if (index == 4) {
+        // final offlineSongsBloc = context.read<OfflineSongsBloc>();
+        // if (offlineSongsBloc.state is! OfflineSongsDataState) {
+        //   offlineSongsBloc.add(LoadOfflineSongsEvent());
+        // }
+        context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
+      }
 
       // Lazy load the screen only when accessed
       if (screens[index] == null) {
@@ -340,7 +348,9 @@ class _NavBarState extends State<NavBar> with WidgetsBindingObserver {
             screens[3] = const FavoritesScreen();
             break;
           case 4:
-            screens[4] = const SavedSongs();
+            screens[4] = const SavedSongs(
+              isoffline: false,
+            );
             break;
           case 5:
             screens[5] = DesktopSettingTab(currentUser: currentUser);

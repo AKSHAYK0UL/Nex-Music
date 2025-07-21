@@ -312,7 +312,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
-    context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
+    //called in the splash screen
+    // context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
 
     super.initState();
   }
