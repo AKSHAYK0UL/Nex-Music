@@ -24,30 +24,37 @@ class SongsTab extends StatelessWidget {
           return loadingDisk();
         }
         if (state is SongsResultState) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenSize * 0.0131,
-                // right: screenSize * 0.0131,
-                // left: screenSize * 0.0131,
-                // top: screenSize * 0.0131,
-              ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: state.searchedSongs.length,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final songData = state.searchedSongs[index];
-                  return SongTitle(
-                    songData: songData,
-                    songIndex: index,
-                    showDelete: false,
-                    tabRouteENUM: TabRouteENUM.other,
-                  );
-                },
-              ),
-            ),
-          );
+          return state.searchedSongs.isEmpty
+              ? Center(
+                  child: Text(
+                    "No songs found.",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: screenSize * 0.0131,
+                      // right: screenSize * 0.0131,
+                      // left: screenSize * 0.0131,
+                      // top: screenSize * 0.0131,
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: state.searchedSongs.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final songData = state.searchedSongs[index];
+                        return SongTitle(
+                          songData: songData,
+                          songIndex: index,
+                          showDelete: false,
+                          tabRouteENUM: TabRouteENUM.other,
+                        );
+                      },
+                    ),
+                  ),
+                );
         }
         return const SizedBox();
       },

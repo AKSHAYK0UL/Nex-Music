@@ -37,23 +37,30 @@ class _ArtistPlaylistState extends State<ArtistPlaylist> {
           return loadingDisk();
         }
         if (state is FullArtistPlaylistDataState) {
-          return SingleChildScrollView(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: screenSize * 0.00107,
-              ),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: state.playlistData.length,
-              itemBuilder: (BuildContext context, int index) {
-                final playlistData = state.playlistData[index];
-                return PlaylistGridView(
-                  playList: playlistData,
+          return state.playlistData.isEmpty
+              ? Center(
+                  child: Text(
+                    "No playlists found.",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: screenSize * 0.00107,
+                    ),
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: state.playlistData.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final playlistData = state.playlistData[index];
+                      return PlaylistGridView(
+                        playList: playlistData,
+                      );
+                    },
+                  ),
                 );
-              },
-            ),
-          );
         }
         return const SizedBox();
       },

@@ -41,30 +41,37 @@ class _VideostabState extends State<Videostab> {
           return loadingDisk();
         }
         if (state is VideosResultState) {
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.screenSize * 0.0131,
-                // right: screenSize * 0.0131,
-                // left: screenSize * 0.0131,
-                // top: screenSize * 0.0131,
-              ),
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: state.searchedVideo.length,
-                physics: const NeverScrollableScrollPhysics(),
-                itemBuilder: (context, index) {
-                  final songData = state.searchedVideo[index];
-                  return SongTitle(
-                    songData: songData,
-                    songIndex: index,
-                    showDelete: false,
-                    tabRouteENUM: TabRouteENUM.other,
-                  );
-                },
-              ),
-            ),
-          );
+          return state.searchedVideo.isEmpty
+              ? Center(
+                  child: Text(
+                    "No videos found.",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: widget.screenSize * 0.0131,
+                      // right: screenSize * 0.0131,
+                      // left: screenSize * 0.0131,
+                      // top: screenSize * 0.0131,
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: state.searchedVideo.length,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) {
+                        final songData = state.searchedVideo[index];
+                        return SongTitle(
+                          songData: songData,
+                          songIndex: index,
+                          showDelete: false,
+                          tabRouteENUM: TabRouteENUM.other,
+                        );
+                      },
+                    ),
+                  ),
+                );
         }
         return const SizedBox();
       },

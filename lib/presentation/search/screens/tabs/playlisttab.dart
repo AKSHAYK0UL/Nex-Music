@@ -40,23 +40,30 @@ class _PlaylistTabState extends State<PlaylistTab> {
           return loadingDisk();
         }
         if (state is PlaylistDataState) {
-          return SingleChildScrollView(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: widget.screenSize * 0.00107,
-              ),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: state.playlist.length,
-              itemBuilder: (BuildContext context, int index) {
-                final playlistData = state.playlist[index];
-                return PlaylistGridView(
-                  playList: playlistData,
+          return state.playlist.isEmpty
+              ? Center(
+                  child: Text(
+                    "No playlists found.",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: widget.screenSize * 0.00107,
+                    ),
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: state.playlist.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final playlistData = state.playlist[index];
+                      return PlaylistGridView(
+                        playList: playlistData,
+                      );
+                    },
+                  ),
                 );
-              },
-            ),
-          );
         }
         return const SizedBox();
       },

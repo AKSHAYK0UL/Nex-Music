@@ -38,23 +38,30 @@ class _ArtistTabState extends State<ArtistTab> {
           return loadingDisk();
         }
         if (state is ArtistDataState) {
-          return SingleChildScrollView(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: widget.screenSize * 0.00107,
-              ),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: state.artists.length,
-              itemBuilder: (context, index) {
-                final artistData = state.artists[index];
-                return ArtistGridView(
-                  artist: artistData,
+          return state.artists.isEmpty
+              ? Center(
+                  child: Text(
+                    "No artists found.",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: widget.screenSize * 0.00107,
+                    ),
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: state.artists.length,
+                    itemBuilder: (context, index) {
+                      final artistData = state.artists[index];
+                      return ArtistGridView(
+                        artist: artistData,
+                      );
+                    },
+                  ),
                 );
-              },
-            ),
-          );
         }
         return const SizedBox();
       },

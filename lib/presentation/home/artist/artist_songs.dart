@@ -43,21 +43,29 @@ class _ArtistScreenongs extends State<ArtistSongs> {
           );
         }
         if (state is ArtistSongsState) {
-          return ListView.builder(
-            itemCount: state.artistSongs.length,
-            itemBuilder: (context, index) {
-              final songData = state.artistSongs[index];
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0131),
-                child: SongTitle(
-                  songData: songData,
-                  songIndex: index,
-                  showDelete: false,
-                  tabRouteENUM: TabRouteENUM.other,
-                ),
-              );
-            },
-          );
+          return state.artistSongs.isEmpty
+              ? Center(
+                  child: Text(
+                    "No songs found.",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: state.artistSongs.length,
+                  itemBuilder: (context, index) {
+                    final songData = state.artistSongs[index];
+                    return Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenSize * 0.0131),
+                      child: SongTitle(
+                        songData: songData,
+                        songIndex: index,
+                        showDelete: false,
+                        tabRouteENUM: TabRouteENUM.other,
+                      ),
+                    );
+                  },
+                );
         }
         return const SizedBox();
       },

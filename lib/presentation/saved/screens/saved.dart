@@ -24,8 +24,10 @@ class _SavedSongsState extends State<SavedSongs> {
   List<Songmodel> downloadedSongs = [];
   @override
   void initState() {
-    print(" LoadOfflineSongsEvent @@@@@");
-    context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
+    if (widget.isoffline) {
+      print(" LoadOfflineSongsEvent @@@@@");
+      context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
+    }
     super.initState();
   }
 

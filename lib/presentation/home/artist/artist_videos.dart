@@ -41,21 +41,29 @@ class _ArtistVideosState extends State<ArtistVideos> {
           );
         }
         if (state is ArtistVideosDataState) {
-          return ListView.builder(
-            itemCount: state.artistVidoes.length,
-            itemBuilder: (context, index) {
-              final songData = state.artistVidoes[index];
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: screenSize * 0.0131),
-                child: SongTitle(
-                  songData: songData,
-                  songIndex: index,
-                  showDelete: false,
-                  tabRouteENUM: TabRouteENUM.other,
-                ),
-              );
-            },
-          );
+          return state.artistVidoes.isEmpty
+              ? Center(
+                  child: Text(
+                    "No videos found.",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: state.artistVidoes.length,
+                  itemBuilder: (context, index) {
+                    final songData = state.artistVidoes[index];
+                    return Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenSize * 0.0131),
+                      child: SongTitle(
+                        songData: songData,
+                        songIndex: index,
+                        showDelete: false,
+                        tabRouteENUM: TabRouteENUM.other,
+                      ),
+                    );
+                  },
+                );
         }
         return const SizedBox();
       },

@@ -38,23 +38,30 @@ class _ArtistAlbumState extends State<ArtistAlbum> {
           return loadingDisk();
         }
         if (state is FullartistalbumDataState) {
-          return SingleChildScrollView(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: screenSize * 0.00107,
-              ),
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: state.artistAlbums.length,
-              itemBuilder: (BuildContext context, int index) {
-                final playlistData = state.artistAlbums[index];
-                return PlaylistGridView(
-                  playList: playlistData,
+          return state.artistAlbums.isEmpty
+              ? Center(
+                  child: Text(
+                    "No albums found.",
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: screenSize * 0.00107,
+                    ),
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: state.artistAlbums.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final playlistData = state.artistAlbums[index];
+                      return PlaylistGridView(
+                        playList: playlistData,
+                      );
+                    },
+                  ),
                 );
-              },
-            ),
-          );
         }
         return const SizedBox();
       },
