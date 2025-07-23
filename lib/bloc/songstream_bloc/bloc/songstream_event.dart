@@ -65,3 +65,5 @@ final class AddToPlayNextEvent extends SongstreamEvent {
 
   AddToPlayNextEvent({required this.songData});
 }
+
+final class SetSongDataToNullEvent extends SongstreamEvent {}

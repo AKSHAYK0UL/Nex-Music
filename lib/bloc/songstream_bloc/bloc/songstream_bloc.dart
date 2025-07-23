@@ -436,7 +436,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<SongCompletedEvent>(_onSongCompleted);
     on<UpdateUIEvent>(_updateUIFromBackground);
     on<GetSongPlaylistEvent>(_songsPlaylist);
-
+    on<SetSongDataToNullEvent>(_setSongDataToNull);
     songPosition = _audioPlayer.positionStream;
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
 
@@ -733,6 +733,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _isPlaying = false;
     songDuration = Duration.zero;
     _audioPlayer.seek(Duration.zero);
+  }
+
+//set current songdata object to null
+  void _setSongDataToNull(
+      SetSongDataToNullEvent event, Emitter<SongstreamState> emit) {
+    _songData = null; //set to null
   }
 
 // Refresh the UI when the app returns from the dead [background or recent apps].

@@ -36,6 +36,7 @@ class Repository {
     final networkData = await _dataProvider.homeScreenSongs(inputPrompt);
     final quickPicks = await RepositoryHelperFunction.getQuickPicks(
         networkData.quickPicks, quality.thumbnailQuality);
+
     final playlist =
         RepositoryHelperFunction.getPlaylists(networkData.homeSectionData);
 

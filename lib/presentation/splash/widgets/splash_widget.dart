@@ -7,7 +7,7 @@ class SplashWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final screenWidth = MediaQuery.sizeOf(context).width;
+    // final screenWidth = MediaQuery.sizeOf(context).width;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -23,7 +23,8 @@ class SplashWidget extends StatelessWidget {
             ),
             child: Container(
               height: screenHeight * 0.158,
-              width: screenWidth * 0.307,
+              width: screenHeight * 0.158,
+              // width: screenWidth * 0.307,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(25),
               ),

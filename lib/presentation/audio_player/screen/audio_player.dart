@@ -112,6 +112,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                         child: Container(
                           // height: screenSize * 0.410,
                           width: screenWidth * 0.866,
+
                           // width: screenSize * 0.448,
 
                           decoration: BoxDecoration(
@@ -135,13 +136,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                             child: Column(
                               children: [
                                 SizedBox(
+                                  width: screenWidth * 0.866,
                                   height: screenSize * 0.410,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(
-                                            screenSize * 0.0131),
-                                        topRight: Radius.circular(
-                                            screenSize * 0.0131)),
+                                      topLeft:
+                                          Radius.circular(screenSize * 0.0131),
+                                      topRight: Radius.circular(
+                                        screenSize * 0.0131,
+                                      ),
+                                    ),
                                     child: Transform.scale(
                                       scaleX: quality == ThumbnailQuality.low &&
                                               !songData.isLocal
