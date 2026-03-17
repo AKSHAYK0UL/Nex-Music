@@ -18,6 +18,6 @@ final class SearchSuggestionResultState extends SearchState {
 }
 
 final class LoadedRecentSearchState extends SearchState {
-  List<String> recentSerach = [];
-  LoadedRecentSearchState({required this.recentSerach});
+  Stream<List<String>> searchHistoryStream;
+  LoadedRecentSearchState({required this.searchHistoryStream});
 }

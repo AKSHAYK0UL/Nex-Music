@@ -1,5 +1,6 @@
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
 
 class SplashWidget extends StatelessWidget {
   const SplashWidget({super.key});
@@ -7,76 +8,86 @@ class SplashWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.sizeOf(context).height;
-    // final screenWidth = MediaQuery.sizeOf(context).width;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+
+    return Container(
+      width: double.infinity,
+      color: Colors.white, 
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          const Spacer(),
-
-          Card(
-            elevation: 3,
-            color: backgroundColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: Container(
-              height: screenHeight * 0.158,
-              width: screenHeight * 0.158,
-              // width: screenWidth * 0.307,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: screenHeight * 0.12,
+                width: screenHeight * 0.12,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha:0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: Image.asset(
+                    "assets/icon.png",
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(25),
-                child: Image.asset("assets/icon.png"),
+              const SizedBox(height: 24),
+              
+              const Text(
+                "Nex Music",
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                   fontFamily: 'serif',
+                  letterSpacing: -0.8, 
+                  color: Colors.black,
+                ),
               ),
+              const SizedBox(height: 32),
+              
+               CupertinoActivityIndicator(
+                radius: 12,
+                color: Colors.red.withValues(alpha: 0.8),
+              ),
+            ],
+          ),
+
+          Positioned(
+            bottom: 5,
+            child: Column(
+              children: [
+                Text(
+                  "POWERED BY",
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    
+                    letterSpacing: 2.5, 
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "KOUL CLOUD",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.5,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+              ],
             ),
           ),
-
-          SizedBox(
-            height: screenHeight * 0.297,
-          ),
-          CircularProgressIndicator(
-            color: accentColor,
-          ),
-          SizedBox(
-            height: screenHeight * 0.030,
-          ),
-          Text(
-            "Nex Music",
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-
-          Text(
-            "Your moment, your music",
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-
-          //Powered by KOUL
-          SizedBox(
-            height: screenHeight * 0.017,
-          ),
-          // RichText(
-          //     text: TextSpan(children: [
-          //   TextSpan(
-          //     text: "Powered by ",
-          //     style: Theme.of(context).textTheme.displaySmall,
-          //   ),
-          //   TextSpan(
-          //     text: "KOUL",
-          //     style: Theme.of(context)
-          //         .textTheme
-          //         .displaySmall
-          //         ?.copyWith(fontWeight: FontWeight.bold),
-          //   )
-          // ])),
-          Text(
-            "Powered by KOUL",
-            style: Theme.of(context).textTheme.labelSmall,
-            textAlign: TextAlign.center,
-          )
         ],
       ),
     );

@@ -1,8 +1,9 @@
-import 'package:buttons_tabbar/buttons_tabbar.dart';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
-import 'package:nex_music/core/ui_component/animatedtext.dart';
-import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nex_music/core/route/go_router/go_router.dart';
+
 import 'package:nex_music/presentation/search/screens/tabs/albumtab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/artisttab.dart';
 import 'package:nex_music/presentation/search/screens/tabs/playlisttab.dart';
@@ -11,7 +12,8 @@ import 'package:nex_music/presentation/search/screens/tabs/videostab.dart';
 
 class SearchResultTab extends StatefulWidget {
   static const routeName = "/searchresulttab";
-  const SearchResultTab({super.key});
+  final String searchText;
+  const SearchResultTab({super.key, required this.searchText});
 
   @override
   State<SearchResultTab> createState() => _SearchResultTabState();
@@ -20,93 +22,89 @@ class SearchResultTab extends StatefulWidget {
 class _SearchResultTabState extends State<SearchResultTab> {
   @override
   Widget build(BuildContext context) {
-    final searchText = ModalRoute.of(context)!.settings.arguments as String;
     final screenSize = MediaQuery.sizeOf(context).height;
+
     return DefaultTabController(
-      initialIndex: 0,
       length: 5,
       child: Scaffold(
-        appBar: AppBar(
-          title: animatedText(
-            text: searchText,
-            style: Theme.of(context).textTheme.titleLarge!,
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(kMinInteractiveDimension),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenSize * 0.0115,
-              ),
-              child: ButtonsTabBar(
-                splashColor: backgroundColor,
-                backgroundColor: Colors.blueGrey.shade600,
-                unselectedBackgroundColor: secondaryColor,
-                width: screenSize / 8.15,
-                contentCenter: true,
+        backgroundColor: Colors.white,
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.transparent,
+                pinned: true,
+                floating: true,
                 elevation: 0,
-                labelStyle: Theme.of(context).textTheme.titleSmall,
-                unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
-                tabs: const [
-                  Tab(text: "Songs"),
-                  Tab(text: "Videos"),
-                  Tab(text: "Albums"),
-                  Tab(text: "Playlists"),
-                  Tab(text: "Artists"),
-                ],
+                centerTitle: true,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new,
+                      color: Colors.red, size: 20),
+                  onPressed: () => context.pop(),
+                ),
+                // title: Text(
+                //   widget.searchText,
+                //   style: const TextStyle(
+                //       color: Colors.black,
+                //       fontWeight: FontWeight.bold,
+                //       fontSize: 17),
+                // ),
+                title: GestureDetector(
+                  onTap: () {
+                     context.pushNamed(RouterName.searchName,extra: widget.searchText);
+                    // context.pop(true);
+                  },
+                  child: AbsorbPointer(
+                    absorbing: true,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 0.0, right: 16.0, bottom: 10.0, top: 10.0),
+                      child: CupertinoSearchTextField(
+                        enabled: false,
+                        cursorColor: Colors.red,
+                        autofocus: false,
+                        placeholder: widget.searchText,
+                        placeholderStyle: const TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ),
+                ),
+
+                bottom: TabBar(
+                  isScrollable: true,
+                  tabAlignment: TabAlignment.start,
+                  indicatorColor:
+                      Colors.redAccent, // Apple Music's signature accent
+                  indicatorWeight: 2,
+                  dividerColor: Colors.grey.withValues(alpha: 0.2),
+                  labelColor: Colors.redAccent,
+                  unselectedLabelColor: Colors.grey,
+                  labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      letterSpacing: -0.2),
+                  tabs: const [
+                    Tab(text: "Songs"),
+                    Tab(text: "Videos"),
+                    Tab(text: "Albums"),
+                    Tab(text: "Playlists"),
+                    Tab(text: "Artists"),
+                  ],
+                ),
               ),
-            ),
+            ];
+          },
+          body: TabBarView(
+            children: [
+              SongsTab(inputText: widget.searchText, screenSize: screenSize),
+              Videostab(inputText: widget.searchText, screenSize: screenSize),
+              AlbumTab(inputText: widget.searchText, screenSize: screenSize),
+              PlaylistTab(inputText: widget.searchText, screenSize: screenSize),
+              ArtistTab(inputText: widget.searchText, screenSize: screenSize),
+            ],
           ),
-          // bottom: ButtonsTabBar(
-          //   splashColor: backgroundColor,
-          //   backgroundColor: Colors.white24,
-          //   unselectedBackgroundColor: secondaryColor,
-          //   width: screenSize / 8,
-          //   contentCenter: true,
-          //   elevation: 0,
-          //   labelStyle: Theme.of(context).textTheme.titleSmall,
-          //   unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
-          //   tabs: const [
-          //     Tab(
-          //       text: "Songs",
-          //     ),
-          //     Tab(
-          //       text: "Videos",
-          //     ),
-          //     Tab(
-          //       text: "Albums",
-          //     ),
-          //     Tab(
-          //       text: "Playlists",
-          //     ),
-          //     Tab(
-          //       text: "Artists",
-          //     ),
-          //   ],
-          // ),
         ),
-        body: TabBarView(children: [
-          SongsTab(
-            inputText: searchText,
-            screenSize: screenSize,
-          ),
-          Videostab(
-            inputText: searchText,
-            screenSize: screenSize,
-          ),
-          AlbumTab(
-            inputText: searchText,
-            screenSize: screenSize,
-          ),
-          PlaylistTab(
-            inputText: searchText,
-            screenSize: screenSize,
-          ),
-          ArtistTab(
-            inputText: searchText,
-            screenSize: screenSize,
-          ),
-        ]),
-        bottomNavigationBar: MiniPlayer(screenSize: screenSize),
       ),
     );
   }

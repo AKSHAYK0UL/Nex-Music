@@ -20,7 +20,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     emit(LoadingStateFavorites());
     try {
       await _dbRepository.addToFavorites(event.song);
-      emit(IsFavoritesState(isFavorites: true));
+      emit(IsFavoritesState(isFavorites: true, vId: event.song.vId));
     } catch (e) {
       emit(ErrorStateFavorites(errorMessage: e.toString()));
     }
@@ -30,7 +30,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
       IsFavoritesEvent event, Emitter<FavoritesState> emit) async {
     try {
       final isFav = await _dbRepository.getIsFavorites(event.vId);
-      emit(IsFavoritesState(isFavorites: isFav));
+      emit(IsFavoritesState(isFavorites: isFav, vId: event.vId));
     } catch (e) {
       emit(ErrorStateFavorites(errorMessage: e.toString()));
     }
@@ -41,7 +41,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     emit(LoadingStateFavorites());
     try {
       await _dbRepository.removeFromFavorites(event.vId);
-      emit(IsFavoritesState(isFavorites: false));
+      emit(IsFavoritesState(isFavorites: false, vId: event.vId));
     } on FirebaseAuthException catch (e) {
       emit(ErrorStateFavorites(errorMessage: e.toString()));
     } catch (e) {

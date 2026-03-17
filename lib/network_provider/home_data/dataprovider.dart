@@ -15,7 +15,7 @@ class DataProvider {
 
 //cancel all ongoing request
   void cancelRequest() {
-    _ytMusic.dio.close();
+    // _ytMusic.dio.close();//remove in new version 1.3.6
     _youtubeExplode.close();
   }
 
@@ -126,4 +126,17 @@ class DataProvider {
   Future<List<AlbumDetailed>> getArtistAlbums(String artistId) async {
     return await _ytMusic.getArtistAlbums(artistId);
   }
+
+  //get up next songs for radio feature
+  Future<List<UpNextsDetails>> getUpNexts(String videoId) async {
+    return await _ytMusic.getUpNexts(videoId);
+  }
 }
+
+
+//TODO:
+// _ytMusic.getAlbum(albumId)
+// _ytMusic.getArtist(artistId)
+// _ytMusic.getArtistSingles(artistId)
+// _ytMusic.getPlaylist(playlistId)
+// _ytMusic.getTimedLyrics(videoId)

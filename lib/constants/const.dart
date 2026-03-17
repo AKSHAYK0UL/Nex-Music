@@ -6,3 +6,6 @@ const favoritesCollection = "favorites";
 const playlistCollection = "playlist";
 const userPlaylistSongs = "userPlaylistSongs";
 const thinkUserData = "thinkUserData";
+const savedArtistsCollection = "savedArtists";
+const searchHistoryCollection = "searchHistory";
+const publicPlaylistsCollection = "publicPlaylists";

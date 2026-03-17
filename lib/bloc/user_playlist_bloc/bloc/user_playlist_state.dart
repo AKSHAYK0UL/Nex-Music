@@ -7,7 +7,7 @@ final class UserPlaylistInitial extends UserPlaylistState {}
 final class UserPlaylistLoadingState extends UserPlaylistState {}
 
 final class UserPlaylistDataState extends UserPlaylistState {
-  final Stream<List<String>> data;
+  final Stream<List<UserPlaylistModel>> data;
 
   UserPlaylistDataState({required this.data});
 }

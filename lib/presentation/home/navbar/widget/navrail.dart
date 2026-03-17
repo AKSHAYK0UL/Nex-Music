@@ -68,9 +68,9 @@ class NavRail extends StatelessWidget {
                 text: "Playlist",
               ),
               SideBarItem(
-                iconUnselected: CupertinoIcons.heart,
-                iconSelected: CupertinoIcons.heart_fill,
-                text: "Favorites",
+                iconUnselected: CupertinoIcons.folder,
+                iconSelected: CupertinoIcons.folder_fill,
+                text: "Library",
               ),
               SideBarItem(
                 iconUnselected: Icons.tune_outlined,

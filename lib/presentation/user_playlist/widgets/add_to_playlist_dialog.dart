@@ -5,6 +5,7 @@ import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/model/user_playlist_model.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/show_create_playlist_dialog.dart';
 
 void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
@@ -28,7 +29,8 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
                   style: Theme.of(context).textTheme.titleLarge),
               IconButton(
                 onPressed: () {
-                  showCreatePlaylistDialog(context);
+                  // showCreatePlaylistDialog(context);
+                  showCupertinoCreatePlaylist(context);
                 },
                 icon: Icon(Icons.add, color: textColor),
               ),
@@ -45,7 +47,7 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
                 }
 
                 if (state is UserPlaylistDataState) {
-                  return StreamBuilder<List<String>>(
+                  return StreamBuilder<List<UserPlaylistModel>>(
                     stream: state.data,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -64,7 +66,7 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
                         child: ListView.builder(
                           itemCount: playlists.length,
                           itemBuilder: (context, index) {
-                            final playlistName = playlists[index];
+                            final playlistName = playlists[index].name;
                             return GestureDetector(
                               onTap: () {
                                 context.read<UserPlaylistBloc>().add(

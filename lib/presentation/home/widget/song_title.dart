@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/enum/tab_route.dart';
-import 'package:nex_music/helper_function/route.dart';
-import 'package:nex_music/main.dart';
 import 'package:nex_music/model/songmodel.dart';
-import 'package:nex_music/presentation/audio_player/widget/overlay_audio_player.dart';
-import 'package:nex_music/presentation/home/navbar/screen/navbar.dart';
 import 'package:nex_music/presentation/home/widget/longpress_options_bottom_sheet.dart';
 import 'package:nex_music/presentation/home/widget/long_press_options.dart';
 
@@ -54,23 +53,23 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
   }
 
 //for large screen devices
-  void _showOverlay(BuildContext context) {
-    overlayEntry = OverlayEntry(
-      builder: (context) => OverlaySongPlayer(
-        key: overlayPlayerKey,
-        route: SongMiniPlayerRoute.songRoute,
-        songData: widget.songData,
-        songIndex: widget.songIndex,
-        quality: quality,
-        onClose: () {
-          overlayEntry?.remove();
-          overlayEntry = null;
-        },
-      ),
-    );
+  // void _showOverlay(BuildContext context) {
+  //   overlayEntry = OverlayEntry(
+  //     builder: (context) => OverlaySongPlayer(
+  //       key: overlayPlayerKey,
+  //       route: SongMiniPlayerRoute.songRoute,
+  //       songData: widget.songData,
+  //       songIndex: widget.songIndex,
+  //       quality: quality,
+  //       onClose: () {
+  //         overlayEntry?.remove();
+  //         overlayEntry = null;
+  //       },
+  //     ),
+  //   );
 
-    Overlay.of(context).insert(overlayEntry!);
-  }
+  //   Overlay.of(context).insert(overlayEntry!);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -109,27 +108,32 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
           }
         },
         onTap: () {
-          if (isSmallScreen) {
-            // Navigator.of(context)
-            //     .pushNamed(AudioPlayerScreen.routeName, arguments: {
-            //   "songindex": widget.songIndex,
-            //   "songdata": widget.songData,
-            //   "route": SongMiniPlayerRoute.songRoute,
-            //   "quality": quality,
-            //   "tabroute": widget.tabRouteENUM,
-            // });
-
-            Navigator.of(context).push(
-              slideTransitionRoute(
-                context: context,
-                songData: widget.songData,
-                route: SongMiniPlayerRoute.songRoute,
-                quality: quality,
-              ),
-            );
-          } else {
-            _showOverlay(context);
-          }
+          // if (isSmallScreen) {
+          // Trigger play event before navigating (like recent songs)
+          context.read<SongstreamBloc>().add(
+                PlayIndividualSongEvent(
+                  songData: widget.songData,
+                  songIndex: widget.songIndex,
+                ),
+              );
+          context.push(
+            RouterPath.audioPlayerRoute,
+            extra: {
+              "songindex": widget.songIndex,
+              'songdata': widget.songData,
+              'route': SongMiniPlayerRoute.songRoute,
+              "quality": quality,
+            },
+          );
+          // navigateToAudioPlayer(
+          //   context: context,
+          //   songData: widget.songData,
+          //   route: SongMiniPlayerRoute.songRoute,
+          //   quality: quality,
+          // );
+          // } else {
+          //   _showOverlay(context);
+          // }
         },
         leading: Container(
           width: screenSize * 0.0755,

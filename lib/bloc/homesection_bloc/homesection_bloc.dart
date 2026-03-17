@@ -20,6 +20,7 @@ class HomesectionBloc extends Bloc<HomesectionEvent, HomesectionState> {
       : super(HomesectionInitial()) {
     on<GetHomeSectonDataEvent>(_getHomeSectionData);
   }
+
   Future<void> _getHomeSectionData(
       GetHomeSectonDataEvent event, Emitter<HomesectionState> emit) async {
     emit(LoadingState());
@@ -28,13 +29,35 @@ class HomesectionBloc extends Bloc<HomesectionEvent, HomesectionState> {
       if (_hiveDataBaseSingleton.recommendationStatus) {
         inputPrompt = await recommendationPrompt(_dbRepository);
       }
+
       final homeSectionData =
           await _repository.homeScreenSongsList(inputPrompt);
+
       final playlistsSet = homeSectionData.playlist.toSet();
+      final albumsSet = homeSectionData.albums.toSet();
+
       emit(
-        HomeSectionState(
-            quickPicks: homeSectionData.quickPicks,
-            playlist: playlistsSet.toList()),
+        HomeSectionStateData(
+          quickPicks: homeSectionData.quickPicks,
+          playlist: playlistsSet.toList(),
+          albums: albumsSet.toList(),
+          globalHitsPlaylists: homeSectionData.globalHitsPlaylists,
+          trendingGloballyPlaylists: homeSectionData.trendingGloballyPlaylists,
+          trendingPunjabiPlaylists: homeSectionData.trendingPunjabiPlaylists,
+          trendingPunjabiAlbums: homeSectionData.trendingPunjabiAlbums,
+          trendingHindiPlaylists: homeSectionData.trendingHindiPlaylists,
+          trendingHindiAlbums: homeSectionData.trendingHindiAlbums,
+          trendingEnglishPlaylists: homeSectionData.trendingEnglishPlaylists,
+          trendingPhonkPlaylists: homeSectionData.trendingPhonkPlaylists,
+          trendingPhonkAlbums: homeSectionData.trendingPhonkAlbums,
+          trendingBrazilianPhonkPlaylists:
+              homeSectionData.trendingBrazilianPhonkPlaylists,
+          trendingBrazilianPhonkAlbums:
+              homeSectionData.trendingBrazilianPhonkAlbums,
+          nonstopPunjabiMashup: homeSectionData.nonstopPunjabiMashup,
+          nonstopHindiMashup: homeSectionData.nonstopHindiMashup,
+          nonstopEnglishMashup: homeSectionData.nonstopEnglishMashup,
+        ),
       );
     } catch (e) {
       emit(

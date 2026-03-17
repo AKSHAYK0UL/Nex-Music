@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 
-DialogTheme dialogTheme(double screenSize) {
-  return DialogTheme(
+DialogThemeData dialogTheme(double screenSize) {
+  return DialogThemeData(
     backgroundColor: backgroundColor,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(12),

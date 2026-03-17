@@ -1,11 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -14,203 +13,171 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+class _AuthScreenState extends State<AuthScreen> {
   @override
   void initState() {
-    _animationController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
-    _animationController.forward();
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
+    // Ensure status bar icons are dark for the white background
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ));
   }
 
   void privacyPolicy() {}
-
   void userAgreement() {}
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
-    final bool isSmallScreen = screenWidth < 451;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(
-              horizontal: screenSize * 0.0280, vertical: screenSize * 0.00263),
-          child: AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, _) => Opacity(
-              opacity: _fadeAnimation.value,
-              child: Transform.scale(
-                scale: _scaleAnimation.value,
-                child: Center(
-                  child: Column(
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+          child: Column(
+            children: [
+              const Spacer(flex: 3),
+
+              //  Branding Section
+              Column(
+                children: [
+                  Container(
+                    height: 90,
+                    width: 90,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 15,
+                          offset: const Offset(0, 5),
+                        )
+                      ],
+                      image: const DecorationImage(
+                        image: AssetImage("assets/icon.png"),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  const Text(
+                    'Nex Music',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 34,
+                       fontFamily: 'serif',
+                      fontWeight: FontWeight.w800,
+                      color: Colors.black,
+                      letterSpacing: -1.0,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Your music, your way.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+
+              const Spacer(flex: 4),
+
+              //  Auth Button Section
+              BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  final isLoading = state is LoadingState;
+                  return Column(
                     children: [
                       SizedBox(
-                        height: isSmallScreen
-                            ? screenSize * 0.121
-                            : screenSize * 0.200,
-                      ),
-                      SizedBox(
-                        width: isSmallScreen
-                            ? double.infinity
-                            : screenSize * 0.640,
-                        child: Text(
-                          'EMBRACE THE RHYTHM, STEP IN, AND LET THE MUSIC FLOW',
-                          style: GoogleFonts.sixtyfour(
-                            color: accentColor,
-                            textStyle:
-                                Theme.of(context).textTheme.headlineLarge,
-                            letterSpacing: 0,
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: isLoading
+                              ? null 
+                              : () => context.read<AuthBloc>().add(GoogleSignInEvent()),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            // Keeps the button black even when interaction is disabled during loading
+                            disabledBackgroundColor: Colors.black, 
+                            disabledForegroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 0,
                           ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: screenSize * 0.121,
-                      ),
-                      SizedBox(
-                        width: isSmallScreen
-                            ? double.infinity
-                            : screenSize * 0.640,
-                        child: BlocBuilder<AuthBloc, AuthState>(
-                          buildWhen: (previous, current) => previous != current,
-                          builder: (context, state) {
-                            return ElevatedButton.icon(
-                              onPressed: state is LoadingState
-                                  ? null
-                                  : () {
-                                      context
-                                          .read<AuthBloc>()
-                                          .add(GoogleSignInEvent());
-                                    },
-                              label: state is LoadingState
-                                  ? const Text(" Signing In")
-                                  : Text("${'\t' * 1} Continue with Google"),
-                              icon: state is LoadingState
-                                  ? SizedBox(
-                                      width: screenSize * 0.070,
-                                      height: screenSize * 0.065,
-                                      child: LoadingIndicator(
-                                        indicatorType: Indicator.pacman,
-                                        colors: [accentColor],
-                                        strokeWidth: 1,
+                          child: isLoading
+                              ?  CupertinoActivityIndicator(
+                                  color: Colors.red.withValues(alpha: 0.8), 
+                                  radius: 12,
+                                )
+                              :  Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Icon(FontAwesomeIcons.google, size: 18),
+                                  Image.asset("assets/google-logo.png",height: 28,width: 28,fit: BoxFit.fill),
+                                   const SizedBox(width: 12),
+                                    const Text(
+                                      "Continue with Google",
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                    )
-                                  : Icon(
-                                      FontAwesomeIcons.google,
-                                      size: screenSize * 0.0263,
                                     ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: secondaryColor,
-                                textStyle:
-                                    Theme.of(context).textTheme.labelLarge,
-                                foregroundColor: textColor,
-                                iconColor: textColor,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                        screenSize * 0.0329),
-                                    side: BorderSide(
-                                        color: Colors.blueGrey,
-                                        width: screenSize * 0.00197)),
-                                minimumSize:
-                                    Size(screenSize * 1, screenSize * 0.0659),
-                                disabledBackgroundColor: secondaryColor,
-                                disabledForegroundColor: textColor,
-                                disabledIconColor: textColor,
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: screenSize * 0.0280,
-                      ),
-                      SizedBox(
-                        width: screenWidth * 0.900,
-                        child: RichText(
-                          maxLines: 2,
-                          textAlign: TextAlign.center,
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                  text: "By continuing, you agree to our ",
-                                  style:
-                                      Theme.of(context).textTheme.displaySmall),
-                              TextSpan(
-                                  text: "User Agreement",
-                                  style: TextStyle(
-                                    color: textColor,
-                                    fontSize: screenSize * 0.0200,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: TextDecoration.underline,
-                                    decorationStyle: TextDecorationStyle.solid,
-                                    decorationColor: Colors.white,
-                                    decorationThickness: 1,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      userAgreement();
-                                    }),
-                              TextSpan(
-                                text:
-                                    " and acknowledge that you understand the ",
-                                style: Theme.of(context).textTheme.displaySmall,
-                              ),
-                              TextSpan(
-                                text: "Privacy Policy",
-                                style: TextStyle(
-                                  color: textColor,
-                                  fontSize: screenSize * 0.0200,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                  decorationStyle: TextDecorationStyle.solid,
-                                  decorationColor: Colors.white,
-                                  decorationThickness: 1,
+                                  ],
                                 ),
-                                // style: Theme.of(context)
-                                //     .textTheme
-                                //     .displayMedium
-                                //     ?.copyWith(
-                                //       decoration: TextDecoration.underline,
-                                //       decorationStyle:
-                                //           TextDecorationStyle.solid,
-                                //       decorationColor: Colors.white,
-                                //       decorationThickness: 1,
-                                //     ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    privacyPolicy();
-                                  },
-                              ),
-                            ],
-                          ),
                         ),
                       ),
-                      SizedBox(
-                        height: screenSize * 0.020,
+                    ],
+                  );
+                },
+              ),
+
+              const SizedBox(height: 12),
+
+              // 3. Legal Section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                      height: 1.5,
+                    ),
+                    children: [
+                      const TextSpan(text: "By continuing, you agree to our "),
+                      TextSpan(
+                        text: "User Agreement",
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        recognizer: TapGestureRecognizer()..onTap = userAgreement,
                       ),
+                      const TextSpan(text: " and acknowledge the "),
+                      TextSpan(
+                        text: "Privacy Policy",
+                        style: const TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        recognizer: TapGestureRecognizer()..onTap = privacyPolicy,
+                      ),
+                      const TextSpan(text: "."),
                     ],
                   ),
                 ),
               ),
-            ),
+              const SizedBox(height: 15),
+            ],
           ),
         ),
       ),

@@ -41,6 +41,7 @@ class RepositoryHelperFunction {
       if (section.contents.isNotEmpty) {
         for (int j = 0; j < section.contents.length; j++) {
           var content = section.contents[j];
+          print("HOME SECTION ############################# ${content.runtimeType} ##############################");
           if (content is PlaylistDetailed) {
             playlists.add(
               PlayListmodel(
@@ -55,6 +56,33 @@ class RepositoryHelperFunction {
       }
     }
     return playlists;
+  }
+
+  //Get Albums
+  static List<PlayListmodel> getAlbums(List<HomeSection> homeSection) {
+    List<PlayListmodel> albums = [];
+
+    for (int i = 0; i < homeSection.length; i++) {
+      HomeSection section = homeSection[i];
+
+      if (section.contents.isNotEmpty) {
+        for (int j = 0; j < section.contents.length; j++) {
+          var content = section.contents[j];
+          print("HOME SECTION ############################# ${content.runtimeType} ##############################");
+          if (content is AlbumDetailed) {
+            albums.add(
+              PlayListmodel(
+                playListId: content.playlistId,
+                playlistName: content.name,
+                artistBasic: content.artist,
+                thumbnail: getThumbnail(content.thumbnails),
+              ),
+            );
+          }
+        }
+      }
+    }
+    return albums;
   }
 
 //get songs
@@ -149,6 +177,27 @@ class RepositoryHelperFunction {
         thumbnail: getThumbnail(videofull.thumbnails),
         duration:
             videofull.duration == 0 ? "" : timeFormate(videofull.duration));
+  }
+
+  //UpNextsDetails to SongModel
+  static Songmodel convertUpNextsDetailsToSongModel(
+      UpNextsDetails upNextsDetails) {
+    return Songmodel(
+        vId: upNextsDetails.videoId,
+        songName: upNextsDetails.title,
+        artist: upNextsDetails.artists,
+        thumbnail: getThumbnail(upNextsDetails.thumbnails),
+        duration: upNextsDetails.duration == 0
+            ? ""
+            : timeFormate(upNextsDetails.duration));
+  }
+
+  // Convert list of UpNextsDetails to list of Songmodel
+  static List<Songmodel> convertUpNextsDetailsListToSongModelList(
+      List<UpNextsDetails> upNextsList) {
+    return upNextsList
+        .map((upNext) => convertUpNextsDetailsToSongModel(upNext))
+        .toList();
   }
 
 //list of audio codecs

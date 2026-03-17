@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/full_artist_playlist_bloc/bloc/full_artist_playlist_bloc.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/model/artistmodel.dart';
-import 'package:nex_music/presentation/home/widget/playlistgridview.dart';
+import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 
 class ArtistPlaylist extends StatefulWidget {
   final ArtistModel artist;
@@ -28,8 +28,6 @@ class _ArtistPlaylistState extends State<ArtistPlaylist> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context).height;
-
     return BlocBuilder<FullArtistPlaylistBloc, FullArtistPlaylistState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
@@ -44,22 +42,22 @@ class _ArtistPlaylistState extends State<ArtistPlaylist> {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 )
-              : SingleChildScrollView(
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: screenSize * 0.00107,
-                    ),
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: state.playlistData.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final playlistData = state.playlistData[index];
-                      return PlaylistGridView(
-                        playList: playlistData,
-                      );
-                    },
+              : GridView.builder(
+                  padding: const EdgeInsets.all(20),
+                  physics: const BouncingScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 24,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.78,
                   ),
+                  itemCount: state.playlistData.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final playlistData = state.playlistData[index];
+                    return HomePlaylist(
+                      playList: playlistData,
+                    );
+                  },
                 );
         }
         return const SizedBox();

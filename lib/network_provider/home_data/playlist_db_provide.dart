@@ -21,20 +21,30 @@ class PlaylistDbProvider {
         .collection(playlistCollection);
   }
 
-  //create new collect for new playlist -> collection(playlist)->collection(new playlist)->songs
-  Future<void> createUserPlaylistCollection(String playlistName) async {
+  //create new collect for new playlist ->collection(playlist)->collection(new playlist)->songs
+  Future<void> createUserPlaylistCollection(
+    String playlistName, {
+    String description = '',
+    int colorValue = 0xFFE53935,
+    String displayMode = 'color',
+    bool isPublic = false,
+  }) async {
     final docRef = _playlistCollection.doc(playlistName);
 
     final doc = await docRef.get();
     if (!doc.exists) {
       await docRef.set({
         'name': playlistName,
+        'description': description,
+        'colorValue': colorValue,
+        'displayMode': displayMode,
+        'isPublic': isPublic,
         'timestamp': FieldValue.serverTimestamp(),
       });
     }
   }
 
-  //fetch playlists
+  //fetch playlists - now returns full metadata
   Stream<QuerySnapshot> getUserPlaylists() {
     return _playlistCollection
         .orderBy('timestamp', descending: true)
@@ -77,6 +87,15 @@ class PlaylistDbProvider {
   //delete playlist
   Future<void> deleteUserPlaylist(String playlistName) async {
     try {
+      // Check if it was public before deleting
+      final doc = await _playlistCollection.doc(playlistName).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (data != null && data['isPublic'] == true) {
+          // Also delete from public collection
+          await deletePublicPlaylist(playlistName);
+        }
+      }
       await _playlistCollection.doc(playlistName).delete();
     } on FirebaseException catch (_) {
       rethrow;
@@ -97,6 +116,51 @@ class PlaylistDbProvider {
       for (var doc in querySnapshot.docs) {
         await doc.reference.delete();
       }
+    } on FirebaseException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  //PUBLIC PLAYLISTS
+
+  // Create/update a public playlist document accessible by other users
+  Future<void> createPublicPlaylist(
+    String playlistName, {
+    String description = '',
+    int colorValue = 0xFFE53935,
+    String displayMode = 'color',
+  }) async {
+    try {
+      final publicCollection =
+          _firestoreInstance.collection(publicPlaylistsCollection);
+
+      // Use a composite ID to avoid collisions: userId_playlistName
+      final publicDocId = '${_userId}_$playlistName';
+
+      await publicCollection.doc(publicDocId).set({
+        'name': playlistName,
+        'description': description,
+        'colorValue': colorValue,
+        'displayMode': displayMode,
+        'ownerId': _userId,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  // Delete a public playlist document
+  Future<void> deletePublicPlaylist(String playlistName) async {
+    try {
+      final publicCollection =
+          _firestoreInstance.collection(publicPlaylistsCollection);
+      final publicDocId = '${_userId}_$playlistName';
+      await publicCollection.doc(publicDocId).delete();
     } on FirebaseException catch (_) {
       rethrow;
     } catch (_) {

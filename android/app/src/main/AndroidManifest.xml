@@ -37,7 +37,7 @@
         android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
-        android:enableOnBackInvokedCallback="true">
+        android:enableOnBackInvokedCallback="false">
         
 
         <!-- Main launcher activity -->

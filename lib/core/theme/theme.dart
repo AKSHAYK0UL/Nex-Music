@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:nex_music/core/theme/appbartheme.dart';
 import 'package:nex_music/core/theme/chiptheme.dart';
 import 'package:nex_music/core/theme/dialogtheme.dart';
@@ -18,7 +19,16 @@ ThemeData themeData(BuildContext context) {
     canvasColor: backgroundColor,
     colorScheme: ColorScheme.fromSwatch().copyWith(secondary: secondaryColor),
     scaffoldBackgroundColor: backgroundColor,
-    appBarTheme: appBarTheme(screenSize),
+    appBarTheme: appBarTheme(screenSize).copyWith(
+      systemOverlayStyle: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+        systemNavigationBarDividerColor: Colors.transparent,
+      ),
+    ),
     textTheme: textTheme(context, screenSize),
     snackBarTheme: snackBarTheme(screenSize),
     listTileTheme: listTileTheme(context, screenSize),
@@ -29,5 +39,12 @@ ThemeData themeData(BuildContext context) {
     dialogTheme: dialogTheme(screenSize),
     tabBarTheme: tabBarTheme,
     elevatedButtonTheme: elevatedButtonTheme(),
+pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+      },
+    ),
+  
+     
   );
 }

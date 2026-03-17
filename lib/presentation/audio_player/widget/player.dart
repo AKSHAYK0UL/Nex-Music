@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
@@ -12,6 +13,7 @@ class Player extends StatefulWidget {
   final double screenSize;
   final int songIndex;
   final SongMiniPlayerRoute route;
+  final bool isPlaylist;
 
   const Player({
     super.key,
@@ -19,6 +21,7 @@ class Player extends StatefulWidget {
     required this.screenSize,
     required this.route,
     required this.songIndex,
+    required this.isPlaylist,
   });
 
   @override
@@ -30,7 +33,7 @@ class _PlayerState extends State<Player> {
 
   @override
   void initState() {
-    if (widget.route == SongMiniPlayerRoute.songRoute) {
+    if (widget.route == SongMiniPlayerRoute.songRoute && !widget.isPlaylist) {
       context.read<SongstreamBloc>().add(GetSongStreamEvent(
             songData: widget.songData,
             songIndex: widget.songIndex,
@@ -59,13 +62,24 @@ class _PlayerState extends State<Player> {
       },
       builder: (context, state) {
         if (state is LoadingState) {
+          // return Center(
+          //   child: CircleAvatar(
+          //     backgroundColor: accentColor,
+          //     radius: widget.screenSize * 0.0520,
+          //     child: CircularProgressIndicator(
+          //       color: secondaryColor,
+          //       strokeWidth: 4,
+          //     ),
+          //   ),
+          // );
+
           return Center(
             child: CircleAvatar(
-              backgroundColor: accentColor,
+              backgroundColor: Colors.transparent,
               radius: widget.screenSize * 0.0520,
               child: CircularProgressIndicator(
                 color: secondaryColor,
-                strokeWidth: 4,
+                strokeWidth: 7,
               ),
             ),
           );
@@ -76,14 +90,29 @@ class _PlayerState extends State<Player> {
             onTap: () {
               context.read<SongstreamBloc>().add(PlayPauseEvent());
             },
+            // child: CircleAvatar(
+            //   backgroundColor: accentColor,
+            //   radius: widget.screenSize * 0.0520,
+            //   child: Center(
+            //     child: Icon(
+            //       state is PausedState ? Icons.play_arrow : Icons.pause,
+            //       size: widget.screenSize * 0.0791,
+            //       color: secondaryColor,
+            //     ),
+            //   ),
+            // ),
+
             child: CircleAvatar(
-              backgroundColor: accentColor,
+              backgroundColor: Colors.transparent,
               radius: widget.screenSize * 0.0520,
               child: Center(
                 child: Icon(
-                  state is PausedState ? Icons.play_arrow : Icons.pause,
-                  size: widget.screenSize * 0.0791,
-                  color: secondaryColor,
+                  state is PausedState
+                      ? CupertinoIcons.play_fill
+                      : CupertinoIcons.pause_fill,
+                     
+                  size: widget.screenSize * 0.0650,
+                  color: Colors.black,
                 ),
               ),
             ),

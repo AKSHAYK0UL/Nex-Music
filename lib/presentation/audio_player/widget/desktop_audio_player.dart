@@ -242,6 +242,7 @@ class DesktopAudioPlayer extends StatelessWidget {
                 songIndex: songIndex,
                 screenSize: screenSize,
                 route: route,
+                isPlaylist: false,
               ),
               SizedBox(
                 width: screenSize * 0.0131,

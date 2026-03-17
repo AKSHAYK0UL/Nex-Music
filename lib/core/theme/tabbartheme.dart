@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/theme/hexcolor.dart';
 
-TabBarTheme get tabBarTheme {
-  return TabBarTheme(
+TabBarThemeData get tabBarTheme {
+  return TabBarThemeData(
     unselectedLabelColor: Colors.white38,
     labelColor: textColor,
     indicatorColor: accentColor,

@@ -13,8 +13,18 @@ class ShowAllPlaylists extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Recommended playlists"),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          "Recommended playlists",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: BlocBuilder<HomesectionBloc, HomesectionState>(
         buildWhen: (previous, current) => previous != current,
@@ -24,14 +34,68 @@ class ShowAllPlaylists extends StatelessWidget {
           }
           if (state is ErrorState) {
             return Center(
-              child: Text(state.errorMessage),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Failed to load playlists',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.errorMessage,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             );
           }
-          if (state is HomeSectionState) {
+          if (state is HomeSectionStateData) {
+            if (state.playlist.isEmpty) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.playlist_play_outlined,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'No playlists available',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            
             return GridView.builder(
+              padding: const EdgeInsets.all(16),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: screenSize * 0.00109,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
               ),
               itemCount: state.playlist.length,
               itemBuilder: (BuildContext context, int index) {

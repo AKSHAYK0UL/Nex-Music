@@ -4,4 +4,5 @@ enum TabRouteENUM {
   favorites,
   download,
   other,
+  upNext,
 }

@@ -1,142 +1,203 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
-import 'package:nex_music/presentation/auth/widgets/user_info_title.dart';
 
 class UserInfo extends StatelessWidget {
   static const routeName = "/userinfo";
-  const UserInfo({super.key});
+  final User? currentUser;
+  
+  const UserInfo({super.key, this.currentUser});
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context);
-    final currentUser = ModalRoute.of(context)?.settings.arguments as User;
-    // bool isSmallScreen = screenSize.width < 451;
+    final user = currentUser ?? 
+        (ModalRoute.of(context)?.settings.arguments as User?);
+    
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('User information not available'),
+        ),
+      );
+    }
+    
+    const Color iosBackgroundColor = Color(0xFFF2F2F7);
 
     return Scaffold(
+      backgroundColor: iosBackgroundColor,
       appBar: AppBar(
-        title: Text(
-          "Account",
-          style: Theme.of(context).textTheme.titleLarge,
+        backgroundColor: iosBackgroundColor,
+        elevation: 0,
+        leadingWidth: 100,
+        leading: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: const Row(
+            children: [
+              SizedBox(width: 8),
+              Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
+              Text(
+                'Settings',
+                style: TextStyle(color: Colors.red, fontSize: 17),
+              ),
+            ],
+          ),
         ),
-        // actions: [
-        //   if (isSmallScreen)
-        //     IconButton(
-        //       onPressed: () {
-        //         showDialog(
-        //           barrierDismissible: false,
-        //           context: context,
-        //           builder: (context) => AlertDialog(
-        //             title: const Text("Are You Sure"),
-        //             content: const Text("Do you want to Logout?"),
-        //             actions: [
-        //               TextButton(
-        //                 onPressed: () {
-        //                   Navigator.of(context).pop();
-        //                 },
-        //                 child: const Text("No"),
-        //               ),
-        //               TextButton(
-        //                 onPressed: () {
-        //                   Navigator.of(context).push(MaterialPageRoute(
-        //                       builder: (context) => const SigningOutLoading()));
-        //                 },
-        //                 child: const Text("Yes"),
-        //               )
-        //             ],
-        //           ),
-        //         );
-        //       },
-        //       icon: const Icon(
-        //         Icons.logout,
-        //         size: 27,
-        //         color: Colors.red,
-        //       ),
-        //     ),
-        // ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(screenSize.height * 0.166),
-                  child: CircleAvatar(
-                    backgroundColor: backgroundColor,
-                    radius: screenSize.height * 0.166,
-                    child: Lottie.asset(
-                      "assets/userinfo.json",
-                      repeat: false,
-                      fit: BoxFit.cover,
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+            padding: EdgeInsets.only(left: 16.0, bottom: 10.0),
+            child: Text(
+              "Profile",
+              style: TextStyle(
+                fontFamily: 'serif',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+            const SizedBox(height: 20),
+
+            // --- PROFILE IMAGE SECTION ---
+            Center(
+              child: Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        )
+                      ],
+                    ),
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.white,
+                      backgroundImage: user.photoURL != null
+                          ? NetworkImage(user.photoURL!)
+                          : null,
+                      child: user.photoURL == null
+                          ? const Icon(CupertinoIcons.person_fill,
+                              size: 60, color: Color(0xFFC6C6C8))
+                          : null,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Align(
-            alignment: Alignment.center,
-            child: Chip(
-              backgroundColor: Colors.transparent,
-              side: const BorderSide(color: Colors.transparent),
-              avatar: const Icon(
-                Icons.check,
-                color: Colors.green,
-              ),
-              label: Text(
-                "Your account is secure",
-                style: Theme.of(context).textTheme.bodyMedium!,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Card(
-              elevation: screenSize.height * 0.00200,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(screenSize.height * 0.0131),
-              ),
-              margin: EdgeInsets.only(
-                left: screenSize.height * 0.0110,
-                right: screenSize.height * 0.0110,
-                bottom: screenSize.height * 0.0110,
-              ),
-              color: secondaryColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  buildUserInfo(
-                    context: context,
-                    title: "Name",
-                    data: currentUser.displayName!,
-                    screenSize: screenSize,
+                  const SizedBox(height: 12),
+                  Text(
+                    user.displayName ?? "User",
+                    style: const TextStyle(
+                      fontFamily: 'serif',
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  buildUserInfo(
-                    context: context,
-                    title: "Email",
-                    data: currentUser.email!,
-                    screenSize: screenSize,
-                  ),
-                  buildUserInfo(
-                    context: context,
-                    title: "Register On",
-                    data: convertUkToIst(currentUser.metadata.creationTime!),
-                    screenSize: screenSize,
-                  ),
-                  buildUserInfo(
-                    context: context,
-                    title: "Last Sign-In On",
-                    data: convertUkToIst(currentUser.metadata.lastSignInTime!),
-                    screenSize: screenSize,
+                  const SizedBox(height: 4),
+                  // Security Badge
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(CupertinoIcons.checkmark_shield_fill,
+                          color: Colors.green, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        "Your account is secure",
+                        style: TextStyle(
+                            color: Colors.grey.shade600, fontSize: 13),
+                      ),
+                    ],
                   ),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // --- USER DATA SECTION ---
+            _buildSectionHeader("PERSONAL INFORMATION"),
+            _buildGroupedContainer([
+              _buildInfoTile("Name", user.displayName ?? "Not Set"),
+              const Divider(height: 1, indent: 20, color: Color(0xFFC6C6C8)),
+              _buildInfoTile("Email", user.email ?? "Not Set"),
+            ]),
+
+            _buildSectionHeader("METADATA"),
+            _buildGroupedContainer([
+              _buildInfoTile("Registered On",
+                  convertUkToIst(user.metadata.creationTime!)),
+              const Divider(height: 1, indent: 20, color: Color(0xFFC6C6C8)),
+              _buildInfoTile("Last Sign-In",
+                  convertUkToIst(user.metadata.lastSignInTime!)),
+            ]),
+
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildSectionHeader(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, bottom: 8, top: 20),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Color(0xFF6E6E72),
+            fontSize: 13,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGroupedContainer(List<Widget> children) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildInfoTile(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'serif',
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontFamily: 'serif',
+                fontSize: 15,
+                color: Color(0xFF8E8E93),
               ),
             ),
           ),

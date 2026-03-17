@@ -67,3 +67,57 @@ final class AddToPlayNextEvent extends SongstreamEvent {
 }
 
 final class SetSongDataToNullEvent extends SongstreamEvent {}
+
+final class SetVolumeEvent extends SongstreamEvent {
+  final double volume;
+
+  SetVolumeEvent({required this.volume});
+}
+
+final class StartRadioEvent extends SongstreamEvent {
+  final String videoId;
+
+  StartRadioEvent({required this.videoId});
+}
+
+final class AddRadioSongsToPlaylistEvent extends SongstreamEvent {
+  final List<Songmodel> radioSongs;
+
+  AddRadioSongsToPlaylistEvent({required this.radioSongs});
+}
+
+final class PlayIndividualSongEvent extends SongstreamEvent {
+  final Songmodel songData;
+  final int songIndex;
+
+  PlayIndividualSongEvent({
+    required this.songData,
+    required this.songIndex,
+  });
+}
+
+final class RemoveFromPlaylistEvent extends SongstreamEvent {
+  final String videoId;
+
+  RemoveFromPlaylistEvent({required this.videoId});
+}
+
+final class GetUpcomingSongsEvent extends SongstreamEvent {}
+
+final class ShouldShowStartRadioEvent extends SongstreamEvent {}
+
+final class GetUpcomingSongsStateEvent extends SongstreamEvent {}
+
+// Event to play a song from a playlist/album context
+// This keeps the playlist songs in the Up Next queue instead of radio songs
+final class PlaySongFromPlaylistEvent extends SongstreamEvent {
+  final Songmodel songData;
+  final int songIndex;
+  final List<Songmodel> playlistSongs;
+
+  PlaySongFromPlaylistEvent({
+    required this.songData,
+    required this.songIndex,
+    required this.playlistSongs,
+  });
+}

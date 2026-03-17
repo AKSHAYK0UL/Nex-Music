@@ -4,7 +4,7 @@ import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart
 import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/artistmodel.dart';
-import 'package:nex_music/presentation/home/widget/song_title.dart';
+import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 
 class ArtistSongs extends StatefulWidget {
   final ArtistModel artist;
@@ -29,8 +29,6 @@ class _ArtistScreenongs extends State<ArtistSongs> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context).height;
-
     return BlocBuilder<FullArtistSongBloc, FullArtistSongState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
@@ -51,18 +49,16 @@ class _ArtistScreenongs extends State<ArtistSongs> {
                   ),
                 )
               : ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  physics: const BouncingScrollPhysics(),
                   itemCount: state.artistSongs.length,
                   itemBuilder: (context, index) {
                     final songData = state.artistSongs[index];
-                    return Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: screenSize * 0.0131),
-                      child: SongTitle(
-                        songData: songData,
-                        songIndex: index,
-                        showDelete: false,
-                        tabRouteENUM: TabRouteENUM.other,
-                      ),
+                    return RecentSongTile(
+                      songData: songData,
+                      songIndex: index,
+                      showDelete: false,
+                      tabRouteENUM: TabRouteENUM.other,
                     );
                   },
                 );

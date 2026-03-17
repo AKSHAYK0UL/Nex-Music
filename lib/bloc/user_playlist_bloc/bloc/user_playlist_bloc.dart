@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/model/user_playlist_model.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 
 part 'user_playlist_event.dart';
@@ -15,10 +16,27 @@ class UserPlaylistBloc extends Bloc<UserPlaylistEvent, UserPlaylistState> {
     on<DeleteUserPlaylistEvent>(_deleteUserPlaylist);
     on<DeleteSongUserPlaylistEvent>(_deleteSongUserPlaylist);
   }
+
   Future<void> _createPlaylist(
       CreatePlaylistEvent event, Emitter<UserPlaylistState> emit) async {
     try {
-      await _dbRepository.createPlaylistCollection(event.playlistName);
+      await _dbRepository.createPlaylistCollection(
+        event.playlistName,
+        description: event.description,
+        colorValue: event.colorValue,
+        displayMode: event.displayMode,
+        isPublic: event.isPublic,
+      );
+
+      // If the playlist is public, also save to the public collection
+      if (event.isPublic) {
+        await _dbRepository.createPublicPlaylist(
+          event.playlistName,
+          description: event.description,
+          colorValue: event.colorValue,
+          displayMode: event.displayMode,
+        );
+      }
     } on FirebaseAuthException catch (e) {
       emit(UserPlaylistErrorState(errorMessage: e.toString()));
     } catch (e) {
@@ -41,7 +59,6 @@ class UserPlaylistBloc extends Bloc<UserPlaylistEvent, UserPlaylistState> {
 
   Future<void> _addToUserPlaylist(
       AddSongToUserPlaylistEvent event, Emitter<UserPlaylistState> emit) async {
-    // emit(UserPlaylistLoadingState());
     try {
       await _dbRepository.addSongToPlaylist(event.playlistName, event.songData);
     } on FirebaseAuthException catch (e) {

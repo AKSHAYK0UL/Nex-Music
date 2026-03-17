@@ -91,33 +91,52 @@ class _DesktopSearchBarState extends State<DesktopSearchBar> {
                       return loadingDisk();
                     }
                     if (state is LoadedRecentSearchState) {
-                      _showRecent = state.recentSerach.isNotEmpty;
-                      cardContainerItems = state.recentSerach.length;
-                      return ListView.builder(
-                        itemCount: state.recentSerach.length,
-                        itemBuilder: (context, index) {
-                          final rIndex = state.recentSerach.length - index - 1;
-                          final recentSearch = state.recentSerach[rIndex];
-                          return GestureDetector(
-                            onTap: () {
-                              _searchFieldKey.currentState
-                                  ?.setText(recentSearch);
-                              setState(() {
-                                _showSuggestions = false;
-                              });
-                            },
-                            child: RecentSearchTitle(
-                              text: recentSearch,
-                              size: screenSize,
-                              onSuggestionSelected: (selectedText) {
-                                _searchFieldKey.currentState
-                                    ?.setText(selectedText);
-                                setState(() {
-                                  _showSuggestions = false;
-                                });
+                      return StreamBuilder<List<String>>(
+                        stream: state.searchHistoryStream,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return loadingDisk();
+                          } else if (snapshot.hasError) {
+                            return Center(
+                              child: Text(snapshot.error.toString()),
+                            );
+                          } else if (!snapshot.hasData ||
+                              snapshot.data!.isEmpty) {
+                            _showRecent = false;
+                            cardContainerItems = 0;
+                            return const SizedBox();
+                          } else {
+                            final recentSearches = snapshot.data!;
+                            _showRecent = recentSearches.isNotEmpty;
+                            cardContainerItems = recentSearches.length;
+                            return ListView.builder(
+                              itemCount: recentSearches.length,
+                              itemBuilder: (context, index) {
+                                final recentSearch = recentSearches[index];
+                                return GestureDetector(
+                                  onTap: () {
+                                    _searchFieldKey.currentState
+                                        ?.setText(recentSearch);
+                                    setState(() {
+                                      _showSuggestions = false;
+                                    });
+                                  },
+                                  child: RecentSearchTitle(
+                                    text: recentSearch,
+                                    size: screenSize,
+                                    onSuggestionSelected: (selectedText) {
+                                      _searchFieldKey.currentState
+                                          ?.setText(selectedText);
+                                      setState(() {
+                                        _showSuggestions = false;
+                                      });
+                                    },
+                                  ),
+                                );
                               },
-                            ),
-                          );
+                            );
+                          }
                         },
                       );
                     }
@@ -138,6 +157,7 @@ class _DesktopSearchBarState extends State<DesktopSearchBar> {
                               });
                             },
                             child: SuggestionTitle(
+                              onTap: (val){},
                               text: suggestion,
                               size: screenSize,
                               onSuggestionSelected: (selectedText) {

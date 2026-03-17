@@ -1,10 +1,13 @@
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/model/playlistmodel.dart';
-import 'package:nex_music/presentation/playlist/screen/playlist_loading.dart';
 
 class HomePlaylist extends StatelessWidget {
   final PlayListmodel playList;
+  
   const HomePlaylist({
     super.key,
     required this.playList,
@@ -12,34 +15,75 @@ class HomePlaylist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context).height;
-
     return GestureDetector(
       onTap: () {
-        // Navigator.of(context)
-        //     .pushNamed(ShowPlaylist.routeName, arguments: playList);
-        Navigator.of(context)
-            .pushNamed(PlaylistLoading.routeName, arguments: playList);
+        context.push(RouterPath.showPlaylistSongsRoute, extra: playList);
       },
-      child: Container(
-        width: screenSize * 0.288,
-        margin: EdgeInsets.all(screenSize * 0.0106),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(screenSize * 0.0132),
-          color: Theme.of(context).colorScheme.secondary,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(screenSize * 0.0132),
-          child: Hero(
-            tag: playList.playListId,
-            child: cacheImage(
-              imageUrl: playList.thumbnail,
-              width: screenSize * 0.288,
-              height: screenSize * 0.345,
-              isRecommendedPlaylist: true,
+      behavior: HitTestBehavior.translucent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          //  The Artwork (Square, Rounded Corners)
+          AspectRatio(
+            aspectRatio: 1.0, 
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Hero(
+                  tag: playList.playListId,
+                  child: cacheImage(
+                    imageUrl: playList.thumbnail,
+                    width: double.infinity, 
+                    height: double.infinity,
+                    isRecommendedPlaylist: true,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: 8),
+          
+          // The Title (SF Pro style bold)
+          Flexible(
+            child: Text(
+              playList.playlistName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ),
+          
+          // The Subtitle (Grey, smaller)
+          const SizedBox(height: 2),
+          Flexible(
+            child: Text(
+              playList.artistBasic.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

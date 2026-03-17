@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/search_album_bloc/bloc/search_album_bloc.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
-import 'package:nex_music/presentation/home/widget/playlistgridview.dart';
+import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 
 class AlbumTab extends StatefulWidget {
   final String inputText;
@@ -21,14 +21,12 @@ class AlbumTab extends StatefulWidget {
 class AlbumTabState extends State<AlbumTab> {
   @override
   void initState() {
+    super.initState();
+    // Only trigger search if don't already have results for this search
     final currentState = context.read<SearchAlbumBloc>().state;
     if (currentState.runtimeType != SearchedAlbumsDataState) {
-      context
-          .read<SearchAlbumBloc>()
-          .add(SearchAlbumsEvent(inputText: widget.inputText));
+      context.read<SearchAlbumBloc>().add(SearchAlbumsEvent(inputText: widget.inputText));
     }
-
-    super.initState();
   }
 
   @override
@@ -36,37 +34,34 @@ class AlbumTabState extends State<AlbumTab> {
     return BlocBuilder<SearchAlbumBloc, SearchAlbumState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
-        if (state is LoadingState) {
-          return loadingDisk();
-        }
+        if (state is LoadingState) return loadingDisk();
         if (state is SearchedAlbumsDataState) {
-          return state.albums.isEmpty
-              ? Center(
-                  child: Text(
-                    "No albums found.",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                )
-              : SingleChildScrollView(
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: widget.screenSize * 0.00107,
-                    ),
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: state.albums.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final playlistData = state.albums[index];
-                      return PlaylistGridView(
-                        playList: playlistData,
-                      );
-                    },
-                  ),
-                );
+          if (state.albums.isEmpty) return _buildEmptyState("No albums found");
+
+          return GridView.builder(
+            padding: const EdgeInsets.all(20),
+            physics: const BouncingScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 24,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.78, 
+            ),
+            itemCount: state.albums.length,
+            itemBuilder: (context, index) {
+              // return PlaylistGridView(playList: state.albums[index]);
+              return HomePlaylist(playList: state.albums[index]);
+            },
+          );
         }
         return const SizedBox();
       },
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Center(
+      child: Text(message, style: const TextStyle(color: Colors.grey, fontSize: 16)),
     );
   }
 }

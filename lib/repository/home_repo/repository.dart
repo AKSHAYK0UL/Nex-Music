@@ -1,4 +1,5 @@
 import 'package:dart_ytmusic_api/types.dart';
+import 'package:flutter/foundation.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
@@ -30,62 +31,160 @@ class Repository {
   }
 
 //using records
-  Future<({List<Songmodel> quickPicks, List<PlayListmodel> playlist})>
-      homeScreenSongsList(String inputPrompt) async {
+  Future<
+      ({
+        List<Songmodel> quickPicks,
+        List<PlayListmodel> playlist,
+        List<PlayListmodel> albums,
+        List<PlayListmodel> globalHitsPlaylists,
+        List<PlayListmodel> trendingGloballyPlaylists,
+        List<PlayListmodel> trendingPunjabiPlaylists,
+        List<PlayListmodel> trendingPunjabiAlbums,
+        List<PlayListmodel> trendingHindiPlaylists,
+        List<PlayListmodel> trendingHindiAlbums,
+        List<PlayListmodel> trendingEnglishPlaylists,
+        List<PlayListmodel> trendingPhonkPlaylists,
+        List<PlayListmodel> trendingPhonkAlbums,
+        List<PlayListmodel> trendingBrazilianPhonkPlaylists,
+        List<PlayListmodel> trendingBrazilianPhonkAlbums,
+        List<PlayListmodel> nonstopPunjabiMashup,
+        List<PlayListmodel> nonstopHindiMashup,
+        List<PlayListmodel> nonstopEnglishMashup,
+      })> homeScreenSongsList(String inputPrompt) async {
     final quality = _dbInstance.getData;
+
+    // Fetch main home data first (required)
     final networkData = await _dataProvider.homeScreenSongs(inputPrompt);
+
     final quickPicks = await RepositoryHelperFunction.getQuickPicks(
         networkData.quickPicks, quality.thumbnailQuality);
 
     final playlist =
         RepositoryHelperFunction.getPlaylists(networkData.homeSectionData);
 
-    return (quickPicks: quickPicks, playlist: playlist);
-  }
+    final albums =
+        RepositoryHelperFunction.getAlbums(networkData.homeSectionData);
 
-  //Get playlist songs
-  Future<
-      ({
-        List<Songmodel> playlistSongs,
-        int playlistSize,
-        String playListDuration
-      })> getPlayList(
-    String playlistId,
-    int index,
-  ) async {
-    final songStream =
-        await _dataProvider.getSongIdFromPlayList(playlistId).toList();
-    int totalSongs = songStream.length;
+    // Fetch trending data in parallel (optional - failures return empty lists)
+    final trendingResults = await Future.wait([
+      // Global sections
+      _safeSearchPlaylist("global hits playlist"),
+      _safeSearchPlaylist("trending globally playlist"),
+      
+      // Trending Punjabi
+      _safeSearchPlaylist("trending punjabi playlist"),
+      _safeSearchAlbums("trending punjabi album"),
 
-    List<String> songIds =
-        songStream.skip(index).map((video) => video.id.value).take(20).toList();
+      // Trending Hindi
+      _safeSearchPlaylist("trending hindi playlist"),
+      _safeSearchAlbums("trending hindi album"),
 
-    List<int> songsDuration = songStream
-        .skip(index)
-        .map((video) => video.duration!.inSeconds)
-        .take(20)
-        .toList();
+      // Trending English
+      _safeSearchPlaylist("trending english playlist"),
 
-    // List<String> songIds = songStream.map((video) => video.id.value).toList();
-    // List<int> songsDuration =
-    //     songStream.map((video) => video.duration!.inSeconds).toList();
+      // Trending Phonk
+      _safeSearchPlaylist("phonk playlist"),
+      _safeSearchAlbums("phonk album"),
 
-    //No longer need
-    // int totalDurationInSeconds = songStream
-    //     .map((video) => video.duration?.inSeconds ?? 0)
-    //     .fold(0, (total, duration) => total + duration);
+      // Trending Brazilian Phonk
+      _safeSearchPlaylist("brazilian phonk playlist"),
+      _safeSearchAlbums("brazilian phonk album"),
 
-    // String playListDuration = timeFormate(totalDurationInSeconds);
-
-    final songsList = await _dataProvider.getPlayListSongs(songIds);
+      // Nonstop Mashup
+      _safeSearchPlaylist("nonstop punjabi mashup"),
+      _safeSearchPlaylist("nonstop hindi mashup"),
+      _safeSearchPlaylist("nonstop english mashup"),
+    ]);
 
     return (
-      playlistSongs:
-          RepositoryHelperFunction.getSongsList(songsList, songsDuration),
-      playlistSize: totalSongs,
-      playListDuration: "",
+      quickPicks: quickPicks,
+      playlist: playlist,
+      albums: albums,
+      globalHitsPlaylists: trendingResults[0],
+      trendingGloballyPlaylists: trendingResults[1],
+      trendingPunjabiPlaylists: trendingResults[2],
+      trendingPunjabiAlbums: trendingResults[3],
+      trendingHindiPlaylists: trendingResults[4],
+      trendingHindiAlbums: trendingResults[5],
+      trendingEnglishPlaylists: trendingResults[6],
+      trendingPhonkPlaylists: trendingResults[7],
+      trendingPhonkAlbums: trendingResults[8],
+      trendingBrazilianPhonkPlaylists: trendingResults[9],
+      trendingBrazilianPhonkAlbums: trendingResults[10],
+      nonstopPunjabiMashup: trendingResults[11],
+      nonstopHindiMashup: trendingResults[12],
+      nonstopEnglishMashup: trendingResults[13],
     );
   }
+
+  // Safe wrapper for playlist search - returns empty list on error
+  Future<List<PlayListmodel>> _safeSearchPlaylist(String query) async {
+    try {
+      final playlists = await _dataProvider.searchPlaylist(query);
+      return RepositoryHelperFunction.getPlaylistDetailedToPlayListModel(
+          playlists);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Safe wrapper for album search - returns empty list on error
+  Future<List<PlayListmodel>> _safeSearchAlbums(String query) async {
+    try {
+      final albums = await _dataProvider.searchAlbums(query);
+      return RepositoryHelperFunction.albumsToPlaylist(albums);
+    } catch (e) {
+      return [];
+    }
+  }
+
+
+Future<
+    ({
+      List<Songmodel> playlistSongs,
+      int playlistSize,
+      String playListDuration
+    })> getPlayList(
+  String playlistId,
+  int index,
+) async {
+  // 1️⃣ Get song IDs stream
+  final songStream =
+      await _dataProvider.getSongIdFromPlayList(playlistId).toList();
+
+  final totalSongs = songStream.length;
+
+  // 2️⃣ Prepare IDs & durations
+  final songIds =
+      songStream.skip(index).map((video) => video.id.value).take(20).toList();
+
+  final songsDuration = songStream
+      .skip(index)
+      .map((video) => video.duration!.inSeconds)
+      .take(20)
+      .toList();
+
+  // 3️⃣ Fetch songs (NETWORK / MAIN ISOLATE)
+  final songsList = await _dataProvider.getPlayListSongs(songIds);
+
+  // 4️⃣ CPU-heavy mapping in isolate
+  final playlistSongs = await compute(
+    playlistSongsCompute,
+    (
+      songs: songsList,
+      durations: songsDuration,
+    ),
+  );
+
+  return (
+    playlistSongs: playlistSongs,
+    playlistSize: totalSongs,
+    playListDuration: "",
+  );
+}
+
+
+  //###########
 
 //play get song [Deep link]
   Future<Songmodel> getSongDataDeeplink(String songId) async {
@@ -199,4 +298,27 @@ class Repository {
 
     return RepositoryHelperFunction.albumsToPlaylist(albums);
   }
+
+  //get radio songs (similar songs)
+  Future<List<Songmodel>> getRadioSongs(String videoId) async {
+    final radioSongsRaw = await _dataProvider.getUpNexts(videoId);
+    return RepositoryHelperFunction.convertUpNextsDetailsListToSongModelList(
+        radioSongsRaw);
+  }
+}
+
+//Isolate
+/// Isolate-safe payload
+typedef _PlaylistComputePayload = ({
+  List<SongFull> songs,
+  List<int> durations,
+});
+
+/// Top-level function for compute
+// ignore: library_private_types_in_public_api
+List<Songmodel> playlistSongsCompute(_PlaylistComputePayload payload) {
+  return RepositoryHelperFunction.getSongsList(
+    payload.songs,
+    payload.durations,
+  );
 }

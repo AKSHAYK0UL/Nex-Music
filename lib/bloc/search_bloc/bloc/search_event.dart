@@ -15,3 +15,9 @@ final class AddRecentSearchEvent extends SearchEvent {
 }
 
 final class LoadRecentSearchEvent extends SearchEvent {}
+
+final class DeleteRecentSearchEvent extends SearchEvent {
+  final String search;
+
+  DeleteRecentSearchEvent({required this.search});
+}

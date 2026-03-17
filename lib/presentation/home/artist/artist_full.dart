@@ -1,12 +1,11 @@
-import 'package:buttons_tabbar/buttons_tabbar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
-
-import 'package:nex_music/core/theme/hexcolor.dart';
-import 'package:nex_music/core/ui_component/animatedtext.dart';
+import 'package:nex_music/bloc/saved_artists_bloc/bloc/saved_artists_bloc.dart';
+import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/model/artistmodel.dart';
-import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/artist/artist_album.dart';
 import 'package:nex_music/presentation/home/artist/artist_playlist.dart';
 import 'package:nex_music/presentation/home/artist/artist_songs.dart';
@@ -21,12 +20,42 @@ class ArtistFullScreen extends StatefulWidget {
 }
 
 class _ArtistFullScreenState extends State<ArtistFullScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _isCollapsed = false;
+
   @override
   void initState() {
     context
         .read<FullArtistSongBloc>()
         .add(GetArtistSongsEvent(artistId: widget.artist.artist.artistId!));
+
+    _scrollController.addListener(_scrollListener);
     super.initState();
+  }
+
+  void _scrollListener() {
+    if (!_scrollController.hasClients) return;
+
+    final screenSize = MediaQuery.sizeOf(context);
+    final expandedHeight = screenSize.height * 0.45;
+    final threshold = expandedHeight - kToolbarHeight - 20;
+
+    if (_scrollController.offset > threshold && !_isCollapsed) {
+      setState(() {
+        _isCollapsed = true;
+      });
+    } else if (_scrollController.offset <= threshold && _isCollapsed) {
+      setState(() {
+        _isCollapsed = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -34,47 +63,176 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
     final screenSize = MediaQuery.sizeOf(context).height;
 
     return DefaultTabController(
-      initialIndex: 0,
       length: 4,
       child: Scaffold(
-        appBar: AppBar(
-          title: animatedText(
-            text: widget.artist.artist.name,
-            style: Theme.of(context).textTheme.titleLarge!,
-          ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(kMinInteractiveDimension),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenSize * 0.0115,
-              ),
-              child: ButtonsTabBar(
-                splashColor: backgroundColor,
-                // backgroundColor: Colors.white24,
-                backgroundColor: Colors.blueGrey.shade600,
-                unselectedBackgroundColor: secondaryColor,
-                width: screenSize / 8.15,
-                contentCenter: true,
+        backgroundColor: Colors.white,
+        body: NestedScrollView(
+          controller: _scrollController,
+          physics: const BouncingScrollPhysics(),
+          headerSliverBuilder: (context, innerBoxIsScrolled) {
+            return [
+              SliverAppBar(
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.transparent,
+                pinned: true,
+                floating: false,
+                stretch: true,
                 elevation: 0,
-                labelStyle: Theme.of(context).textTheme.titleSmall,
-                unselectedLabelStyle: Theme.of(context).textTheme.bodySmall,
-                tabs: const [
-                  Tab(text: "Songs"),
-                  Tab(text: "Videos"),
-                  Tab(text: "Albums"),
-                  Tab(text: "Playlists"),
+                expandedHeight: screenSize * 0.45,
+                leading: IconButton(
+                  icon: const Icon(CupertinoIcons.chevron_back,
+                      color: Colors.red, size: 28),
+                  onPressed: () => context.pop(),
+                ),
+                title: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 200),
+                  opacity: _isCollapsed ? 1.0 : 0.0,
+                  child: Text(
+                    widget.artist.artist.name,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                actions: [
+                  BlocBuilder<SavedArtistsBloc, SavedArtistsState>(
+                    builder: (context, state) {
+                      bool isSaved = false;
+                      final artistId = widget.artist.artist.artistId;
+                      if (artistId != null) {
+                        if (state is IsArtistSavedState &&
+                            state.artistId == artistId) {
+                          isSaved = state.isSaved;
+                        } else {
+                          context.read<SavedArtistsBloc>().add(
+                                IsArtistSavedEvent(artistId: artistId),
+                              );
+                        }
+                      }
+                      return IconButton(
+                        icon: Icon(
+                          isSaved
+                              ? CupertinoIcons.person_crop_circle_badge_minus
+                              : CupertinoIcons.person_crop_circle_badge_plus,
+                          color: isSaved ? const Color(0xFFFF3B30) : Colors.white,
+                          size: 28,
+                        ),
+                        onPressed: () {
+                          if (artistId != null) {
+                            if (isSaved) {
+                              context.read<SavedArtistsBloc>().add(
+                                    RemoveFromSavedArtistsEvent(
+                                        artistId: artistId),
+                                  );
+                            } else {
+                              context.read<SavedArtistsBloc>().add(
+                                    AddToSavedArtistsEvent(
+                                        artist: widget.artist),
+                                  );
+                            }
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
                 ],
+                centerTitle: false,
+                flexibleSpace: FlexibleSpaceBar(
+                  stretchModes: const [
+                    StretchMode.zoomBackground,
+                    StretchMode.blurBackground,
+                  ],
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Background Image
+                      Container(
+                        color: const Color(0xFF1C1C44),
+                        child: cacheImage(
+                          imageUrl: widget.artist.thumbnail,
+                          width: double.infinity,
+                          height: double.infinity,
+                          islocal: false,
+                        ),
+                      ),
+                      // Gradient Overlay
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withValues(alpha: 0.1),
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.5),
+                              Colors.black.withValues(alpha: 0.9),
+                            ],
+                            stops: const [0.0, 0.4, 0.7, 1.0],
+                          ),
+                        ),
+                      ),
+                      // Artist Name
+                      Positioned(
+                        bottom: 60, 
+                        left: 20,
+                        right: 20,
+                        child: Text(
+                          widget.artist.artist.name,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontFamily: 'System',
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(kTextTabBarHeight),
+                  child: Container(
+                    color: Colors.white,
+                    child: TabBar(
+                      isScrollable: true,
+                      tabAlignment: TabAlignment.center,
+                      indicatorColor: Colors.redAccent,
+                      indicatorWeight: 2,
+                      dividerColor: Colors.grey.withValues(alpha: 0.2),
+                      labelColor: Colors.redAccent,
+                      unselectedLabelColor: Colors.grey,
+                      labelStyle: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          letterSpacing: -0.2),
+                      tabs: const [
+                        Tab(text: "Songs"),
+                        Tab(text: "Videos"),
+                        Tab(text: "Albums"),
+                        Tab(text: "Playlists"),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
+            ];
+          },
+          body: TabBarView(
+            children: [
+              ArtistSongs(artist: widget.artist),
+              ArtistVideos(artist: widget.artist),
+              ArtistAlbum(artist: widget.artist),
+              ArtistPlaylist(artist: widget.artist),
+            ],
           ),
         ),
-        body: TabBarView(children: [
-          ArtistSongs(artist: widget.artist),
-          ArtistVideos(artist: widget.artist),
-          ArtistAlbum(artist: widget.artist),
-          ArtistPlaylist(artist: widget.artist)
-        ]),
-        bottomNavigationBar: MiniPlayer(screenSize: screenSize),
       ),
     );
   }

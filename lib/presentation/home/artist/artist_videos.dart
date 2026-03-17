@@ -4,7 +4,7 @@ import 'package:nex_music/bloc/full_artist_video_bloc/bloc/full_artist_video_blo
 import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/artistmodel.dart';
-import 'package:nex_music/presentation/home/widget/song_title.dart';
+import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 
 class ArtistVideos extends StatefulWidget {
   final ArtistModel artist;
@@ -27,8 +27,6 @@ class _ArtistVideosState extends State<ArtistVideos> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context).height;
-
     return BlocBuilder<FullArtistVideoBloc, FullArtistVideoBlocState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
@@ -49,18 +47,16 @@ class _ArtistVideosState extends State<ArtistVideos> {
                   ),
                 )
               : ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  physics: const BouncingScrollPhysics(),
                   itemCount: state.artistVidoes.length,
                   itemBuilder: (context, index) {
                     final songData = state.artistVidoes[index];
-                    return Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: screenSize * 0.0131),
-                      child: SongTitle(
-                        songData: songData,
-                        songIndex: index,
-                        showDelete: false,
-                        tabRouteENUM: TabRouteENUM.other,
-                      ),
+                    return RecentSongTile(
+                      songData: songData,
+                      songIndex: index,
+                      showDelete: false,
+                      tabRouteENUM: TabRouteENUM.other,
                     );
                   },
                 );

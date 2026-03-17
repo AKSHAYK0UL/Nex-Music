@@ -4,8 +4,18 @@ sealed class UserPlaylistEvent {}
 
 final class CreatePlaylistEvent extends UserPlaylistEvent {
   final String playlistName;
+  final String description;
+  final int colorValue;
+  final String displayMode;
+  final bool isPublic;
 
-  CreatePlaylistEvent({required this.playlistName});
+  CreatePlaylistEvent({
+    required this.playlistName,
+    this.description = '',
+    this.colorValue = 0xFFE53935,
+    this.displayMode = 'color',
+    this.isPublic = false,
+  });
 }
 
 final class GetUserPlaylistsEvent extends UserPlaylistEvent {}

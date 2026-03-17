@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/enum/tab_route.dart';
-import 'package:nex_music/presentation/home/widget/song_title.dart';
+import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 
 class Videostab extends StatefulWidget {
   final String inputText;
@@ -22,14 +22,11 @@ class Videostab extends StatefulWidget {
 class _VideostabState extends State<Videostab> {
   @override
   void initState() {
+    super.initState();
     final currentState = context.read<VideoBloc>().state;
     if (currentState.runtimeType != VideosResultState) {
-      context
-          .read<VideoBloc>()
-          .add(SearchInVideoEvent(inputText: widget.inputText));
+      context.read<VideoBloc>().add(SearchInVideoEvent(inputText: widget.inputText));
     }
-
-    super.initState();
   }
 
   @override
@@ -40,39 +37,33 @@ class _VideostabState extends State<Videostab> {
         if (state is LoadingState) {
           return loadingDisk();
         }
+        
         if (state is VideosResultState) {
-          return state.searchedVideo.isEmpty
-              ? Center(
-                  child: Text(
-                    "No videos found.",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                )
-              : SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: widget.screenSize * 0.0131,
-                      // right: screenSize * 0.0131,
-                      // left: screenSize * 0.0131,
-                      // top: screenSize * 0.0131,
-                    ),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: state.searchedVideo.length,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        final songData = state.searchedVideo[index];
-                        return SongTitle(
-                          songData: songData,
-                          songIndex: index,
-                          showDelete: false,
-                          tabRouteENUM: TabRouteENUM.other,
-                        );
-                      },
-                    ),
-                  ),
-                );
+          if (state.searchedVideo.isEmpty) {
+            return const Center(
+              child: Text(
+                "No videos found.",
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            physics: const BouncingScrollPhysics(),
+            itemCount: state.searchedVideo.length,
+            itemBuilder: (context, index) {
+              final songData = state.searchedVideo[index];
+              return RecentSongTile(
+                songData: songData,
+                songIndex: index,
+                showDelete: false,
+                tabRouteENUM: TabRouteENUM.other,
+              );
+            },
+          );
         }
+        
         return const SizedBox();
       },
     );

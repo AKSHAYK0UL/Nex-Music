@@ -14,6 +14,7 @@ final class ErrorStateFavorites extends FavoritesState {
 
 final class IsFavoritesState extends FavoritesState {
   final bool isFavorites;
+  final String vId;
 
-  IsFavoritesState({required this.isFavorites});
+  IsFavoritesState({required this.isFavorites, required this.vId});
 }
