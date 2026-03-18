@@ -9,3 +9,8 @@ final class GetArtistSongsEvent extends FullArtistSongEvent {
   @override
   List<Object?> get props => [artistId];
 }
+
+final class ResetArtistSongsEvent extends FullArtistSongEvent {
+  @override
+  List<Object?> get props => [];
+}

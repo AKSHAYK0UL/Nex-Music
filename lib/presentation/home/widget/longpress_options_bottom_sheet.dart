@@ -11,7 +11,8 @@ import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
-import 'package:nex_music/helper_function/routefunc/artistview_route.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/bottom_sheet_button.dart';
@@ -81,7 +82,7 @@ Future<void> showBottomOptionSheet({
                         await Share.share(
                             "https://music.youtube.com/watch?v=${songData.vId}");
                         if (!context.mounted) return;
-                        Navigator.of(context).pop();
+                        context.pop();
                       },
                       icon: Icon(
                         Icons.share,
@@ -90,7 +91,7 @@ Future<void> showBottomOptionSheet({
                     ),
                     IconButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        context.pop();
                       },
                       icon: Icon(
                         Icons.close,
@@ -118,7 +119,7 @@ Future<void> showBottomOptionSheet({
                       .read<SongstreamBloc>()
                       .add(AddToPlayNextEvent(songData: songData));
                   showSnackbar(context, "Added to Play Next");
-                  Navigator.of(context).pop();
+                  context.pop();
                 },
               ),
 
@@ -128,9 +129,10 @@ Future<void> showBottomOptionSheet({
                 icon: Icons.playlist_add,
                 screenSize: screenSize,
                 onPressed: () {
+                  ;
                   final rootContext =
                       Navigator.of(context, rootNavigator: true).context;
-                  Navigator.of(context).pop();
+                  context.pop();
                   addToPlayListBottomSheet(rootContext, songData, screenSize);
                 },
               ),
@@ -142,11 +144,13 @@ Future<void> showBottomOptionSheet({
                 screenSize: screenSize,
                 onPressed: () {
                   Navigator.of(context).pop();
-                  artistViewRoute(
-                      context,
-                      ArtistModel(
-                          artist: songData.artist,
-                          thumbnail: songData.thumbnail));
+                  context.pushNamed(
+                    RouterName.artistName,
+                    extra: ArtistModel(
+                      artist: songData.artist,
+                      thumbnail: songData.thumbnail,
+                    ),
+                  );
                 },
               ),
 

@@ -2,7 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nex_music/bloc/full_artist_album_bloc/bloc/fullartistalbum_bloc.dart';
+import 'package:nex_music/bloc/full_artist_playlist_bloc/bloc/full_artist_playlist_bloc.dart';
 import 'package:nex_music/bloc/full_artist_songs_bloc/bloc/full_artist_bloc.dart';
+import 'package:nex_music/bloc/full_artist_video_bloc/bloc/full_artist_video_bloc_bloc.dart';
 import 'package:nex_music/bloc/saved_artists_bloc/bloc/saved_artists_bloc.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/model/artistmodel.dart';
@@ -25,12 +28,33 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
 
   @override
   void initState() {
-    context
-        .read<FullArtistSongBloc>()
-        .add(GetArtistSongsEvent(artistId: widget.artist.artist.artistId!));
+    super.initState();
+    final artistId = widget.artist.artist.artistId;
+    final artistName = widget.artist.artist.name;
+
+    if (artistId != null) {
+      // Reset all blocs to clear old artist's data
+      context.read<FullArtistSongBloc>().add(ResetArtistSongsEvent());
+      context.read<FullArtistVideoBloc>().add(SetFullArtistVideoBlocInitialEvent());
+      context.read<FullArtistAlbumBloc>().add(SetFullartistalbumInitialEvent());
+      context.read<FullArtistPlaylistBloc>().add(SetFullArtistPlaylistInitialEvent());
+
+      // Fetch new data
+      context
+          .read<FullArtistSongBloc>()
+          .add(GetArtistSongsEvent(artistId: artistId));
+      context
+          .read<FullArtistVideoBloc>()
+          .add(GetArtistVideosEvent(inputText: artistName));
+      context
+          .read<FullArtistAlbumBloc>()
+          .add(GetArtistAlbumsEvent(artist: widget.artist));
+      context
+          .read<FullArtistPlaylistBloc>()
+          .add(GetFullArtistPlaylistEvent(inputText: artistName));
+    }
 
     _scrollController.addListener(_scrollListener);
-    super.initState();
   }
 
   void _scrollListener() {

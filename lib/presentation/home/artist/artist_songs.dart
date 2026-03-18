@@ -6,26 +6,9 @@ import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 
-class ArtistSongs extends StatefulWidget {
+class ArtistSongs extends StatelessWidget {
   final ArtistModel artist;
   const ArtistSongs({required this.artist, super.key});
-
-  @override
-  State<ArtistSongs> createState() => _ArtistScreenongs();
-}
-
-class _ArtistScreenongs extends State<ArtistSongs> {
-  @override
-  void initState() {
-    final currentState = context.read<FullArtistSongBloc>().state;
-    if (currentState.runtimeType != ArtistSongsState) {
-      context
-          .read<FullArtistSongBloc>()
-          .add(GetArtistSongsEvent(artistId: widget.artist.artist.artistId!));
-    }
-
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

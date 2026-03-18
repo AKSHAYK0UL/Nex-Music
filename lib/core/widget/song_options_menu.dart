@@ -8,7 +8,8 @@ import 'package:nex_music/bloc/saved_artists_bloc/bloc/saved_artists_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
-import 'package:nex_music/helper_function/routefunc/artistview_route.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
@@ -144,8 +145,10 @@ class SongOptionsMenu extends StatelessWidget {
         items.add(_buildDivider());
 
         // Download
-        items.add(_buildDownloadMenuItem(context));
-        items.add(_buildDivider());
+        if (!(tabRouteENUM == TabRouteENUM.download && songData.isLocal)) {
+          items.add(_buildDownloadMenuItem(context));
+          items.add(_buildDivider());
+        }
 
         // View Artist
         items.add(_buildMenuItem(
@@ -154,10 +157,16 @@ class SongOptionsMenu extends StatelessWidget {
           textColor: Colors.black,
           iconColor: Colors.black87,
           onTap: () {
-            Navigator.pop(context);
-            artistViewRoute(
-              context,
-              ArtistModel(
+            Navigator.pop(context); // Pop the bottom sheet
+
+            // If in audio player, we need to pop it first to show bottom nav
+            if (menuType == SongMenuType.audioPlayer) {
+              context.pop();
+            }
+
+            context.pushNamed(
+              RouterName.artistName,
+              extra: ArtistModel(
                 artist: songData.artist,
                 thumbnail: songData.thumbnail,
               ),
@@ -384,6 +393,11 @@ class SongOptionsMenu extends StatelessWidget {
           );
         } else if (isDownloaded) {
           // Song is already downloaded - show "Remove from Downloads" in red
+          // Skip if already showing custom delete for Downloads
+          if (tabRouteENUM == TabRouteENUM.download) {
+            return const SizedBox.shrink();
+          }
+
           return _buildMenuItem(
             "Remove from Downloads",
             CupertinoIcons.trash,

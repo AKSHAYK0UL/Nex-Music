@@ -426,6 +426,7 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                             showDelete: true,
                             tabRouteENUM: TabRouteENUM.playlist,
                             playlistSongs: _playlistSongs,
+                            playlistName: _playlistName,
                           );
                         },
                         childCount: _playlistSongs.length,

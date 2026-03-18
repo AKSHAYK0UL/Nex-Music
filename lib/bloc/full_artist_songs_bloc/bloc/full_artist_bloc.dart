@@ -11,6 +11,7 @@ class FullArtistSongBloc
   final Repository _repository;
   FullArtistSongBloc(this._repository) : super(FullArtistInitial()) {
     on<GetArtistSongsEvent>(_getArtistId);
+    on<ResetArtistSongsEvent>((event, emit) => emit(FullArtistInitial()));
   }
   Future<void> _getArtistId(
       GetArtistSongsEvent event, Emitter<FullArtistSongState> emit) async {

@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +34,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
                 backgroundColor: Colors.white,
                 surfaceTintColor: Colors.transparent,
                 pinned: true,
-                floating: true,
+                floating: false,
                 elevation: 0,
                 centerTitle: true,
                 leading: IconButton(
@@ -52,7 +51,8 @@ class _SearchResultTabState extends State<SearchResultTab> {
                 // ),
                 title: GestureDetector(
                   onTap: () {
-                     context.pushNamed(RouterName.searchName,extra: widget.searchText);
+                    context.pushNamed(RouterName.searchName,
+                        extra: widget.searchText);
                     // context.pop(true);
                   },
                   child: AbsorbPointer(

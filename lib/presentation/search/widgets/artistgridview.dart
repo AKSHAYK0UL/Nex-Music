@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:nex_music/core/ui_component/cacheimage.dart';
-import 'package:nex_music/helper_function/routefunc/artistview_route.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/model/artistmodel.dart';
 
 class ArtistGridView extends StatelessWidget {
@@ -18,9 +19,9 @@ class ArtistGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        artistViewRoute(
-          context,
-          artist,
+        context.pushNamed(
+          RouterName.artistName,
+          extra: artist,
         );
       },
       child: Stack(

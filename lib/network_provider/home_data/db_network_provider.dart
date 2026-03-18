@@ -26,14 +26,18 @@ class DbNetworkProvider {
   }
 
   Future<void> addToRecentPlayedCollection(Map<String, dynamic> songMap) async {
-    final querySnapShot = await _recentPlayedCollection
+    // Clean up old documents with auto-generated IDs (from legacy .add() calls)
+    final oldDocs = await _recentPlayedCollection
         .where("v_id", isEqualTo: songMap["v_id"])
         .get();
-    for (var songs in querySnapShot.docs) {
-      await songs.reference.delete();
+    for (var doc in oldDocs.docs) {
+      // Only delete docs with random IDs (not the one we're about to set)
+      if (doc.id != songMap["v_id"]) {
+        doc.reference.delete();
+      }
     }
     songMap["timestamp"] = FieldValue.serverTimestamp();
-    await _recentPlayedCollection.add(songMap);
+    await _recentPlayedCollection.doc(songMap["v_id"]).set(songMap);
   }
 
   Stream<QuerySnapshot> getRecentPlayed() {
@@ -43,10 +47,6 @@ class DbNetworkProvider {
   }
 
   Future<void> deleteRecentPlayedSong(String vId) async {
-    final querySnapshot =
-        await _recentPlayedCollection.where('v_id', isEqualTo: vId).get();
-    for (var docs in querySnapshot.docs) {
-      await docs.reference.delete();
-    }
+    await _recentPlayedCollection.doc(vId).delete();
   }
 }

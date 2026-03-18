@@ -11,7 +11,8 @@ import 'package:nex_music/presentation/search/widgets/suggestion_title.dart';
 class SearchScreen extends StatefulWidget {
   static const routeName = "/searchscreen";
   final String? searchText;
-  const SearchScreen({super.key,this.searchText });
+
+  const SearchScreen({super.key, this.searchText});
 
   @override
   State<SearchScreen> createState() => SearchScreenState();
@@ -23,20 +24,15 @@ class SearchScreenState extends State<SearchScreen> {
 
   @override
   void initState() {
-    // _searchFocusNode.addListener(() {
-    //   setState(() {});
-    // });
-
-   if (widget.searchText != null && widget.searchText!.isNotEmpty) {
-    _searchController.text = widget.searchText!;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _searchFocusNode.requestFocus();
-      _searchController.selection = TextSelection.fromPosition(
-        TextPosition(offset: _searchController.text.length),
-      );
-    });
-  }
-  }
+    if (widget.searchText != null && widget.searchText!.isNotEmpty) {
+      _searchController.text = widget.searchText!;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _searchFocusNode.requestFocus();
+        _searchController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _searchController.text.length),
+        );
+      });
+    }
     super.initState();
   }
 
@@ -47,7 +43,6 @@ class SearchScreenState extends State<SearchScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Load search history when screen is first built
     context.read<SearchBloc>().add(LoadRecentSearchEvent());
   }
 
@@ -60,7 +55,6 @@ class SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-   
     final screenSize = MediaQuery.sizeOf(context).height;
 
     return Scaffold(
@@ -70,58 +64,76 @@ class SearchScreenState extends State<SearchScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with search bar only (no back button)
             Padding(
-              padding: const EdgeInsets.only(
-                  left: 16.0, right: 16.0, bottom: 10.0, top: 10.0),
-              child: CupertinoSearchTextField(
-                cursorColor: Colors.red,
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                autofocus: false,
-                placeholder: 'Search songs, albums, artists...',
-                onChanged: (text) {
-                  if (text.isEmpty) {
-                    context.read<SearchBloc>().add(LoadRecentSearchEvent());
-                  } else {
-                    context
-                        .read<SearchBloc>()
-                        .add(SearchSongSuggestionEvent(inputQuery: text));
-                  }
-                },
-                onSubmitted: (text) {
-                  if (text.isNotEmpty) {
-                    _performSearch(text);
-                  }
-                },
+              padding:  EdgeInsets.only(
+                left:context.canPop()? 0.0:16.0,
+                right: 16.0,
+                bottom: 10.0,
+                top: 10.0,
+              ),
+              child: Row(
+                children: [
+                  if (context.canPop())
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                      onPressed: () => context.pop(),
+                    ),
+                  Expanded(
+                    child: CupertinoSearchTextField(
+                      cursorColor: Colors.red,
+                      controller: _searchController,
+                      focusNode: _searchFocusNode,
+                      placeholder: 'Search songs, albums, artists...',
+                      onChanged: (text) {
+                        if (text.isEmpty) {
+                          context
+                              .read<SearchBloc>()
+                              .add(LoadRecentSearchEvent());
+                        } else {
+                          context.read<SearchBloc>().add(
+                                SearchSongSuggestionEvent(inputQuery: text),
+                              );
+                        }
+                      },
+                      onSubmitted: (text) {
+                        if (text.isNotEmpty) {
+                          _performSearch(text);
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-            // Content area
             Expanded(
               child: BlocBuilder<SearchBloc, SearchState>(
                 buildWhen: (previous, current) => previous != current,
                 builder: (context, state) {
                   if (state is LoadingState) {
-                    return  Center(
+                    return Center(
                       child: CupertinoActivityIndicator(
-                                color: Colors.red.withValues(alpha: 0.8), // Red indicator
-                                 radius: 15,
-                              ));
-                    
+                        color: Colors.red.withValues(alpha: 0.8),
+                        radius: 15,
+                      ),
+                    );
                   }
+
                   if (state is LoadedRecentSearchState) {
                     return StreamBuilder<List<String>>(
                       stream: state.searchHistoryStream,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return  Center(
-                            child:
-                                CupertinoActivityIndicator(
-                                color: Colors.red.withValues(alpha: 0.8), // Red indicator
-                                 radius: 15,
-                              ));
-                          
+                          return Center(
+                            child: CupertinoActivityIndicator(
+                              color: Colors.red.withValues(alpha: 0.8),
+                              radius: 15,
+                            ),
+                          );
                         } else if (snapshot.hasError) {
                           return Center(
                             child: Text(
@@ -146,7 +158,6 @@ class SearchScreenState extends State<SearchScreen> {
                             ),
                             child: ListView.builder(
                               itemCount: recentSearches.length,
-                              shrinkWrap: true,
                               itemBuilder: (context, index) {
                                 final recentSearch = recentSearches[index];
                                 return RecentSearchTitle(
@@ -164,6 +175,33 @@ class SearchScreenState extends State<SearchScreen> {
                       },
                     );
                   }
+
+                  if (state is SearchSuggestionResultState) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenSize * 0.0105,
+                        vertical: screenSize * 0.0200,
+                      ),
+                      child: ListView.builder(
+                        itemCount: state.searchSuggestions.length,
+                        itemBuilder: (context, index) {
+                          final suggestion = state.searchSuggestions[index];
+                          return SuggestionTitle(
+                            text: suggestion,
+                            size: screenSize,
+                            onTap: (text) {
+                              _searchController.text = text;
+                              _performSearch(text);
+                            },
+                            onSuggestionSelected: (selectedText) {
+                              _searchController.text = selectedText;
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  }
+
                   if (state is ErrorState) {
                     return Center(
                       child: Text(
@@ -172,34 +210,7 @@ class SearchScreenState extends State<SearchScreen> {
                       ),
                     );
                   }
-                  if (state is SearchSuggestionResultState) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: screenSize * 0.0105,
-                        vertical: screenSize * 0.0200,
-                      ),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: state.searchSuggestions.length,
-                        itemBuilder: (context, index) {
-                          final suggestion = state.searchSuggestions[index];
-                          return SuggestionTitle(
-                            onTap:(text) {
-                          _searchController.text=text;
-                              _performSearch(text);
 
-                            },
-                            text: suggestion,
-                            size: screenSize,
-                            onSuggestionSelected: (selectedText) {
-                              _searchController.text = selectedText;
-                              //  _performSearch(selectedText);
-                            },
-                          );
-                        },
-                      ),
-                    );
-                  }
                   return const SizedBox();
                 },
               ),
@@ -212,17 +223,20 @@ class SearchScreenState extends State<SearchScreen> {
 
   void _performSearch(String query) async {
     if (query.isEmpty) return;
-    
-    // Add to recent searches
-    context.read<SearchBloc>().add(AddRecentSearchEvent(search: query));
-    
-    // Trigger the search
+
+    context.read<SearchBloc>().add(
+          AddRecentSearchEvent(search: query),
+        );
+
     context.read<songbloc.SongBloc>().add(
           songbloc.SeachInSongEvent(inputText: query),
         );
-    
-    // Navigate directly
-    final result = await context.pushNamed(RouterName.searchResultName, extra: query);
+
+    final result = await context.pushNamed(
+      RouterName.searchResultName,
+      extra: query,
+    );
+
     if (result == true) {
       _searchFocusNode.requestFocus();
     }

@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
@@ -15,6 +14,7 @@ import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
 
 class RecentSongTile extends StatefulWidget {
@@ -24,6 +24,7 @@ class RecentSongTile extends StatefulWidget {
   final List<Songmodel>? playlistSongs;
   final bool showDelete;
   final bool isCurrent;
+  final String? playlistName;
 
   const RecentSongTile({
     super.key,
@@ -33,6 +34,7 @@ class RecentSongTile extends StatefulWidget {
     this.playlistSongs,
     this.showDelete = true,
     this.isCurrent = false,
+    this.playlistName,
   });
 
   @override
@@ -81,13 +83,13 @@ class _RecentSongTileState extends State<RecentSongTile> {
           tabRouteENUM: widget.tabRouteENUM,
           menuType: SongMenuType.recent,
           showDelete: widget.showDelete,
-          customDeleteText: widget.showDelete ? "Delete from Downloads" : null,
+          customDeleteText: widget.showDelete ? "Remove from Downloads" : null,
           onCustomDelete: widget.showDelete
               ? () {
                   context.read<OfflineSongsBloc>().add(
                         DeleteDownloadedSongEvent(songData: widget.songData),
                       );
-                  showSnackbar(context, "Deleted from downloads");
+                  showSnackbar(context, "Removed from downloads");
                 }
               : null,
         );
@@ -98,13 +100,34 @@ class _RecentSongTileState extends State<RecentSongTile> {
           tabRouteENUM: widget.tabRouteENUM,
           menuType: SongMenuType.recent,
           showDelete: widget.showDelete,
-          customDeleteText: widget.showDelete ? "Delete from Favorites" : null,
+          customDeleteText: widget.showDelete ? "Remove from Favorites" : null,
           onCustomDelete: widget.showDelete
               ? () {
                   context.read<FavoritesBloc>().add(
                         RemoveFromFavoritesEvent(vId: widget.songData.vId),
                       );
                   showSnackbar(context, "Removed from favorites");
+                }
+              : null,
+        );
+      case TabRouteENUM.playlist:
+        return SongOptionsMenu(
+          songData: widget.songData,
+          screenSize: screenHeight,
+          tabRouteENUM: widget.tabRouteENUM,
+          menuType: SongMenuType.recent,
+          showDelete: widget.showDelete,
+          playlistName: widget.playlistName,
+          customDeleteText: widget.showDelete ? "Remove from Playlist" : null,
+          onCustomDelete: widget.showDelete
+              ? () {
+                  context.read<UserPlaylistBloc>().add(
+                        DeleteSongUserPlaylistEvent(
+                          playlistName: widget.playlistName ?? "",
+                          vId: widget.songData.vId,
+                        ),
+                      );
+                  showSnackbar(context, "Removed from playlist");
                 }
               : null,
         );
@@ -118,7 +141,6 @@ class _RecentSongTileState extends State<RecentSongTile> {
         );
     }
   }
-
 
   void _showOptionsMenu(BuildContext context) {
     final RenderBox? renderBox =

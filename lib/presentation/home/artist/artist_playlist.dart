@@ -5,26 +5,10 @@ import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 
-class ArtistPlaylist extends StatefulWidget {
+class ArtistPlaylist extends StatelessWidget {
   final ArtistModel artist;
 
   const ArtistPlaylist({required this.artist, super.key});
-
-  @override
-  State<ArtistPlaylist> createState() => _ArtistPlaylistState();
-}
-
-class _ArtistPlaylistState extends State<ArtistPlaylist> {
-  @override
-  void initState() {
-    final currentState = context.read<FullArtistPlaylistBloc>().state;
-    if (currentState.runtimeType != FullArtistPlaylistDataState) {
-      context.read<FullArtistPlaylistBloc>().add(
-          GetFullArtistPlaylistEvent(inputText: widget.artist.artist.name));
-    }
-
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

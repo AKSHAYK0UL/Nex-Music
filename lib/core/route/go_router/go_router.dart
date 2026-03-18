@@ -12,6 +12,8 @@ import 'package:nex_music/presentation/home/screen/home_screen.dart';
 import 'package:nex_music/presentation/home/screen/show_all_generic.dart';
 import 'package:nex_music/presentation/home/screen/showallalbums.dart';
 import 'package:nex_music/presentation/home/screen/showallplaylists.dart';
+import 'package:nex_music/model/artistmodel.dart';
+import 'package:nex_music/presentation/home/artist/artist_full.dart';
 import 'package:nex_music/presentation/playlist/screen/showplaylist.dart';
 import 'package:nex_music/presentation/podcast/screens/podcast_screen.dart';
 import 'package:nex_music/presentation/recent/screens/recentscreen.dart';
@@ -114,6 +116,16 @@ class AppRouter {
                         final extra = state.extra as PlayListmodel;
                         return ShowPlaylist(
                           playlistData: extra,
+                        );
+                      },
+                    ),
+                    GoRoute(
+                      path: RouterPath.artistRoute,
+                      name: RouterName.artistName,
+                      builder: (context, state) {
+                        final artist = state.extra as ArtistModel;
+                        return ArtistFullScreen(
+                          artist: artist,
                         );
                       },
                     ),
@@ -340,6 +352,7 @@ class RouterPath {
   static const String offlineDownloadsRoute = '/offline_downloads';
   static const String podcastsRoute = '/podcasts';
   static const String audioBooksRoute = '/audio-books';
+  static const String artistRoute = 'artist';
 }
 
 // Name class
@@ -372,4 +385,5 @@ class RouterName {
   static const String offlineDownloadsName = 'offlineDownloads';
   static const String podcastsName = 'podcasts';
   static const String audioBooksName = 'audioBooks';
+  static const String artistName = 'artist';
 }
