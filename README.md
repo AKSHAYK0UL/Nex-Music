@@ -3,44 +3,44 @@
 <table>
   <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/4b100cfe-beaa-4b83-9d39-8a2cb2976396" alt="NEX Music Screenshot 1" width="300" />
+      <img src="https://github.com/user-attachments/assets/dc79681b-08f3-4797-a00f-3bc833244c2b" alt="NEX Music Screenshot 1" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/12e0c345-c7e2-419b-b357-59ce41ccdc40" alt="NEX Music Screenshot 2" width="300" />
+      <img src="https://github.com/user-attachments/assets/a13225fe-ea8a-4318-9d5b-7e5c82eb9028" alt="NEX Music Screenshot 2" width="300" />
     </td>
   </tr>
   <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/c9a8c69f-0f77-4335-b523-b756c341c04f" alt="NEX Music Screenshot 3" width="300" />
+      <img src="https://github.com/user-attachments/assets/90db44ee-1a5b-4119-b7d2-75c13943dc2d" alt="NEX Music Screenshot 3" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/b91602f7-c6f1-410a-8e77-6203cf988d10" alt="NEX Music Screenshot 4" width="300" />
-    </td>
-  </tr>
-   <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/c0296ebb-f028-42f7-9b27-1b8a4abe3be6" alt="NEX Music Screenshot 5" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/4642f458-4359-45ef-8ae9-ce79dab18649" alt="NEX Music Screenshot 6" width="300" />
+      <img src="https://github.com/user-attachments/assets/e07b580d-3ea7-422c-8590-8ed3310afb77" alt="NEX Music Screenshot 4" width="300" />
     </td>
   </tr>
    <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/62c96cb5-04a6-44fe-b420-56583ded3e43" alt="NEX Music Screenshot 5" width="300" />
+      <img src="https://github.com/user-attachments/assets/aeafd237-2118-402f-a35f-7f0dec88f1ad" alt="NEX Music Screenshot 5" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/951199fc-f06c-4ddc-a2a4-09814e21cb94" alt="NEX Music Screenshot 6" width="300" />
+      <img src="https://github.com/user-attachments/assets/9a1f24fc-6f7e-461a-9b93-aa8091a7d14a" alt="NEX Music Screenshot 6" width="300" />
+    </td>
+  </tr>
+   <tr>
+    <td align="center" style="padding: 20px;">
+      <img src="https://github.com/user-attachments/assets/e7cfa8d2-c7b0-4bd0-ab60-d6c3bb285081" alt="NEX Music Screenshot 5" width="300" />
+    </td>
+    <td align="center" style="padding: 20px;">
+      <img src="https://github.com/user-attachments/assets/b5d872de-536b-47ff-8a4f-adf36d486893" alt="NEX Music Screenshot 6" width="300" />
     </td>
   </tr>
 
 
  <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/d377f0e6-13d6-4b1a-98ff-f6824a2a7894" alt="NEX Music Screenshot 5" width="300" />
+      <img src="https://github.com/user-attachments/assets/65239245-3cc8-4250-b818-6684932a2a38" alt="NEX Music Screenshot 5" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/1e503c25-46ae-4691-8f4d-9120b3649ff2" alt="NEX Music Screenshot 6" width="300" />
+      <img src="https://github.com/user-attachments/assets/5431d35b-7132-4a52-aca5-621c984121f4" alt="NEX Music Screenshot 6" width="300" />
     </td>
   </tr>
 
@@ -48,44 +48,37 @@
   
   <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/b0e0492d-5756-4c2a-84d7-cb136129817c" alt="NEX Music Screenshot 7" width="300" />
+      <img src="https://github.com/user-attachments/assets/32b3a4f4-4810-4037-b659-ddde04d4780d" alt="NEX Music Screenshot 7" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/422bf49e-30f1-4d6c-ba20-486e4365b21c" alt="NEX Music Screenshot 8" width="300" />
+      <img src="https://github.com/user-attachments/assets/a0dda412-5bb0-41d8-88cc-2fa116c06752" alt="NEX Music Screenshot 8" width="300" />
     </td>
   </tr>
     <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/99dea2a1-c1ec-40e8-b77a-21ff0a391960" alt="NEX Music Screenshot 9" width="300" />
+      <img src="https://github.com/user-attachments/assets/4cad55da-6b22-44d3-baac-b5233fd1fae7" alt="NEX Music Screenshot 9" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/c41538ab-3999-4403-9d95-ca8f3da8991b" alt="NEX Music Screenshot 10" width="300" />
+      <img src="https://github.com/user-attachments/assets/14d8d6b2-60b9-4551-921c-73720e462f4d" alt="NEX Music Screenshot 10" width="300" />
     </td>
   </tr>
    <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/6f7fb1d4-d9aa-47df-91a4-65e3d610bb03" alt="NEX Music Screenshot 11" width="300" />
+      <img src="https://github.com/user-attachments/assets/8127c44f-5852-48c4-beb1-3a112f091b1a" alt="NEX Music Screenshot 11" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/7182d3f4-d8da-4eb7-93d8-062e2a0d5e7b" alt="NEX Music Screenshot 12" width="300" />
+      <img src="https://github.com/user-attachments/assets/1da10115-5088-4cc6-8f68-ae965e9c7009" alt="NEX Music Screenshot 12" width="300" />
     </td>
   </tr>
    <tr>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/4da79677-1cee-468a-8d86-ddad6ff1d5f7" alt="NEX Music Screenshot 13" width="300" />
+      <img src="https://github.com/user-attachments/assets/9399e0dc-ea4d-45e1-acdd-612a3a853afe" alt="NEX Music Screenshot 13" width="300" />
     </td>
     <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/3cddca62-5152-4d10-bdb6-365f740f5ba2" alt="NEX Music Screenshot 14" width="300" />
+      <img src="https://github.com/user-attachments/assets/34607105-2e1d-45f5-bf1f-f06f8d1a54ee" alt="NEX Music Screenshot 14" width="300" />
     </td>
   </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/103c8941-037a-4909-81ec-a23f08aa9691" alt="NEX Music Screenshot 15" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="https://github.com/user-attachments/assets/412a8d7a-91f5-42d3-9cf8-98ab2a99c31f" alt="NEX Music Screenshot 16" width="300" />
-    </td>
-  </tr>
+ 
 </table>
 
 ---
