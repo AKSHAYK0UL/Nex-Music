@@ -56,11 +56,11 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
 
                   baseBarColor: Colors.grey.shade400,
                   bufferedBarColor: Colors.grey.shade500,
-                  progressBarColor: Colors.black87,
-                  thumbColor: Colors.black,
+                  progressBarColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.85),
+                  thumbColor: Theme.of(context).colorScheme.onSurface,
 
-                  timeLabelTextStyle: const TextStyle(
-                    color: Colors.black, 
+                  timeLabelTextStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 14, 
                     fontWeight: FontWeight.w600, 
                     fontFeatures: [

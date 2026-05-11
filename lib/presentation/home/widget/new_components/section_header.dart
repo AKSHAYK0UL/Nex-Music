@@ -22,13 +22,13 @@ class SectionHeader extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
-                      fontFamily: 'serif',
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                      letterSpacing: -0.5,
-                    ),
+              style: TextStyle(
+                fontFamily: 'serif',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+                letterSpacing: -0.5,
+              ),
             ),
             if (onTap != null)
               const Text(

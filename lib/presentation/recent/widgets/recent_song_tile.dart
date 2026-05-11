@@ -311,7 +311,7 @@ class _RecentSongTileState extends State<RecentSongTile> {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Colors.grey.shade300,
+                      color: Theme.of(context).dividerColor,
                       width: 0.5,
                     ),
                   ),
@@ -325,10 +325,10 @@ class _RecentSongTileState extends State<RecentSongTile> {
                         children: [
                           animatedText(
                             text: widget.songData.songName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -337,7 +337,7 @@ class _RecentSongTileState extends State<RecentSongTile> {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w400,
-                              color: Colors.grey.shade600,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
                             ),
                           ),
                         ],

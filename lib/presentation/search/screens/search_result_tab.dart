@@ -26,12 +26,10 @@ class _SearchResultTabState extends State<SearchResultTab> {
     return DefaultTabController(
       length: 5,
       child: Scaffold(
-        backgroundColor: Colors.white,
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverAppBar(
-                backgroundColor: Colors.white,
                 surfaceTintColor: Colors.transparent,
                 pinned: true,
                 floating: false,

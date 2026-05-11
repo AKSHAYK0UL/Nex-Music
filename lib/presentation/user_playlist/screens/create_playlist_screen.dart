@@ -77,15 +77,11 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     const double expandedBarHeight = 110.0;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: CustomScrollView(
+    return Scaffold(      body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           //  Sliver App Bar 
-          SliverAppBar(
-            backgroundColor: Colors.white,
-            surfaceTintColor: Colors.transparent,
+          SliverAppBar(            surfaceTintColor: Colors.transparent,
             elevation: 0,
             pinned: true,
             stretch: true,

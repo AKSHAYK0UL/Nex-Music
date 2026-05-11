@@ -54,12 +54,8 @@ class RepositoryProviderClass {
       RepositoryProvider(
         create: (context) => DbRepository(
           dbDataProvider: DbNetworkProvider(
-            // firestoreInstance: FirebaseFirestore.instance,
             firestoreInstance: firebaseFirestore,
             userId: firebaseAuthInstance.currentUser!.uid,
-            // collections: {
-            //   CollectionEnum.recentPlayed: "recentPlayed",
-            // },
           ),
           favoritesDBProvider: FavoritesDBProvider(
             firestoreInstance: firebaseFirestore,

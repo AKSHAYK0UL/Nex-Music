@@ -36,6 +36,7 @@ import 'package:nex_music/bloc/sleep_timer_bloc/bloc/sleep_timer_bloc.dart';
 import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
+import 'package:nex_music/bloc/theme_bloc/bloc/theme_bloc.dart';
 import 'package:nex_music/bloc/upnext_bloc/upnext_bloc.dart';
 import 'package:nex_music/bloc/user_logged_bloc/bloc/user_logged_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
@@ -91,6 +92,7 @@ Future<void> main() async {
 
   await Hive.openBox<HiveQuality>(qualitySettingsBox);
   await Hive.openBox<bool>(thinkBox);
+  await Hive.openBox<bool>(themeBox);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final audioHandler = await AudioService.init(
     builder: () => AudioPlayerHandler(audioPlayer),
@@ -271,6 +273,10 @@ class MyApp extends StatelessWidget {
             ),
           ),
           BlocProvider(create: (context) => QualityBloc(dbInstance)),
+          BlocProvider(
+            create: (context) =>
+                ThemeBloc(dbInstance)..add(GetThemeEvent()),
+          ),
         ],
         child: BlocListener<UserLoggedBloc, UserLoggedState>(
           listenWhen: (previous, current) => previous is LoggedInState && current is! LoggedInState,
@@ -280,16 +286,19 @@ class MyApp extends StatelessWidget {
           },
           child: BlocBuilder<UserLoggedBloc, UserLoggedState>(
             builder: (context, state) {
+              final themeState = context.watch<ThemeBloc>().state;
+              final isDark = themeState is ThemeLoadedState ? themeState.isDark : false;
+              final theme = themeData(context, isDark: isDark);
+
               if (state is LoggedInState) {
-                // User is logged in, get cached router (or create new one)
                 final router = AppRouter.createRouter(
                   repositoryProviderClassInstance.getFirebaseAuthInstance.currentUser!,
                 );
-                
+
                 return MaterialApp.router(
                   debugShowCheckedModeBanner: false,
                   title: 'Nex Music',
-                  theme: themeData(context),
+                  theme: theme,
                   routerConfig: router,
                   builder: (context, child) {
                     return GlobalDownloadListenerWrapper(
@@ -302,16 +311,13 @@ class MyApp extends StatelessWidget {
                   },
                 );
               } else {
-                // User is not logged in, show auth screen
                 return MaterialApp(
                   debugShowCheckedModeBanner: false,
                   title: 'Nex Music',
-                  theme: themeData(context),
+                  theme: theme,
                   home: const AuthScreen(),
                   builder: (context, child) {
-                    return GlobalDownloadListenerWrapper(
-                      child: child!,
-                    );
+                    return GlobalDownloadListenerWrapper(child: child!);
                   },
                 );
               }

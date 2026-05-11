@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/theme/app_colors.dart';
 
-SegmentedButtonThemeData segmentedButtonTheme(BuildContext context) {
+SegmentedButtonThemeData segmentedButtonTheme({bool isDark = false}) {
   return SegmentedButtonThemeData(
     style: ButtonStyle(
       backgroundColor: WidgetStateProperty.resolveWith<Color>(
         (Set<WidgetState> states) {
           if (states.contains(WidgetState.selected)) {
-            return Colors.grey.shade700;
+            return isDark ? Colors.grey.shade600 : Colors.grey.shade700;
           }
-          return secondaryColor;
+          return AppColors.surface(isDark);
         },
       ),
       shape: WidgetStateProperty.resolveWith<OutlinedBorder?>(
-        (_) {
-          return RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.5));
-        },
+        (_) => RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.5)),
       ),
     ),
   );

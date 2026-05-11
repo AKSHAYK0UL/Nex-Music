@@ -103,7 +103,6 @@ class _SongFilterWrapperState extends State<SongFilterWrapper> {
         _sortType == SongSortType.timeAsc || _sortType == SongSortType.timeDesc;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

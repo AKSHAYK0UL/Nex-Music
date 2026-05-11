@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -15,6 +16,13 @@ class DbRepository {
   final SavedArtistsDBProvider _savedArtistsDBProvider;
   final SearchHistoryDBProvider _searchHistoryDBProvider;
 
+  // Tracks the last buffered vId to avoid duplicate entries for the same song.
+  String? _lastBufferedVId;
+  
+  // Timer to ensure song has been playing for at least 350ms before adding to recent.
+  Timer? _recentPlayedTimer;
+  String? _pendingRecentVId;
+
   DbRepository({
     required DbNetworkProvider dbDataProvider,
     required FavoritesDBProvider favoritesDBProvider,
@@ -27,21 +35,43 @@ class DbRepository {
         _savedArtistsDBProvider = savedArtistsDBProvider,
         _searchHistoryDBProvider = searchHistoryDBProvider;
 
-  //Add recent Played
+  // Adds a recently played song to Firebase with microsecond timestamp
+  // for precise ordering Only adds the song if it has been playing for
+  // at least 350ms (prevents quick skips from polluting history).
   Future<void> addToRecentPlayedCollection(Songmodel songData) async {
-    await _dbDataProvider.addToRecentPlayedCollection(songData.toJson());
-  }
+    // Cancel any pending timer from a previous song
+    _recentPlayedTimer?.cancel();
+    
+    // Track this song as pending
+    _pendingRecentVId = songData.vId;
+    
+    // Wait 350ms before adding to recent
+    _recentPlayedTimer = Timer(const Duration(milliseconds: 350), () async {
+      // Only add if this is still the current song (user didn't skip)
+      if (_pendingRecentVId != songData.vId) return;
+      
+      // Skip duplicate rapid calls for the same song.
+      if (_lastBufferedVId == songData.vId) return;
+      _lastBufferedVId = songData.vId;
 
-  //Get recent Played
-  Stream<List<Songmodel>> getRecentPlayed() {
-    final recentPlayedStream = _dbDataProvider.getRecentPlayed();
-    return recentPlayedStream.map((querySnapshot) {
-      return querySnapshot.docs.map((doc) {
-        return Songmodel.fromJson(doc.data() as Map<String, dynamic>);
-      }).toList();
+      final songMap = songData.toJson();
+      // Use microseconds for more precise ordering
+      songMap['timestamp'] = DateTime.now().microsecondsSinceEpoch;
+
+      await _dbDataProvider.addToRecentPlayedCollection(songMap);
     });
   }
 
+  // Returns a stream of recently played songs from Firestore.
+  Stream<List<Songmodel>> getRecentPlayed() {
+    return _dbDataProvider.getRecentPlayed().map(
+      (snapshot) => snapshot.docs
+          .map((doc) => Songmodel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  // Deletes a song from Firestore.
   Future<void> deleteRecentPlayedSong(String vId) async {
     await _dbDataProvider.deleteRecentPlayedSong(vId);
   }

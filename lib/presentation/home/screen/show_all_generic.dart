@@ -21,12 +21,10 @@ class ShowAllGeneric extends StatelessWidget {
     const double expandedBarHeight = 110.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            backgroundColor: Colors.white,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
             pinned: true,
@@ -151,7 +149,7 @@ opacity: expandRatio,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.music_note_rounded, size: 80, color: Colors.grey.withOpacity(0.3)),
+          Icon(Icons.music_note_rounded, size: 80, color: Colors.grey.withValues(alpha:0.3)),
           const SizedBox(height: 16),
           const Text(
             "Nothing here",

@@ -87,12 +87,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
       builder: (context, playlistState) {
         if (playlistState is ErrorState) {
           return Scaffold(
-            backgroundColor: Colors.white,
             appBar: AppBar(
-              backgroundColor: Colors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(CupertinoIcons.back, color: Colors.black),
+                icon: const Icon(CupertinoIcons.back),
                 onPressed: () => context.pop(),
               ),
             ),
@@ -124,7 +122,6 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
         }
 
         return Scaffold(
-          backgroundColor: Colors.white,
           body: CustomScrollView(
             controller: _scrollController,
             physics: const BouncingScrollPhysics(),
@@ -134,8 +131,6 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 expandedHeight: expandedHeight,
                 pinned: true,
                 stretch: true,
-                backgroundColor: Colors.white,
-                surfaceTintColor: Colors.white,
                 elevation: 0,
                 scrolledUnderElevation: 4.0,
                 systemOverlayStyle: SystemUiOverlayStyle.dark,

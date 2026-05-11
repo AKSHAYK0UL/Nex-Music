@@ -44,7 +44,7 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
                 maxHeight: MediaQuery.of(context).size.height * 0.8,
               ),
               decoration: BoxDecoration(
-                color: const Color(0xFFF2F2F7).withValues(alpha: 0.75),
+                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -91,7 +91,6 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
               fontSize: 22,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.5,
-              color: Colors.black,
             ),
           ),
           CupertinoButton(

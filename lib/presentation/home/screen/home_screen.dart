@@ -41,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
         if (state is HomeSectionStateData) {
           return Scaffold(
-            backgroundColor: Colors.white,
             body: _HomeLayout(
               child: _buildBody( context,state),
             ),
@@ -395,7 +394,6 @@ class _HomeLayout extends StatelessWidget {
       ),
       slivers: [
         const SliverAppBar(
-          backgroundColor: Colors.white,
           elevation: 0,
           pinned: true,
           expandedHeight: 80.0,
@@ -407,7 +405,6 @@ class _HomeLayout extends StatelessWidget {
                 fontFamily: 'serif',
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
                 letterSpacing: -0.5,
               ),
             ),

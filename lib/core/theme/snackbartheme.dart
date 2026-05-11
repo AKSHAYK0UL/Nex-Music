@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/theme/app_colors.dart';
 
-SnackBarThemeData snackBarTheme(double screenSize) {
+SnackBarThemeData snackBarTheme(double screenSize, {bool isDark = false}) {
   return SnackBarThemeData(
     behavior: SnackBarBehavior.fixed,
-    actionTextColor: textColor,
-    backgroundColor: secondaryColor,
+    actionTextColor: AppColors.text(isDark),
+    backgroundColor: AppColors.snackBar(isDark),
     contentTextStyle: TextStyle(
-      color: textColor,
+      color: AppColors.text(isDark),
       fontSize: screenSize * 0.0244,
       fontWeight: FontWeight.normal,
     ),

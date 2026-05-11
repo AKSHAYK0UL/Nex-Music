@@ -98,19 +98,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
 
   @override
   void initState() {
-    // Set status bar style for audio player
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Colors.white,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarColor: Colors.white,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ));
-
     context.read<UserPlaylistBloc>().add(GetUserPlaylistsEvent());
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // final routeData =
-      //     ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
       Songmodel songData = widget.routeData["songdata"] as Songmodel;
       context.read<FavoritesBloc>().add(IsFavoritesEvent(vId: songData.vId));
 
@@ -261,7 +250,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                 child: _SwipeUpDetector(
                   onSwipeUp: () => _showUpcomingSongsBottomSheet(context),
                   child: ColoredBox(
-                    color: Colors.white,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     child: Column(
                       children: [
                         SizedBox(height: screenSize * 0.01),
@@ -271,7 +260,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                             width: 40,
                             height: 5,
                             decoration: BoxDecoration(
-                              color: Colors.black54,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
@@ -376,11 +365,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                         }
                                         return animatedText(
                                           text: currentSongData.songName,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: 'Serif',
                                             fontSize: 22,
                                             fontWeight: FontWeight.bold,
-                                            color: Colors.black,
+                                            color: Theme.of(context).colorScheme.onSurface,
                                           ),
                                         );
                                       },

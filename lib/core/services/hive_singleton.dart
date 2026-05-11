@@ -49,7 +49,13 @@ class HiveDataBaseSingleton {
     return box;
   }
 
-//update
+  // THEME Box
+  Box<bool> get getThemeBox {
+    final box = Hive.box<bool>(themeBox);
+    return box;
+  }
+
+  //update
   Future<void> saveRecommendation(bool value) async {
     try {
       final box = getThinkBox;
@@ -66,6 +72,27 @@ class HiveDataBaseSingleton {
   //status
   bool get recommendationStatus {
     final box = getThinkBox;
+    return box.values.first;
+  }
+
+  // Save dark mode preference
+  Future<void> saveDarkMode(bool isDark) async {
+    try {
+      final box = getThemeBox;
+      if (box.isEmpty) {
+        await box.add(isDark);
+      } else {
+        await box.putAt(0, isDark);
+      }
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  // Get dark mode preference (defaults to false -> light)
+  bool get isDarkMode {
+    final box = getThemeBox;
+    if (box.isEmpty) return false;
     return box.values.first;
   }
 }

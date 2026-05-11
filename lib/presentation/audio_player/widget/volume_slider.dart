@@ -41,7 +41,7 @@ class VolumeSlider extends StatelessWidget {
                               ? CupertinoIcons.speaker_2_fill
                               : CupertinoIcons.speaker_3_fill,
                   size: 20,
-                  color: Colors.black,
+                color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               Expanded(

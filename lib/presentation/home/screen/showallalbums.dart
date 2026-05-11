@@ -13,9 +13,7 @@ class ShowAllAlbums extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
           "New Albums",
@@ -24,7 +22,7 @@ class ShowAllAlbums extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: BlocBuilder<HomesectionBloc, HomesectionState>(
         buildWhen: (previous, current) => previous != current,

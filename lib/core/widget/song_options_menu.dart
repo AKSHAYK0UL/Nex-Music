@@ -10,6 +10,7 @@ import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
+import 'package:nex_music/helper_function/check_song_downloaded/check_song_downloaded.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
@@ -369,64 +370,67 @@ class SongOptionsMenu extends StatelessWidget {
   }
 
   Widget _buildDownloadMenuItem(BuildContext context, {bool isLast = false}) {
-    // Check if song is already downloaded
-    final isDownloaded = songData.isLocal;
+    return FutureBuilder<bool>(
+      future: isSongDownloaded(songData),
+      builder: (context, snapshot) {
+        // Check actual file existence, not just songData.isLocal
+        final isDownloaded = snapshot.data ?? false;
 
-    return BlocBuilder<DownloadBloc, DownloadState>(
-      builder: (context, state) {
-        final isDownloading = state is DownloadPercantageStatusState;
+        return BlocBuilder<DownloadBloc, DownloadState>(
+          builder: (context, state) {
+            final isDownloading = state is DownloadPercantageStatusState;
 
-        if (isDownloading) {
-          return StreamBuilder<double>(
-            stream: state.percentageStream,
-            builder: (context, snapshot) {
-              final progress = snapshot.data ?? 0.0;
+            if (isDownloading) {
+              return StreamBuilder<double>(
+                stream: state.percentageStream,
+                builder: (context, snapshot) {
+                  final progress = snapshot.data ?? 0.0;
+                  return _buildMenuItem(
+                    "Downloading... ${progress.toInt()}%",
+                    CupertinoIcons.cloud_download,
+                    textColor: Colors.grey,
+                    iconColor: Colors.grey,
+                    onTap: null,
+                    isLast: isLast,
+                  );
+                },
+              );
+            } else if (isDownloaded) {
+              if (tabRouteENUM == TabRouteENUM.download) {
+                return const SizedBox.shrink();
+              }
+
               return _buildMenuItem(
-                "Downloading... ${progress.toInt()}%",
-                CupertinoIcons.cloud_download,
-                textColor: Colors.grey,
-                iconColor: Colors.grey,
-                onTap: null,
+                "Remove from Downloads",
+                CupertinoIcons.trash,
+                textColor: const Color(0xFFFF3B30),
+                iconColor: const Color(0xFFFF3B30),
+                onTap: () {
+                  Navigator.pop(context);
+                  context.read<OfflineSongsBloc>().add(
+                        DeleteDownloadedSongEvent(songData: songData),
+                      );
+                  showSnackbar(context, "Removed from downloads");
+                },
                 isLast: isLast,
               );
-            },
-          );
-        } else if (isDownloaded) {
-          // Song is already downloaded - show "Remove from Downloads" in red
-          // Skip if already showing custom delete for Downloads
-          if (tabRouteENUM == TabRouteENUM.download) {
-            return const SizedBox.shrink();
-          }
-
-          return _buildMenuItem(
-            "Remove from Downloads",
-            CupertinoIcons.trash,
-            textColor: const Color(0xFFFF3B30),
-            iconColor: const Color(0xFFFF3B30),
-            onTap: () {
-              Navigator.pop(context);
-              context.read<OfflineSongsBloc>().add(
-                    DeleteDownloadedSongEvent(songData: songData),
-                  );
-              showSnackbar(context, "Removed from downloads");
-            },
-            isLast: isLast,
-          );
-        } else {
-          return _buildMenuItem(
-            "Download",
-            CupertinoIcons.cloud_download,
-            textColor: Colors.black,
-            iconColor: Colors.black87,
-            onTap: () {
-              Navigator.pop(context);
-              context.read<DownloadBloc>().add(
-                    DownloadSongEvent(songData: songData),
-                  );
-            },
-            isLast: isLast,
-          );
-        }
+            } else {
+              return _buildMenuItem(
+                "Download",
+                CupertinoIcons.cloud_download,
+                textColor: Colors.black,
+                iconColor: Colors.black87,
+                onTap: () {
+                  Navigator.pop(context);
+                  context.read<DownloadBloc>().add(
+                        DownloadSongEvent(songData: songData),
+                      );
+                },
+                isLast: isLast,
+              );
+            }
+          },
+        );
       },
     );
   }

@@ -37,11 +37,12 @@ class _MiniPlayerState extends State<MiniPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    const kAppleWhite = Color(0xFFF9F9F9); 
-    const kAppleDivider = Color(0xFFE5E5EA); 
-    const kAppleTitleColor = Color(0xFF000000); 
-    const kAppleSubtitleColor = Color(0xFF8E8E93); 
-    const kAppleAccent = Color(0xFFFA2D48); 
+    final theme = Theme.of(context);
+    final bgColor = theme.scaffoldBackgroundColor;
+    final titleColor = theme.colorScheme.onSurface;
+    final subtitleColor = theme.colorScheme.onSurface.withValues(alpha: 0.55);
+    final dividerColor = theme.dividerColor;
+    const kAppleAccent = Color(0xFFFA2D48);
 
     return BlocBuilder<SongstreamBloc, SongstreamState>(
       builder: (context, state) {
@@ -50,7 +51,6 @@ class _MiniPlayerState extends State<MiniPlayer> {
         }
         Songmodel? songData;
 
-        // Handle States
         if (state is PlayingState) {
           songData = state.songData;
         } else if (state is PausedState) {
@@ -58,7 +58,6 @@ class _MiniPlayerState extends State<MiniPlayer> {
         } else if (state is LoadingState) {
           songData = state.songData;
         }
-        
 
         if (songData != null) {
           void navigateToAudioPlayer() {
@@ -73,34 +72,20 @@ class _MiniPlayerState extends State<MiniPlayer> {
             );
           }
           return GestureDetector(
-            // onTap: () {
-            //   pushWithoutNavBar(
-            //     context,
-            //     slideTransitionRoute(
-            //         context: context,
-            //         songData: songData!,
-            //         route: SongMiniPlayerRoute.miniPlayerRoute,
-            //         quality: quality),
-            //   );
-            // },
             onTap: navigateToAudioPlayer,
             onVerticalDragEnd: (details) {
-              // PrimaryVelocity < 0 indicates an upward swipe
               if (details.primaryVelocity! < 0) {
                 navigateToAudioPlayer();
               }
             },
             child: Container(
-              height: 64, 
-              decoration: const BoxDecoration(
-                color: kAppleWhite,
+              height: 64,
+              decoration: BoxDecoration(
+                color: bgColor,
                 border: Border(
-                  top: BorderSide(
-                    color: kAppleDivider,
-                    width: 0.5, 
-                  ),
+                  top: BorderSide(color: dividerColor, width: 0.5),
                 ),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
                     offset: Offset(0, -1),
@@ -110,15 +95,13 @@ class _MiniPlayerState extends State<MiniPlayer> {
               ),
               child: Stack(
                 children: [
-                  // Main Content
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Row(
                       children: [
-                        // Album Art with Shadow
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: bgColor,
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
@@ -133,22 +116,16 @@ class _MiniPlayerState extends State<MiniPlayer> {
                             child: SizedBox(
                               width: 48,
                               height: 48,
-                              child: Transform.scale(
-                                scale: 1.0, // Clean scaling
-                                child: cacheImage(
-                                  imageUrl: songData.thumbnail,
-                                  width: 48,
-                                  height: 48,
-                                  islocal: songData.isLocal,
-                                ),
+                              child: cacheImage(
+                                imageUrl: songData.thumbnail,
+                                width: 48,
+                                height: 48,
+                                islocal: songData.isLocal,
                               ),
                             ),
                           ),
                         ),
-                        
                         const SizedBox(width: 14),
-
-                        // Title and Artist
                         Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -156,41 +133,38 @@ class _MiniPlayerState extends State<MiniPlayer> {
                             children: [
                               animatedText(
                                 text: songData.songName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: '.SF Pro Text',
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
-                                  color: kAppleTitleColor,
+                                  color: titleColor,
                                   letterSpacing: -0.4,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               animatedText(
                                 text: songData.artist.name,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: '.SF Pro Text',
                                   fontSize: 13,
                                   fontWeight: FontWeight.w400,
-                                  color: kAppleSubtitleColor,
+                                  color: subtitleColor,
                                 ),
                               ),
                             ],
                           ),
                         ),
-
-                        // Controls
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Play/Pause Button
                             if (state is LoadingState)
-                               Container(
+                              Container(
                                 width: 20,
                                 height: 20,
-                                margin:const  EdgeInsets.symmetric(horizontal: 15),
-                                child:const CircularProgressIndicator(
-                                  strokeWidth:4,
-                                  color: kAppleTitleColor,
+                                margin: const EdgeInsets.symmetric(horizontal: 15),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 4,
+                                  color: titleColor,
                                 ),
                               )
                             else
@@ -201,31 +175,23 @@ class _MiniPlayerState extends State<MiniPlayer> {
                                   state is PlayingState
                                       ? CupertinoIcons.pause_fill
                                       : CupertinoIcons.play_fill,
-                                  color: kAppleTitleColor, 
+                                  color: titleColor,
                                   size: 26,
                                 ),
                                 onPressed: () {
-                                  context
-                                      .read<SongstreamBloc>()
-                                      .add(PlayPauseEvent());
+                                  context.read<SongstreamBloc>().add(PlayPauseEvent());
                                 },
                               ),
-                            
-                            // const SizedBox(width: 1),
-
-                            // Next Button
                             IconButton(
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
-                              icon: const Icon(
+                              icon: Icon(
                                 CupertinoIcons.forward_fill,
-                                color: kAppleTitleColor, 
+                                color: titleColor,
                                 size: 26,
                               ),
                               onPressed: () {
-                                context
-                                    .read<SongstreamBloc>()
-                                    .add(PlayNextSongEvent());
+                                context.read<SongstreamBloc>().add(PlayNextSongEvent());
                               },
                             ),
                           ],
@@ -233,37 +199,22 @@ class _MiniPlayerState extends State<MiniPlayer> {
                       ],
                     ),
                   ),
-
-                  // Bottom Progress Bar
                   StreamBuilder<Duration>(
                     stream: context.read<SongstreamBloc>().songPosition,
                     builder: (context, snapshot) {
-                      final duration =
-                          context.read<SongstreamBloc>().songDuration;
+                      final duration = context.read<SongstreamBloc>().songDuration;
                       final position = snapshot.data ?? Duration.zero;
-
-                      if (duration.inMilliseconds == 0) {
-                        return const SizedBox();
-                      }
-
-                      double sliderValue = 0.0;
-                      if (position.inMilliseconds > 0) {
-                        sliderValue = (position.inMilliseconds /
-                                duration.inMilliseconds)
-                            .clamp(0.0, 1.0);
-                      }
-
+                      if (duration.inMilliseconds == 0) return const SizedBox();
+                      final sliderValue = (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0);
                       return Positioned(
                         bottom: 0,
                         left: 0,
                         right: 0,
                         child: LinearProgressIndicator(
                           value: sliderValue,
-                          // backgroundColor: Colors.transparent, // Clean look
-                          valueColor:const AlwaysStoppedAnimation<Color>(kAppleAccent),
-                           backgroundColor: Colors.grey.shade400,
-                          color: kAppleSubtitleColor.withValues(alpha: 0.4), // Subtle grey progress
-                          minHeight: 2, // Very thin
+                          valueColor: const AlwaysStoppedAnimation<Color>(kAppleAccent),
+                          backgroundColor: Colors.grey.shade400,
+                          minHeight: 2,
                         ),
                       );
                     },
@@ -273,7 +224,6 @@ class _MiniPlayerState extends State<MiniPlayer> {
             ),
           );
         }
-
         return const SizedBox();
       },
     );

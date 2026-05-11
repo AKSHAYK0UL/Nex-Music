@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/theme/app_colors.dart';
 
-TabBarThemeData get tabBarTheme {
+TabBarThemeData tabBarTheme({bool isDark = false}) {
   return TabBarThemeData(
-    unselectedLabelColor: Colors.white38,
-    labelColor: textColor,
-    indicatorColor: accentColor,
+    unselectedLabelColor: isDark ? Colors.white38 : Colors.black38,
+    labelColor: AppColors.text(isDark),
+    indicatorColor: AppColors.sliderActive(isDark),
     dividerColor: Colors.transparent,
     tabAlignment: TabAlignment.fill,
     overlayColor: const WidgetStatePropertyAll(

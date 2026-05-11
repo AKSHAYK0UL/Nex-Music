@@ -25,9 +25,7 @@ class _FavoritesSongsScreenState extends State<FavoritesSongsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
         elevation: 0,
         leadingWidth: 100,
         leading: GestureDetector(

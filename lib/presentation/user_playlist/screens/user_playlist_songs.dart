@@ -93,7 +93,6 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
         : 0.0;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: BlocBuilder<UserPlaylistSongBloc, UserPlaylistSongState>(
         buildWhen: (previous, current) => previous != current,
         builder: (context, state) {
@@ -131,8 +130,6 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                     expandedHeight: expandedHeight,
                     pinned: true,
                     stretch: true,
-                    backgroundColor: Colors.white,
-                    surfaceTintColor: Colors.white,
                     elevation: 0,
                     scrolledUnderElevation: 4.0,
                     systemOverlayStyle: SystemUiOverlayStyle.dark,

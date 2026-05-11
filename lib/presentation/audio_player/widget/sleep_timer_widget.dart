@@ -40,7 +40,7 @@ class _SleepTimerWidgetState extends State<SleepTimerWidget> {
           height: 300,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFFF2F2F7).withValues(alpha: 0.75),
+            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.2),
@@ -71,7 +71,6 @@ class _SleepTimerWidgetState extends State<SleepTimerWidget> {
                     const Icon(
                       CupertinoIcons.timer,
                       size: 40,
-                      color: Colors.black,
                     ),
                   ],
                 ),
@@ -79,10 +78,10 @@ class _SleepTimerWidgetState extends State<SleepTimerWidget> {
               const SizedBox(height: 10),
               Text(
                 timerInfo.formattedRemainingTime,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontFamily: 'monospace',
                 ),
               ),
@@ -138,7 +137,7 @@ class _SleepTimerWidgetState extends State<SleepTimerWidget> {
           width: 300,
           height: 300,
           decoration: BoxDecoration(
-            color: const Color(0xFFF2F2F7).withValues(alpha: 0.75),
+            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.2),
@@ -177,9 +176,9 @@ class _SleepTimerWidgetState extends State<SleepTimerWidget> {
                     (index) => Center(
                       child: Text(
                         '${index + 1} ${index + 1 == 1 ? 'minute' : 'minutes'}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
-                          color: Colors.black,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
@@ -216,7 +215,6 @@ class _SleepTimerWidgetState extends State<SleepTimerWidget> {
                       child: const Text(
                         'Set Timer',
                         style: TextStyle(
-                          color: Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -237,10 +235,10 @@ class _SleepTimerWidgetState extends State<SleepTimerWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );

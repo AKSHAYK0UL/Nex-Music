@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
+import 'package:nex_music/core/theme/app_colors.dart';
 
-SliderThemeData sliderTheme() {
+SliderThemeData sliderTheme({bool isDark = false}) {
   return SliderThemeData(
-    activeTrackColor: accentColor,
-    thumbColor: accentColor,
+    activeTrackColor: AppColors.sliderActive(isDark),
+    thumbColor: AppColors.sliderActive(isDark),
     inactiveTrackColor: Colors.transparent,
   );
 }

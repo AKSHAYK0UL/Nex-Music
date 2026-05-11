@@ -1,5 +1,6 @@
 const qualitySettingsBox = "qualitysettingsbox";
 const thinkBox = "thinkbox";
+const themeBox = "themebox";
 const userCollection = "users";
 const recentsCollection = "recentPlayed";
 const favoritesCollection = "favorites";

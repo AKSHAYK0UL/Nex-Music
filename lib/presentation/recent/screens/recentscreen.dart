@@ -38,7 +38,6 @@ class _RecentScreenState extends State<RecentScreen> {
               // Loading State
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Scaffold(
-                  backgroundColor: Colors.white,
                   body: Center(
                     child: CupertinoActivityIndicator(
                       color: Colors.red.withValues(alpha: 0.8),
@@ -51,7 +50,6 @@ class _RecentScreenState extends State<RecentScreen> {
               // Error State
               if (snapshot.hasError) {
                 return Scaffold(
-                  backgroundColor: Colors.white,
                   body: Center(child: Text(snapshot.error.toString())),
                 );
               }
@@ -61,7 +59,6 @@ class _RecentScreenState extends State<RecentScreen> {
               // Empty State
               if (songs.isEmpty) {
                 return const Scaffold(
-                  backgroundColor: Colors.white,
                   body: Center(
                     child: Text(
                       'No recent songs played.',

@@ -89,14 +89,12 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
     return DefaultTabController(
       length: 4,
       child: Scaffold(
-        backgroundColor: Colors.white,
         body: NestedScrollView(
           controller: _scrollController,
           physics: const BouncingScrollPhysics(),
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverAppBar(
-                backgroundColor: Colors.white,
                 surfaceTintColor: Colors.transparent,
                 pinned: true,
                 floating: false,
