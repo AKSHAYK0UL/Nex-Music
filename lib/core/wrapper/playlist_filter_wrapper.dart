@@ -124,11 +124,11 @@ class _PlaylistFilterWrapperState extends State<PlaylistFilterWrapper> {
             children: [
               Text(
                 widget.title,
-                style: const TextStyle(
+                style:  TextStyle(
                   fontFamily: 'serif',
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -194,7 +194,9 @@ class _SortButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive ? Colors.black : Colors.grey,
+              color: isActive
+                  ? Theme.of(context).colorScheme.onSurface
+                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
           if (isActive) ...[
@@ -202,7 +204,7 @@ class _SortButton extends StatelessWidget {
             Icon(
               isDesc ? CupertinoIcons.arrow_down : CupertinoIcons.arrow_up,
               size: 14,
-              color: Colors.black,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ]
         ],

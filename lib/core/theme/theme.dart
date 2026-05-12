@@ -22,12 +22,17 @@ ThemeData themeData(BuildContext context, {bool isDark = false}) {
     brightness: isDark ? Brightness.dark : Brightness.light,
     canvasColor: bg,
     scaffoldBackgroundColor: bg,
+    cardColor: AppColors.card(isDark),
+    dividerColor: AppColors.divider(isDark),
+    iconTheme: IconThemeData(color: AppColors.text(isDark)),
     colorScheme: ColorScheme.fromSwatch(
       brightness: isDark ? Brightness.dark : Brightness.light,
     ).copyWith(
       primary: AppColors.primary,
       secondary: surface,
       surface: surface,
+      onSurface: AppColors.text(isDark),
+      onBackground: AppColors.text(isDark),
     ),
     appBarTheme: appBarTheme(screenSize, isDark: isDark).copyWith(
       systemOverlayStyle: SystemUiOverlayStyle(

@@ -54,6 +54,9 @@ class QualitySettingState extends State<QualitySetting> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtextColor = theme.colorScheme.onSurface.withValues(alpha: 0.7);
+
     return BlocListener<QualityBloc, QualityState>(
       listener: (context, state) {
         if (state is SuccessState) showSnackbar(context, "Changes Applied");
@@ -67,19 +70,19 @@ class QualitySettingState extends State<QualitySetting> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader("ARTWORK VISUALS"),
-            _buildGroupedContainer([
+            _buildSectionHeader(context, "ARTWORK VISUALS", subtextColor),
+            _buildGroupedContainer(context, [
               _buildRadioList(ThumbnailQuality.values, thumbnailQualityNotifier),
             ]),
-            _buildSectionHeader("STREAMING AUDIO"),
-            _buildGroupedContainer([
+            _buildSectionHeader(context, "STREAMING AUDIO", subtextColor),
+            _buildGroupedContainer(context, [
               _buildRadioList(AudioQuality.values, audioQualityNotifier),
             ]),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 28, vertical: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
               child: Text(
                 "Higher quality uses more data and may take longer to load.",
-                style: TextStyle(color: Color(0xFF8E8E93), fontSize: 13),
+                style: TextStyle(color: subtextColor, fontSize: 13),
               ),
             ),
             const SizedBox(height: 40),
@@ -89,13 +92,13 @@ class QualitySettingState extends State<QualitySetting> {
     );
   }
 
-  Widget _buildSectionHeader(String text) {
+  Widget _buildSectionHeader(BuildContext context, String text, Color color) {
     return Padding(
       padding: const EdgeInsets.only(left: 28, bottom: 8, top: 20),
       child: Text(
         text.toUpperCase(),
-        style: const TextStyle(
-          color: Color(0xFF6E6E72),
+        style: TextStyle(
+          color: color,
           fontSize: 13,
           fontWeight: FontWeight.w400,
           letterSpacing: 0.2,
@@ -104,12 +107,12 @@ class QualitySettingState extends State<QualitySetting> {
     );
   }
 
-  Widget _buildGroupedContainer(List<Widget> children) {
+  Widget _buildGroupedContainer(BuildContext context, List<Widget> children) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       clipBehavior: Clip.antiAlias, 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(children: children),
@@ -118,6 +121,7 @@ class QualitySettingState extends State<QualitySetting> {
 
   Widget _buildRadioList<T extends Enum>(
       List<T> values, ValueNotifier<T> notifier) {
+    final theme = Theme.of(context);
     return ValueListenableBuilder<T>(
       valueListenable: notifier,
       builder: (context, currentSelection, _) {
@@ -133,10 +137,10 @@ class QualitySettingState extends State<QualitySetting> {
                   title: Text(
                     value.name.substring(0, 1).toUpperCase() + 
                     value.name.substring(1).toLowerCase(), 
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'serif', 
                       fontSize: 17,
-                      color: Colors.black,
+                      color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w400,
                     ),
                   ),
@@ -146,10 +150,10 @@ class QualitySettingState extends State<QualitySetting> {
                       : null,
                 ),
                 if (!isLast)
-                  const Divider(
+                  Divider(
                       height: 0.5, 
                       indent: 16, 
-                      color: Color(0xFFC6C6C8)),
+                      color: theme.dividerColor),
               ],
             );
           }).toList(),

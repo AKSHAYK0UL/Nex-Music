@@ -137,12 +137,12 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                           opacity: collapseRatio > 0.8
                               ? (collapseRatio - 0.8) / 0.2
                               : 0.0,
-                          child: const Text(
+                          child:  Text(
                             'Create Playlist',
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                               letterSpacing: -0.3,
                             ),
                           ),
@@ -156,14 +156,14 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                       bottom: 12,
                       child: Opacity(
                         opacity: expandRatio,
-                        child: const Text(
+                        child:  Text(
                           'Create Playlist',
                           style: TextStyle(
                             fontFamily: 'serif',
                             fontSize: 28,
                             overflow: TextOverflow.ellipsis,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Theme.of(context).colorScheme.onSurface,
                             letterSpacing: -1.0,
                           ),
                         ),
@@ -346,15 +346,16 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
 
   Widget _buildDynamicPreview() {
     return LayoutBuilder(builder: (context, constraints) {
+      final theme = Theme.of(context);
       final w = constraints.maxWidth;
       final h = constraints.maxHeight;
       final cw = (w - 2) / 2;
       final ch = (h - 2) / 2;
       final List<Color> shades = [
-        Colors.grey.shade300,
-        Colors.grey.shade400,
-        Colors.grey.shade400,
-        Colors.grey.shade300,
+        theme.colorScheme.onSurface.withValues(alpha: 0.1),
+        theme.colorScheme.onSurface.withValues(alpha: 0.2),
+        theme.colorScheme.onSurface.withValues(alpha: 0.2),
+        theme.colorScheme.onSurface.withValues(alpha: 0.1),
       ];
       return Stack(children: [
         Positioned(
@@ -422,10 +423,11 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
 
   // Display mode picker 
   Widget _buildDisplayModePicker() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F2),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -487,10 +489,11 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
 
   // Privacy toggle  CupertinoSwitch 
   Widget _buildPrivacyToggle() {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F2),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
@@ -503,7 +506,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
             decoration: BoxDecoration(
               color: _isPublic
                   ? const Color(0xFF22C55E).withOpacity(0.15)
-                  : Colors.grey.withOpacity(0.15),
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -524,10 +527,10 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                   child: Text(
                     _isPublic ? 'Public Playlist' : 'Private Playlist',
                     key: ValueKey(_isPublic),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: kTextPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -539,9 +542,9 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                         ? 'Anyone can find and play'
                         : 'Only you can see this',
                     key: ValueKey('sub_$_isPublic'),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
-                      color: kTextSecondary,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -589,7 +592,7 @@ class _ModeTab extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isActive ? Colors.white : Colors.transparent,
+            color: isActive ? Theme.of(context).cardColor : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             boxShadow: isActive
                 ? [
@@ -604,14 +607,14 @@ class _ModeTab extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 17, color: isActive ? kPrimary : kTextSecondary),
+              Icon(icon, size: 17, color: isActive ? kPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6)),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: isActive ? kTextPrimary : kTextSecondary,
+                  color: isActive ? kPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
             ],
@@ -631,10 +634,10 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w700,
-        color: kTextSecondary,
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
         letterSpacing: 0.8,
       ),
     );
@@ -661,7 +664,7 @@ class _InputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F2),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
@@ -669,16 +672,16 @@ class _InputField extends StatelessWidget {
         focusNode: focusNode,
         onChanged: onChanged,
         maxLines: maxLines,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w500,
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
         cursorColor: kPrimary,
         decoration: InputDecoration(
           hintText: hint,
           hintStyle: TextStyle(
-            color: kTextSecondary.withOpacity(0.7),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
             fontSize: 15,
             fontWeight: FontWeight.w400,
           ),

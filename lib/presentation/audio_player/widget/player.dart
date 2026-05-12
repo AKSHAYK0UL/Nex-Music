@@ -78,7 +78,7 @@ class _PlayerState extends State<Player> {
               backgroundColor: Colors.transparent,
               radius: widget.screenSize * 0.0520,
               child: CircularProgressIndicator(
-                color: secondaryColor,
+                color: Theme.of(context).iconTheme.color,
                 strokeWidth: 7,
               ),
             ),
@@ -112,7 +112,7 @@ class _PlayerState extends State<Player> {
                       : CupertinoIcons.pause_fill,
                      
                   size: widget.screenSize * 0.0650,
-                  color: Colors.black,
+                 color: Theme.of(context).iconTheme.color,
                 ),
               ),
             ),

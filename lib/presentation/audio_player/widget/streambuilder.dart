@@ -47,27 +47,31 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
                   progress: position ?? Duration.zero,
                   buffered: bufferedPosition ?? Duration.zero,
                   total: duration,
-
-                 
                   barHeight: 5,
                   thumbRadius: 6,
                   timeLabelLocation: TimeLabelLocation.below,
                   timeLabelPadding: 10,
-
-                  baseBarColor: Colors.grey.shade400,
-                  bufferedBarColor: Colors.grey.shade500,
-                  progressBarColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.85),
+                  baseBarColor: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.16),
+                  bufferedBarColor: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.2),
+                  progressBarColor: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.85),
                   thumbColor: Theme.of(context).colorScheme.onSurface,
-
                   timeLabelTextStyle: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 14, 
-                    fontWeight: FontWeight.w600, 
-                    fontFeatures: [
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontFeatures: const [
                       FontFeature.tabularFigures()
                     ], // Keeps numbers aligned
                   ),
-
                   onSeek: (value) {
                     _songstreamBloc.add(
                       SeekToEvent(position: value),

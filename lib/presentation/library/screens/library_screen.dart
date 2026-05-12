@@ -15,7 +15,7 @@ class LibraryScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header Section
-            const Padding(
+             Padding(
               padding: EdgeInsets.only(left: 16.0, bottom: 10.0),
               child: Text(
                 'Library',
@@ -23,7 +23,7 @@ class LibraryScreen extends StatelessWidget {
                   fontFamily: 'serif',
                   fontWeight: FontWeight.bold,
                   fontSize: 30,
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -121,7 +121,7 @@ class LibraryTile extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        color: Colors.white,
+        color: Colors.transparent,
         height: 56,
         padding: const EdgeInsets.only(left: 20),
         child: Padding(
@@ -144,10 +144,10 @@ class LibraryTile extends StatelessWidget {
               Expanded(
                 child: Container(
                   height: double.infinity,
-                  decoration: const BoxDecoration(
+                  decoration:  BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: Color(0xFFE5E5EA),
+                        color: Theme.of(context).dividerColor,
                         width: 1.0,
                       ),
                     ),
@@ -158,18 +158,18 @@ class LibraryTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
-                          color: Colors.black,
+                          color: Theme.of(context).colorScheme.onSurface,
                           letterSpacing: -0.4,
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.only(right: 20),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 20),
                         child: Icon(
                           CupertinoIcons.chevron_right,
-                          color: Color(0xFFC7C7CC),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                           size: 20,
                         ),
                       ),

@@ -48,13 +48,13 @@ class QualitySettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color iosBackgroundColor = Color(0xFFF2F2F7);
+    final theme = Theme.of(context);
     final GlobalKey<QualitySettingState> qualitySettingKey = GlobalKey();
 
     return Scaffold(
-      backgroundColor: iosBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: iosBackgroundColor,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leadingWidth: 100,
         actionsPadding: const EdgeInsets.only(right: 15),
@@ -74,13 +74,13 @@ class QualitySettingsScreen extends StatelessWidget {
         ],
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Row(
+          child: Row(
             children: [
-              SizedBox(width: 8),
-              Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
               Text(
                 'Settings',
-                style: TextStyle(color: Colors.red, fontSize: 17),
+                style: TextStyle(color: Colors.red, fontSize: 17, backgroundColor: theme.scaffoldBackgroundColor),
               ),
             ],
           ),
@@ -89,15 +89,15 @@ class QualitySettingsScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 16.0, bottom: 10.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
             child: Text(
               "Quality Settings",
               style: TextStyle(
                 fontFamily: 'serif',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: theme.colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             ),

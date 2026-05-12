@@ -10,6 +10,7 @@ import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/core/theme/app_colors.dart';
 
 ThumbnailQuality quality = ThumbnailQuality.low;
 
@@ -38,7 +39,8 @@ class _MiniPlayerState extends State<MiniPlayer> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bgColor = theme.scaffoldBackgroundColor;
+    final isDark = theme.brightness == Brightness.dark;
+    final bgColor = isDark ? AppColors.darkNavBar : AppColors.lightNavBar;
     final titleColor = theme.colorScheme.onSurface;
     final subtitleColor = theme.colorScheme.onSurface.withValues(alpha: 0.55);
     final dividerColor = theme.dividerColor;
@@ -85,10 +87,10 @@ class _MiniPlayerState extends State<MiniPlayer> {
                 border: Border(
                   top: BorderSide(color: dividerColor, width: 0.5),
                 ),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
-                    offset: Offset(0, -1),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                    offset: const Offset(0, -1),
                     blurRadius: 2,
                   )
                 ],
@@ -105,7 +107,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -204,8 +206,9 @@ class _MiniPlayerState extends State<MiniPlayer> {
                     builder: (context, snapshot) {
                       final duration = context.read<SongstreamBloc>().songDuration;
                       final position = snapshot.data ?? Duration.zero;
-                      if (duration.inMilliseconds == 0) return const SizedBox();
-                      final sliderValue = (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0);
+                      final sliderValue = duration.inMilliseconds > 0 
+                          ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
+                          : 0.0;
                       return Positioned(
                         bottom: 0,
                         left: 0,
@@ -213,7 +216,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
                         child: LinearProgressIndicator(
                           value: sliderValue,
                           valueColor: const AlwaysStoppedAnimation<Color>(kAppleAccent),
-                          backgroundColor: Colors.grey.shade400,
+                          backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                           minHeight: 2,
                         ),
                       );

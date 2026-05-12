@@ -8,13 +8,13 @@ class AppColors {
   static const Color primary = Color(0xFFFF2D55);
 
   //  Light 
-  static const Color lightBackground   = Color(0xFFFFFFFF);
+  static const Color lightBackground   = Color(0xFFF2F2F7);
   static const Color lightSurface      = Color(0xFFFFFFFF);
   static const Color lightCard         = Color(0xFFFFFFFF);
   static const Color lightGroupBg      = Color(0xFFF2F2F7);
   static const Color lightText         = Color(0xFF000000);
   static const Color lightSubtext      = Color(0xFF6E6E72);
-  static const Color lightDivider      = Color(0xFFC6C6C8);
+  static const Color lightDivider      = Color(0xFFD1D1D6);
   static const Color lightNavBar       = Color(0xFFFFFFFF);
   static const Color lightNavSelected  = Color(0xFFFF2D55);
   static const Color lightNavUnselected = Color(0xFF8E8E93);

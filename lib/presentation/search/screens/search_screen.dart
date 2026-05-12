@@ -57,6 +57,8 @@ class SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
 
+    final theme = Theme.of(context);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
@@ -74,19 +76,21 @@ class SearchScreenState extends State<SearchScreen> {
                 children: [
                   if (context.canPop())
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back_ios_new,
-                        color: Colors.red,
+                        color: theme.colorScheme.primary,
                         size: 20,
                       ),
                       onPressed: () => context.pop(),
                     ),
                   Expanded(
                     child: CupertinoSearchTextField(
-                      cursorColor: Colors.red,
+                      cursorColor: theme.colorScheme.primary,
                       controller: _searchController,
                       focusNode: _searchFocusNode,
+                      style: TextStyle(color: theme.colorScheme.onSurface),
                       placeholder: 'Search songs, albums, artists...',
+                      placeholderStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                       onChanged: (text) {
                         if (text.isEmpty) {
                           context
@@ -115,7 +119,7 @@ class SearchScreenState extends State<SearchScreen> {
                   if (state is LoadingState) {
                     return Center(
                       child: CupertinoActivityIndicator(
-                        color: Colors.red.withValues(alpha: 0.8),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.8),
                         radius: 15,
                       ),
                     );
@@ -129,7 +133,7 @@ class SearchScreenState extends State<SearchScreen> {
                             ConnectionState.waiting) {
                           return Center(
                             child: CupertinoActivityIndicator(
-                              color: Colors.red.withValues(alpha: 0.8),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.8),
                               radius: 15,
                             ),
                           );
@@ -142,10 +146,10 @@ class SearchScreenState extends State<SearchScreen> {
                           );
                         } else if (!snapshot.hasData ||
                             snapshot.data!.isEmpty) {
-                          return const Center(
+                          return Center(
                             child: Text(
                               'No recent searches',
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                             ),
                           );
                         } else {

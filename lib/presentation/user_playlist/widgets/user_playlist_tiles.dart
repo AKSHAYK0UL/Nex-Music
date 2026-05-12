@@ -190,10 +190,10 @@ class UserPlaylistTile extends StatelessWidget {
             playlistName,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: Colors.black,
+              color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: -0.3,
             ),
           ),

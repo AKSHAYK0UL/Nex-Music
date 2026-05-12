@@ -23,23 +23,23 @@ class UserInfo extends StatelessWidget {
       );
     }
     
-    const Color iosBackgroundColor = Color(0xFFF2F2F7);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: iosBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: iosBackgroundColor,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leadingWidth: 100,
         leading: GestureDetector(
           onTap: () => Navigator.pop(context),
-          child: const Row(
+          child: Row(
             children: [
-              SizedBox(width: 8),
-              Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
               Text(
                 'Settings',
-                style: TextStyle(color: Colors.red, fontSize: 17),
+                style: TextStyle(color: Colors.red, fontSize: 17, backgroundColor: theme.scaffoldBackgroundColor),
               ),
             ],
           ),
@@ -50,15 +50,15 @@ class UserInfo extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
-            padding: EdgeInsets.only(left: 16.0, bottom: 10.0),
+            Padding(
+            padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
             child: Text(
               "Profile",
               style: TextStyle(
                 fontFamily: 'serif',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: theme.colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
@@ -86,18 +86,19 @@ class UserInfo extends StatelessWidget {
                           ? NetworkImage(user.photoURL!)
                           : null,
                       child: user.photoURL == null
-                          ? const Icon(CupertinoIcons.person_fill,
-                              size: 60, color: Color(0xFFC6C6C8))
+                          ? Icon(CupertinoIcons.person_fill,
+                              size: 60, color: theme.dividerColor)
                           : null,
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     user.displayName ?? "User",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'serif',
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -111,7 +112,7 @@ class UserInfo extends StatelessWidget {
                       Text(
                         "Your account is secure",
                         style: TextStyle(
-                            color: Colors.grey.shade600, fontSize: 13),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 13),
                       ),
                     ],
                   ),
@@ -122,19 +123,19 @@ class UserInfo extends StatelessWidget {
             const SizedBox(height: 30),
 
             // --- USER DATA SECTION ---
-            _buildSectionHeader("PERSONAL INFORMATION"),
-            _buildGroupedContainer([
-              _buildInfoTile("Name", user.displayName ?? "Not Set"),
-              const Divider(height: 1, indent: 20, color: Color(0xFFC6C6C8)),
-              _buildInfoTile("Email", user.email ?? "Not Set"),
+            _buildSectionHeader(context, "PERSONAL INFORMATION"),
+            _buildGroupedContainer(context, [
+              _buildInfoTile(context, "Name", user.displayName ?? "Not Set"),
+              Divider(height: 1, indent: 20, color: theme.dividerColor),
+              _buildInfoTile(context, "Email", user.email ?? "Not Set"),
             ]),
 
-            _buildSectionHeader("METADATA"),
-            _buildGroupedContainer([
-              _buildInfoTile("Registered On",
+            _buildSectionHeader(context, "METADATA"),
+            _buildGroupedContainer(context, [
+              _buildInfoTile(context, "Registered On",
                   convertUkToIst(user.metadata.creationTime!)),
-              const Divider(height: 1, indent: 20, color: Color(0xFFC6C6C8)),
-              _buildInfoTile("Last Sign-In",
+              Divider(height: 1, indent: 20, color: theme.dividerColor),
+              _buildInfoTile(context, "Last Sign-In",
                   convertUkToIst(user.metadata.lastSignInTime!)),
             ]),
 
@@ -146,15 +147,15 @@ class UserInfo extends StatelessWidget {
   }
 
 
-  Widget _buildSectionHeader(String text) {
+  Widget _buildSectionHeader(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, bottom: 8, top: 20),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           text,
-          style: const TextStyle(
-            color: Color(0xFF6E6E72),
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 13,
             fontWeight: FontWeight.w400,
           ),
@@ -163,18 +164,19 @@ class UserInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupedContainer(List<Widget> children) {
+  Widget _buildGroupedContainer(BuildContext context, List<Widget> children) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Column(children: children),
     );
   }
 
-  Widget _buildInfoTile(String label, String value) {
+  Widget _buildInfoTile(BuildContext context, String label, String value) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -182,21 +184,21 @@ class UserInfo extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'serif',
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: Colors.black,
+              color: theme.colorScheme.onSurface,
             ),
           ),
           Flexible(
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'serif',
                 fontSize: 15,
-                color: Color(0xFF8E8E93),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ),

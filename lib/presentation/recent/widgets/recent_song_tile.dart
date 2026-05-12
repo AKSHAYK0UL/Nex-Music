@@ -211,7 +211,8 @@ class _RecentSongTileState extends State<RecentSongTile> {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context).height;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return InkWell(
       onTap: () {
@@ -249,32 +250,14 @@ class _RecentSongTileState extends State<RecentSongTile> {
             },
           );
         }
-
-        // navigateToAudioPlayer(
-        //   context: context,
-        //   songData: widget.songData,
-        //   route: SongMiniPlayerRoute.songRoute,
-        //   quality: quality,
-        // );
       },
-      //Old impli
-      // onLongPress: () {
-      //   showBottomOptionSheet(
-      //     context: context,
-      //     songData: widget.songData,
-      //     screenSize: screenSize,
-      //     showDelete: true,
-      //     tabRouteENUM: widget.tabRouteENUM,
-      //     playlistName: null,
-      //   );
-      // },
       child: Container(
         height: 85,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(10),
           color: widget.isCurrent
-              ? const Color.fromARGB(255, 199, 175, 175)
+              ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.1)
               : Colors.transparent,
         ),
         child: Row(
@@ -284,8 +267,8 @@ class _RecentSongTileState extends State<RecentSongTile> {
               width: 70,
               height: 70,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6),
-                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8),
+                color: theme.colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.1),
@@ -295,7 +278,7 @@ class _RecentSongTileState extends State<RecentSongTile> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
+                borderRadius: BorderRadius.circular(8),
                 child: cacheImage(
                   imageUrl: widget.songData.thumbnail,
                   width: 70,
@@ -311,8 +294,8 @@ class _RecentSongTileState extends State<RecentSongTile> {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                      width: 0.5,
+                      color: theme.colorScheme.onSurface.withValues(alpha: isDark ? 0.18 : 0.12),
+                      width: 1.0,
                     ),
                   ),
                 ),
@@ -328,7 +311,7 @@ class _RecentSongTileState extends State<RecentSongTile> {
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
-                              color: Theme.of(context).colorScheme.onSurface,
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -337,7 +320,7 @@ class _RecentSongTileState extends State<RecentSongTile> {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w400,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                             ),
                           ),
                         ],
@@ -346,14 +329,12 @@ class _RecentSongTileState extends State<RecentSongTile> {
                     IconButton(
                       key: _menuButtonKey,
                       onPressed: () => _showOptionsMenu(context),
-                      icon: const CircleAvatar(
-                        backgroundColor: Color.fromARGB(255, 255, 231, 234),
-                        radius: 10,
+                      icon: CircleAvatar(
+                        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        radius: 12,
                         child: Icon(
-                          // CupertinoIcons.ellipsis_vertical,
                           Icons.more_vert,
-                          // color: Colors.grey.shade600,
-                          color: Colors.red,
+                          color: theme.colorScheme.primary,
                           size: 18,
                         ),
                       ),

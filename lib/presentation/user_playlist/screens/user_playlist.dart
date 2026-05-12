@@ -274,7 +274,7 @@ class DeletePlaylistSheet extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(20)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -308,16 +308,16 @@ class DeletePlaylistSheet extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                 Text(
                   'This will permanently delete this playlist.\nThis action cannot be undone.',
                   textAlign: TextAlign.center,
                   style:
-                      TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
+                      TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6), fontSize: 14, height: 1.5),
                 ),
               ],
             ),
           ),
-          const Divider(color: Colors.white),
+          Divider(color: Theme.of(context).dividerColor),
           TextButton(
             onPressed: onDelete,
             child: const Text(
@@ -329,9 +329,9 @@ class DeletePlaylistSheet extends StatelessWidget {
           const Divider(height: 1, color: Colors.grey),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(color: Colors.black, fontSize: 17),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 17),
             ),
           ),
           const SizedBox(height: 8),

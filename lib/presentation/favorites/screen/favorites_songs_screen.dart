@@ -115,14 +115,14 @@ class _EmptyFavoritesView extends StatelessWidget {
               color: Colors.red.withValues(alpha:0.8),
             ),
             const SizedBox(height: 25),
-            const Text(
+             Text(
               "Add Your Favorite Songs",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'serif',
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 10),
@@ -131,7 +131,7 @@ class _EmptyFavoritesView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
-                color: Colors.grey.shade600,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 height: 1.4,
               ),
             ),

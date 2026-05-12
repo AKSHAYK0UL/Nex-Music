@@ -22,6 +22,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
+    final theme = Theme.of(context);
 
     return DefaultTabController(
       length: 5,
@@ -36,34 +37,26 @@ class _SearchResultTabState extends State<SearchResultTab> {
                 elevation: 0,
                 centerTitle: true,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new,
-                      color: Colors.red, size: 20),
+                  icon: Icon(Icons.arrow_back_ios_new,
+                      color: theme.colorScheme.primary, size: 20),
                   onPressed: () => context.pop(),
                 ),
-                // title: Text(
-                //   widget.searchText,
-                //   style: const TextStyle(
-                //       color: Colors.black,
-                //       fontWeight: FontWeight.bold,
-                //       fontSize: 17),
-                // ),
                 title: GestureDetector(
                   onTap: () {
                     context.pushNamed(RouterName.searchName,
                         extra: widget.searchText);
-                    // context.pop(true);
                   },
-                  child: AbsorbPointer(
-                    absorbing: true,
+                  child: IgnorePointer(
                     child: Padding(
                       padding: const EdgeInsets.only(
                           left: 0.0, right: 16.0, bottom: 10.0, top: 10.0),
                       child: CupertinoSearchTextField(
-                        enabled: false,
-                        cursorColor: Colors.red,
+                        enabled: true,
+                        cursorColor: theme.colorScheme.primary,
                         autofocus: false,
                         placeholder: widget.searchText,
-                        placeholderStyle: const TextStyle(color: Colors.black),
+                        placeholderStyle: TextStyle(color: theme.colorScheme.onSurface),
+                        itemColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ),
@@ -72,12 +65,11 @@ class _SearchResultTabState extends State<SearchResultTab> {
                 bottom: TabBar(
                   isScrollable: true,
                   tabAlignment: TabAlignment.start,
-                  indicatorColor:
-                      Colors.redAccent, // Apple Music's signature accent
+                  indicatorColor: theme.colorScheme.primary,
                   indicatorWeight: 2,
-                  dividerColor: Colors.grey.withValues(alpha: 0.2),
-                  labelColor: Colors.redAccent,
-                  unselectedLabelColor: Colors.grey,
+                  dividerColor: theme.dividerColor,
+                  labelColor: theme.colorScheme.primary,
+                  unselectedLabelColor: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   labelStyle: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,

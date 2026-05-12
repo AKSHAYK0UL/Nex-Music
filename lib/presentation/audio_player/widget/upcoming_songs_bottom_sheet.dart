@@ -35,46 +35,64 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
           return _buildErrorState(context, state.errorMessage);
         }
 
-        return ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-            child: Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // iOS-style Grab Handle
-                  Container(
-                    margin: const EdgeInsets.only(top: 12, bottom: 8),
-                    width: 36,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.black12,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  // Header
-                  _buildHeader(context),
-                  // Content Area
-                  _buildContent(
-                    context,
-                    allPlaylistSongs: allPlaylistSongs,
-                    currentSongIndex: currentSongIndex,
-                    isLoading: isLoading,
-                    shouldShowStartRadio: shouldShowStartRadio,
-                  ),
-                  const SizedBox(height: 20),
-                ],
+        final theme = Theme.of(context);
+        final isDark = theme.brightness == Brightness.dark;
+
+        Widget content = Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.8,
+          ),
+          decoration: BoxDecoration(
+            color: isDark 
+              ? theme.cardColor 
+              : Colors.white.withValues(alpha: 0.85),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            border: Border(
+              top: BorderSide(
+                color: theme.dividerColor.withValues(alpha: 0.2),
+                width: 0.5,
               ),
             ),
           ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // iOS-style Grab Handle
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 36,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              // Header
+              _buildHeader(context),
+              // Content Area
+              _buildContent(
+                context,
+                allPlaylistSongs: allPlaylistSongs,
+                currentSongIndex: currentSongIndex,
+                isLoading: isLoading,
+                shouldShowStartRadio: shouldShowStartRadio,
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         );
+
+        if (!isDark) {
+          return ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              child: content,
+            ),
+          );
+        }
+
+        return content;
       },
     );
   }
@@ -97,9 +115,9 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
             padding: EdgeInsets.zero,
             minimumSize: const Size(0, 0),
             onPressed: () => context.pop(),
-            child: const Icon(
+            child: Icon(
               CupertinoIcons.xmark_circle_fill,
-              color: Colors.black26,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
               size: 28,
             ),
           ),

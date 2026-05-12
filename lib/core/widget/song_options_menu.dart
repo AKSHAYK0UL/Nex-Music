@@ -52,30 +52,44 @@ class SongOptionsMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(13),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-        child: Container(
-          width: 250,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF2F2F7).withValues(alpha: 0.75),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.2),
-                blurRadius: 50,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: _buildMenuItems(context),
-          ),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    Widget content = Container(
+      width: 250,
+      decoration: BoxDecoration(
+        color: isDark ? theme.cardColor : Colors.white.withValues(alpha: 0.8),
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(
+          color: theme.dividerColor.withValues(alpha: 0.2),
+          width: 0.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 50,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: _buildMenuItems(context),
       ),
     );
+
+    if (!isDark) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(13),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: content,
+        ),
+      );
+    }
+
+    return content;
   }
 
   List<Widget> _buildMenuItems(BuildContext context) {
@@ -114,28 +128,30 @@ class SongOptionsMenu extends StatelessWidget {
               },
             ));
           }
-          items.add(_buildDivider());
+          items.add(_buildDivider(context));
         }
 
         // Add to Playlist
         items.add(_buildMenuItem(
           "Add to a Playlist...",
           CupertinoIcons.text_badge_plus,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () {
             Navigator.pop(context);
             addToPlayListBottomSheet(context, songData, screenSize);
           },
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         // Share
         items.add(_buildMenuItem(
           "Share Song...",
           CupertinoIcons.share,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () async {
             Navigator.pop(context);
             await Share.share(
@@ -143,24 +159,25 @@ class SongOptionsMenu extends StatelessWidget {
             );
           },
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         // Download
         if (!(tabRouteENUM == TabRouteENUM.download && songData.isLocal)) {
           items.add(_buildDownloadMenuItem(context));
-          items.add(_buildDivider());
+          items.add(_buildDivider(context));
         }
 
         // View Artist
         items.add(_buildMenuItem(
           "View Artist",
           CupertinoIcons.person_crop_circle,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () {
             Navigator.pop(context); // Pop the bottom sheet
 
-            // If in audio player, we need to pop it first to show bottom nav
+            // If in audio player, pop it first to show bottom nav
             if (menuType == SongMenuType.audioPlayer) {
               context.pop();
             }
@@ -174,14 +191,15 @@ class SongOptionsMenu extends StatelessWidget {
             );
           },
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         // Play Next
         items.add(_buildMenuItem(
           "Play Next",
           CupertinoIcons.play_arrow,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () {
             Navigator.pop(context);
             context.read<SongstreamBloc>().add(
@@ -227,14 +245,15 @@ class SongOptionsMenu extends StatelessWidget {
         items.add(_buildMenuItem(
           "Add to a Playlist...",
           CupertinoIcons.text_badge_plus,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () {
             Navigator.pop(context);
             addToPlayListBottomSheet(context, songData, screenSize);
           },
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         // Save Artist
         items.add(BlocBuilder<SavedArtistsBloc, SavedArtistsState>(
@@ -256,8 +275,13 @@ class SongOptionsMenu extends StatelessWidget {
               isSaved
                   ? CupertinoIcons.person_crop_circle_badge_minus
                   : CupertinoIcons.person_crop_circle_badge_plus,
-              textColor: isSaved ? const Color(0xFFFF3B30) : Colors.black,
-              iconColor: isSaved ? const Color(0xFFFF3B30) : Colors.black87,
+              textColor: isSaved
+                  ? const Color(0xFFFF3B30)
+                  : (Theme.of(context).textTheme.bodyMedium?.color ??
+                      Colors.black),
+              iconColor: isSaved
+                  ? const Color(0xFFFF3B30)
+                  : (Theme.of(context).iconTheme.color ?? Colors.black87),
               onTap: artistId != null
                   ? () {
                       Navigator.pop(context);
@@ -281,14 +305,15 @@ class SongOptionsMenu extends StatelessWidget {
             );
           },
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         // Share Song
         items.add(_buildMenuItem(
           "Share Song...",
           CupertinoIcons.share,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () async {
             Navigator.pop(context);
             await Share.share(
@@ -296,18 +321,19 @@ class SongOptionsMenu extends StatelessWidget {
             );
           },
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         // Download
         items.add(_buildDownloadMenuItem(context));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         // Set Timer
         items.add(_buildMenuItem(
           "Set Timer",
           CupertinoIcons.timer,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: onTimerTap != null
               ? () {
                   onTimerTap!();
@@ -315,14 +341,15 @@ class SongOptionsMenu extends StatelessWidget {
               : null,
           isLast: true,
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         // Start Radio
         items.add(_buildMenuItem(
           "Start Radio",
           Icons.radio,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () {
             Navigator.pop(context);
             context.read<SongstreamBloc>().add(
@@ -339,20 +366,22 @@ class SongOptionsMenu extends StatelessWidget {
         items.add(_buildMenuItem(
           "Add to a Playlist...",
           CupertinoIcons.text_badge_plus,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () {
             Navigator.pop(context);
             addToPlayListBottomSheet(context, songData, screenSize);
           },
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         items.add(_buildMenuItem(
           "Share Song...",
           CupertinoIcons.share,
-          textColor: Colors.black,
-          iconColor: Colors.black87,
+          textColor:
+              Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
+          iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () async {
             Navigator.pop(context);
             await Share.share(
@@ -360,7 +389,7 @@ class SongOptionsMenu extends StatelessWidget {
             );
           },
         ));
-        items.add(_buildDivider());
+        items.add(_buildDivider(context));
 
         items.add(_buildDownloadMenuItem(context, isLast: true));
         break;
@@ -418,8 +447,9 @@ class SongOptionsMenu extends StatelessWidget {
               return _buildMenuItem(
                 "Download",
                 CupertinoIcons.cloud_download,
-                textColor: Colors.black,
-                iconColor: Colors.black87,
+                textColor: Theme.of(context).textTheme.bodyMedium?.color ??
+                    Colors.black,
+                iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
                 onTap: () {
                   Navigator.pop(context);
                   context.read<DownloadBloc>().add(
@@ -469,13 +499,13 @@ class SongOptionsMenu extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context) {
     return Container(
       color: Colors.transparent,
       child: Container(
         height: 0.5,
         margin: const EdgeInsets.only(left: 16),
-        color: const Color(0xFF3C3C43).withValues(alpha: 0.36),
+        color: Theme.of(context).dividerColor,
       ),
     );
   }

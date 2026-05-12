@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -391,7 +390,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                           text: currentSongData.artist.name,
                                           style: TextStyle(
                                             fontSize: 18,
-                                            color: Colors.grey.shade600,
+                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                             fontWeight: FontWeight.w400,
                                           ),
                                         );
@@ -449,7 +448,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                               : CupertinoIcons.heart,
                                           color: isFavorite
                                               ? Colors.red
-                                              : Colors.grey.shade600,
+                                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                           size: 28,
                                         ),
                                       );
@@ -633,8 +632,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                                       CircularProgressIndicator(
                                                         value: progress / 100,
                                                         strokeWidth: 3,
-                                                        backgroundColor: Colors
-                                                            .grey.shade300,
+                                                        backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                                                         valueColor:
                                                             AlwaysStoppedAnimation<
                                                                 Color>(
@@ -687,7 +685,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                               height: 5,
                               margin: const EdgeInsets.only(bottom: 5),
                               decoration: BoxDecoration(
-                                color: Colors.black54,
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),

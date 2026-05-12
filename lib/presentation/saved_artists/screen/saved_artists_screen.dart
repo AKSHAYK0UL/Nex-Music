@@ -70,7 +70,7 @@ class _SavedArtistsScreenState extends State<SavedArtistsScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
+                     Padding(
                       padding: EdgeInsets.only(left: 24.0, bottom: 10.0),
                       child: Text(
                         "Artists",
@@ -78,7 +78,7 @@ class _SavedArtistsScreenState extends State<SavedArtistsScreen> {
                           fontFamily: 'serif',
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: Theme.of(context).colorScheme.onSurface,
                           letterSpacing: -0.5,
                         ),
                       ),
@@ -180,13 +180,13 @@ class _EmptyArtistsView extends StatelessWidget {
             color: Colors.red.withValues(alpha: 0.8),
           ),
           const SizedBox(height: 20),
-          const Text(
+           Text(
             "Add Your Favorite Artists",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'serif',
               fontSize: 22,
-              color: Colors.black,
+              color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -196,7 +196,7 @@ class _EmptyArtistsView extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               height: 1.4,
             ),
           ),

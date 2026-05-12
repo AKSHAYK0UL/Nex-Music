@@ -28,19 +28,22 @@ class AppSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final subtextColor = theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    
     return Container(
       height: 40,
       decoration: BoxDecoration(
-        color: const Color(0xFFF0F0F0),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
           const SizedBox(width: 10),
-          const Icon(Icons.search, color: kTextSecondary, size: 20),
+          Icon(Icons.search, color: subtextColor, size: 20),
           const SizedBox(width: 8),
           Text(hint,
-              style: const TextStyle(color: kTextSecondary, fontSize: 15)),
+              style: TextStyle(color: subtextColor, fontSize: 15)),
         ],
       ),
     );
@@ -54,17 +57,18 @@ class CircleIconBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: kTextPrimary.withOpacity(0.06),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
           shape: BoxShape.circle,
-          border: Border.all(color: kTextPrimary.withOpacity(0.12), width: 1.5),
+          border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.12), width: 1.5),
         ),
-        child: Icon(icon, color: kTextPrimary, size: 22),
+        child: Icon(icon, color: theme.colorScheme.onSurface, size: 22),
       ),
     );
   }

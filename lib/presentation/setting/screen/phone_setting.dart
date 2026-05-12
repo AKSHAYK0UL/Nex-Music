@@ -63,115 +63,107 @@ class Setting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ThemeBloc, ThemeState>(
-      builder: (context, themeState) {
-        final isDark = themeState is ThemeLoadedState ? themeState.isDark : false;
-        final bgColor = isDark ? const Color(0xFF000000) : kAppleBackgroundColor;
-        final cardColor = isDark ? const Color(0xFF1C1C1E) : Colors.white;
-        final textPrimary = isDark ? Colors.white : Colors.black;
-        final textSecondary = isDark ? const Color(0xFF8E8E93) : const Color(0xFF6E6E72);
-        final dividerColor = isDark ? const Color(0xFF38383A) : const Color(0xFFC6C6C8);
+    final theme = Theme.of(context);
+    final textSecondary = theme.colorScheme.onSurface.withValues(alpha: 0.7);
 
-        return Scaffold(
-          backgroundColor: bgColor,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
-                    child: Text(
-                      "Settings",
-                      style: TextStyle(
-                        fontFamily: 'serif',
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: textPrimary,
-                        letterSpacing: -0.5,
-                      ),
-                    ),
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
+                child: Text(
+                  "Settings",
+                  style: TextStyle(
+                    fontFamily: 'serif',
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                    letterSpacing: -0.5,
                   ),
-
-                  _buildSectionHeader("ACCOUNT", textSecondary),
-                  _buildGroupedContainer(cardColor, [
-                    _buildSettingsTile(
-                      context,
-                      title: "Profile",
-                      icon: CupertinoIcons.person_crop_circle,
-                      iconColor: Colors.blue,
-                      textColor: textPrimary,
-                      dividerColor: dividerColor,
-                      onTap: () => context.push(RouterPath.userInfoRoute),
-                    ),
-                  ]),
-
-                  _buildSectionHeader("PREFERENCES", textSecondary),
-                  _buildGroupedContainer(cardColor, [
-                    _buildSettingsTile(
-                      context,
-                      title: "Quality Settings",
-                      icon: CupertinoIcons.slider_horizontal_3,
-                      iconColor: Colors.grey,
-                      textColor: textPrimary,
-                      dividerColor: dividerColor,
-                      onTap: () => context.push(RouterPath.qualityRoute),
-                    ),
-                    Divider(height: 1, indent: 56, endIndent: 0, color: dividerColor),
-                    ValueListenableBuilder<bool>(
-                      valueListenable: _recommendationNotifier,
-                      builder: (context, value, _) {
-                        return _buildSwitchTile(
-                          title: "Recommendations",
-                          icon: CupertinoIcons.sparkles,
-                          iconColor: Colors.orange,
-                          textColor: textPrimary,
-                          value: value,
-                          onChanged: (newValue) async {
-                            await _hiveDbInstance.saveRecommendation(newValue);
-                            _recommendationNotifier.value = newValue;
-                          },
-                        );
-                      },
-                    ),
-                    Divider(height: 1, indent: 56, endIndent: 0, color: dividerColor),
-                    BlocBuilder<ThemeBloc, ThemeState>(
-                      builder: (context, state) {
-                        final dark = state is ThemeLoadedState ? state.isDark : false;
-                        return _buildSwitchTile(
-                          title: "Dark Mode",
-                          icon: CupertinoIcons.moon_fill,
-                          iconColor: const Color(0xFF5856D6),
-                          textColor: textPrimary,
-                          value: dark,
-                          onChanged: (_) =>
-                              context.read<ThemeBloc>().add(ToggleThemeEvent()),
-                        );
-                      },
-                    ),
-                  ]),
-
-                  _buildSectionHeader("SESSION", textSecondary),
-                  _buildGroupedContainer(cardColor, [
-                    _buildSettingsTile(
-                      context,
-                      title: "Sign Out",
-                      icon: CupertinoIcons.arrow_right_square,
-                      iconColor: CupertinoColors.systemRed,
-                      textColor: CupertinoColors.systemRed,
-                      dividerColor: dividerColor,
-                      showChevron: false,
-                      onTap: () => _showLogoutDialog(context),
-                    ),
-                  ]),
-                  const SizedBox(height: 40),
-                ],
+                ),
               ),
-            ),
+
+              _buildSectionHeader("ACCOUNT", textSecondary),
+              _buildGroupedContainer(theme.cardColor, [
+                _buildSettingsTile(
+                  context,
+                  title: "Profile",
+                  icon: CupertinoIcons.person_crop_circle,
+                  iconColor: Colors.blue,
+                  textColor: theme.colorScheme.onSurface,
+                  dividerColor: theme.dividerColor,
+                  onTap: () => context.push(RouterPath.userInfoRoute),
+                ),
+              ]),
+
+              _buildSectionHeader("PREFERENCES", textSecondary),
+              _buildGroupedContainer(theme.cardColor, [
+                _buildSettingsTile(
+                  context,
+                  title: "Quality Settings",
+                  icon: CupertinoIcons.slider_horizontal_3,
+                  iconColor: Colors.grey,
+                  textColor: theme.colorScheme.onSurface,
+                  dividerColor: theme.dividerColor,
+                  onTap: () => context.push(RouterPath.qualityRoute),
+                ),
+                Divider(height: 1, indent: 56, endIndent: 0, color: theme.dividerColor),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _recommendationNotifier,
+                  builder: (context, value, _) {
+                    return _buildSwitchTile(
+                      title: "Recommendations",
+                      icon: CupertinoIcons.sparkles,
+                      iconColor: Colors.orange,
+                      textColor: theme.colorScheme.onSurface,
+                      value: value,
+                      onChanged: (newValue) async {
+                        await _hiveDbInstance.saveRecommendation(newValue);
+                        _recommendationNotifier.value = newValue;
+                      },
+                    );
+                  },
+                ),
+                Divider(height: 1, indent: 56, endIndent: 0, color: theme.dividerColor),
+                BlocBuilder<ThemeBloc, ThemeState>(
+                  builder: (context, state) {
+                    final dark = state is ThemeLoadedState ? state.isDark : false;
+                    return _buildSwitchTile(
+                      title: "Dark Mode",
+                      icon: CupertinoIcons.moon_fill,
+                      iconColor: const Color(0xFF5856D6),
+                      textColor: theme.colorScheme.onSurface,
+                      value: dark,
+                      onChanged: (_) =>
+                          context.read<ThemeBloc>().add(ToggleThemeEvent()),
+                    );
+                  },
+                ),
+              ]),
+
+              _buildSectionHeader("SESSION", textSecondary),
+              _buildGroupedContainer(theme.cardColor, [
+                _buildSettingsTile(
+                  context,
+                  title: "Sign Out",
+                  icon: CupertinoIcons.arrow_right_square,
+                  iconColor: CupertinoColors.systemRed,
+                  textColor: CupertinoColors.systemRed,
+                  dividerColor: theme.dividerColor,
+                  showChevron: false,
+                  onTap: () => _showLogoutDialog(context),
+                ),
+              ]),
+              const SizedBox(height: 40),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 

@@ -76,7 +76,7 @@ class RecentSearchTitle extends StatelessWidget {
             .add(SetFullartistalbumInitialEvent());
       },
       child: Container(
-        color: Colors.white,
+        color: Colors.transparent,
         height: 56,
         padding: const EdgeInsets.only(left: 20),
         child: Padding(
@@ -98,10 +98,10 @@ class RecentSearchTitle extends StatelessWidget {
               Expanded(
                 child: Container(
                   height: double.infinity,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: Color(0xFFE5E5EA),
+                        color: Theme.of(context).dividerColor,
                         width: 1.0,
                       ),
                     ),
@@ -113,10 +113,10 @@ class RecentSearchTitle extends StatelessWidget {
                       Expanded(
                         child: Text(
                           text,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
-                            color: Colors.black,
+                            color: Theme.of(context).colorScheme.onSurface,
                             letterSpacing: -0.4,
                           ),
                           overflow: TextOverflow.ellipsis,

@@ -46,7 +46,7 @@ class SuggestionTitle extends StatelessWidget {
         context.read<ArtistBloc>().add(SetStateToinitialEvent());
       },
       child: Container(
-        color: Colors.white,
+        color: Colors.transparent,
         height: 56,
         padding: const EdgeInsets.only(left: 20),
         child: Padding(
@@ -68,10 +68,10 @@ class SuggestionTitle extends StatelessWidget {
               Expanded(
                 child: Container(
                   height: double.infinity,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: Color(0xFFE5E5EA),
+                        color: Theme.of(context).dividerColor,
                         width: 1.0,
                       ),
                     ),
@@ -83,10 +83,10 @@ class SuggestionTitle extends StatelessWidget {
                       Expanded(
                         child: Text(
                           text,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w400,
-                            color: Colors.black,
+                            color: Theme.of(context).colorScheme.onSurface,
                             letterSpacing: -0.4,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -101,9 +101,9 @@ class SuggestionTitle extends StatelessWidget {
                             
                             onSuggestionSelected(text);
                           },
-                          icon: const Icon(
+                          icon: Icon(
                             CupertinoIcons.arrow_up_left,
-                            color: Color.fromARGB(255, 190, 190, 194),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                             size: 20,
                           ),
                         ),
