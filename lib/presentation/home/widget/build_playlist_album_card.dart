@@ -43,8 +43,8 @@ class BuildPlaylistAlbumCard extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Text(
               playlist.playlistName,
-              style: const TextStyle(
-                color: Colors.black,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 22,
                 fontWeight: FontWeight.w500,
                 letterSpacing: -0.5,

@@ -1,11 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
-// import 'package:lottie/lottie.dart';
 
 Widget loadingDisk() {
-  return Center(
-    child: CircularProgressIndicator(
-      color: accentColor,
+  return const Center(
+    child: CupertinoActivityIndicator(
+      color: Colors.red,
+      radius: 15,
     ),
   );
 }

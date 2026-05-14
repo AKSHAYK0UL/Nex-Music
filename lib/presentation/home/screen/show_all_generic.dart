@@ -25,6 +25,7 @@ class ShowAllGeneric extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             surfaceTintColor: Colors.transparent,
             elevation: 0,
             pinned: true,
@@ -35,10 +36,12 @@ class ShowAllGeneric extends StatelessWidget {
               builder: (context, constraints) {
                 final double top = constraints.biggest.height;
                 final double minHeight = kToolbarHeight + statusBarHeight;
-                
+
                 // Calculate ratios for animations
                 // 1.0 = fully expanded, 0.0 = fully collapsed
-                final double expandRatio = ((top - minHeight) / (expandedBarHeight - kToolbarHeight)).clamp(0.0, 1.0);
+                final double expandRatio =
+                    ((top - minHeight) / (expandedBarHeight - kToolbarHeight))
+                        .clamp(0.0, 1.0);
                 final double collapseRatio = 1.0 - expandRatio;
 
                 return Stack(
@@ -51,16 +54,18 @@ class ShowAllGeneric extends StatelessWidget {
                       child: GestureDetector(
                         onTap: () => context.pop(),
                         behavior: HitTestBehavior.opaque,
-                        child:  Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                           const Icon(Icons.arrow_back_ios_new, color: Colors.red, size: 20),
-                          const  SizedBox(width: 4),
+                            const Icon(Icons.arrow_back_ios_new,
+                                color: Colors.red, size: 20),
+                            const SizedBox(width: 4),
                             Opacity(
-opacity: expandRatio,
+                              opacity: expandRatio,
                               child: const Text(
                                 'Home',
-                                style: TextStyle(color: Colors.red, fontSize: 17),
+                                style:
+                                    TextStyle(color: Colors.red, fontSize: 17),
                               ),
                             ),
                           ],
@@ -79,13 +84,15 @@ opacity: expandRatio,
                         margin: const EdgeInsets.only(left: 40),
                         child: Opacity(
                           // Starts fading in after 80% of the scroll is done
-                          opacity: collapseRatio > 0.8 ? (collapseRatio - 0.8) / 0.2 : 0.0,
+                          opacity: collapseRatio > 0.8
+                              ? (collapseRatio - 0.8) / 0.2
+                              : 0.0,
                           child: Text(
                             title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                               letterSpacing: -0.3,
                             ),
                           ),
@@ -101,12 +108,12 @@ opacity: expandRatio,
                         opacity: expandRatio,
                         child: Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'serif',
                             fontSize: 28,
                             overflow: TextOverflow.ellipsis,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: Theme.of(context).colorScheme.onSurface,
                             letterSpacing: -1.0,
                           ),
                         ),
@@ -125,9 +132,11 @@ opacity: expandRatio,
                   child: _buildEmptyState(),
                 )
               : SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   sliver: SliverGrid(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       mainAxisSpacing: 24,
                       crossAxisSpacing: 16,
@@ -149,15 +158,13 @@ opacity: expandRatio,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.music_note_rounded, size: 80, color: Colors.grey.withValues(alpha:0.3)),
+          Icon(Icons.music_note_rounded,
+              size: 80, color: Colors.grey.withValues(alpha: 0.3)),
           const SizedBox(height: 16),
           const Text(
             "Nothing here",
             style: TextStyle(
-              fontSize: 22, 
-              fontWeight: FontWeight.bold, 
-              fontFamily: 'serif'
-            ),
+                fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'serif'),
           ),
         ],
       ),

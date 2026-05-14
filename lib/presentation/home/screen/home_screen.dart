@@ -1,5 +1,3 @@
-
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (state is HomeSectionStateData) {
           return Scaffold(
             body: _HomeLayout(
-              child: _buildBody( context,state),
+              child: _buildBody(context, state),
             ),
           );
         }
@@ -53,9 +51,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-//  BODY 
+//  BODY
 
-Widget _buildBody(BuildContext context,HomeSectionStateData state, ) {
+Widget _buildBody(
+  BuildContext context,
+  HomeSectionStateData state,
+) {
   return SliverToBoxAdapter(
     child: Padding(
       padding: const EdgeInsets.only(bottom: 20.0),
@@ -74,13 +75,13 @@ Widget _buildBody(BuildContext context,HomeSectionStateData state, ) {
             title: "Made For You",
             // onTap: () => context.push(RouterPath.showAllPlaylistsRoute),
             onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Made For You',
-                  'items': state.playlist,
-                  'isAlbum': false,
-                },
-              ),
+              RouterPath.showAllGenericRoute,
+              extra: {
+                'title': 'Made For You',
+                'items': state.playlist,
+                'isAlbum': false,
+              },
+            ),
           ),
           PlaylistCarousel(
             playlists: state.playlist.take(7).toList(),
@@ -93,13 +94,13 @@ Widget _buildBody(BuildContext context,HomeSectionStateData state, ) {
             title: "New Albums",
             // onTap: () => context.push(RouterPath.showAllAlbumsRoute),
             onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'New Albums',
-                  'items': state.albums,
-                  'isAlbum': true,
-                },
-              ),
+              RouterPath.showAllGenericRoute,
+              extra: {
+                'title': 'New Albums',
+                'items': state.albums,
+                'isAlbum': true,
+              },
+            ),
           ),
           AlbumCarousel(
             albums: state.albums.take(7).toList(),
@@ -379,7 +380,7 @@ Widget _buildBody(BuildContext context,HomeSectionStateData state, ) {
   );
 }
 
-//  SHARED LAYOUT 
+//  SHARED LAYOUT
 
 class _HomeLayout extends StatelessWidget {
   final Widget child;
@@ -393,18 +394,20 @@ class _HomeLayout extends StatelessWidget {
         parent: AlwaysScrollableScrollPhysics(),
       ),
       slivers: [
-        const SliverAppBar(
+        SliverAppBar(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
           pinned: true,
           expandedHeight: 80.0,
           flexibleSpace: FlexibleSpaceBar(
-            titlePadding: EdgeInsets.fromLTRB(14, 0, 0, 10),
+            titlePadding: const EdgeInsets.fromLTRB(14, 0, 0, 10),
             title: Text(
               "Home",
               style: TextStyle(
                 fontFamily: 'serif',
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
@@ -416,7 +419,7 @@ class _HomeLayout extends StatelessWidget {
   }
 }
 
-//  SUB HEADER 
+//  SUB HEADER
 
 class _SubHeader extends StatelessWidget {
   final String title;
@@ -428,11 +431,11 @@ class _SubHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14.0, 0, 0, 4),
       child: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'serif',
           fontSize: 13,
           fontWeight: FontWeight.bold,
-          color: Colors.grey,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           letterSpacing: -0.5,
         ),
       ),

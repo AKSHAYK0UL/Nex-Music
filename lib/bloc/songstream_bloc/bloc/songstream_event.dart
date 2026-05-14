@@ -121,3 +121,8 @@ final class PlaySongFromPlaylistEvent extends SongstreamEvent {
     required this.playlistSongs,
   });
 }
+
+final class UpdatePlaylistSongsEvent extends SongstreamEvent {
+  final List<Songmodel> updatedPlaylist;
+  UpdatePlaylistSongsEvent({required this.updatedPlaylist});
+}

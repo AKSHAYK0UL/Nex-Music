@@ -42,6 +42,7 @@ class _SearchResultTabState extends State<SearchResultTab> {
                   onPressed: () => context.pop(),
                 ),
                 title: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () {
                     context.pushNamed(RouterName.searchName,
                         extra: widget.searchText);

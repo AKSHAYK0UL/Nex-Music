@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
@@ -43,7 +44,7 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
               builder: (context, state) {
                 if (state is UserPlaylistLoadingState ||
                     state is UserPlaylistInitial) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CupertinoActivityIndicator(color: Colors.red, radius: 15));
                 }
 
                 if (state is UserPlaylistDataState) {
@@ -51,7 +52,7 @@ void showAddToPlaylistDialog(BuildContext context, Songmodel currentSong) {
                     stream: state.data,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(child: CupertinoActivityIndicator(color: Colors.red, radius: 15));
                       }
                       if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));

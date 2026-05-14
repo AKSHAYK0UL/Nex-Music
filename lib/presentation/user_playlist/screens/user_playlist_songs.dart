@@ -105,14 +105,14 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
           }
 
           if (isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CupertinoActivityIndicator(color: Colors.red, radius: 15));
           }
 
           return StreamBuilder<List<Songmodel>>(
             stream: songStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(child: CupertinoActivityIndicator(color: Colors.red, radius: 15));
               } else if (snapshot.hasError) {
                 return Center(child: Text(snapshot.error.toString()));
               }
@@ -127,11 +127,13 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                 slivers: [
                  
                   SliverAppBar(
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    surfaceTintColor: Colors.transparent,
                     expandedHeight: expandedHeight,
                     pinned: true,
                     stretch: true,
                     elevation: 0,
-                    scrolledUnderElevation: 4.0,
+                    scrolledUnderElevation: 0,
                     systemOverlayStyle: SystemUiOverlayStyle.dark,
                     leading: GestureDetector(
                       onTap: () {
@@ -155,8 +157,8 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                       opacity: _isCollapsed ? 1.0 : 0.0,
                       child: Text(
                         _playlistName,
-                        style: const TextStyle(
-                          color: Colors.black,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
                         ),
@@ -189,7 +191,7 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                          
                           Container(
                             height: 30,
-                            color: const Color(0xFF1C1C44),
+                            color: Theme.of(context).scaffoldBackgroundColor,
                             child: widget.thumbnail != null &&
                                     widget.thumbnail!.isNotEmpty
                                 ? cacheImage(

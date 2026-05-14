@@ -15,14 +15,15 @@ class ShowAllAlbums extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text(
+        title: Text(
           "New Albums",
           style: TextStyle(
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.w600,
           ),
         ),
-        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.onSurface),
+        iconTheme:
+            IconThemeData(color: Theme.of(context).colorScheme.onSurface),
       ),
       body: BlocBuilder<HomesectionBloc, HomesectionState>(
         buildWhen: (previous, current) => previous != current,
@@ -41,12 +42,12 @@ class ShowAllAlbums extends StatelessWidget {
                     color: Colors.grey,
                   ),
                   const SizedBox(height: 16),
-                 const Text(
+                  Text(
                     'Failed to load albums',
-                    style:  TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -64,7 +65,7 @@ class ShowAllAlbums extends StatelessWidget {
           }
           if (state is HomeSectionStateData) {
             if (state.albums.isEmpty) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -79,14 +80,14 @@ class ShowAllAlbums extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
                 ),
               );
             }
-            
+
             return GridView.builder(
               padding: const EdgeInsets.all(16),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

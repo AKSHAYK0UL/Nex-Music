@@ -1,4 +1,4 @@
-﻿// import 'dart:async';
+// import 'dart:async';
 // import 'dart:io';
 // import 'package:audio_service/audio_service.dart';
 // import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -447,6 +447,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     on<GetUpcomingSongsStateEvent>(_getUpcomingSongsState);
     on<PlaySongFromPlaylistEvent>(_playSongFromPlaylist,
         transformer: restartable());
+    on<UpdatePlaylistSongsEvent>(_updatePlaylistSongs);
     songPosition = _audioPlayer.positionStream;
     bufferedPositionStream = _audioPlayer.bufferedPositionStream;
 
@@ -1303,5 +1304,18 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     }
 
     return upcomingSongs;
+  }
+
+  void _updatePlaylistSongs(
+      UpdatePlaylistSongsEvent event, Emitter<SongstreamState> emit) {
+    // update currently playing songs from a playlist
+    // merge the new songs into the current playlist
+    final existingIds = _playlistSongs.map((s) => s.vId).toSet();
+    final newSongs = event.updatedPlaylist
+        .where((s) => !existingIds.contains(s.vId))
+        .toList();
+    if (newSongs.isNotEmpty) {
+      _playlistSongs.addAll(newSongs);
+    }
   }
 }

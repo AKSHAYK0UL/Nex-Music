@@ -1,4 +1,3 @@
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -47,8 +46,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
     //=
     final screenSize = MediaQuery.sizeOf(context);
     final expandedHeight = screenSize.height * 0.52;
-    final threshold =
-        expandedHeight - kToolbarHeight - 20; 
+    final threshold = expandedHeight - kToolbarHeight - 20;
 
     if (_scrollController.offset > threshold && !_isCollapsed) {
       setState(() {
@@ -58,6 +56,16 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
       setState(() {
         _isCollapsed = false;
       });
+    }
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final state = context.read<PlaylistBloc>().state;
+      if (state is PlaylistDataState && !state.isLoading) {
+        context.read<PlaylistBloc>().add(
+              LoadMoreSongsEvent(playlistId: widget.playlistData.playListId),
+            );
+      }
     }
   }
 
@@ -114,12 +122,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
             ? playlistState.isLoading
             : false;
 
-        // Trigger load more if needed
-        if (playlistState is PlaylistDataState) {
-          context.read<PlaylistBloc>().add(
-                LoadMoreSongsEvent(playlistId: widget.playlistData.playListId),
-              );
-        }
+        // Pagination is now handled by _scrollListener
 
         return Scaffold(
           body: CustomScrollView(
@@ -128,11 +131,13 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
             slivers: [
               // 1. The Sliver App Bar (Collapsing Header)
               SliverAppBar(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                surfaceTintColor: Colors.transparent,
                 expandedHeight: expandedHeight,
                 pinned: true,
                 stretch: true,
                 elevation: 0,
-                scrolledUnderElevation: 4.0,
+                scrolledUnderElevation: 0,
                 systemOverlayStyle: SystemUiOverlayStyle.dark,
                 leading: GestureDetector(
                   onTap: () => context.pop(),
@@ -152,8 +157,8 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                   opacity: _isCollapsed ? 1.0 : 0.0,
                   child: Text(
                     widget.playlistData.playlistName,
-                    style: const TextStyle(
-                      color: Colors.black,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                     ),
@@ -187,7 +192,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                       // Background Image
                       Container(
                         height: 30,
-                        color: const Color(0xFF1C1C44),
+                        color: Theme.of(context).scaffoldBackgroundColor,
                         child: cacheImage(
                             imageUrl: widget.playlistData.thumbnail,
                             width: double.infinity,
@@ -323,7 +328,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                     children: [
                                       // Shuffle Button
                                       GestureDetector(
-                                        onTap: () {
+                                        onTap: () async {
                                           if (songs.isNotEmpty) {
                                             final shuffled =
                                                 List<Songmodel>.from(songs)
@@ -338,6 +343,47 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                                 ));
                                             showSnackbar(
                                                 context, "Shuffling...");
+
+                                            // Auto load rest of playlist for playback
+                                            if (songs.length < totalSongs) {
+                                              final repo = context
+                                                  .read<PlaylistBloc>()
+                                                  .repository;
+                                              int fetchIndex = songs.length;
+                                              List<Songmodel> allSongs =
+                                                  List.from(songs);
+                                              while (fetchIndex < totalSongs) {
+                                                try {
+                                                  final data =
+                                                      await repo.getPlayList(
+                                                          widget.playlistData
+                                                              .playListId,
+                                                          fetchIndex);
+                                                  if (data
+                                                      .playlistSongs.isEmpty) {
+                                                    break;
+                                                  }
+                                                  allSongs.addAll(
+                                                      data.playlistSongs);
+                                                  fetchIndex +=
+                                                      data.playlistSongs.length;
+                                                } catch (e) {
+                                                  break;
+                                                }
+                                              }
+                                              if (mounted) {
+                                                final finalShuffled =
+                                                    List<Songmodel>.from(
+                                                        allSongs)
+                                                      ..shuffle();
+                                                context
+                                                    .read<ss.SongstreamBloc>()
+                                                    .add(ss
+                                                        .UpdatePlaylistSongsEvent(
+                                                            updatedPlaylist:
+                                                                finalShuffled));
+                                              }
+                                            }
                                           }
                                         },
                                         child: Container(
@@ -358,7 +404,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                       const SizedBox(width: 16),
                                       // Play Button
                                       GestureDetector(
-                                        onTap: () {
+                                        onTap: () async {
                                           if (songs.isNotEmpty) {
                                             context
                                                 .read<ss.SongstreamBloc>()
@@ -368,6 +414,43 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                                   songIndex: 0,
                                                   playlistSongs: songs,
                                                 ));
+
+                                            // Auto load rest of playlist for playback
+                                            if (songs.length < totalSongs) {
+                                              final repo = context
+                                                  .read<PlaylistBloc>()
+                                                  .repository;
+                                              int fetchIndex = songs.length;
+                                              List<Songmodel> allSongs =
+                                                  List.from(songs);
+                                              while (fetchIndex < totalSongs) {
+                                                try {
+                                                  final data =
+                                                      await repo.getPlayList(
+                                                          widget.playlistData
+                                                              .playListId,
+                                                          fetchIndex);
+                                                  if (data
+                                                      .playlistSongs.isEmpty) {
+                                                    break;
+                                                  }
+                                                  allSongs.addAll(
+                                                      data.playlistSongs);
+                                                  fetchIndex +=
+                                                      data.playlistSongs.length;
+                                                } catch (e) {
+                                                  break;
+                                                }
+                                              }
+                                              if (mounted) {
+                                                context
+                                                    .read<ss.SongstreamBloc>()
+                                                    .add(ss
+                                                        .UpdatePlaylistSongsEvent(
+                                                            updatedPlaylist:
+                                                                allSongs));
+                                              }
+                                            }
                                           }
                                         },
                                         child: Container(
@@ -419,7 +502,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                             return isLoadingMore
                                 ? const Padding(
                                     padding: EdgeInsets.symmetric(vertical: 20),
-                                    child: CupertinoActivityIndicator(),
+                                    child: CupertinoActivityIndicator(
+                                      color: Colors.red,
+                                      radius: 15,
+                                    ),
                                   )
                                 : const SizedBox.shrink();
                           }
@@ -448,6 +534,8 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
   // --- Helper Widgets ---
 
   Widget _buildLoadingIndicator() {
+    final shimmerColor =
+        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1);
     return Column(
       children: List.generate(
         6,
@@ -461,7 +549,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 height: 70,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: Colors.grey.shade100,
+                  color: shimmerColor,
                 ),
               ),
               const SizedBox(width: 16),
@@ -475,7 +563,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                       width: 150,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
-                        color: Colors.grey.shade100,
+                        color: shimmerColor,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -484,7 +572,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                       width: 100,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(4),
-                        color: Colors.grey.shade100,
+                        color: shimmerColor,
                       ),
                     ),
                   ],

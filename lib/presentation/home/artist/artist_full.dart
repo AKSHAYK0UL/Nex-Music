@@ -95,6 +95,7 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
           headerSliverBuilder: (context, innerBoxIsScrolled) {
             return [
               SliverAppBar(
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 surfaceTintColor: Colors.transparent,
                 pinned: true,
                 floating: false,
@@ -111,8 +112,8 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                   opacity: _isCollapsed ? 1.0 : 0.0,
                   child: Text(
                     widget.artist.artist.name,
-                    style: const TextStyle(
-                      color: Colors.black,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                     ),
@@ -161,7 +162,7 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                   ),
                   const SizedBox(width: 8),
                 ],
-                centerTitle: false,
+                centerTitle: true,
                 flexibleSpace: FlexibleSpaceBar(
                   stretchModes: const [
                     StretchMode.zoomBackground,
@@ -221,15 +222,15 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(kTextTabBarHeight),
                   child: Container(
-                    color: Colors.white,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     child: TabBar(
                       isScrollable: true,
                       tabAlignment: TabAlignment.center,
                       indicatorColor: Colors.redAccent,
                       indicatorWeight: 2,
-                      dividerColor: Colors.grey.withValues(alpha: 0.2),
+                      dividerColor: Theme.of(context).dividerColor.withValues(alpha: 0.2),
                       labelColor: Colors.redAccent,
-                      unselectedLabelColor: Colors.grey,
+                      unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                       labelStyle: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
