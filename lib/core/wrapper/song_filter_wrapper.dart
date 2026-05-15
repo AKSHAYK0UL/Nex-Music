@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/presentation/library/widgets/no_results_view.dart';
+import 'package:nex_music/presentation/library/widgets/sort_button.dart';
 
 enum SongSortType {
   nameAsc,
@@ -55,19 +57,33 @@ class _SongFilterWrapperState extends State<SongFilterWrapper> {
         break;
       case SongSortType.timeAsc:
         result.sort((a, b) {
-          final DateTime timeA =
-              a.timestamp is DateTime ? a.timestamp as DateTime : DateTime(0);
-          final DateTime timeB =
-              b.timestamp is DateTime ? b.timestamp as DateTime : DateTime(0);
+          final aTimestamp = a.timestamp;
+          final bTimestamp = b.timestamp;
+
+          if (aTimestamp == null || bTimestamp == null) return 0;
+
+          DateTime timeA = aTimestamp is DateTime 
+              ? aTimestamp 
+              : (aTimestamp as dynamic).toDate();
+          DateTime timeB = bTimestamp is DateTime 
+              ? bTimestamp 
+              : (bTimestamp as dynamic).toDate();
           return timeA.compareTo(timeB);
         });
         break;
       case SongSortType.timeDesc:
         result.sort((a, b) {
-          final DateTime timeA =
-              a.timestamp is DateTime ? a.timestamp as DateTime : DateTime(0);
-          final DateTime timeB =
-              b.timestamp is DateTime ? b.timestamp as DateTime : DateTime(0);
+          final aTimestamp = a.timestamp;
+          final bTimestamp = b.timestamp;
+
+          if (aTimestamp == null || bTimestamp == null) return 0;
+
+          DateTime timeA = aTimestamp is DateTime 
+              ? aTimestamp 
+              : (aTimestamp as dynamic).toDate();
+          DateTime timeB = bTimestamp is DateTime 
+              ? bTimestamp 
+              : (bTimestamp as dynamic).toDate();
           return timeB.compareTo(timeA);
         });
         break;
@@ -102,6 +118,8 @@ class _SongFilterWrapperState extends State<SongFilterWrapper> {
     final bool isTimeActive =
         _sortType == SongSortType.timeAsc || _sortType == SongSortType.timeDesc;
 
+    final List<Songmodel> filteredSongs = _filteredSongs;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -115,7 +133,7 @@ class _SongFilterWrapperState extends State<SongFilterWrapper> {
                 children: [
                   Text(
                     widget.title,
-                    style:  TextStyle(
+                    style: TextStyle(
                       fontFamily: 'serif',
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
@@ -125,14 +143,14 @@ class _SongFilterWrapperState extends State<SongFilterWrapper> {
                   ),
                   Row(
                     children: [
-                      _SortButton(
+                      SortButton(
                         label: "Name",
                         isActive: isNameActive,
                         isDesc: _sortType == SongSortType.nameDesc,
                         onTap: _toggleNameSort,
                       ),
-                      const SizedBox(width: 12),
-                      _SortButton(
+                      const SizedBox(width: 15),
+                      SortButton(
                         label: "Time",
                         isActive: isTimeActive,
                         isDesc: _sortType == SongSortType.timeDesc,
@@ -154,53 +172,12 @@ class _SongFilterWrapperState extends State<SongFilterWrapper> {
               ),
             ),
             Expanded(
-              child: widget.builder(context, _filteredSongs),
+              child: (filteredSongs.isEmpty && _searchQuery.isNotEmpty)
+                  ? NoResultsView(message: "No songs match your search")
+                  : widget.builder(context, filteredSongs),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _SortButton extends StatelessWidget {
-  final String label;
-  final bool isActive;
-  final bool isDesc;
-  final VoidCallback onTap;
-
-  const _SortButton({
-    required this.label,
-    required this.isActive,
-    required this.isDesc,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive
-                  ? Theme.of(context).colorScheme.onSurface
-                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
-          ),
-          if (isActive) ...[
-            const SizedBox(width: 2),
-            Icon(
-              isDesc ? CupertinoIcons.arrow_down : CupertinoIcons.arrow_up,
-              size: 14,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ]
-        ],
       ),
     );
   }

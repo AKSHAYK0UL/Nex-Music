@@ -29,6 +29,7 @@ import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/bloc/quality_bloc/bloc/quality_bloc.dart';
 import 'package:nex_music/bloc/recent_played_bloc/bloc/recentplayed_bloc.dart';
 import 'package:nex_music/bloc/saved_artists_bloc/bloc/saved_artists_bloc.dart';
+import 'package:nex_music/bloc/saved_playlists_bloc/bloc/saved_playlists_bloc.dart';
 import 'package:nex_music/bloc/search_album_bloc/bloc/search_album_bloc.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
 import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart';
@@ -221,6 +222,9 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => SavedArtistsBloc(context.read<DbRepository>()),
+          ),
+          BlocProvider(
+            create: (context) => SavedPlaylistsBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
             create: (context) =>

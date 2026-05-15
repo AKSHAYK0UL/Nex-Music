@@ -5,11 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
+import 'package:nex_music/bloc/saved_playlists_bloc/bloc/saved_playlists_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart' as ss;
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/playlistmodel.dart';
+import 'package:nex_music/model/saved_playlist_model.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 import 'package:share_plus/share_plus.dart';
@@ -17,8 +19,9 @@ import 'package:share_plus/share_plus.dart';
 class ShowPlaylist extends StatefulWidget {
   static const routeName = "/showplaylist";
   final PlayListmodel playlistData;
+  final bool isAlbum;
 
-  const ShowPlaylist({super.key, required this.playlistData});
+  const ShowPlaylist({super.key, required this.playlistData, this.isAlbum = false});
 
   @override
   State<ShowPlaylist> createState() => _ShowPlaylistState();
@@ -35,6 +38,9 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
     context
         .read<PlaylistBloc>()
         .add(GetPlaylistEvent(playlistId: widget.playlistData.playListId));
+    context
+        .read<SavedPlaylistsBloc>()
+        .add(IsPlaylistSavedEvent(playlistId: widget.playlistData.playListId));
 
     // Add listener to handle title visibility
     _scrollController.addListener(_scrollListener);
@@ -73,7 +79,36 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
   void dispose() {
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
-    super.dispose();
+  }
+
+  void _showRemoveConfirmation(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Remove from Library'),
+        content: Text(
+            'Are you sure you want to remove "${widget.playlistData.playlistName}" from your library?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              context.read<SavedPlaylistsBloc>().add(
+                    RemoveFromSavedPlaylistsEvent(
+                      playlistId: widget.playlistData.playListId,
+                    ),
+                  );
+              Navigator.pop(ctx);
+              showSnackbar(context, "Removed from library");
+            },
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -278,25 +313,50 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                   // Left Side: Add & Info
                                   Row(
                                     children: [
-                                      // Add Button
-                                      GestureDetector(
-                                        onTap: () {
-                                          showSnackbar(
-                                              context, "Added to library");
+                                      BlocBuilder<SavedPlaylistsBloc, SavedPlaylistsState>(
+                                        builder: (context, state) {
+                                          bool isSaved = false;
+                                          if (state is IsPlaylistSavedState &&
+                                              state.playlistId == widget.playlistData.playListId) {
+                                            isSaved = state.isSaved;
+                                          } else if (state is SavedPlaylistsDataState && 
+                                              state.lastPlaylistId == widget.playlistData.playListId) {
+                                            isSaved = state.lastIsSaved ?? false;
+                                          }
+                                          return GestureDetector(
+                                            onTap: () {
+                                              if (isSaved) {
+                                                _showRemoveConfirmation(context);
+                                              } else {
+                                                final savedModel = SavedPlaylistModel(
+                                                  playListId: widget.playlistData.playListId,
+                                                  playlistName: widget.playlistData.playlistName,
+                                                  artistBasic: widget.playlistData.artistBasic,
+                                                  thumbnail: widget.playlistData.thumbnail,
+                                                  isAlbum: widget.isAlbum, 
+                                                );
+                                                context.read<SavedPlaylistsBloc>().add(
+                                                  AddToSavedPlaylistsEvent(playlist: savedModel),
+                                                );
+                                                showSnackbar(context, "Added to library");
+                                              }
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: isSaved 
+                                                    ? Colors.red.withValues(alpha: 0.2)
+                                                    : Colors.white.withValues(alpha: 0.2),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                isSaved ? CupertinoIcons.delete : CupertinoIcons.add,
+                                                color: isSaved ? Colors.red : Colors.white,
+                                                size: 24,
+                                              ),
+                                            ),
+                                          );
                                         },
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.2),
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            CupertinoIcons.add,
-                                            color: Colors.white,
-                                            size: 24,
-                                          ),
-                                        ),
                                       ),
                                       const SizedBox(width: 16),
                                       // --- INFO BUTTON ---

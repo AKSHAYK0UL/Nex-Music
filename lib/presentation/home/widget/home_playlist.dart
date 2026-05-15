@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
@@ -7,17 +6,25 @@ import 'package:nex_music/model/playlistmodel.dart';
 
 class HomePlaylist extends StatelessWidget {
   final PlayListmodel playList;
+  final bool isAlbum;
   
   const HomePlaylist({
     super.key,
     required this.playList,
+    this.isAlbum = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.push(RouterPath.showPlaylistSongsRoute, extra: playList);
+        context.push(
+          RouterPath.showPlaylistSongsRoute,
+          extra: {
+            'playlistData': playList,
+            'isAlbum': isAlbum,
+          },
+        );
       },
       behavior: HitTestBehavior.translucent,
       child: Column(

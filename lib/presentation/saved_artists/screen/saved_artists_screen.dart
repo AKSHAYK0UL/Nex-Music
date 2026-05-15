@@ -1,11 +1,12 @@
-
-import 'package:flutter/cupertino.dart'; 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/saved_artists_bloc/bloc/saved_artists_bloc.dart';
-
+import 'package:nex_music/constants/enums.dart';
 import 'package:nex_music/model/artistmodel.dart';
+import 'package:nex_music/presentation/library/widgets/no_results_view.dart';
+import 'package:nex_music/presentation/library/widgets/sort_button.dart';
 import 'package:nex_music/presentation/search/widgets/artistgridview.dart';
 
 class SavedArtistsScreen extends StatefulWidget {
@@ -17,6 +18,8 @@ class SavedArtistsScreen extends StatefulWidget {
 
 class _SavedArtistsScreenState extends State<SavedArtistsScreen> {
   Stream<List<ArtistModel>>? _artistsStream;
+  String _searchQuery = '';
+  PlaylistSortType _sortType = PlaylistSortType.nameAsc;
 
   @override
   void initState() {
@@ -24,8 +27,48 @@ class _SavedArtistsScreenState extends State<SavedArtistsScreen> {
     context.read<SavedArtistsBloc>().add(GetSavedArtistsEvent());
   }
 
+  List<ArtistModel> _filterArtists(List<ArtistModel> artists) {
+    final filtered = artists
+        .where((a) => (a.artist.name ?? '')
+            .toLowerCase()
+            .contains(_searchQuery.toLowerCase()))
+        .toList();
+
+    if (_sortType == PlaylistSortType.nameAsc ||
+        _sortType == PlaylistSortType.nameDesc) {
+      filtered.sort((a, b) => _sortType == PlaylistSortType.nameAsc
+          ? (a.artist.name ?? '').compareTo(b.artist.name ?? '')
+          : (b.artist.name ?? '').compareTo(a.artist.name ?? ''));
+    } else {
+      filtered.sort((a, b) {
+        final aTimestamp = a.timestamp;
+        final bTimestamp = b.timestamp;
+
+        if (aTimestamp == null || bTimestamp == null) return 0;
+
+        DateTime aTime = aTimestamp is DateTime
+            ? aTimestamp
+            : (aTimestamp as dynamic).toDate();
+        DateTime bTime = bTimestamp is DateTime
+            ? bTimestamp
+            : (bTimestamp as dynamic).toDate();
+
+        return _sortType == PlaylistSortType.timeAsc
+            ? aTime.compareTo(bTime)
+            : bTime.compareTo(aTime);
+      });
+    }
+
+    return filtered;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool isNameActive = _sortType == PlaylistSortType.nameAsc ||
+        _sortType == PlaylistSortType.nameDesc;
+    final bool isTimeActive = _sortType == PlaylistSortType.timeAsc ||
+        _sortType == PlaylistSortType.timeDesc;
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -57,52 +100,98 @@ class _SavedArtistsScreenState extends State<SavedArtistsScreen> {
             return StreamBuilder<List<ArtistModel>>(
               stream: _artistsStream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
+                if (snapshot.connectionState == ConnectionState.waiting &&
+                    !snapshot.hasData) {
+                  return const Center(
                       child: CupertinoActivityIndicator(
-                    color: Colors.red.withValues(alpha: 0.8),
+                    color: Colors.red,
                     radius: 15,
                   ));
                 }
 
-                final artists = snapshot.data ?? [];
+                final allArtists = snapshot.data ?? [];
+                final filteredArtists = _filterArtists(allArtists);
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                     Padding(
-                      padding: EdgeInsets.only(left: 24.0, bottom: 10.0),
-                      child: Text(
-                        "Artists",
-                        style: TextStyle(
-                          fontFamily: 'serif',
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                          letterSpacing: -0.5,
-                        ),
+                    // Header with Sort Buttons
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 16, 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Artists",
+                            style: TextStyle(
+                              fontFamily: 'serif',
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              SortButton(
+                                label: 'Name',
+                                isActive: isNameActive,
+                                isDesc: _sortType == PlaylistSortType.nameDesc,
+                                onTap: () {
+                                  setState(() {
+                                    _sortType =
+                                        _sortType == PlaylistSortType.nameAsc
+                                            ? PlaylistSortType.nameDesc
+                                            : PlaylistSortType.nameAsc;
+                                  });
+                                },
+                              ),
+                              const SizedBox(width: 15),
+                              SortButton(
+                                label: 'Time',
+                                isActive: isTimeActive,
+                                isDesc: _sortType == PlaylistSortType.timeDesc,
+                                onTap: () {
+                                  setState(() {
+                                    _sortType =
+                                        _sortType == PlaylistSortType.timeDesc
+                                            ? PlaylistSortType.timeAsc
+                                            : PlaylistSortType.timeDesc;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(16, 0, 16, 7),
+
+                    // Search Bar
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 15),
                       child: CupertinoSearchTextField(
-                        placeholder: 'Find in Artists',
+                        placeholder: 'Search saved artists',
+                        onChanged: (value) =>
+                            setState(() => _searchQuery = value),
                         cursorColor: Colors.red,
                       ),
                     ),
+
                     Expanded(
-                      child: artists.isEmpty
+                      child: allArtists.isEmpty
                           ? const _EmptyArtistsView()
-                          : _ArtistsGridView(artists: artists),
+                          : filteredArtists.isEmpty
+                              ? NoResultsView(
+                                  message: "No artists match your search")
+                              : _ArtistsGridView(artists: filteredArtists),
                     ),
                   ],
                 );
               },
             );
           }
-          return Center(
+          return const Center(
               child: CupertinoActivityIndicator(
-            color: Colors.red.withValues(alpha: 0.8), 
+            color: Colors.red,
             radius: 15,
           ));
         },
@@ -145,12 +234,12 @@ class _ArtistsGridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 0.8,
-        crossAxisSpacing: 15,
-        mainAxisSpacing: 15,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
       ),
       itemCount: artists.length,
       itemBuilder: (context, index) {
@@ -180,7 +269,7 @@ class _EmptyArtistsView extends StatelessWidget {
             color: Colors.red.withValues(alpha: 0.8),
           ),
           const SizedBox(height: 20),
-           Text(
+          Text(
             "Add Your Favorite Artists",
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -196,7 +285,10 @@ class _EmptyArtistsView extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 15,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.6),
               height: 1.4,
             ),
           ),

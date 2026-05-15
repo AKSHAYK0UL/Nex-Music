@@ -41,8 +41,30 @@ class DataProvider {
   }
 
   Stream<Video> getSongIdFromPlayList(String playlistID) async* {
-    Stream<Video> songStream = _youtubeExplode.playlists.getVideos(playlistID);
-    yield* songStream;
+    String id = playlistID;
+    
+    // Handle full URLs if passed accidentally
+    if (id.contains('list=')) {
+      id = id.split('list=')[1].split('&')[0];
+    }
+
+    try {
+      // Try fetching with the original ID first
+      yield* _youtubeExplode.playlists.getVideos(id);
+    } catch (e) {
+      // For YT Music specific IDs (like Mixes starting with RD or Artist IDs UC)
+      // YoutubeExplode often requires the 'VL' prefix to treat them as playlists.
+      if (!id.startsWith('VL') && (id.startsWith('RD') || id.startsWith('UC') || id.startsWith('PL') == false)) {
+        try {
+          yield* _youtubeExplode.playlists.getVideos('VL$id');
+        } catch (_) {
+          // If both fail, rethrow the original error
+          rethrow;
+        }
+      } else {
+        rethrow;
+      }
+    }
   }
 
   // Future<List<yt.SongFull>> getPlayListSongs(

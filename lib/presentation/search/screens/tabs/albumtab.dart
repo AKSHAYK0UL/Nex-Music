@@ -50,7 +50,10 @@ class AlbumTabState extends State<AlbumTab> {
             itemCount: state.albums.length,
             itemBuilder: (context, index) {
               // return PlaylistGridView(playList: state.albums[index]);
-              return HomePlaylist(playList: state.albums[index]);
+              return HomePlaylist(
+                playList: state.albums[index],
+                isAlbum: true,
+              );
             },
           );
         }

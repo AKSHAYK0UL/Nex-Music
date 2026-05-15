@@ -101,6 +101,7 @@ class ShowAllAlbums extends StatelessWidget {
                 final albumData = state.albums[index];
                 return HomePlaylist(
                   playList: albumData,
+                  isAlbum: true,
                 );
               },
             );

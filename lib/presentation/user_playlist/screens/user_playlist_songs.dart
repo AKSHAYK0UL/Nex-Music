@@ -12,6 +12,7 @@ import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
 import '../widgets/user_playlist_constants.dart';
 
 class UserPlaylistSongs extends StatefulWidget {
@@ -78,13 +79,38 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
     super.dispose();
   }
 
+  void _showDeleteConfirmation(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Delete Playlist'),
+        content: Text('Are you sure you want to delete "$_playlistName"? This action cannot be undone.'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              context.read<UserPlaylistBloc>().add(DeleteUserPlaylistEvent(playlistName: _playlistName));
+              Navigator.pop(ctx); // Close dialog
+              context.pop(); // Go back to library
+              showSnackbar(context, "Playlist deleted");
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context);
     final expandedHeight = screenSize.height * 0.45;
     final Color kPrimaryPink = const Color(0xFFFF2D55);
 
-   
     final currentState = context.watch<ss.SongstreamBloc>().state;
     double bottomPadding = (currentState is ss.PausedState ||
             currentState is ss.PlayingState ||
@@ -285,29 +311,20 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                      
-                                      Row(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              showSnackbar(
-                                                  context, "Added to library");
-                                            },
-                                            child: Container(
-                                              padding: const EdgeInsets.all(8),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white
-                                                    .withOpacity(0.2),
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                CupertinoIcons.add,
-                                                color: Colors.white,
-                                                size: 24,
-                                              ),
-                                            ),
+                                      GestureDetector(
+                                        onTap: () => _showDeleteConfirmation(context),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withValues(alpha: 0.2),
+                                            shape: BoxShape.circle,
                                           ),
-                                         
-                                        ],
+                                          child: const Icon(
+                                            CupertinoIcons.delete,
+                                            color: Colors.red,
+                                            size: 24,
+                                          ),
+                                        ),
                                       ),
                                      
                                       Row(

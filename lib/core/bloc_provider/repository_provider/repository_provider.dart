@@ -11,6 +11,7 @@ import 'package:nex_music/network_provider/home_data/db_network_provider.dart';
 import 'package:nex_music/network_provider/home_data/favorites_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/playlist_db_provide.dart';
 import 'package:nex_music/network_provider/home_data/saved_artists_db_provider.dart';
+import 'package:nex_music/network_provider/home_data/saved_playlists_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/search_history_db_provider.dart';
 import 'package:nex_music/repository/auth_repository/auth_repository.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
@@ -66,6 +67,10 @@ class RepositoryProviderClass {
             userId: firebaseAuthInstance.currentUser!.uid,
           ),
           savedArtistsDBProvider: SavedArtistsDBProvider(
+            firestoreInstance: firebaseFirestore,
+            userId: firebaseAuthInstance.currentUser!.uid,
+          ),
+          savedPlaylistsDBProvider: SavedPlaylistsDBProvider(
             firestoreInstance: firebaseFirestore,
             userId: firebaseAuthInstance.currentUser!.uid,
           ),

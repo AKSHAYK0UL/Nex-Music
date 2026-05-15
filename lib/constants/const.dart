@@ -10,3 +10,4 @@ const thinkUserData = "thinkUserData";
 const savedArtistsCollection = "savedArtists";
 const searchHistoryCollection = "searchHistory";
 const publicPlaylistsCollection = "publicPlaylists";
+const savedPlaylistsCollection = "savedPlaylists";

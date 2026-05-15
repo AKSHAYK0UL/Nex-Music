@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nex_music/model/artistmodel.dart';
+import 'package:nex_music/model/saved_playlist_model.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/network_provider/home_data/db_network_provider.dart';
 import 'package:nex_music/network_provider/home_data/favorites_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/playlist_db_provide.dart';
 import 'package:nex_music/network_provider/home_data/saved_artists_db_provider.dart';
+import 'package:nex_music/network_provider/home_data/saved_playlists_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/search_history_db_provider.dart';
 import 'package:nex_music/model/user_playlist_model.dart';
 
@@ -14,11 +16,12 @@ class DbRepository {
   final FavoritesDBProvider _favoritesDBProvider;
   final PlaylistDbProvider _playlistDbProvider;
   final SavedArtistsDBProvider _savedArtistsDBProvider;
+  final SavedPlaylistsDBProvider _savedPlaylistsDBProvider;
   final SearchHistoryDBProvider _searchHistoryDBProvider;
 
   // Tracks the last buffered vId to avoid duplicate entries for the same song.
   String? _lastBufferedVId;
-  
+
   // Timer to ensure song has been playing for at least 350ms before adding to recent.
   Timer? _recentPlayedTimer;
   String? _pendingRecentVId;
@@ -28,11 +31,13 @@ class DbRepository {
     required FavoritesDBProvider favoritesDBProvider,
     required PlaylistDbProvider playlistDbProvider,
     required SavedArtistsDBProvider savedArtistsDBProvider,
+    required SavedPlaylistsDBProvider savedPlaylistsDBProvider,
     required SearchHistoryDBProvider searchHistoryDBProvider,
   })  : _dbDataProvider = dbDataProvider,
         _favoritesDBProvider = favoritesDBProvider,
         _playlistDbProvider = playlistDbProvider,
         _savedArtistsDBProvider = savedArtistsDBProvider,
+        _savedPlaylistsDBProvider = savedPlaylistsDBProvider,
         _searchHistoryDBProvider = searchHistoryDBProvider;
 
   // Adds a recently played song to Firebase with microsecond timestamp
@@ -41,15 +46,15 @@ class DbRepository {
   Future<void> addToRecentPlayedCollection(Songmodel songData) async {
     // Cancel any pending timer from a previous song
     _recentPlayedTimer?.cancel();
-    
+
     // Track this song as pending
     _pendingRecentVId = songData.vId;
-    
+
     // Wait 350ms before adding to recent
     _recentPlayedTimer = Timer(const Duration(milliseconds: 350), () async {
       // Only add if this is still the current song (user didn't skip)
       if (_pendingRecentVId != songData.vId) return;
-      
+
       // Skip duplicate rapid calls for the same song.
       if (_lastBufferedVId == songData.vId) return;
       _lastBufferedVId = songData.vId;
@@ -65,10 +70,11 @@ class DbRepository {
   // Returns a stream of recently played songs from Firestore.
   Stream<List<Songmodel>> getRecentPlayed() {
     return _dbDataProvider.getRecentPlayed().map(
-      (snapshot) => snapshot.docs
-          .map((doc) => Songmodel.fromJson(doc.data() as Map<String, dynamic>))
-          .toList(),
-    );
+          (snapshot) => snapshot.docs
+              .map((doc) =>
+                  Songmodel.fromJson(doc.data() as Map<String, dynamic>))
+              .toList(),
+        );
   }
 
   // Deletes a song from Firestore.
@@ -150,7 +156,7 @@ class DbRepository {
     final data = _playlistDbProvider.getUserPlaylists();
     return data.asyncMap((querySnapshot) async {
       final List<UserPlaylistModel> playlists = [];
-      
+
       for (var doc in querySnapshot.docs) {
         final docData = doc.data() as Map<String, dynamic>? ?? {};
         List<String> thumbnails = [];
@@ -169,8 +175,9 @@ class DbRepository {
             thumbnails = [];
           }
         }
-        
-        playlists.add(UserPlaylistModel.fromMap(doc.id, docData, thumbnails: thumbnails));
+
+        playlists.add(
+            UserPlaylistModel.fromMap(doc.id, docData, thumbnails: thumbnails));
       }
       return playlists;
     });
@@ -294,6 +301,51 @@ class DbRepository {
     return savedArtistsStream.map((querySnapshot) {
       return querySnapshot.docs.map((doc) {
         return ArtistModel.fromJson(doc.data() as Map<String, dynamic>);
+      }).toList();
+    });
+  }
+
+  // Saved Playlists / Albums
+
+  // Add playlist/album to saved playlists
+  Future<void> addToSavedPlaylists(SavedPlaylistModel playlist) async {
+    try {
+      await _savedPlaylistsDBProvider.addToSavedPlaylists(playlist.toJson());
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  // Check if playlist/album is saved
+  Future<bool> isPlaylistSaved(String playlistId) async {
+    try {
+      return await _savedPlaylistsDBProvider.isPlaylistSaved(playlistId);
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  // Remove playlist/album from saved playlists
+  Future<void> removeFromSavedPlaylists(String playlistId) async {
+    try {
+      await _savedPlaylistsDBProvider.removeFromSavedPlaylists(playlistId);
+    } on FirebaseAuthException catch (_) {
+      rethrow;
+    } catch (_) {
+      rethrow;
+    }
+  }
+
+  // Get saved playlists
+  Stream<List<SavedPlaylistModel>> getSavedPlaylists() {
+    final savedPlaylistsStream = _savedPlaylistsDBProvider.getSavedPlaylists();
+    return savedPlaylistsStream.map((querySnapshot) {
+      return querySnapshot.docs.map((doc) {
+        return SavedPlaylistModel.fromJson(doc.data() as Map<String, dynamic>);
       }).toList();
     });
   }

@@ -19,6 +19,7 @@ import 'package:nex_music/presentation/podcast/screens/podcast_screen.dart';
 import 'package:nex_music/presentation/recent/screens/recentscreen.dart';
 import 'package:nex_music/presentation/saved/screens/saved.dart';
 import 'package:nex_music/presentation/saved_artists/screen/saved_artists_screen.dart';
+import 'package:nex_music/presentation/saved_playlists/screen/saved_albums_screen.dart';
 import 'package:nex_music/presentation/search/screens/search_result_tab.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/setting/screen/phone_setting.dart';
@@ -93,8 +94,18 @@ class AppRouter {
                       path: RouterPath.showPlaylistRoute,
                       name: RouterName.showPlaylistName,
                       builder: (context, state) {
-                        final playlistData = state.extra as PlayListmodel;
-                        return ShowPlaylist(playlistData: playlistData);
+                        final extra = state.extra;
+                        if (extra is PlayListmodel) {
+                          return ShowPlaylist(
+                            playlistData: extra,
+                          );
+                        } else if (extra is Map<String, dynamic>) {
+                          return ShowPlaylist(
+                            playlistData: extra['playlistData'] as PlayListmodel,
+                            isAlbum: extra['isAlbum'] as bool? ?? false,
+                          );
+                        }
+                        return const SizedBox();
                       },
                     ),
                     GoRoute(
@@ -113,10 +124,18 @@ class AppRouter {
                       path: RouterPath.showPlaylistSongsRoute,
                       name: RouterName.showPlaylistSongsName,
                       builder: (context, state) {
-                        final extra = state.extra as PlayListmodel;
-                        return ShowPlaylist(
-                          playlistData: extra,
-                        );
+                        final extra = state.extra;
+                        if (extra is PlayListmodel) {
+                          return ShowPlaylist(
+                            playlistData: extra,
+                          );
+                        } else if (extra is Map<String, dynamic>) {
+                          return ShowPlaylist(
+                            playlistData: extra['playlistData'] as PlayListmodel,
+                            isAlbum: extra['isAlbum'] as bool? ?? false,
+                          );
+                        }
+                        return const SizedBox();
                       },
                     ),
                     GoRoute(
@@ -211,6 +230,13 @@ class AppRouter {
                       name: RouterName.savedArtistName,
                       builder: (context, state) {
                         return const SavedArtistsScreen();
+                      },
+                    ),
+                    GoRoute(
+                      path: RouterPath.savedAlbumsRoute,
+                      name: RouterName.savedAlbumsName,
+                      builder: (context, state) {
+                        return const SavedAlbumsScreen();
                       },
                     ),
                     GoRoute(
@@ -343,6 +369,7 @@ class RouterPath {
   static const String searchResultRoute = 'search-result';
   static const String libraryUserPlaylistRoute = 'library-User-playlist';
   static const String savedArtistRoute = 'saved-artist-route';
+  static const String savedAlbumsRoute = 'saved-albums-route';
   static const String favoritesSongsRoute = 'favorites-songs-route';
   static const String downloadedSongsRoute = 'downloaded-songs-route';
 
@@ -376,6 +403,7 @@ class RouterName {
   static const String searchResultName = 'searchResult';
   static const String libraryUserPlaylistName = 'libraryUserPlaylist';
   static const String savedArtistName = 'savedArtist';
+  static const String savedAlbumsName = 'savedAlbums';
   static const String favoritesSongsName = 'favoritesSongs';
   static const String downloadedSongsName = 'downloadedSongs';
 

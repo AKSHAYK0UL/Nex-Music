@@ -143,7 +143,10 @@ class ShowAllGeneric extends StatelessWidget {
                       childAspectRatio: 0.75,
                     ),
                     delegate: SliverChildBuilderDelegate(
-                      (context, index) => HomePlaylist(playList: items[index]),
+                      (context, index) => HomePlaylist(
+                        playList: items[index],
+                        isAlbum: isAlbum,
+                      ),
                       childCount: items.length,
                     ),
                   ),

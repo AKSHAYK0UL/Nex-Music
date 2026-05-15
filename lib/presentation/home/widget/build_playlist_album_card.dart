@@ -4,23 +4,29 @@ import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 
-// ignore: must_be_immutable
 class BuildPlaylistAlbumCard extends StatelessWidget {
-  PlayListmodel playlist;
-  Size screenSize;
-  bool isAlbum;
+  final PlayListmodel playlist;
+  final Size screenSize;
+  final bool isAlbum;
 
-  BuildPlaylistAlbumCard(
-      {super.key,
-      required this.playlist,
-      required this.isAlbum,
-      required this.screenSize});
+  const BuildPlaylistAlbumCard({
+    super.key,
+    required this.playlist,
+    required this.isAlbum,
+    required this.screenSize,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.push(RouterPath.showPlaylistSongsRoute, extra: playlist);
+        context.push(
+          RouterPath.showPlaylistSongsRoute,
+          extra: {
+            'playlistData': playlist,
+            'isAlbum': isAlbum,
+          },
+        );
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,11 +78,14 @@ class BuildPlaylistAlbumCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     // Background Image
-                    cacheImage(
-                      imageUrl: playlist.thumbnail,
-                      width: double.infinity,
-                      height: double.infinity,
-                      islocal: false,
+                    Hero(
+                      tag: playlist.playListId,
+                      child: cacheImage(
+                        imageUrl: playlist.thumbnail,
+                        width: double.infinity,
+                        height: double.infinity,
+                        islocal: false,
+                      ),
                     ),
                     // Gradient Overlay
                     Positioned(
@@ -109,6 +118,8 @@ class BuildPlaylistAlbumCard extends StatelessWidget {
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],

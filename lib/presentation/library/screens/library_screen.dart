@@ -34,12 +34,18 @@ class LibraryScreen extends StatelessWidget {
               child: ListView(
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  // Playlists
                   LibraryTile(
                     icon: CupertinoIcons.music_note_list,
                     title: "Playlists",
                     onTap: () {
                       context.pushNamed(RouterName.libraryUserPlaylistName);
+                    },
+                  ),
+                  LibraryTile(
+                    icon: CupertinoIcons.square_stack,
+                    title: "Albums",
+                    onTap: () {
+                      context.pushNamed(RouterName.savedAlbumsName);
                     },
                   ),
                   // Artists
@@ -48,14 +54,6 @@ class LibraryScreen extends StatelessWidget {
                     title: "Artists",
                     onTap: () {
                       context.pushNamed(RouterName.savedArtistName);
-                    },
-                  ),
-                  // Albums
-                  LibraryTile(
-                    icon: CupertinoIcons.square_stack,
-                    title: "Albums",
-                    onTap: () {
-                      // Add Albums navigation here
                     },
                   ),
                   // Favorites
