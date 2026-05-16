@@ -78,15 +78,13 @@ class BuildPlaylistAlbumCard extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     // Background Image
-                    Hero(
-                      tag: playlist.playListId,
-                      child: cacheImage(
-                        imageUrl: playlist.thumbnail,
-                        width: double.infinity,
-                        height: double.infinity,
-                        islocal: false,
-                      ),
+                    cacheImage(
+                      imageUrl: playlist.thumbnail,
+                      width: double.infinity,
+                      height: double.infinity,
+                      islocal: false,
                     ),
+
                     // Gradient Overlay
                     Positioned(
                       bottom: 0,

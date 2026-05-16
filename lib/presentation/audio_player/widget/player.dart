@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
-import 'package:nex_music/core/theme/hexcolor.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -110,9 +109,8 @@ class _PlayerState extends State<Player> {
                   state is PausedState
                       ? CupertinoIcons.play_fill
                       : CupertinoIcons.pause_fill,
-                     
                   size: widget.screenSize * 0.0650,
-                 color: Theme.of(context).iconTheme.color,
+                  color: Theme.of(context).iconTheme.color,
                 ),
               ),
             ),

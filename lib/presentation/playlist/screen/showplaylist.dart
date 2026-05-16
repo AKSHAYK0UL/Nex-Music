@@ -21,7 +21,8 @@ class ShowPlaylist extends StatefulWidget {
   final PlayListmodel playlistData;
   final bool isAlbum;
 
-  const ShowPlaylist({super.key, required this.playlistData, this.isAlbum = false});
+  const ShowPlaylist(
+      {super.key, required this.playlistData, this.isAlbum = false});
 
   @override
   State<ShowPlaylist> createState() => _ShowPlaylistState();
@@ -77,6 +78,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
 
   @override
   void dispose() {
+    super.dispose();
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
   }
@@ -201,7 +203,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 ),
                 centerTitle: true,
                 actions: [
-                  // --- SHARE BUTTON ---
+                  //  SHARE BUTTON
                   IconButton(
                     onPressed: () async {
                       await Share.share(
@@ -313,45 +315,69 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                   // Left Side: Add & Info
                                   Row(
                                     children: [
-                                      BlocBuilder<SavedPlaylistsBloc, SavedPlaylistsState>(
+                                      BlocBuilder<SavedPlaylistsBloc,
+                                          SavedPlaylistsState>(
                                         builder: (context, state) {
                                           bool isSaved = false;
                                           if (state is IsPlaylistSavedState &&
-                                              state.playlistId == widget.playlistData.playListId) {
+                                              state.playlistId ==
+                                                  widget.playlistData
+                                                      .playListId) {
                                             isSaved = state.isSaved;
-                                          } else if (state is SavedPlaylistsDataState && 
-                                              state.lastPlaylistId == widget.playlistData.playListId) {
-                                            isSaved = state.lastIsSaved ?? false;
+                                          } else if (state
+                                                  is SavedPlaylistsDataState &&
+                                              state.lastPlaylistId ==
+                                                  widget.playlistData
+                                                      .playListId) {
+                                            isSaved =
+                                                state.lastIsSaved ?? false;
                                           }
                                           return GestureDetector(
                                             onTap: () {
                                               if (isSaved) {
-                                                _showRemoveConfirmation(context);
+                                                _showRemoveConfirmation(
+                                                    context);
                                               } else {
-                                                final savedModel = SavedPlaylistModel(
-                                                  playListId: widget.playlistData.playListId,
-                                                  playlistName: widget.playlistData.playlistName,
-                                                  artistBasic: widget.playlistData.artistBasic,
-                                                  thumbnail: widget.playlistData.thumbnail,
-                                                  isAlbum: widget.isAlbum, 
+                                                final savedModel =
+                                                    SavedPlaylistModel(
+                                                  playListId: widget
+                                                      .playlistData.playListId,
+                                                  playlistName: widget
+                                                      .playlistData
+                                                      .playlistName,
+                                                  artistBasic: widget
+                                                      .playlistData.artistBasic,
+                                                  thumbnail: widget
+                                                      .playlistData.thumbnail,
+                                                  isAlbum: widget.isAlbum,
                                                 );
-                                                context.read<SavedPlaylistsBloc>().add(
-                                                  AddToSavedPlaylistsEvent(playlist: savedModel),
-                                                );
-                                                showSnackbar(context, "Added to library");
+                                                context
+                                                    .read<SavedPlaylistsBloc>()
+                                                    .add(
+                                                      AddToSavedPlaylistsEvent(
+                                                          playlist: savedModel),
+                                                    );
+                                                showSnackbar(context,
+                                                    "Added to library");
                                               }
                                             },
                                             child: Container(
                                               padding: const EdgeInsets.all(8),
                                               decoration: BoxDecoration(
-                                                color: isSaved 
-                                                    ? Colors.red.withValues(alpha: 0.2)
-                                                    : Colors.white.withValues(alpha: 0.2),
+                                                color: isSaved
+                                                    ? Colors.red
+                                                        .withValues(alpha: 0.2)
+                                                    : Colors.white
+                                                        .withValues(alpha: 0.2),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: Icon(
-                                                isSaved ? CupertinoIcons.delete : CupertinoIcons.add,
-                                                color: isSaved ? Colors.red : Colors.white,
+                                                isSaved
+                                                    ? CupertinoIcons.delete
+                                                    : CupertinoIcons.add,
+                                                color: isSaved
+                                                    ? Colors.red
+                                                    : Colors.white,
                                                 size: 24,
                                               ),
                                             ),

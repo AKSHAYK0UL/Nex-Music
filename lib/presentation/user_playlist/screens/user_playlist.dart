@@ -352,8 +352,9 @@ class _UserPlaylistState extends State<UserPlaylist> {
                 ),
                 itemCount: gridItemCount,
                 itemBuilder: (context, index) {
-                  if (index == 0)
+                  if (index == 0) {
                     return AddPlaylistTile(onTap: _showCreateDialog);
+                  }
                   final playlist = playlists[index - 1];
                   final playlistName = playlist.name;
                   final colorValue = playlist.colorValue;
@@ -366,8 +367,9 @@ class _UserPlaylistState extends State<UserPlaylist> {
                       return;
                     }
                     String? thumbnail;
-                    if (displayMode == 'dynamic' && thumbnails.isNotEmpty)
+                    if (displayMode == 'dynamic' && thumbnails.isNotEmpty) {
                       thumbnail = thumbnails.first;
+                    }
                     context.pushNamed(RouterName.userPlaylistSongsName, extra: {
                       'name': playlistName,
                       'colorValue': colorValue,
@@ -421,8 +423,10 @@ class _UserPlaylistState extends State<UserPlaylist> {
               final filteredPlaylists = _filterSavedPlaylists(allSavedItems);
 
               if (allSavedPlaylists.isEmpty) return const _EmptySavedView();
-              if (filteredPlaylists.isEmpty)
-                return NoResultsView(message: "No playlists match your search");
+              if (filteredPlaylists.isEmpty) {
+                return const NoResultsView(
+                    message: "No playlists match your search");
+              }
 
               return GridView.builder(
                 padding: const EdgeInsets.all(16),
@@ -501,7 +505,6 @@ class _SavedPlaylistTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      onLongPress: onRemove,
       behavior: HitTestBehavior.translucent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

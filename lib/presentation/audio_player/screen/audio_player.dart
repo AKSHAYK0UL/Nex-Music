@@ -16,7 +16,6 @@ import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
-import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/player.dart';
@@ -218,7 +217,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     Songmodel songData = widget.routeData["songdata"] as Songmodel;
     final route = widget.routeData["route"] as SongMiniPlayerRoute;
     final songIndex = widget.routeData["songindex"] as int;
-    final quality = widget.routeData["quality"] as ThumbnailQuality;
+    // final quality = widget.routeData["quality"] as ThumbnailQuality;
 
     return BlocListener<DownloadBloc, DownloadState>(
       listener: (context, state) {
@@ -253,13 +252,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     child: Column(
                       children: [
                         SizedBox(height: screenSize * 0.01),
-                        // --- 1. Top Grab Handle ---
+                        //  Top Grab Handle
                         Center(
                           child: Container(
                             width: 40,
                             height: 5,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
@@ -267,7 +269,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
 
                         const Spacer(flex: 1),
 
-                        // ---  Album Art ---
+                        // Album Art
                         BlocBuilder<SongstreamBloc, SongstreamState>(
                           buildWhen: (previous, current) => previous != current,
                           builder: (context, state) {
@@ -301,7 +303,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withValues(alpha: 0.2),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -335,7 +337,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
 
                         const Spacer(flex: 1),
 
-                        // --- Title, Artist & Like Button ---
+                        //  Title, Artist & Like Button
                         Padding(
                           // padding:
                           //     EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
@@ -368,7 +370,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                             fontFamily: 'Serif',
                                             fontSize: 22,
                                             fontWeight: FontWeight.bold,
-                                            color: Theme.of(context).colorScheme.onSurface,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
                                           ),
                                         );
                                       },
@@ -390,7 +394,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                           text: currentSongData.artist.name,
                                           style: TextStyle(
                                             fontSize: 18,
-                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(alpha: 0.6),
                                             fontWeight: FontWeight.w400,
                                           ),
                                         );
@@ -448,7 +455,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                               : CupertinoIcons.heart,
                                           color: isFavorite
                                               ? Colors.red
-                                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface
+                                                  .withValues(alpha: 0.6),
                                           size: 28,
                                         ),
                                       );
@@ -462,11 +472,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
 
                         const SizedBox(height: 20),
 
-                        // --- 4. Progress Bar ---
+                        // Progress Bar
                         StreamBuilderWidget(screenSize: screenSize),
                         const SizedBox(height: 7),
 
-                        // --- 5. Controls (Prev, Play, Next) ---
+                        // Controls (Prev, Play, Next)
                         Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: screenWidth * 0.13),
@@ -529,12 +539,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
 
                         const SizedBox(height: 30),
 
-                        // --- 6. Volume Slider ---
+                        // Volume Slider
                         VolumeSlider(screenWidth: screenWidth),
 
                         const Spacer(flex: 2),
 
-                        // --- 7. Bottom Actions ---
+                        // Bottom Actions
                         Padding(
                           padding: EdgeInsets.only(
                               bottom: screenSize * 0.024,
@@ -632,7 +642,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                                       CircularProgressIndicator(
                                                         value: progress / 100,
                                                         strokeWidth: 3,
-                                                        backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                                                        backgroundColor:
+                                                            Theme.of(context)
+                                                                .colorScheme
+                                                                .onSurface
+                                                                .withValues(
+                                                                    alpha: 0.1),
                                                         valueColor:
                                                             AlwaysStoppedAnimation<
                                                                 Color>(
@@ -685,12 +700,29 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                               height: 5,
                               margin: const EdgeInsets.only(bottom: 5),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                           ),
                         ),
+                        //   child: Container(
+                        //     width: 40,
+                        //     height: 5,
+                        //     margin: const EdgeInsets.only(bottom: 5),
+                        //     decoration: BoxDecoration(
+                        //       color: Theme.of(context)
+                        //           .colorScheme
+                        //           .onSurface
+                        //           .withValues(alpha: 0.5),
+                        //       borderRadius: BorderRadius.circular(10),
+                        //     ),
+                        //   ),
+                        // ),
+                        // ),
                       ],
                     ),
                   ),

@@ -40,6 +40,7 @@ class ArtistAlbum extends StatelessWidget {
                     final playlistData = state.artistAlbums[index];
                     return HomePlaylist(
                       playList: playlistData,
+                      isAlbum: true,
                     );
                   },
                 );
