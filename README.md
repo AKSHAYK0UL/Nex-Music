@@ -85,14 +85,60 @@
 
 ## 🎵 Features
 
-- 🔴 **YouTube Playback** – Stream songs directly from YouTube or YouTube Music.
-- 💾 **Song Caching** – Cache songs while playing for offline-friendly playback.
-- 📥 **Offline Downloads** – Download songs and access them anytime, even without an internet connection.
-- 🎧 **Background Music Support** – Continue listening even when minimized or in the background.
-- 📝 **Create & Manage Playlists** – Personalized music library at your fingertips.
-- ⚙️ **Streaming Quality Control** – Fine-tune stream and artwork quality based on your preferences and network.
-- 🔐 **Google OAuth Login** – Secure authentication and real-time sync across devices.
-- ❌ **No Ads** – 100% uninterrupted music experience.
+- 🔴 **YouTube & YouTube Music Playback**  
+  Stream your favorite songs directly from YouTube and YouTube Music.
+
+- 💾 **Smart Song Caching**  
+  Automatically cache songs during playback for faster loading and reduced data usage.
+
+- 📥 **Offline Downloads**  
+  Download songs and listen anytime, even without an internet connection.
+
+- 🎧 **Background Playback**  
+  Continue listening while using other apps or when your device is locked.
+
+- 📝 **Playlists & Library Management**  
+  Create, organize, and manage custom playlists with ease.
+
+- 🎨 **Dark & Light Themes**  
+  Switch between beautiful dark and light modes based on your preference.
+
+- 📻 **Radio Mode**  
+  Discover new music with endless radio stations generated from your favorite songs, artists, and genres.
+
+- ⏭️ **Smart Up Next Queue**  
+  Automatically loads and queues similar songs based on the currently playing track for uninterrupted listening.
+
+- 🤖 **Personalized Recommendations**  
+  Get music suggestions tailored to your listening habits.
+
+- ⚙️ **Streaming Quality Control**  
+  Adjust audio and artwork quality to match your network conditions and preferences.
+
+- 🔍 **Powerful Search**  
+  Instantly find songs, albums, artists, playlists, and videos.
+
+- ❤️ **Favorites & Liked Songs**  
+  Save your favorite tracks and access them anytime.
+
+- 🔄 **Cloud Sync**  
+  Sync playlists, favorites, downloads, and listening history across devices.
+
+- 📜 **Listening History**  
+  Easily revisit recently played songs.
+
+- 🎵 **Queue Management**  
+  Add, remove, reorder, and manage your playback queue effortlessly.
+
+- 🌐 **Online & Offline Library**  
+  Access both streamed and downloaded music from a unified library.
+
+- 🔐 **Google OAuth Authentication**  
+  Secure login with Google and seamless account synchronization.
+
+- 🚫 **Ad-Free Experience**  
+  Enjoy your music without interruptions, ads, or distractions.
+  
 
 ---
 
