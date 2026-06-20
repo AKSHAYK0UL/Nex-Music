@@ -148,15 +148,22 @@ Future<
   String playlistId,
   int index,
 ) async {
-  // 1️⃣ Get song IDs stream
-  final songStream =
-      await _dataProvider.getSongIdFromPlayList(playlistId).toList();
+     print("##################### SONG PLAYLISTID ${playlistId} ##############################");   
 
+  // Get song IDs stream
+  
+  // final songStream =
+  //     await _dataProvider.getSongIdFromPlayList(playlistId).toList();
+  final songStream =
+      await _dataProvider.getSongIdFromPlayList(playlistId);
+
+   print("##################### SONG STREAMs ${songStream} ##############################");   
   final totalSongs = songStream.length;
 
-  // 2️⃣ Prepare IDs & durations
+  // 2️ Prepare IDs & durations
   final songIds =
-      songStream.skip(index).map((video) => video.id.value).take(20).toList();
+      songStream.skip(index).map((video) => video.videoId).take(20).toList();
+   print("##################### SONG IDS ${songIds} ##############################");   
 
   final songsDuration = songStream
       .skip(index)
@@ -164,10 +171,10 @@ Future<
       .take(20)
       .toList();
 
-  // 3️⃣ Fetch songs (NETWORK / MAIN ISOLATE)
+  // 3️ Fetch songs (NETWORK / MAIN ISOLATE)
   final songsList = await _dataProvider.getPlayListSongs(songIds);
 
-  // 4️⃣ CPU-heavy mapping in isolate
+  // 4️ CPU-heavy mapping in isolate
   final playlistSongs = await compute(
     playlistSongsCompute,
     (

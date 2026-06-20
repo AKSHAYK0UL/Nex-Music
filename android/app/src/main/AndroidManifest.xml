@@ -52,10 +52,11 @@
 
             <!-- Background for splash -->
             <meta-data
-                android:name="io.flutter.embedding.android.NormalTheme"
+                android:name="io.flutter.embedding.android.AOTSharedLibraryName"
+
                 android:resource="@drawable/ic_notification" />
                  <meta-data
-              android:name="io.flutter.embedding.android.EnableImpeller"
+    android:name="io.flutter.embedding.android.FlutterAssetsDir"
               android:value="true" />
 
             <!-- Deep links -->

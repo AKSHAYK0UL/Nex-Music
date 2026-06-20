@@ -44,3 +44,4 @@ app.*.map.json
 **/google-services.json
 /lib/secrets/
 **/firebase.json
+.env

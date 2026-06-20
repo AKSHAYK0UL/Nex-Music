@@ -1,6 +1,8 @@
 import 'package:dart_ytmusic_api/types.dart' as yt;
 import 'package:dart_ytmusic_api/types.dart';
 import 'package:dart_ytmusic_api/yt_music.dart';
+import 'package:nex_music/secrets/gcp_key.dart';
+import 'package:nex_music/service/playlist_songs_getter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class DataProvider {
@@ -40,63 +42,54 @@ class DataProvider {
     return (homeSectionData: homeSectionData, quickPicks: quickPicks);
   }
 
-  Stream<Video> getSongIdFromPlayList(String playlistID) async* {
-    String id = playlistID;
+  // Stream<Video> getSongIdFromPlayList(String playlistID) async* {
+  //   String id = playlistID;
     
-    // Handle full URLs if passed accidentally
-    if (id.contains('list=')) {
-      id = id.split('list=')[1].split('&')[0];
-    }
-
-    try {
-      // Try fetching with the original ID first
-      yield* _youtubeExplode.playlists.getVideos(id);
-    } catch (e) {
-      // For YT Music specific IDs (like Mixes starting with RD or Artist IDs UC)
-      // YoutubeExplode often requires the 'VL' prefix to treat them as playlists.
-      if (!id.startsWith('VL') && (id.startsWith('RD') || id.startsWith('UC') || id.startsWith('PL') == false)) {
-        try {
-          yield* _youtubeExplode.playlists.getVideos('VL$id');
-        } catch (_) {
-          // If both fail, rethrow the original error
-          rethrow;
-        }
-      } else {
-        rethrow;
-      }
-    }
-  }
-
-  // Future<List<yt.SongFull>> getPlayListSongs(
-  //   List<String> songIds,
-  // ) async {
-  //   final List<yt.SongFull> songs = [];
-  //   for (var i = 0; i < songIds.length; i++) {
-  //     final data = await _ytMusic.getSong(songIds[i]);
-  //     if (data.type == "SONG") {
-  //       songs.add(data);
-  //     }
+  //   // Handle full URLs if passed accidentally
+  //   if (id.contains('list=')) {
+  //     id = id.split('list=')[1].split('&')[0];
   //   }
 
-  //   return songs;
+  //   try {
+  //     // Try fetching with the original ID first
+  //     yield* _youtubeExplode.playlists.getVideos(id);
+  //   } catch (e) {
+  //     // For YT Music specific IDs (like Mixes starting with RD or Artist IDs UC)
+  //     // YoutubeExplode often requires the 'VL' prefix to treat them as playlists.
+  //     if (!id.startsWith('VL') && (id.startsWith('RD') || id.startsWith('UC') || id.startsWith('PL') == false)) {
+  //       try {
+  //         yield* _youtubeExplode.playlists.getVideos('VL$id');
+  //       } catch (_) {
+  //         // If both fail, rethrow the original error
+  //         rethrow;
+  //       }
+  //     } else {
+  //       rethrow;
+  //     }
+  //   }
   // }
+ Future<List<VideoMetadata>> getSongIdFromPlayList(String playlistID) async {
 
-  //Testing
+ return await fetchPlaylistVideoMetadata(
+  playlistId: playlistID,
+  apiKey: ytApIKey,
+);
+
+
+ }
+
+  //TESTING
+
+
+  
   Future<List<yt.SongFull>> getPlayListSongs(List<String> songIds) async {
     final results =
         await Future.wait(songIds.map((id) => _ytMusic.getSong(id)));
     return results;
-    // .where((data) => data.type == "SONG")
-    // .cast<yt.SongFull>()
-    // .toList();
+   
   }
 
-  //Testing
-
-  // Future<StreamManifest> songStreamUrl(String songId) async {
-  //   return await _youtubeExplode.videos.streamsClient.getManifest(songId);
-  // }
-
+ 
   Future<StreamManifest> songStreamUrl(String songId) {
     return _youtubeExplode.videos.streamsClient.getManifest(songId);
   }

@@ -38,10 +38,8 @@ dependencies:
   just_audio: ^0.10.4 
   # just_audio: ^0.9.46
 
-  flutter_bloc: ^8.1.6
-  # dart_ytmusic_api: ^1.0.8
-  # dart_ytmusic_api: ^1.2.1
-  dart_ytmusic_api: ^1.3.6
+  flutter_bloc: ^8.1.6 
+  dart_ytmusic_api: ^1.3.7
   hexcolor: ^3.0.1
   cached_network_image: ^3.4.1
   lottie: ^3.2.0
@@ -67,6 +65,10 @@ dependencies:
     git:
       url: https://github.com/anandnet/youtube_explode_dart.git
       ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024  
+  # youtube_explode_dart:
+  #   git:
+  #     url: https://github.com/Hexer10/youtube_explode_dart.git
+  #     ref: c846d78fa0842c5b1d00830ec10d3ae42d961e87    
   fluttertoast: ^8.2.12
   hive_ce: ^2.10.1
   hive_ce_flutter: ^2.1.0
