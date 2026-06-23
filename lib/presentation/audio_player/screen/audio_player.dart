@@ -585,7 +585,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                           .read<SongstreamBloc>()
                                           .add(LoopEvent());
                                     },
-                                    icon: Icon(
+                                    // icon: Icon(
+                                    //   context
+                                    //           .read<SongstreamBloc>()
+                                    //           .getLoopStatus
+                                    //       ? FontAwesomeIcons.repeat
+                                    //       : FontAwesomeIcons.shuffle,
+                                    //   color: Colors.red.withValues(alpha: 0.8),
+                                    //   size: 23,
+                                    // ),
+                                      icon: FaIcon(
                                       context
                                               .read<SongstreamBloc>()
                                               .getLoopStatus
@@ -676,12 +685,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                                 context,
                                                 currentSongData,
                                                 screenSize),
-                                            icon: Icon(
+                                            // icon: Icon(
+                                            //   FontAwesomeIcons.list,
+                                            //   color: Colors.red
+                                            //       .withValues(alpha: 0.8),
+                                            //   size: 24,
+                                            // ),
+                                            icon: FaIcon(
                                               FontAwesomeIcons.list,
                                               color: Colors.red
                                                   .withValues(alpha: 0.8),
                                               size: 24,
                                             ),
+                                            
                                           );
                                         }
                                       },

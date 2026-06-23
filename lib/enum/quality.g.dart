@@ -8,7 +8,7 @@ part of 'quality.dart';
 
 class ThumbnailQualityAdapter extends TypeAdapter<ThumbnailQuality> {
   @override
-  final int typeId = 1;
+  final typeId = 1;
 
   @override
   ThumbnailQuality read(BinaryReader reader) {
@@ -49,7 +49,7 @@ class ThumbnailQualityAdapter extends TypeAdapter<ThumbnailQuality> {
 
 class AudioQualityAdapter extends TypeAdapter<AudioQuality> {
   @override
-  final int typeId = 2;
+  final typeId = 2;
 
   @override
   AudioQuality read(BinaryReader reader) {

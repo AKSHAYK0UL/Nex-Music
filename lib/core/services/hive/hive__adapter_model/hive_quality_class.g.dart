@@ -8,7 +8,7 @@ part of 'hive_quality_class.dart';
 
 class HiveQualityAdapter extends TypeAdapter<HiveQuality> {
   @override
-  final int typeId = 0;
+  final typeId = 0;
 
   @override
   HiveQuality read(BinaryReader reader) {

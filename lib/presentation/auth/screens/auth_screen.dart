@@ -3,7 +3,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -32,6 +31,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final screenWidth = MediaQuery.sizeOf(context).width;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),

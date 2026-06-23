@@ -2,11 +2,19 @@
 // Do not modify
 // Check in to version control
 
-import 'package:hive_ce/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
 import 'package:nex_music/enum/quality.dart';
 
 extension HiveRegistrar on HiveInterface {
+  void registerAdapters() {
+    registerAdapter(AudioQualityAdapter());
+    registerAdapter(HiveQualityAdapter());
+    registerAdapter(ThumbnailQualityAdapter());
+  }
+}
+
+extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(AudioQualityAdapter());
     registerAdapter(HiveQualityAdapter());

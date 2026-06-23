@@ -9,7 +9,7 @@ TextScroll animatedText({required String text, required TextStyle style}) {
     delayBefore: const Duration(seconds: 2),
     pauseBetween: const Duration(seconds: 3),
     style: style,
-    textAlign: TextAlign.right,
+    textAlign: TextAlign.left,
     textDirection: TextDirection.ltr,
   );
 }

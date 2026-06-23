@@ -1,9 +1,13 @@
 
+
+import 'dart:ui' as androidx_ui;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/bloc/theme_bloc/bloc/theme_bloc.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
@@ -33,20 +37,13 @@ class Setting extends StatelessWidget {
         actions: <CupertinoDialogAction>[
           CupertinoDialogAction(
             isDefaultAction: true,
-            // onPressed: () => Navigator.pop(context),
-            onPressed: () =>  context.pop(),
+            onPressed: () => context.pop(),
             child: const Text("Cancel"),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              // await FirebaseAuth.instance.signOut();
-              // if (context.mounted) {
-              //   Navigator.of(context)
-              //       .pushNamedAndRemoveUntil('/', (route) => false);
-              // }
               try {
-                // Navigator.of(context).pop();
                 context.pop();
                 await handleSignout(context);
               } catch (e) {
@@ -66,6 +63,29 @@ class Setting extends StatelessWidget {
     final theme = Theme.of(context);
     final textSecondary = theme.colorScheme.onSurface.withValues(alpha: 0.7);
 
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        final bool isLoading = state is LoadingState;
+      
+
+        return Stack(
+          children: [
+            AbsorbPointer(
+              absorbing: isLoading,
+              child: _buildScaffold(context, theme, textSecondary),
+            ),
+            if (isLoading) _buildAppleLoadingOverlay(theme),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildScaffold(
+    BuildContext context,
+    ThemeData theme,
+    Color textSecondary,
+  ) {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
@@ -112,7 +132,11 @@ class Setting extends StatelessWidget {
                   dividerColor: theme.dividerColor,
                   onTap: () => context.push(RouterPath.qualityRoute),
                 ),
-                Divider(height: 1, indent: 56, endIndent: 0, color: theme.dividerColor),
+                Divider(
+                    height: 1,
+                    indent: 56,
+                    endIndent: 0,
+                    color: theme.dividerColor),
                 ValueListenableBuilder<bool>(
                   valueListenable: _recommendationNotifier,
                   builder: (context, value, _) {
@@ -129,7 +153,11 @@ class Setting extends StatelessWidget {
                     );
                   },
                 ),
-                Divider(height: 1, indent: 56, endIndent: 0, color: theme.dividerColor),
+                Divider(
+                    height: 1,
+                    indent: 56,
+                    endIndent: 0,
+                    color: theme.dividerColor),
                 BlocBuilder<ThemeBloc, ThemeState>(
                   builder: (context, state) {
                     final dark = state is ThemeLoadedState ? state.isDark : false;
@@ -161,6 +189,58 @@ class Setting extends StatelessWidget {
               ]),
               const SizedBox(height: 40),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // full screen loading overlay.
+  Widget _buildAppleLoadingOverlay(ThemeData theme) {
+    final bool isDark = theme.brightness == Brightness.dark;
+    isDark
+        ? CupertinoColors.tertiarySystemBackground.darkColor
+        : CupertinoColors.systemBackground.color;
+    final Color textColor = isDark
+        ? CupertinoColors.label.darkColor
+        : CupertinoColors.label.color;
+
+    return Positioned.fill(
+      child: AbsorbPointer(
+        child: BackdropFilter(
+          filter: androidx_ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Container(
+            color: CupertinoColors.systemBackground
+                .withValues(alpha: 0.0),
+            alignment: Alignment.center,
+            child: CupertinoPopupSurface(
+              // isRadiusApplied: true,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 180),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 28),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CupertinoActivityIndicator(
+                        radius: 14,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        "Signing out…",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: textColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

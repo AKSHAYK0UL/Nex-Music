@@ -86,7 +86,8 @@ class RepositoryProviderClass {
       RepositoryProvider(
         create: (context) => AuthRepository(
           AuthProviderr(firebaseAuthInstance),
-          GoogleSignIn(),
+          // GoogleSignIn(),
+          GoogleSignIn.instance,
         ),
       );
 }
