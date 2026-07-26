@@ -25,7 +25,6 @@ class SplashWithRouter extends StatefulWidget {
 }
 
 class _SplashWithRouterState extends State<SplashWithRouter> {
-
   @override
   void initState() {
     super.initState();
@@ -40,26 +39,25 @@ class _SplashWithRouterState extends State<SplashWithRouter> {
 
   @override
   Widget build(BuildContext context) {
-  
-
-  
     return Scaffold(
-      body: BlocListener<HomesectionBloc, HomesectionState>(
-        listener: (context, state) {
-          if (state is ErrorState) {
-            showSnackbar(context, "No internet connection");
-            AppRouter.router.go(RouterPath.offlineDownloadsRoute);
-          }
-        },
-        child: BlocBuilder<HomesectionBloc, HomesectionState>(
-          buildWhen: (previous, current) => previous != current,
-          builder: (context, state) {
-            if (state is HomeSectionStateData || state is ErrorState) {
-              return widget.child;
+      body: SafeArea(
+        child: BlocListener<HomesectionBloc, HomesectionState>(
+          listener: (context, state) {
+            if (state is ErrorState) {
+              showSnackbar(context, "No internet connection");
+              AppRouter.router.go(RouterPath.offlineDownloadsRoute);
             }
-
-            return const SplashWidget();
           },
+          child: BlocBuilder<HomesectionBloc, HomesectionState>(
+            buildWhen: (previous, current) => previous != current,
+            builder: (context, state) {
+              if (state is HomeSectionStateData || state is ErrorState) {
+                return widget.child;
+              }
+
+              return const SplashWidget();
+            },
+          ),
         ),
       ),
     );

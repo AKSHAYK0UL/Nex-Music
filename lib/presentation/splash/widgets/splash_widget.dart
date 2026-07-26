@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +10,7 @@ class SplashWidget extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      color: Colors.white, 
+      color: Colors.white,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -26,7 +25,7 @@ class SplashWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha:0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -41,26 +40,23 @@ class SplashWidget extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              
               const Text(
                 "Nex Music",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
-                   fontFamily: 'serif',
-                  letterSpacing: -0.8, 
+                  fontFamily: 'serif',
+                  letterSpacing: -0.8,
                   color: Colors.black,
                 ),
               ),
               const SizedBox(height: 32),
-              
-               CupertinoActivityIndicator(
+              CupertinoActivityIndicator(
                 radius: 12,
                 color: Colors.red.withValues(alpha: 0.8),
               ),
             ],
           ),
-
           Positioned(
             bottom: 5,
             child: Column(
@@ -70,8 +66,7 @@ class SplashWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    
-                    letterSpacing: 2.5, 
+                    letterSpacing: 2.5,
                     color: Colors.grey.shade400,
                   ),
                 ),

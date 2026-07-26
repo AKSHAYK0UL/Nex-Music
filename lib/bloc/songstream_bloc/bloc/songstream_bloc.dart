@@ -549,6 +549,14 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
+      if (!_songData!.isLocal) {
+        _dbRepository.addToRecentPlayedCollection(_songData!);
+      }
+      emit(PlayingState(
+        songData: _songData!,
+        volume: _currentVolume,
+        isMuted: _isMute,
+      ));
       return;
     }
 
@@ -809,6 +817,28 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // Play individual song with complete state reset
   Future<void> _playIndividualSong(
       PlayIndividualSongEvent event, Emitter<SongstreamState> emit) async {
+    // Check if same song is already playing
+    if (_songData != null &&
+        event.songData.vId == _songData!.vId &&
+        event.songData.isLocal == _songData!.isLocal) {
+      // Same song, just restart from beginning
+      _audioPlayer.seek(Duration.zero);
+      _audioPlayer.play();
+      _isPlaying = true;
+      _songLoaded = true;
+
+      if (!_songData!.isLocal) {
+        _dbRepository.addToRecentPlayedCollection(_songData!);
+      }
+
+      emit(PlayingState(
+        songData: _songData!,
+        volume: _currentVolume,
+        isMuted: _isMute,
+      ));
+      return;
+    }
+
     // Complete reset of all state
     _resetAudioPlayer();
     _playlistSongs.clear();
@@ -1202,6 +1232,10 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayer.play();
       _isPlaying = true;
       _songLoaded = true;
+
+      if (!_songData!.isLocal) {
+        _dbRepository.addToRecentPlayedCollection(_songData!);
+      }
 
       // Update playlist context
       _playlistSongs = event.playlistSongs.toSet().toList();

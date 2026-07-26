@@ -128,9 +128,18 @@ class Songmodel extends Equatable {
     Timestamp? ts;
     if (json["timestamp"] != null) {
       if (json["timestamp"] is String) {
-        ts = Timestamp.fromDate(DateTime.parse(json["timestamp"]));
+        try {
+          ts = Timestamp.fromDate(DateTime.parse(json["timestamp"]));
+        } catch (_) {}
       } else if (json["timestamp"] is Timestamp) {
         ts = json["timestamp"];
+      } else if (json["timestamp"] is int) {
+        final val = json["timestamp"] as int;
+        if (val > 100000000000000) {
+          ts = Timestamp.fromMicrosecondsSinceEpoch(val);
+        } else {
+          ts = Timestamp.fromMillisecondsSinceEpoch(val);
+        }
       }
     }
 

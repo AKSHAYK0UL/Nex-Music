@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/saved_playlist_model.dart';
@@ -25,6 +26,7 @@ class DbRepository {
   // Timer to ensure song has been playing for at least 350ms before adding to recent.
   Timer? _recentPlayedTimer;
   String? _pendingRecentVId;
+  DateTime? _lastAddedTime;
 
   DbRepository({
     required DbNetworkProvider dbDataProvider,
@@ -55,13 +57,20 @@ class DbRepository {
       // Only add if this is still the current song (user didn't skip)
       if (_pendingRecentVId != songData.vId) return;
 
-      // Skip duplicate rapid calls for the same song.
-      if (_lastBufferedVId == songData.vId) return;
+      final now = DateTime.now();
+
+      // Skip duplicate rapid calls for the same song within 2 seconds.
+      if (_lastBufferedVId == songData.vId &&
+          _lastAddedTime != null &&
+          now.difference(_lastAddedTime!).inSeconds < 2) {
+        return;
+      }
+      
       _lastBufferedVId = songData.vId;
+      _lastAddedTime = now;
 
       final songMap = songData.toJson();
-      // Use microseconds for more precise ordering
-      songMap['timestamp'] = DateTime.now().microsecondsSinceEpoch;
+      songMap['timestamp'] = Timestamp.fromDate(now);
 
       await _dbDataProvider.addToRecentPlayedCollection(songMap);
     });
@@ -69,12 +78,21 @@ class DbRepository {
 
   // Returns a stream of recently played songs from Firestore.
   Stream<List<Songmodel>> getRecentPlayed() {
-    return _dbDataProvider.getRecentPlayed().map(
-          (snapshot) => snapshot.docs
-              .map((doc) =>
-                  Songmodel.fromJson(doc.data() as Map<String, dynamic>))
-              .toList(),
-        );
+    return _dbDataProvider.getRecentPlayed().map((snapshot) {
+      final list = snapshot.docs
+          .map((doc) =>
+              Songmodel.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+
+      list.sort((a, b) {
+        if (a.timestamp == null && b.timestamp == null) return 0;
+        if (a.timestamp == null) return 1;
+        if (b.timestamp == null) return -1;
+        return b.timestamp!.compareTo(a.timestamp!);
+      });
+
+      return list;
+    });
   }
 
   // Deletes a song from Firestore.
