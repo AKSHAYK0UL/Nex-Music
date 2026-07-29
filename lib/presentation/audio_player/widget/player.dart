@@ -56,7 +56,11 @@ class _PlayerState extends State<Player> {
       listener: (context, state) {
         if (state is ErrorState) {
           context.read<SongstreamBloc>().add(PauseEvent());
-          showSnackbar(context, state.errorMessage);
+          //  print("################# ERROR PLAYER ${state.errorMessage} ################");
+          if (state.errorMessage != "Error fetching song: Connection aborted") {
+
+showSnackbar(context, state.errorMessage);
+          }
         }
       },
       builder: (context, state) {

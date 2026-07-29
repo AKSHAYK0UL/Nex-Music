@@ -58,7 +58,7 @@ class SplashWidget extends StatelessWidget {
             ],
           ),
           Positioned(
-            bottom: 5,
+            bottom: 50,
             child: Column(
               children: [
                 Text(

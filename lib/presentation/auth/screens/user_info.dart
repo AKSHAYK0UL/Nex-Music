@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nex_music/helper_function/general/convert_to_ist.dart';
 
 class UserInfo extends StatelessWidget {
@@ -32,7 +33,7 @@ class UserInfo extends StatelessWidget {
         elevation: 0,
         leadingWidth: 100,
         leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
+          onTap: () => context.pop(),
           child: Row(
             children: [
               const SizedBox(width: 8),
@@ -65,7 +66,7 @@ class UserInfo extends StatelessWidget {
           ),
             const SizedBox(height: 20),
 
-            // --- PROFILE IMAGE SECTION ---
+            //  PROFILE IMAGE SECTION 
             Center(
               child: Column(
                 children: [

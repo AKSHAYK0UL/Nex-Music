@@ -191,7 +191,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                           tabRouteENUM: TabRouteENUM.other,
                           menuType: SongMenuType.audioPlayer,
                           onTimerTap: () {
-                            Navigator.pop(context); // Close menu
+                            context.pop(); 
                             _showSleepTimerDialog(context); // Show timer
                           },
                         ),

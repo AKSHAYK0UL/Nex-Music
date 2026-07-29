@@ -40,8 +40,7 @@ class _SplashWithRouterState extends State<SplashWithRouter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: BlocListener<HomesectionBloc, HomesectionState>(
+      body: BlocListener<HomesectionBloc, HomesectionState>(
           listener: (context, state) {
             if (state is ErrorState) {
               showSnackbar(context, "No internet connection");
@@ -59,7 +58,7 @@ class _SplashWithRouterState extends State<SplashWithRouter> {
             },
           ),
         ),
-      ),
+      
     );
   }
 }
