@@ -38,47 +38,49 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
 
-        Widget content = Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-          ),
-          decoration: BoxDecoration(
-            color: isDark 
-              ? theme.cardColor 
-              : Colors.white.withValues(alpha: 0.85),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            border: Border(
-              top: BorderSide(
-                color: theme.dividerColor.withValues(alpha: 0.2),
-                width: 0.5,
-              ),
+        Widget content = SafeArea(
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // iOS-style Grab Handle
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
-                width: 36,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
+            decoration: BoxDecoration(
+              color: isDark 
+                ? theme.cardColor 
+                : Colors.white.withValues(alpha: 0.85),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              border: Border(
+                top: BorderSide(
+                  color: theme.dividerColor.withValues(alpha: 0.2),
+                  width: 0.5,
                 ),
               ),
-              // Header
-              _buildHeader(context),
-              // Content Area
-              _buildContent(
-                context,
-                allPlaylistSongs: allPlaylistSongs,
-                currentSongIndex: currentSongIndex,
-                isLoading: isLoading,
-                shouldShowStartRadio: shouldShowStartRadio,
-              ),
-              const SizedBox(height: 20),
-            ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // iOS-style Grab Handle
+                Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 36,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                // Header
+                _buildHeader(context),
+                // Content Area
+                _buildContent(
+                  context,
+                  allPlaylistSongs: allPlaylistSongs,
+                  currentSongIndex: currentSongIndex,
+                  isLoading: isLoading,
+                  shouldShowStartRadio: shouldShowStartRadio,
+                ),
+                // const SizedBox(height: 20),
+              ],
+            ),
           ),
         );
 
@@ -106,6 +108,7 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
           const Text(
             'Playing Next',
             style: TextStyle(
+               fontFamily: 'serif',
               fontSize: 22,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.5,
