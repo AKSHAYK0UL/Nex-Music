@@ -608,8 +608,8 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                     ),
 
               // 3. Bottom Padding for Player
-              SliverPadding(
-                  padding: EdgeInsets.only(bottom: bottomPadding + 20)),
+              // SliverPadding(
+              //     padding: EdgeInsets.only(bottom: bottomPadding + 20)),
             ],
           ),
         );

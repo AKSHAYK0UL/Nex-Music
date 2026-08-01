@@ -164,7 +164,7 @@ class _SavedSongsState extends State<SavedSongs> {
         },
       ),
       bottomNavigationBar: widget.isoffline
-          ? MiniPlayer(screenSize: MediaQuery.sizeOf(context).height)
+          ? SafeArea(child: MiniPlayer(screenSize: MediaQuery.sizeOf(context).height))
           : const SizedBox(),
     );
   }
