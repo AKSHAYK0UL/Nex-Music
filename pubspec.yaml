@@ -61,14 +61,14 @@ dependencies:
   app_links: ^6.3.2
   bloc_concurrency: ^0.3.0
   audio_service: ^0.18.18
-  youtube_explode_dart:
-    git:
-      url: https://github.com/anandnet/youtube_explode_dart.git
-      ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024  
   # youtube_explode_dart:
   #   git:
-  #     url: https://github.com/Hexer10/youtube_explode_dart.git
-  #     ref: c846d78fa0842c5b1d00830ec10d3ae42d961e87    
+  #     url: https://github.com/anandnet/youtube_explode_dart.git
+  #     ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024  
+  youtube_explode_dart:
+    git:
+      url: https://github.com/AKSHAYK0UL/Youtube-Client-Dart.git
+      ref: 8c8d0e21c43178691c1f17cf214251b632532b61    
   fluttertoast: ^9.0.0
   hive_ce: ^2.10.1
   hive_ce_flutter: ^2.1.0

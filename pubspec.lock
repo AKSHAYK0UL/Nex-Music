@@ -1642,9 +1642,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "1d9ec9baa806705b1d859260eeb389ec28c6b024"
-      resolved-ref: "1d9ec9baa806705b1d859260eeb389ec28c6b024"
-      url: "https://github.com/anandnet/youtube_explode_dart.git"
+      ref: "8c8d0e21c43178691c1f17cf214251b632532b61"
+      resolved-ref: "8c8d0e21c43178691c1f17cf214251b632532b61"
+      url: "https://github.com/AKSHAYK0UL/Youtube-Client-Dart.git"
     source: git
     version: "2.3.7"
 sdks:
