@@ -547,6 +547,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         event.songData.isLocal == _songData!.isLocal) {
       _audioPlayer.seek(Duration.zero);
       _audioPlayer.play();
+      _audioPlayer.setVolume(_currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {
@@ -614,6 +615,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       _audioPlayer.play();
+      _audioPlayer.setVolume(_currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {
@@ -686,6 +688,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       _audioPlayer.play();
+      _audioPlayer.setVolume(_currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {
@@ -824,6 +827,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       // Same song, just restart from beginning
       _audioPlayer.seek(Duration.zero);
       _audioPlayer.play();
+      _audioPlayer.setVolume(_currentVolume);
       _isPlaying = true;
       _songLoaded = true;
 
@@ -841,6 +845,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
     // Complete reset of all state
     _resetAudioPlayer();
+
     _playlistSongs.clear();
     _storeQuicksPicksList.clear();
     _currentSongIndex = 0;
@@ -883,6 +888,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       _audioPlayer.play();
+      _audioPlayer.setVolume(_currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {
@@ -999,7 +1005,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   void _resetAudioPlayer() {
     _songLoaded = false;
-    if (_isPlaying) _audioPlayer.pause();
+    // if (_isPlaying) _audioPlayer.pause();
+    if (_isPlaying) _audioPlayer.setVolume(0);
     _isPlaying = false;
     songDuration = Duration.zero;
     _audioPlayer.seek(Duration.zero);
@@ -1007,6 +1014,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   void _resetAudioPlayerWhenOnShuffle() {
     _songLoaded = false;
+    if (_isPlaying) _audioPlayer.setVolume(0);
     _isPlaying = false;
     songDuration = Duration.zero;
     _audioPlayer.seek(Duration.zero);
@@ -1230,6 +1238,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       // Same song, just restart from beginning
       _audioPlayer.seek(Duration.zero);
       _audioPlayer.play();
+      _audioPlayer.setVolume(_currentVolume);
       _isPlaying = true;
       _songLoaded = true;
 
@@ -1296,6 +1305,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       _audioPlayer.play();
+      _audioPlayer.setVolume(_currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {
