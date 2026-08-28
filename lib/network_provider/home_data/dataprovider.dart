@@ -44,7 +44,7 @@ class DataProvider {
 
   // Stream<Video> getSongIdFromPlayList(String playlistID) async* {
   //   String id = playlistID;
-    
+
   //   // Handle full URLs if passed accidentally
   //   if (id.contains('list=')) {
   //     id = id.split('list=')[1].split('&')[0];
@@ -68,28 +68,25 @@ class DataProvider {
   //     }
   //   }
   // }
- Future<List<VideoMetadata>> getSongIdFromPlayList(String playlistID) async {
-
- return await fetchPlaylistVideoMetadata(
-  playlistId: playlistID,
-  apiKey: ytApIKey,
-);
-
-
- }
+  Future<List<VideoMetadata>> getSongIdFromPlayList(String playlistID) async {
+    try {
+      return await fetchPlaylistVideoMetadata(
+        playlistId: playlistID,
+        apiKey: ytApIKey,
+      );
+    } catch (_) {
+      rethrow;
+    }
+  }
 
   //TESTING
 
-
-  
   Future<List<yt.SongFull>> getPlayListSongs(List<String> songIds) async {
     final results =
         await Future.wait(songIds.map((id) => _ytMusic.getSong(id)));
     return results;
-   
   }
 
- 
   Future<StreamManifest> songStreamUrl(String songId) {
     return _youtubeExplode.videos.streamsClient.getManifest(songId);
   }

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 // Model
@@ -44,46 +46,111 @@ Future<List<VideoMetadata>> fetchPlaylistVideoMetadata({
 
 
 
+
+
+//############ updated
 Future<List<String>> _fetchAllVideoIds({
   required String playlistId,
   required String apiKey,
 }) async {
   const baseUrl = 'https://www.googleapis.com/youtube/v3/playlistItems';
+  const maxRetries = 4;
+  const requestTimeout = Duration(seconds: 15);
+  const maxPages = 500; //safety net
+
+  final isMix = playlistId.startsWith('RD');
+  print('[fetchAllVideoIds] START playlistId=$playlistId type=${isMix ? "MIX/RADIO" : "NORMAL"}');
 
   final ids = <String>[];
+  final seenIds = <String>{};       // dedupe video IDs
+  final seenTokens = <String>{};    // detect repeating pageTokens (the actual bug)
   String? pageToken;
+  var pageCount = 0;
 
   do {
+    pageCount++;
+
+    // Cycle detection: if we've already used this exact pageToken before,
+    // the API is looping (this is what happens on Mix/Radio playlists)
+    if (pageToken != null && seenTokens.contains(pageToken)) {
+      print('[fetchAllVideoIds] CYCLE DETECTED at page=$pageCount — pageToken repeated. '
+          'Likely a Mix/Radio playlist (isMix=$isMix). Stopping pagination.');
+      break;
+    }
+    if (pageToken != null) seenTokens.add(pageToken);
+
     final params = {
-      'part': 'contentDetails',   // only contentDetails needed for video IDs
+      'part': 'contentDetails',
       'playlistId': playlistId,
-      'maxResults': '50',         // max allowed per request
+      'maxResults': '50',
       'key': apiKey,
       if (pageToken != null) 'pageToken': pageToken,
     };
 
     final uri = Uri.parse(baseUrl).replace(queryParameters: params);
-    final response = await http.get(uri);
-    _assertOk(response, 'playlistItems.list');
+    print('[fetchAllVideoIds] page=$pageCount pageToken=${pageToken ?? "(first)"}');
 
-    final body = jsonDecode(response.body) as Map<String, dynamic>;
+    Map<String, dynamic>? body;
+    var attempt = 0;
+
+    while (true) {
+      attempt++;
+      try {
+        final response = await http.get(uri).timeout(requestTimeout);
+
+        if (response.statusCode == 429 ||
+            (response.statusCode >= 500 && response.statusCode < 600)) {
+          print('[fetchAllVideoIds] page=$pageCount attempt=$attempt TRANSIENT ${response.statusCode}');
+          throw http.ClientException('Transient HTTP ${response.statusCode}');
+        }
+
+        _assertOk(response, 'playlistItems.list');
+        body = jsonDecode(response.body) as Map<String, dynamic>;
+        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt SUCCESS');
+        break;
+      } on TimeoutException catch (e) {
+        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt TIMEOUT: $e');
+        if (attempt > maxRetries) rethrow;
+      } on SocketException catch (e) {
+        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt SOCKET ERROR: $e');
+        if (attempt > maxRetries) rethrow;
+      } on http.ClientException catch (e) {
+        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt CLIENT EXCEPTION: $e');
+        if (attempt > maxRetries) rethrow;
+      } on FormatException catch (e) {
+        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt MALFORMED JSON: $e');
+        if (attempt > maxRetries) rethrow;
+      }
+
+      final delayMs = 500 * (1 << (attempt - 1));
+      await Future.delayed(Duration(milliseconds: delayMs));
+    }
+
     final items = body['items'] as List<dynamic>? ?? [];
-
+    var newOnThisPage = 0;
     for (final item in items) {
-      final videoId = (item['contentDetails'] as Map<String, dynamic>?)?['videoId'] as String?;
-      // Skip deleted / private videos (videoId will be null or empty)
-      if (videoId != null && videoId.isNotEmpty) {
+      final videoId = (item['contentDetails']
+          as Map<String, dynamic>?)?['videoId'] as String?;
+      if (videoId != null && videoId.isNotEmpty && seenIds.add(videoId)) {
         ids.add(videoId);
+        newOnThisPage++;
       }
     }
 
-    // Move to next page, or null ->done
-    pageToken = body['nextPageToken'] as String?;
-  } while (pageToken != null);
+    //  if tokens didn't repeat, if a
+    // full page came back with zero new video IDs, we're looping .
+    if (items.isNotEmpty && newOnThisPage == 0) {
+      print('[fetchAllVideoIds] page=$pageCount returned only already-seen IDs — stopping.');
+      break;
+    }
 
+    pageToken = body['nextPageToken'] as String?;
+    print('[fetchAllVideoIds] page=$pageCount done, newIds=$newOnThisPage, runningTotal=${ids.length}');
+  } while (pageToken != null && pageCount < maxPages);
+
+  print('[fetchAllVideoIds] DONE playlistId=$playlistId totalIds=${ids.length} pagesFetched=$pageCount');
   return ids;
 }
-
 
 
 Future<List<VideoMetadata>> _fetchDurationsForVideoIds({
