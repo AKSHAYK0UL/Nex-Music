@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
@@ -28,26 +27,6 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
-  final _audioPlayer = AudioPlayer();
-
-  @override
-  void initState() {
-    if (widget.route == SongMiniPlayerRoute.songRoute && !widget.isPlaylist) {
-      context.read<SongstreamBloc>().add(GetSongStreamEvent(
-            songData: widget.songData,
-            songIndex: widget.songIndex,
-          ));
-    }
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SongstreamBloc, SongstreamState>(

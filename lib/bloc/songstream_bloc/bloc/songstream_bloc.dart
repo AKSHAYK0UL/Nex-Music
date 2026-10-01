@@ -1470,7 +1470,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     });
 
     _audioPlayer.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
+      if (state.processingState == ProcessingState.completed && _songLoaded) {
+        _songLoaded = false; // Guard: prevent duplicate SongCompletedEvent when pause() re-triggers completed state
         add(SongCompletedEvent());
       }
       if (state.processingState == ProcessingState.buffering ||
@@ -1541,23 +1542,24 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     if (_songData != null &&
         event.songData.vId == _songData!.vId &&
         event.songData.isLocal == _songData!.isLocal) {
-      _audioPlayer.seek(Duration.zero);
-      _audioPlayer.play();
-      _audioPlayer.setVolume(_currentVolume);
-      _isPlaying = true;
-      _songLoaded = true;
-      if (!_songData!.isLocal) {
-        _dbRepository.addToRecentPlayedCollection(_songData!);
+      if (_songLoaded) {
+        _audioPlayer.seek(Duration.zero);
+        _audioPlayer.play();
+        _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
+        _isPlaying = true;
+        if (!_songData!.isLocal) {
+          _dbRepository.addToRecentPlayedCollection(_songData!);
+        }
+        emit(PlayingState(
+          songData: _songData!,
+          volume: _currentVolume,
+          isMuted: _isMute,
+        ));
       }
-      emit(PlayingState(
-        songData: _songData!,
-        volume: _currentVolume,
-        isMuted: _isMute,
-      ));
       return;
     }
 
-    _resetAudioPlayer();
+    await _resetAudioPlayer();
 
     _songData = event.songData;
     emit(LoadingState(
@@ -1587,7 +1589,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       if (_songData!.isLocal && _songData!.localFilePath != null) {
         await _audioPlayer.setFilePath(_songData!.localFilePath!);
       } else {
-        final qualityInfo = await _dbInstance.getData;
+        final qualityInfo = _dbInstance.getData;
         final songRawInfo = await _repository.getSongUrl(
             _songData!.vId, qualityInfo.audioQuality);
         final audioSource = LockCachingAudioSource(songRawInfo.url);
@@ -1600,7 +1602,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       _audioPlayer.play();
-      _audioPlayer.setVolume(_currentVolume);
+      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {
@@ -1626,7 +1628,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 // Do exactly what [_getSongUrl] does, but with extra spice shuffle mode activated.
   Future<void> _getSongUrlOnShuffle(
       GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
-    _resetAudioPlayerWhenOnShuffle();
+    await _resetAudioPlayerWhenOnShuffle();
     _songData = event.songData;
 
     // Update current song index to match the song being played
@@ -1672,7 +1674,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       _audioPlayer.play();
-      _audioPlayer.setVolume(_currentVolume);
+      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {
@@ -1812,27 +1814,28 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     if (_songData != null &&
         event.songData.vId == _songData!.vId &&
         event.songData.isLocal == _songData!.isLocal) {
-      // Same song, just restart from beginning
-      _audioPlayer.seek(Duration.zero);
-      _audioPlayer.play();
-      _audioPlayer.setVolume(_currentVolume);
-      _isPlaying = true;
-      _songLoaded = true;
+      if (_songLoaded) {
+        // Same song, just restart from beginning
+        _audioPlayer.seek(Duration.zero);
+        _audioPlayer.play();
+        _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
+        _isPlaying = true;
 
-      if (!_songData!.isLocal) {
-        _dbRepository.addToRecentPlayedCollection(_songData!);
+        if (!_songData!.isLocal) {
+          _dbRepository.addToRecentPlayedCollection(_songData!);
+        }
+
+        emit(PlayingState(
+          songData: _songData!,
+          volume: _currentVolume,
+          isMuted: _isMute,
+        ));
       }
-
-      emit(PlayingState(
-        songData: _songData!,
-        volume: _currentVolume,
-        isMuted: _isMute,
-      ));
       return;
     }
 
     // Complete reset of all state
-    _resetAudioPlayer();
+    await _resetAudioPlayer();
 
     _playlistSongs.clear();
     _storeQuicksPicksList.clear();
@@ -1876,7 +1879,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       _audioPlayer.play();
-      _audioPlayer.setVolume(_currentVolume);
+      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {
@@ -1995,21 +1998,18 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     }
   }
 
-  void _resetAudioPlayer() {
+  Future<void> _resetAudioPlayer() async {
     _songLoaded = false;
-    // if (_isPlaying) _audioPlayer.pause();
-    if (_isPlaying) _audioPlayer.setVolume(0);
     _isPlaying = false;
     songDuration = Duration.zero;
-    _audioPlayer.seek(Duration.zero);
+    try {
+      await _audioPlayer.pause();
+      await _audioPlayer.setVolume(0.0);
+    } catch (_) {}
   }
 
-  void _resetAudioPlayerWhenOnShuffle() {
-    _songLoaded = false;
-    if (_isPlaying) _audioPlayer.setVolume(0);
-    _isPlaying = false;
-    songDuration = Duration.zero;
-    _audioPlayer.seek(Duration.zero);
+  Future<void> _resetAudioPlayerWhenOnShuffle() async {
+    await _resetAudioPlayer();
   }
 
 //set current songdata object to null
@@ -2227,31 +2227,32 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     if (_songData != null &&
         event.songData.vId == _songData!.vId &&
         event.songData.isLocal == _songData!.isLocal) {
-      // Same song, just restart from beginning
-      _audioPlayer.seek(Duration.zero);
-      _audioPlayer.play();
-      _audioPlayer.setVolume(_currentVolume);
-      _isPlaying = true;
-      _songLoaded = true;
+      if (_songLoaded) {
+        // Same song, just restart from beginning
+        _audioPlayer.seek(Duration.zero);
+        _audioPlayer.play();
+        _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
+        _isPlaying = true;
 
-      if (!_songData!.isLocal) {
-        _dbRepository.addToRecentPlayedCollection(_songData!);
+        if (!_songData!.isLocal) {
+          _dbRepository.addToRecentPlayedCollection(_songData!);
+        }
+
+        // Update playlist context
+        _playlistSongs = event.playlistSongs.toSet().toList();
+        _currentSongIndex = event.songIndex;
+
+        emit(PlayingState(
+          songData: _songData!,
+          volume: _currentVolume,
+          isMuted: _isMute,
+        ));
       }
-
-      // Update playlist context
-      _playlistSongs = event.playlistSongs.toSet().toList();
-      _currentSongIndex = event.songIndex;
-
-      emit(PlayingState(
-        songData: _songData!,
-        volume: _currentVolume,
-        isMuted: _isMute,
-      ));
       return;
     }
 
     // Reset audio player
-    _resetAudioPlayer();
+    await _resetAudioPlayer();
 
     // Set the playlist songs (no radio songs will be generated)
     _playlistSongs = event.playlistSongs.toSet().toList();
@@ -2297,7 +2298,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       _audioPlayer.play();
-      _audioPlayer.setVolume(_currentVolume);
+      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
       _isPlaying = true;
       _songLoaded = true;
       if (!_songData!.isLocal) {

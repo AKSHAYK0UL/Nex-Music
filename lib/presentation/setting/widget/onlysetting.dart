@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -72,7 +71,8 @@ class QualitySettingState extends State<QualitySetting> {
           children: [
             _buildSectionHeader(context, "ARTWORK VISUALS", subtextColor),
             _buildGroupedContainer(context, [
-              _buildRadioList(ThumbnailQuality.values, thumbnailQualityNotifier),
+              _buildRadioList(
+                  ThumbnailQuality.values, thumbnailQualityNotifier),
             ]),
             _buildSectionHeader(context, "STREAMING AUDIO", subtextColor),
             _buildGroupedContainer(context, [
@@ -82,7 +82,7 @@ class QualitySettingState extends State<QualitySetting> {
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),
               child: Text(
                 "Higher quality uses more data and may take longer to load.",
-                style: TextStyle(color: subtextColor, fontSize: 13),
+                style: TextStyle(color: subtextColor, fontSize: 12),
               ),
             ),
             const SizedBox(height: 40),
@@ -110,7 +110,7 @@ class QualitySettingState extends State<QualitySetting> {
   Widget _buildGroupedContainer(BuildContext context, List<Widget> children) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      clipBehavior: Clip.antiAlias, 
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(10),
@@ -132,13 +132,13 @@ class QualitySettingState extends State<QualitySetting> {
               children: [
                 ListTile(
                   onTap: () => notifier.value = value,
-                  tileColor: Colors.transparent, 
+                  tileColor: Colors.transparent,
                   hoverColor: Colors.transparent,
                   title: Text(
-                    value.name.substring(0, 1).toUpperCase() + 
-                    value.name.substring(1).toLowerCase(), 
+                    value.name.substring(0, 1).toUpperCase() +
+                        value.name.substring(1).toLowerCase(),
                     style: TextStyle(
-                      fontFamily: 'serif', 
+                      fontFamily: 'serif',
                       fontSize: 17,
                       color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w400,
@@ -150,10 +150,7 @@ class QualitySettingState extends State<QualitySetting> {
                       : null,
                 ),
                 if (!isLast)
-                  Divider(
-                      height: 0.5, 
-                      indent: 16, 
-                      color: theme.dividerColor),
+                  Divider(height: 0.5, indent: 16, color: theme.dividerColor),
               ],
             );
           }).toList(),
