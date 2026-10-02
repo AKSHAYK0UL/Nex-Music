@@ -1,85 +1,14 @@
-# 🎧 Nex Music (Cross-Platform Music Streaming App)
+# 🎧 Nex Music (Music Streaming App)
 
-<table>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-01.jpg" alt="NEX Music Screenshot 1" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-02.jpg" alt="NEX Music Screenshot 2" width="300" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-03.jpg" alt="NEX Music Screenshot 3" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-04.jpg" alt="NEX Music Screenshot 4" width="300" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-05.jpg" alt="NEX Music Screenshot 5" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-06.jpg" alt="NEX Music Screenshot 6" width="300" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-07.jpg" alt="NEX Music Screenshot 7" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-08.jpg" alt="NEX Music Screenshot 8" width="300" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-09.jpg" alt="NEX Music Screenshot 9" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-10.jpg" alt="NEX Music Screenshot 10" width="300" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-11.jpg" alt="NEX Music Screenshot 11" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-12.jpg" alt="NEX Music Screenshot 12" width="300" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-13.jpg" alt="NEX Music Screenshot 13" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-14.jpg" alt="NEX Music Screenshot 14" width="300" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-15.jpg" alt="NEX Music Screenshot 15" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-16.jpg" alt="NEX Music Screenshot 16" width="300" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-17.jpg" alt="NEX Music Screenshot 17" width="300" />
-    </td>
-    <td align="center" style="padding: 20px;">
-      <img src="assets/screenshots/screenshot-18.jpg" alt="NEX Music Screenshot 18" width="300" />
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <img src="assets/screenshots/cover_image.png" alt="Nex Music Cover Image" width="1200" />
+</p>
 
 ---
 
 ## 🚀 Overview
 
-**Nex Music** is a sleek, ad-free, and cross-platform music streaming app built with **Flutter**, allowing users to stream from YouTube/YouTube Music, create playlists, and sync data across devices with ease.
+**Nex Music** is a sleek, ad-free music streaming app built with **Flutter**, allowing users to stream from YouTube/YouTube Music, create playlists, and sync data across devices with ease.
 
 ---
 
@@ -138,7 +67,6 @@
 
 - 🚫 **Ad-Free Experience**  
   Enjoy your music without interruptions, ads, or distractions.
-  
 
 ---
 
@@ -148,7 +76,6 @@
 |-------|------------|
 | **Frontend** | Flutter |
 | **State Management** | BLoC |
-| **Architecture** | BLoC Pattern |
 | **Backend & Sync** | Firebase (Authentication, Firestore, Real-time Sync) |
 
 ---
@@ -168,3 +95,28 @@
 Expect regular updates, new features, and improvements over time!
 
 ---
+
+## 📜 License
+```
+Nex Music is free software licensed under GPL v3.0 with the following conditions:
+
+- Copied/Modified versions of this software cannot be used for 'non-free' and profit purposes.
+- You cannot publish copied/modified versions of this app on closed-source app repositories
+  like PlayStore/AppStore.
+```
+---
+
+## ⚠️ Disclaimer
+```
+This project has been created while learning, and learning is the main intention.
+This project is not sponsored by, affiliated with, funded by, authorized by, or endorsed by any content provider.
+Any song, content, or trademark used in this app is the intellectual property of its respective owners.
+Nex Music is not responsible for any infringement of copyright or other intellectual property rights that may result
+from the use of the songs and other content available through this app.
+
+This software is released "as-is", without any warranty, responsibility or liability.
+In no event shall the Author of this Software be liable for any special, consequential,
+incidental or indirect damages whatsoever (including, without limitation, any
+other pecuniary loss) arising out of the use of or inability to use this product, even if
+the Author of this Software is aware of the possibility of such damages and known defect.
+```
