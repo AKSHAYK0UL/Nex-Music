@@ -277,10 +277,111 @@ class Repository {
         playlists);
   }
 
+  // In-memory cache for resolved artist details
+  final Map<String, ArtistModel> _artistDetailsCache = {};
+
+  ArtistModel? getCachedArtist(String? artistId, String? artistName) {
+    if (artistId != null &&
+        artistId.isNotEmpty &&
+        _artistDetailsCache.containsKey(artistId)) {
+      return _artistDetailsCache[artistId];
+    }
+    final nameKey = (artistName ?? '').trim().toLowerCase();
+    if (nameKey.isNotEmpty && _artistDetailsCache.containsKey(nameKey)) {
+      return _artistDetailsCache[nameKey];
+    }
+    return null;
+  }
+
+  // Get artist full details
+  Future<ArtistFull> getArtist(String artistId) async {
+    return await _dataProvider.getArtist(artistId);
+  }
+
   //search artist
   Future<List<ArtistModel>> searchArtist(String inputText) async {
     final artists = await _dataProvider.searchArtist(inputText);
-    return RepositoryHelperFunction.getArtist(artists);
+    final artistModels = RepositoryHelperFunction.getArtist(artists);
+    for (final a in artistModels) {
+      if (a.artist.artistId != null && a.artist.artistId!.isNotEmpty) {
+        _artistDetailsCache[a.artist.artistId!] = a;
+      }
+      _artistDetailsCache[a.artist.name.trim().toLowerCase()] = a;
+    }
+    return artistModels;
+  }
+
+  // Resolve artist model with real artist thumbnail and artistId
+  Future<ArtistModel> resolveArtist(ArtistModel artist) async {
+    final artistId = artist.artist.artistId;
+    final artistName = artist.artist.name.trim();
+
+    // Check cache first
+    if (artistId != null &&
+        artistId.isNotEmpty &&
+        _artistDetailsCache.containsKey(artistId)) {
+      return _artistDetailsCache[artistId]!;
+    }
+    final nameKey = artistName.toLowerCase();
+    if (nameKey.isNotEmpty && _artistDetailsCache.containsKey(nameKey)) {
+      return _artistDetailsCache[nameKey]!;
+    }
+
+    String? resolvedId = artistId;
+    String? resolvedThumbnail =
+        artist.thumbnail.isNotEmpty ? artist.thumbnail : null;
+
+    //  If artistId is present, try getting artist profile to get their official high-res image
+    if (resolvedId != null && resolvedId.isNotEmpty) {
+      try {
+        final full = await _dataProvider.getArtist(resolvedId);
+        if (full.thumbnails.isNotEmpty) {
+          final thumb = getThumbnail(full.thumbnails);
+          if (thumb.isNotEmpty) {
+            final resolved = ArtistModel(
+              artist: ArtistBasic(name: full.name, artistId: full.artistId),
+              thumbnail: thumb,
+            );
+            _artistDetailsCache[resolvedId] = resolved;
+            if (nameKey.isNotEmpty) _artistDetailsCache[nameKey] = resolved;
+            return resolved;
+          }
+        }
+      } catch (_) {}
+    }
+
+    //  If artistId is missing or getArtist failed, search the artist by name
+    if (artistName.isNotEmpty) {
+      try {
+        final searched = await searchArtist(artistName);
+        if (searched.isNotEmpty) {
+          final match = searched.firstWhere(
+            (a) => a.artist.name.trim().toLowerCase() == nameKey,
+            orElse: () => searched.first,
+          );
+          if (match.thumbnail.isNotEmpty) {
+            final resolved = ArtistModel(
+              artist: ArtistBasic(
+                name: match.artist.name,
+                artistId: match.artist.artistId ?? resolvedId,
+              ),
+              thumbnail: match.thumbnail,
+            );
+            if (resolved.artist.artistId != null &&
+                resolved.artist.artistId!.isNotEmpty) {
+              _artistDetailsCache[resolved.artist.artistId!] = resolved;
+            }
+            if (nameKey.isNotEmpty) _artistDetailsCache[nameKey] = resolved;
+            return resolved;
+          }
+        }
+      } catch (_) {}
+    }
+
+    return ArtistModel(
+      artist: ArtistBasic(name: artistName, artistId: resolvedId),
+      thumbnail: resolvedThumbnail ?? "",
+    );
   }
 
   //get artist Songs

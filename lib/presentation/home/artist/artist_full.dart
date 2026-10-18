@@ -13,6 +13,7 @@ import 'package:nex_music/presentation/home/artist/artist_album.dart';
 import 'package:nex_music/presentation/home/artist/artist_playlist.dart';
 import 'package:nex_music/presentation/home/artist/artist_songs.dart';
 import 'package:nex_music/presentation/home/artist/artist_videos.dart';
+import 'package:nex_music/repository/home_repo/repository.dart';
 
 class ArtistFullScreen extends StatefulWidget {
   final ArtistModel artist;
@@ -25,12 +26,14 @@ class ArtistFullScreen extends StatefulWidget {
 class _ArtistFullScreenState extends State<ArtistFullScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isCollapsed = false;
+  late ArtistModel _currentArtist;
 
   @override
   void initState() {
     super.initState();
-    final artistId = widget.artist.artist.artistId;
-    final artistName = widget.artist.artist.name;
+    _currentArtist = widget.artist;
+    final artistId = _currentArtist.artist.artistId;
+    final artistName = _currentArtist.artist.name;
 
     // Reset all blocs to clear old artist's data
     context.read<FullArtistSongBloc>().add(ResetArtistSongsEvent());
@@ -49,12 +52,45 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
         .add(GetArtistVideosEvent(inputText: artistName));
     context
         .read<FullArtistAlbumBloc>()
-        .add(GetArtistAlbumsEvent(artist: widget.artist));
+        .add(GetArtistAlbumsEvent(artist: _currentArtist));
     context
         .read<FullArtistPlaylistBloc>()
         .add(GetFullArtistPlaylistEvent(inputText: artistName));
 
     _scrollController.addListener(_scrollListener);
+
+    // If thumbnail is empty or artistId is missing, resolve official artist details
+    if (_currentArtist.thumbnail.isEmpty || artistId == null || artistId.isEmpty) {
+      _loadArtistDetails();
+    }
+  }
+
+  Future<void> _loadArtistDetails() async {
+    try {
+      final resolved =
+          await context.read<Repository>().resolveArtist(_currentArtist);
+      if (!mounted) return;
+      final hadNoId = _currentArtist.artist.artistId == null ||
+          _currentArtist.artist.artistId!.isEmpty;
+      if (resolved.thumbnail != _currentArtist.thumbnail ||
+          resolved.artist.artistId != _currentArtist.artist.artistId) {
+        setState(() {
+          _currentArtist = resolved;
+        });
+
+        // If artistId was previously missing, now fetch artist songs with the resolved ID
+        if (hadNoId &&
+            resolved.artist.artistId != null &&
+            resolved.artist.artistId!.isNotEmpty) {
+          context
+              .read<FullArtistSongBloc>()
+              .add(GetArtistSongsEvent(artistId: resolved.artist.artistId!));
+          context
+              .read<FullArtistAlbumBloc>()
+              .add(GetArtistAlbumsEvent(artist: _currentArtist));
+        }
+      }
+    } catch (_) {}
   }
 
   void _scrollListener() {
@@ -80,6 +116,30 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Widget _buildArtistImage() {
+    if (_currentArtist.thumbnail.isNotEmpty) {
+      return cacheImage(
+        imageUrl: _currentArtist.thumbnail,
+        width: double.infinity,
+        height: double.infinity,
+        islocal: false,
+      );
+    }
+
+    return Container(
+      color: const Color(0xFF1C1C44),
+      width: double.infinity,
+      height: double.infinity,
+      child: Center(
+        child: Icon(
+          CupertinoIcons.person_solid,
+          size: 80,
+          color: Colors.white.withValues(alpha: 0.25),
+        ),
+      ),
+    );
   }
 
   @override
@@ -111,7 +171,7 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                   duration: const Duration(milliseconds: 200),
                   opacity: _isCollapsed ? 1.0 : 0.0,
                   child: Text(
-                    widget.artist.artist.name,
+                    _currentArtist.artist.name,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 17,
@@ -123,8 +183,8 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                   BlocBuilder<SavedArtistsBloc, SavedArtistsState>(
                     builder: (context, state) {
                       bool isSaved = false;
-                      final artistId = widget.artist.artist.artistId;
-                      if (artistId != null) {
+                      final artistId = _currentArtist.artist.artistId;
+                      if (artistId != null && artistId.isNotEmpty) {
                         if (state is IsArtistSavedState &&
                             state.artistId == artistId) {
                           isSaved = state.isSaved;
@@ -143,7 +203,7 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                           size: 28,
                         ),
                         onPressed: () {
-                          if (artistId != null) {
+                          if (artistId != null && artistId.isNotEmpty) {
                             if (isSaved) {
                               context.read<SavedArtistsBloc>().add(
                                     RemoveFromSavedArtistsEvent(
@@ -152,7 +212,7 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                             } else {
                               context.read<SavedArtistsBloc>().add(
                                     AddToSavedArtistsEvent(
-                                        artist: widget.artist),
+                                        artist: _currentArtist),
                                   );
                             }
                           }
@@ -174,12 +234,7 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                       // Background Image
                       Container(
                         color: const Color(0xFF1C1C44),
-                        child: cacheImage(
-                          imageUrl: widget.artist.thumbnail,
-                          width: double.infinity,
-                          height: double.infinity,
-                          islocal: false,
-                        ),
+                        child: _buildArtistImage(),
                       ),
                       // Gradient Overlay
                       Container(
@@ -203,7 +258,7 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
                         left: 20,
                         right: 20,
                         child: Text(
-                          widget.artist.artist.name,
+                          _currentArtist.artist.name,
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -249,10 +304,10 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
           },
           body: TabBarView(
             children: [
-              ArtistSongs(artist: widget.artist),
-              ArtistVideos(artist: widget.artist),
-              ArtistAlbum(artist: widget.artist),
-              ArtistPlaylist(artist: widget.artist),
+              ArtistSongs(artist: _currentArtist),
+              ArtistVideos(artist: _currentArtist),
+              ArtistAlbum(artist: _currentArtist),
+              ArtistPlaylist(artist: _currentArtist),
             ],
           ),
         ),

@@ -24,6 +24,7 @@ import 'package:nex_music/presentation/audio_player/widget/volume_slider.dart';
 import 'package:nex_music/presentation/audio_player/widget/sleep_timer_widget.dart';
 import 'package:nex_music/presentation/audio_player/widget/sleep_timer_indicator.dart';
 import 'package:nex_music/presentation/audio_player/widget/upcoming_songs_bottom_sheet.dart';
+import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/service/sleep_timer_service.dart';
 
 // Custom widget to detect upward swipes without interfering with Dismissible
@@ -553,19 +554,37 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              IconButton(
-                                onPressed: () {
-                                  context.pop();
-                                  context.pushNamed(RouterName.artistName,
-                                      extra: ArtistModel(
-                                          artist: songData.artist,
-                                          thumbnail: songData.thumbnail));
+                              BlocBuilder<SongstreamBloc, SongstreamState>(
+                                builder: (context, songStreamState) {
+                                  Songmodel activeSong = songData;
+                                  if (songStreamState is PlayingState) {
+                                    activeSong = songStreamState.songData;
+                                  } else if (songStreamState is PausedState) {
+                                    activeSong = songStreamState.songData;
+                                  } else if (songStreamState is LoadingState) {
+                                    activeSong = songStreamState.songData;
+                                  }
+                                  return IconButton(
+                                    onPressed: () {
+                                      context.pop();
+                                      final cached = context
+                                          .read<Repository>()
+                                          .getCachedArtist(
+                                              activeSong.artist.artistId,
+                                              activeSong.artist.name);
+                                      context.pushNamed(RouterName.artistName,
+                                          extra: cached ??
+                                              ArtistModel(
+                                                  artist: activeSong.artist,
+                                                  thumbnail: ""));
+                                    },
+                                    icon: Icon(
+                                      CupertinoIcons.person_crop_circle_fill,
+                                      color: Colors.red.withValues(alpha: 0.8),
+                                      size: 28.5,
+                                    ),
+                                  );
                                 },
-                                icon: Icon(
-                                  CupertinoIcons.person_crop_circle_fill,
-                                  color: Colors.red.withValues(alpha: 0.8),
-                                  size: 28.5,
-                                ),
                               ),
                               IconButton(
                                 onPressed: () {},

@@ -11,8 +11,12 @@ import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nex_music/core/route/go_router/go_router.dart';
+import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_dialog.dart';
+import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> showLongPressOptions({
@@ -126,7 +130,20 @@ Future<void> showLongPressOptions({
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          final cached = context
+                              .read<Repository>()
+                              .getCachedArtist(songData.artist.artistId, songData.artist.name);
+                          context.pushNamed(
+                            RouterName.artistName,
+                            extra: cached ??
+                                ArtistModel(
+                                  artist: songData.artist,
+                                  thumbnail: "",
+                                ),
+                          );
+                        },
                         label: animatedText(
                             text: "View Artist (${songData.artist.name})",
                             style: Theme.of(context).textTheme.labelMedium!),

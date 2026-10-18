@@ -17,6 +17,7 @@ import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/bottom_sheet_button.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
+import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> showBottomOptionSheet({
@@ -144,12 +145,16 @@ Future<void> showBottomOptionSheet({
                 screenSize: screenSize,
                 onPressed: () {
                   Navigator.of(context).pop();
+                  final cached = context
+                      .read<Repository>()
+                      .getCachedArtist(songData.artist.artistId, songData.artist.name);
                   context.pushNamed(
                     RouterName.artistName,
-                    extra: ArtistModel(
-                      artist: songData.artist,
-                      thumbnail: songData.thumbnail,
-                    ),
+                    extra: cached ??
+                        ArtistModel(
+                          artist: songData.artist,
+                          thumbnail: "",
+                        ),
                   );
                 },
               ),
