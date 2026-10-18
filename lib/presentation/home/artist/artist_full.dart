@@ -27,41 +27,60 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isCollapsed = false;
   late ArtistModel _currentArtist;
+  late final FullArtistSongBloc _songBloc;
+  late final FullArtistVideoBloc _videoBloc;
+  late final FullArtistAlbumBloc _albumBloc;
+  late final FullArtistPlaylistBloc _playlistBloc;
 
   @override
   void initState() {
     super.initState();
     _currentArtist = widget.artist;
+
+    final repo = context.read<Repository>();
+    _songBloc = FullArtistSongBloc(repo);
+    _videoBloc = FullArtistVideoBloc(repo);
+    _albumBloc = FullArtistAlbumBloc(repo);
+    _playlistBloc = FullArtistPlaylistBloc(repo);
+
     final artistId = _currentArtist.artist.artistId;
     final artistName = _currentArtist.artist.name;
 
-    // Reset all blocs to clear old artist's data
-    context.read<FullArtistSongBloc>().add(ResetArtistSongsEvent());
-    context.read<FullArtistVideoBloc>().add(SetFullArtistVideoBlocInitialEvent());
-    context.read<FullArtistAlbumBloc>().add(SetFullartistalbumInitialEvent());
-    context.read<FullArtistPlaylistBloc>().add(SetFullArtistPlaylistInitialEvent());
-
     // Fetch new data
     if (artistId != null && artistId.isNotEmpty) {
-      context
-          .read<FullArtistSongBloc>()
-          .add(GetArtistSongsEvent(artistId: artistId));
+      _songBloc.add(GetArtistSongsEvent(artistId: artistId));
     }
-    context
-        .read<FullArtistVideoBloc>()
-        .add(GetArtistVideosEvent(inputText: artistName));
-    context
-        .read<FullArtistAlbumBloc>()
-        .add(GetArtistAlbumsEvent(artist: _currentArtist));
-    context
-        .read<FullArtistPlaylistBloc>()
-        .add(GetFullArtistPlaylistEvent(inputText: artistName));
+    _videoBloc.add(GetArtistVideosEvent(inputText: artistName));
+    _albumBloc.add(GetArtistAlbumsEvent(artist: _currentArtist));
+    _playlistBloc.add(GetFullArtistPlaylistEvent(inputText: artistName));
 
     _scrollController.addListener(_scrollListener);
 
     // If thumbnail is empty or artistId is missing, resolve official artist details
     if (_currentArtist.thumbnail.isEmpty || artistId == null || artistId.isEmpty) {
       _loadArtistDetails();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ArtistFullScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.artist.artist.artistId != widget.artist.artist.artistId ||
+        oldWidget.artist.artist.name != widget.artist.artist.name) {
+      _currentArtist = widget.artist;
+      final artistId = _currentArtist.artist.artistId;
+      final artistName = _currentArtist.artist.name;
+
+      if (artistId != null && artistId.isNotEmpty) {
+        _songBloc.add(GetArtistSongsEvent(artistId: artistId));
+      }
+      _videoBloc.add(GetArtistVideosEvent(inputText: artistName));
+      _albumBloc.add(GetArtistAlbumsEvent(artist: _currentArtist));
+      _playlistBloc.add(GetFullArtistPlaylistEvent(inputText: artistName));
+
+      if (_currentArtist.thumbnail.isEmpty || artistId == null || artistId.isEmpty) {
+        _loadArtistDetails();
+      }
     }
   }
 
@@ -82,12 +101,8 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
         if (hadNoId &&
             resolved.artist.artistId != null &&
             resolved.artist.artistId!.isNotEmpty) {
-          context
-              .read<FullArtistSongBloc>()
-              .add(GetArtistSongsEvent(artistId: resolved.artist.artistId!));
-          context
-              .read<FullArtistAlbumBloc>()
-              .add(GetArtistAlbumsEvent(artist: _currentArtist));
+          _songBloc.add(GetArtistSongsEvent(artistId: resolved.artist.artistId!));
+          _albumBloc.add(GetArtistAlbumsEvent(artist: _currentArtist));
         }
       }
     } catch (_) {}
@@ -113,6 +128,10 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
 
   @override
   void dispose() {
+    _songBloc.close();
+    _videoBloc.close();
+    _albumBloc.close();
+    _playlistBloc.close();
     _scrollController.removeListener(_scrollListener);
     _scrollController.dispose();
     super.dispose();
@@ -146,9 +165,16 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
 
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<FullArtistSongBloc>.value(value: _songBloc),
+        BlocProvider<FullArtistVideoBloc>.value(value: _videoBloc),
+        BlocProvider<FullArtistAlbumBloc>.value(value: _albumBloc),
+        BlocProvider<FullArtistPlaylistBloc>.value(value: _playlistBloc),
+      ],
+      child: DefaultTabController(
+        length: 4,
+        child: Scaffold(
         body: NestedScrollView(
           controller: _scrollController,
           physics: const BouncingScrollPhysics(),
@@ -312,6 +338,7 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
