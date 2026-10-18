@@ -3,7 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/bloc/upnext_bloc/upnext_bloc.dart';
+import 'package:nex_music/core/ui_component/snackbar.dart';
 
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -143,17 +145,44 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
     } else {
       return Flexible(
         child: ListView.builder(
-          
           padding: const EdgeInsets.symmetric(horizontal: 16),
           itemCount: allPlaylistSongs.length,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
             final songData = allPlaylistSongs[index];
             final isCurrent = index == currentSongIndex;
-            final isPlayed = index < currentSongIndex;
-            return RecentSongTile(songData: songData, songIndex: index, isCurrent:isCurrent,tabRouteENUM: TabRouteENUM.upNext);
-            
-            // return _buildUpNextSongTile(context, songData, index, isCurrent, isPlayed);
+
+            final tile = RecentSongTile(
+              key: ValueKey('upnext_tile_${songData.vId}_$index'),
+              songData: songData,
+              songIndex: index,
+              isCurrent: isCurrent,
+              tabRouteENUM: TabRouteENUM.upNext,
+              showDelete: !isCurrent,
+            );
+
+            if (isCurrent) return tile;
+
+            return Dismissible(
+              key: ValueKey('upnext_dismiss_${songData.vId}_$index'),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF3B30).withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(CupertinoIcons.trash, color: Colors.white),
+              ),
+              onDismissed: (_) {
+                context.read<SongstreamBloc>().add(
+                      RemoveFromPlaylistEvent(videoId: songData.vId),
+                    );
+                showSnackbar(context, "Removed from queue");
+              },
+              child: tile,
+            );
           },
         ),
       );

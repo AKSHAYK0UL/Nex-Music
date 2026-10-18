@@ -131,6 +131,21 @@ class _RecentSongTileState extends State<RecentSongTile> {
                 }
               : null,
         );
+      case TabRouteENUM.upNext:
+        return SongOptionsMenu(
+          songData: widget.songData,
+          screenSize: screenHeight,
+          tabRouteENUM: widget.tabRouteENUM,
+          menuType: SongMenuType.recent,
+          showDelete: widget.showDelete,
+          customDeleteText: "Remove from Queue",
+          onCustomDelete: () {
+            context.read<SongstreamBloc>().add(
+                  RemoveFromPlaylistEvent(videoId: widget.songData.vId),
+                );
+            showSnackbar(context, "Removed from queue");
+          },
+        );
       default:
         return SongOptionsMenu(
           songData: widget.songData,
@@ -218,8 +233,12 @@ class _RecentSongTileState extends State<RecentSongTile> {
       onTap: () {
         if (widget.tabRouteENUM == TabRouteENUM.upNext) {
           context.pop();
-        }
-        if (widget.tabRouteENUM == TabRouteENUM.playlist ||
+          context.read<SongstreamBloc>().add(
+                GetSongUrlOnShuffleEvent(
+                  songData: widget.songData,
+                ),
+              );
+        } else if (widget.tabRouteENUM == TabRouteENUM.playlist ||
             widget.tabRouteENUM == TabRouteENUM.download) {
           context.read<SongstreamBloc>().add(
                 PlaySongFromPlaylistEvent(

@@ -28,7 +28,7 @@ class NavBarWidget extends StatelessWidget {
             TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
+            icon: Icon(Icons.home),
             label: 'Home',
           ),
           BottomNavigationBarItem(

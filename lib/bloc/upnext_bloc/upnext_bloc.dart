@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -7,6 +8,7 @@ part 'upnext_state.dart';
 
 class UpnextBloc extends Bloc<UpnextEvent, UpnextState> {
   final SongstreamBloc _songstreamBloc;
+  StreamSubscription<SongstreamState>? _songstreamSubscription;
 
   UpnextBloc({
     required SongstreamBloc songstreamBloc,
@@ -18,13 +20,25 @@ class UpnextBloc extends Bloc<UpnextEvent, UpnextState> {
     on<PlaySongFromUpnextEvent>(_playSongFromUpnext);
     on<RefreshUpnextEvent>(_refreshUpnext);
     on<ClearUpnextEvent>(_clearUpnext);
+
+    _songstreamSubscription = _songstreamBloc.stream.listen((_) {
+      add(RefreshUpnextEvent());
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _songstreamSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _loadUpcomingSongs(
     LoadUpcomingSongsEvent event,
     Emitter<UpnextState> emit,
   ) async {
-    emit(UpnextLoadingState());
+    if (state is! UpnextLoadedState) {
+      emit(UpnextLoadingState());
+    }
 
     try {
       final upcomingSongs = _getUpcomingSongs();
@@ -59,9 +73,6 @@ class UpnextBloc extends Bloc<UpnextEvent, UpnextState> {
 
     try {
       _songstreamBloc.add(StartRadioEvent(videoId: event.videoId));
-
-      await Future.delayed(const Duration(milliseconds: 500));
-      add(RefreshUpnextEvent());
     } catch (e) {
       emit(UpnextErrorState(errorMessage: e.toString()));
     }
@@ -72,8 +83,6 @@ class UpnextBloc extends Bloc<UpnextEvent, UpnextState> {
     Emitter<UpnextState> emit,
   ) async {
     _songstreamBloc.add(RemoveFromPlaylistEvent(videoId: event.videoId));
-
-    add(RefreshUpnextEvent());
   }
 
   Future<void> _playSongFromUpnext(

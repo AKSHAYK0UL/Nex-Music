@@ -1800,6 +1800,20 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
         if (_songData == null) {
           add(GetSongStreamEvent(songData: radioSongs[0], songIndex: 0));
+        } else {
+          if (_isPlaying) {
+            emit(PlayingState(
+              songData: _songData!,
+              volume: _currentVolume,
+              isMuted: _isMute,
+            ));
+          } else {
+            emit(PausedState(
+              songData: _songData!,
+              volume: _currentVolume,
+              isMuted: _isMute,
+            ));
+          }
         }
       }
     } catch (e) {
@@ -1921,11 +1935,16 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     try {
       final moreRadioSongs = await _repository.getRadioSongs(videoId);
       if (moreRadioSongs.isNotEmpty) {
+        bool added = false;
         // Add new radio songs to playlist, avoiding duplicates
         for (final song in moreRadioSongs) {
           if (!_playlistSongs.any((s) => s.vId == song.vId)) {
             _playlistSongs.add(song);
+            added = true;
           }
+        }
+        if (added) {
+          add(UpdateUIEvent());
         }
       }
     } catch (e) {
@@ -1938,11 +1957,16 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     try {
       final radioSongs = await _repository.getRadioSongs(videoId);
       if (radioSongs.isNotEmpty) {
+        bool added = false;
         // Add radio songs to playlist after the current song
         for (final song in radioSongs) {
           if (!_playlistSongs.any((s) => s.vId == song.vId)) {
             _playlistSongs.add(song);
+            added = true;
           }
+        }
+        if (added) {
+          add(UpdateUIEvent());
         }
       }
     } catch (e) {
@@ -2034,22 +2058,24 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   void _addToPlayNext(AddToPlayNextEvent event, Emitter<SongstreamState> emit) {
-    // Calculate the next index where the song should be inserted
+    // Check if song already exists in playlist, if so remove it first (unless it's the currently playing song)
+    final existingIndex =
+        _playlistSongs.indexWhere((song) => song.vId == event.songData.vId);
+    if (existingIndex != -1 && existingIndex != _currentSongIndex) {
+      _playlistSongs.removeAt(existingIndex);
+      if (_currentSongIndex > existingIndex) {
+        _currentSongIndex--;
+      }
+    }
+
+    // Calculate the next index where the song should be inserted (right after current song)
     final insertIndex =
         (_currentSongIndex >= 0 && _currentSongIndex < _playlistSongs.length)
             ? _currentSongIndex + 1
             : _playlistSongs.length;
 
-    // Check if song already exists in playlist, if so remove it first
-    _playlistSongs.removeWhere((song) => song.vId == event.songData.vId);
-
     // Insert at the next index
     _playlistSongs.insert(insertIndex, event.songData);
-
-    // Update current index if needed
-    if (_currentSongIndex >= insertIndex) {
-      _currentSongIndex++;
-    }
 
     // Emit current state to trigger UI update
     if (_songData != null) {
@@ -2107,6 +2133,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
             isMuted: _isMute,
           ));
         }
+      } else {
+        emit(SongstreamInitial());
       }
     }
   }
