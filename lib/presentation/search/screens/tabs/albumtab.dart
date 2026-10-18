@@ -18,19 +18,25 @@ class AlbumTab extends StatefulWidget {
   State<AlbumTab> createState() => AlbumTabState();
 }
 
-class AlbumTabState extends State<AlbumTab> {
+class AlbumTabState extends State<AlbumTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
     // Only trigger search if don't already have results for this search
     final currentState = context.read<SearchAlbumBloc>().state;
-    if (currentState.runtimeType != SearchedAlbumsDataState) {
+    if (currentState.runtimeType != SearchedAlbumsDataState &&
+        currentState.runtimeType != LoadingState) {
       context.read<SearchAlbumBloc>().add(SearchAlbumsEvent(inputText: widget.inputText));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocBuilder<SearchAlbumBloc, SearchAlbumState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {

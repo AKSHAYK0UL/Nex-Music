@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
-import 'package:nex_music/bloc/song_bloc/bloc/song_bloc.dart' as songbloc;
 import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/presentation/search/widgets/recentsearchtitle.dart';
 import 'package:nex_music/presentation/search/widgets/suggestion_title.dart';
@@ -231,17 +230,20 @@ class SearchScreenState extends State<SearchScreen> {
           AddRecentSearchEvent(search: query),
         );
 
-    context.read<songbloc.SongBloc>().add(
-          songbloc.SeachInSongEvent(inputText: query),
-        );
+    if (widget.searchText != null) {
+      context.pushReplacementNamed(
+        RouterName.searchResultName,
+        extra: query,
+      );
+    } else {
+      final result = await context.pushNamed(
+        RouterName.searchResultName,
+        extra: query,
+      );
 
-    final result = await context.pushNamed(
-      RouterName.searchResultName,
-      extra: query,
-    );
-
-    if (result == true) {
-      _searchFocusNode.requestFocus();
+      if (result == true) {
+        _searchFocusNode.requestFocus();
+      }
     }
   }
 }

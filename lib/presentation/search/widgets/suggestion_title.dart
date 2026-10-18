@@ -1,17 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/artist_bloc/bloc/artist_bloc.dart';
-import 'package:nex_music/bloc/search_album_bloc/bloc/search_album_bloc.dart';
-import 'package:nex_music/bloc/search_bloc/bloc/search_bloc.dart';
-import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart'
-    as pl;
-import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 
 class SuggestionTitle extends StatelessWidget {
   final String text;
   final double size;
-  final void Function(String)onTap;
+  final void Function(String) onTap;
   final void Function(String) onSuggestionSelected;
 
   const SuggestionTitle({
@@ -26,24 +19,7 @@ class SuggestionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        
-
         onTap(text);
-        //reset the state
-        context.read<VideoBloc>().add(SetStateToInitialEvent());
-
-        //reset the state
-        context
-            .read<SearchAlbumBloc>()
-            .add(SetStateToInitialSearchAlbumBlocEvent());
-
-        //reset the state
-        context
-            .read<pl.SearchedplaylistBloc>()
-            .add(pl.SetStateToInitialEvent());
-
-        //reset the state
-        context.read<ArtistBloc>().add(SetStateToinitialEvent());
       },
       child: Container(
         color: Colors.transparent,

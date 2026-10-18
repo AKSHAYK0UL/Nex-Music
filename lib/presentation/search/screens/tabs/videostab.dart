@@ -19,18 +19,24 @@ class Videostab extends StatefulWidget {
   State<Videostab> createState() => _VideostabState();
 }
 
-class _VideostabState extends State<Videostab> {
+class _VideostabState extends State<Videostab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
     final currentState = context.read<VideoBloc>().state;
-    if (currentState.runtimeType != VideosResultState) {
+    if (currentState.runtimeType != VideosResultState &&
+        currentState.runtimeType != LoadingState) {
       context.read<VideoBloc>().add(SearchInVideoEvent(inputText: widget.inputText));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocBuilder<VideoBloc, VideoState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {

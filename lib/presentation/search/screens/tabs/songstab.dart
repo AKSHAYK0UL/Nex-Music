@@ -14,12 +14,17 @@ class SongsTab extends StatefulWidget {
   State<SongsTab> createState() => _SongsTabState();
 }
 
-class _SongsTabState extends State<SongsTab> {
+class _SongsTabState extends State<SongsTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
     final currentState = context.read<songbloc.SongBloc>().state;
-    if (currentState.runtimeType != songbloc.SongsResultState) {
+    if (currentState.runtimeType != songbloc.SongsResultState &&
+        currentState.runtimeType != songbloc.LoadingState) {
       context.read<songbloc.SongBloc>().add(
             songbloc.SeachInSongEvent(inputText: widget.inputText),
           );
@@ -28,6 +33,7 @@ class _SongsTabState extends State<SongsTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocBuilder<songbloc.SongBloc, songbloc.SongState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {

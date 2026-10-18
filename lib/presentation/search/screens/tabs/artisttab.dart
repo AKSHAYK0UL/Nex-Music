@@ -14,13 +14,18 @@ class ArtistTab extends StatefulWidget {
   State<ArtistTab> createState() => _ArtistTabState();
 }
 
-class _ArtistTabState extends State<ArtistTab> {
+class _ArtistTabState extends State<ArtistTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
-    // Only trigger search if  don't already have results for this search
+    // Only trigger search if don't already have results for this search
     final currentState = context.read<ArtistBloc>().state;
-    if (currentState.runtimeType != ArtistDataState) {
+    if (currentState.runtimeType != ArtistDataState &&
+        currentState.runtimeType != LoadingState) {
       context
           .read<ArtistBloc>()
           .add(GetArtistEvent(inputText: widget.inputText));
@@ -29,6 +34,7 @@ class _ArtistTabState extends State<ArtistTab> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocBuilder<ArtistBloc, ArtistState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {

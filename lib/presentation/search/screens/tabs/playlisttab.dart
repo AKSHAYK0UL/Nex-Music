@@ -19,19 +19,25 @@ class PlaylistTab extends StatefulWidget {
   State<PlaylistTab> createState() => _PlaylistTabState();
 }
 
-class _PlaylistTabState extends State<PlaylistTab> {
+class _PlaylistTabState extends State<PlaylistTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
     // Only trigger search iff don't already have results for this search
     final currentState = context.read<SearchedplaylistBloc>().state;
-    if (currentState.runtimeType != PlaylistDataState) {
+    if (currentState.runtimeType != PlaylistDataState &&
+        currentState.runtimeType != LoadingState) {
       context.read<SearchedplaylistBloc>().add(SearchInPlaylistEvent(inputText: widget.inputText));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return BlocBuilder<SearchedplaylistBloc, SearchedplaylistState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
@@ -51,8 +57,7 @@ class _PlaylistTabState extends State<PlaylistTab> {
             itemCount: state.playlist.length,
             itemBuilder: (context, index) {
               // return PlaylistGridView(playList: state.playlist[index]);
-                            return HomePlaylist(playList: state.playlist[index]);
-
+              return HomePlaylist(playList: state.playlist[index]);
             },
           );
         }

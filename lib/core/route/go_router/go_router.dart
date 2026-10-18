@@ -177,8 +177,11 @@ class AppRouter {
                       path: RouterPath.searchResultRoute,
                       name: RouterName.searchResultName,
                       builder: (context, state) {
-                        final extra = state.extra as String;
-                        return SearchResultTab(searchText: extra);
+                        final extra = state.extra as String? ?? '';
+                        return SearchResultTab(
+                          key: ValueKey(state.pageKey),
+                          searchText: extra,
+                        );
                       },
                     ),
                   ],
