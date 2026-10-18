@@ -15,8 +15,16 @@ class ArtistAlbum extends StatelessWidget {
     return BlocBuilder<FullArtistAlbumBloc, FullArtistAlbumState>(
       buildWhen: (previous, current) => previous != current,
       builder: (context, state) {
-        if (state is LoadingState) {
+        if (state is LoadingState || state is FullartistalbumInitial) {
           return loadingDisk();
+        }
+        if (state is ErrorState) {
+          return Center(
+            child: Text(
+              "No albums found.",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          );
         }
         if (state is FullartistalbumDataState) {
           return state.artistAlbums.isEmpty

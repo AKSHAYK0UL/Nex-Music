@@ -139,6 +139,16 @@ class DataProvider {
     return await _ytMusic.getArtistAlbums(artistId);
   }
 
+  //get artist full details
+  Future<yt.ArtistFull> getArtist(String artistId) async {
+    return await _ytMusic.getArtist(artistId);
+  }
+
+  //get artist singles
+  Future<List<AlbumDetailed>> getArtistSingles(String artistId) async {
+    return await _ytMusic.getArtistSingles(artistId);
+  }
+
   //get up next songs for radio feature
   Future<List<UpNextsDetails>> getUpNexts(String videoId) async {
     return await _ytMusic.getUpNexts(videoId);

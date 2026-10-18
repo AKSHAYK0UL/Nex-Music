@@ -32,27 +32,27 @@ class _ArtistFullScreenState extends State<ArtistFullScreen> {
     final artistId = widget.artist.artist.artistId;
     final artistName = widget.artist.artist.name;
 
-    if (artistId != null) {
-      // Reset all blocs to clear old artist's data
-      context.read<FullArtistSongBloc>().add(ResetArtistSongsEvent());
-      context.read<FullArtistVideoBloc>().add(SetFullArtistVideoBlocInitialEvent());
-      context.read<FullArtistAlbumBloc>().add(SetFullartistalbumInitialEvent());
-      context.read<FullArtistPlaylistBloc>().add(SetFullArtistPlaylistInitialEvent());
+    // Reset all blocs to clear old artist's data
+    context.read<FullArtistSongBloc>().add(ResetArtistSongsEvent());
+    context.read<FullArtistVideoBloc>().add(SetFullArtistVideoBlocInitialEvent());
+    context.read<FullArtistAlbumBloc>().add(SetFullartistalbumInitialEvent());
+    context.read<FullArtistPlaylistBloc>().add(SetFullArtistPlaylistInitialEvent());
 
-      // Fetch new data
+    // Fetch new data
+    if (artistId != null && artistId.isNotEmpty) {
       context
           .read<FullArtistSongBloc>()
           .add(GetArtistSongsEvent(artistId: artistId));
-      context
-          .read<FullArtistVideoBloc>()
-          .add(GetArtistVideosEvent(inputText: artistName));
-      context
-          .read<FullArtistAlbumBloc>()
-          .add(GetArtistAlbumsEvent(artist: widget.artist));
-      context
-          .read<FullArtistPlaylistBloc>()
-          .add(GetFullArtistPlaylistEvent(inputText: artistName));
     }
+    context
+        .read<FullArtistVideoBloc>()
+        .add(GetArtistVideosEvent(inputText: artistName));
+    context
+        .read<FullArtistAlbumBloc>()
+        .add(GetArtistAlbumsEvent(artist: widget.artist));
+    context
+        .read<FullArtistPlaylistBloc>()
+        .add(GetFullArtistPlaylistEvent(inputText: artistName));
 
     _scrollController.addListener(_scrollListener);
   }

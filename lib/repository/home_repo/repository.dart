@@ -70,7 +70,7 @@ class Repository {
       // Global sections
       _safeSearchPlaylist("global hits playlist"),
       _safeSearchPlaylist("trending globally playlist"),
-      
+
       // Trending Punjabi
       _safeSearchPlaylist("trending punjabi playlist"),
       _safeSearchAlbums("trending punjabi album"),
@@ -138,58 +138,58 @@ class Repository {
     }
   }
 
+  Future<
+      ({
+        List<Songmodel> playlistSongs,
+        int playlistSize,
+        String playListDuration
+      })> getPlayList(
+    String playlistId,
+    int index,
+  ) async {
+    print(
+        "##################### SONG PLAYLISTID ${playlistId} ##############################");
 
-Future<
-    ({
-      List<Songmodel> playlistSongs,
-      int playlistSize,
-      String playListDuration
-    })> getPlayList(
-  String playlistId,
-  int index,
-) async {
-     print("##################### SONG PLAYLISTID ${playlistId} ##############################");   
+    // Get song IDs stream
 
-  // Get song IDs stream
-  
-  // final songStream =
-  //     await _dataProvider.getSongIdFromPlayList(playlistId).toList();
-  final songStream =
-      await _dataProvider.getSongIdFromPlayList(playlistId);
+    // final songStream =
+    //     await _dataProvider.getSongIdFromPlayList(playlistId).toList();
+    final songStream = await _dataProvider.getSongIdFromPlayList(playlistId);
 
-   print("##################### SONG STREAMs ${songStream} ##############################");   
-  final totalSongs = songStream.length;
+    print(
+        "##################### SONG STREAMs ${songStream} ##############################");
+    final totalSongs = songStream.length;
 
-  // 2️ Prepare IDs & durations
-  final songIds =
-      songStream.skip(index).map((video) => video.videoId).take(20).toList();
-   print("##################### SONG IDS ${songIds} ##############################");   
+    // 2️ Prepare IDs & durations
+    final songIds =
+        songStream.skip(index).map((video) => video.videoId).take(20).toList();
+    print(
+        "##################### SONG IDS ${songIds} ##############################");
 
-  final songsDuration = songStream
-      .skip(index)
-      .map((video) => video.duration!.inSeconds)
-      .take(20)
-      .toList();
+    final songsDuration = songStream
+        .skip(index)
+        .map((video) => video.duration!.inSeconds)
+        .take(20)
+        .toList();
 
-  // 3️ Fetch songs (NETWORK / MAIN ISOLATE)
-  final songsList = await _dataProvider.getPlayListSongs(songIds);
+    // 3️ Fetch songs (NETWORK / MAIN ISOLATE)
+    final songsList = await _dataProvider.getPlayListSongs(songIds);
 
-  // 4️ CPU-heavy mapping in isolate
-  final playlistSongs = await compute(
-    playlistSongsCompute,
-    (
-      songs: songsList,
-      durations: songsDuration,
-    ),
-  );
+    // 4️ CPU-heavy mapping in isolate
+    final playlistSongs = await compute(
+      playlistSongsCompute,
+      (
+        songs: songsList,
+        durations: songsDuration,
+      ),
+    );
 
-  return (
-    playlistSongs: playlistSongs,
-    playlistSize: totalSongs,
-    playListDuration: "",
-  );
-}
-
+    return (
+      playlistSongs: playlistSongs,
+      playlistSize: totalSongs,
+      playListDuration: "",
+    );
+  }
 
   //###########
 
@@ -300,10 +300,115 @@ Future<
 
   //get artist album
   Future<List<PlayListmodel>> getArtistAlbums(ArtistModel artist) async {
-    List<AlbumDetailed> albums =
-        await _dataProvider.getArtistAlbums(artist.artist.artistId ?? "");
+    final artistId = artist.artist.artistId;
+    final artistName = artist.artist.name.trim();
 
-    return RepositoryHelperFunction.albumsToPlaylist(albums);
+    // Fetch artist profile (topAlbums & topSingles),
+    // singles, and searchAlbums concurrently for maximum speed
+    final discographyAlbumsFuture = (artistId != null && artistId.isNotEmpty)
+        ? _dataProvider
+            .getArtistAlbums(artistId)
+            .catchError((_) => <AlbumDetailed>[])
+        : Future.value(<AlbumDetailed>[]);
+
+    final artistFullFuture = (artistId != null && artistId.isNotEmpty)
+        ? _dataProvider
+            .getArtist(artistId)
+            .then<ArtistFull?>((v) => v)
+            .catchError((_) => null)
+        : Future.value(null);
+
+    final discographySinglesFuture = (artistId != null && artistId.isNotEmpty)
+        ? _dataProvider
+            .getArtistSingles(artistId)
+            .catchError((_) => <AlbumDetailed>[])
+        : Future.value(<AlbumDetailed>[]);
+
+    final searchAlbumsFuture = artistName.isNotEmpty
+        ? _dataProvider
+            .searchAlbums(artistName)
+            .catchError((_) => <AlbumDetailed>[])
+        : Future.value(<AlbumDetailed>[]);
+
+    final results = await Future.wait([
+      discographyAlbumsFuture,
+      artistFullFuture,
+      discographySinglesFuture,
+      searchAlbumsFuture,
+    ]);
+
+    final discographyAlbums = results[0] as List<AlbumDetailed>;
+    final artistFull = results[1] as ArtistFull?;
+    final discographySingles = results[2] as List<AlbumDetailed>;
+    final searchedAlbums = results[3] as List<AlbumDetailed>;
+
+    final List<AlbumDetailed> allAlbums = [];
+    final Set<String> seenIds = {};
+    final Set<String> seenNames = {};
+
+    void addAlbum(AlbumDetailed album) {
+      if (album.playlistId.isNotEmpty && seenIds.contains(album.playlistId)) {
+        return;
+      }
+      if (album.albumId.isNotEmpty && seenIds.contains(album.albumId)) {
+        return;
+      }
+
+      final normName = album.name.trim().toLowerCase();
+      if (normName.isNotEmpty && seenNames.contains(normName)) {
+        return;
+      }
+
+      if (album.playlistId.isNotEmpty) seenIds.add(album.playlistId);
+      if (album.albumId.isNotEmpty) seenIds.add(album.albumId);
+      if (normName.isNotEmpty) seenNames.add(normName);
+
+      allAlbums.add(album);
+    }
+
+    // albums from discography endpoint (for artists > 10 albums)
+    for (final album in discographyAlbums) {
+      addAlbum(album);
+    }
+
+    //  topAlbums from the artist profile carousel (especially for artists <= 10 albums)
+    if (artistFull != null) {
+      for (final album in artistFull.topAlbums) {
+        addAlbum(album);
+      }
+    }
+
+    // singles & EPs from discography endpoint
+    for (final album in discographySingles) {
+      addAlbum(album);
+    }
+
+    // Top singles & EPs from artist profile
+    if (artistFull != null) {
+      for (final album in artistFull.topSingles) {
+        addAlbum(album);
+      }
+    }
+
+    //  All matching albums & singles returned by searchAlbums
+    final artistNameLower = artistName.toLowerCase();
+    for (final album in searchedAlbums) {
+      final albArtist = album.artist.name.trim().toLowerCase();
+      if (albArtist == artistNameLower ||
+          albArtist.contains(artistNameLower) ||
+          artistNameLower.contains(albArtist)) {
+        addAlbum(album);
+      }
+    }
+
+    // If still empty ( artist with no exact matches) accept all searchedAlbums
+    if (allAlbums.isEmpty && searchedAlbums.isNotEmpty) {
+      for (final album in searchedAlbums) {
+        addAlbum(album);
+      }
+    }
+
+    return RepositoryHelperFunction.albumsToPlaylist(allAlbums);
   }
 
   //get radio songs (similar songs)

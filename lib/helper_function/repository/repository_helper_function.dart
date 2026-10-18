@@ -148,7 +148,7 @@ class RepositoryHelperFunction {
       final data = album[i];
       playlist.add(
         PlayListmodel(
-          playListId: data.playlistId,
+          playListId: data.playlistId.isNotEmpty ? data.playlistId : data.albumId,
           playlistName: data.name,
           artistBasic: data.artist,
           thumbnail: getThumbnail(data.thumbnails),
