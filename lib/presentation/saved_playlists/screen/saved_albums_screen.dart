@@ -182,7 +182,7 @@ class _SavedAlbumsScreenState extends State<SavedAlbumsScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 15),
                       child: CupertinoSearchTextField(
-                        placeholder: 'Search saved albums',
+                        placeholder: 'Find in Albums',
                         onChanged: (value) =>
                             setState(() => _searchQuery = value),
                         cursorColor: Colors.red,

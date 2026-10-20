@@ -169,7 +169,7 @@ class _SavedArtistsScreenState extends State<SavedArtistsScreen> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 15),
                       child: CupertinoSearchTextField(
-                        placeholder: 'Search saved artists',
+                        placeholder: 'Find in Artists',
                         onChanged: (value) =>
                             setState(() => _searchQuery = value),
                         cursorColor: Colors.red,

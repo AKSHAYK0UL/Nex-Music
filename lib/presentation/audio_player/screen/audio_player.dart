@@ -1,6 +1,6 @@
-import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
@@ -222,41 +222,53 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     final songIndex = widget.routeData["songindex"] as int;
     // final quality = widget.routeData["quality"] as ThumbnailQuality;
 
-    return BlocListener<DownloadBloc, DownloadState>(
-      listener: (context, state) {
-        if (state is DownloadErrorState) {
-          showSnackbar(context, state.errorMessage);
-        }
-      },
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Stack(
-          children: [
-            BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.3),
-              ),
-            ),
-            Dismissible(
-              key: const Key('audio_player_dismiss'),
-              direction: DismissDirection.down,
-              onDismissed: (_) {
-                // Navigator.of(context).pop();
-                context.pop();
-              },
-              background: Container(color: Colors.transparent),
-              secondaryBackground: Container(color: Colors.transparent),
-              child: SafeArea(
-                child: _SwipeUpDetector(
-                  onSwipeUp: () => _showUpcomingSongsBottomSheet(context),
-                  child: ColoredBox(
-                    color: Theme.of(context).scaffoldBackgroundColor,
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final overlayStyle = isDark
+        ? SystemUiOverlayStyle.light.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: theme.scaffoldBackgroundColor,
+          )
+        : SystemUiOverlayStyle.dark.copyWith(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: theme.scaffoldBackgroundColor,
+          );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: BlocListener<DownloadBloc, DownloadState>(
+        listener: (context, state) {
+          if (state is DownloadErrorState) {
+            showSnackbar(context, state.errorMessage);
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Dismissible(
+            key: const Key('audio_player_dismiss'),
+            direction: DismissDirection.down,
+            onDismissed: (_) {
+              context.pop();
+            },
+            background: Container(color: Colors.transparent),
+            secondaryBackground: Container(color: Colors.transparent),
+            child: SizedBox.expand(
+              child: ColoredBox(
+                color: theme.scaffoldBackgroundColor,
+                child: SafeArea(
+                  child: _SwipeUpDetector(
+                    onSwipeUp: () => _showUpcomingSongsBottomSheet(context),
                     child: Column(
                       children: [
-                        SizedBox(height: screenSize * 0.01),
-                        //  Top Grab Handle
-                        Center(
+                    SizedBox(height: screenSize * 0.01),
+                    //  Top Grab Handle
+                    Center(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => context.pop(),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 6.0, horizontal: 20.0),
                           child: Container(
                             width: 40,
                             height: 5,
@@ -269,6 +281,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                             ),
                           ),
                         ),
+                      ),
+                    ),
 
                         const Spacer(flex: 1),
 
@@ -777,7 +791,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
