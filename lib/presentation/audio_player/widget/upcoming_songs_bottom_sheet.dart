@@ -39,17 +39,21 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
 
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
+        final sheetHeight = MediaQuery.of(context).size.height * 0.8;
 
         Widget content = SafeArea(
           child: Container(
+            height:
+                (allPlaylistSongs.isNotEmpty || isLoading) ? sheetHeight : null,
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
+              maxHeight: sheetHeight,
             ),
             decoration: BoxDecoration(
-              color: isDark 
-                ? theme.cardColor 
-                : Colors.white.withValues(alpha: 0.85),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              color: isDark
+                  ? theme.cardColor
+                  : Colors.white.withValues(alpha: 0.85),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
               border: Border(
                 top: BorderSide(
                   color: theme.dividerColor.withValues(alpha: 0.2),
@@ -110,7 +114,7 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
           const Text(
             'Playing Next',
             style: TextStyle(
-               fontFamily: 'serif',
+              fontFamily: 'serif',
               fontSize: 22,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.5,
@@ -122,7 +126,10 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
             onPressed: () => context.pop(),
             child: Icon(
               CupertinoIcons.xmark_circle_fill,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.2),
               size: 28,
             ),
           ),
@@ -139,9 +146,14 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
     required bool shouldShowStartRadio,
   }) {
     if (allPlaylistSongs.isEmpty) {
-      if (isLoading) return _buildLoadingState();
-      if (shouldShowStartRadio) return _buildStartRadioButton(context);
-      return _buildLoadingState();
+      if (isLoading) return _buildLoadingState(context);
+      if (shouldShowStartRadio) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: _buildStartRadioButton(context),
+        );
+      }
+      return _buildLoadingState(context);
     } else {
       final showTrailingLoading = isLoading;
       final showTrailingStartRadio = !isLoading && shouldShowStartRadio;
@@ -206,55 +218,85 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
     }
   }
 
-  Widget _buildQueueLoadingIndicator(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CupertinoActivityIndicator(radius: 10),
-            const SizedBox(width: 12),
-            Text(
-              'Loading radio queue...',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
+  Widget _buildShimmerItem(BuildContext context) {
+    final shimmerColor =
+        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1);
+    return Container(
+      height: 85,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              color: shimmerColor,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FractionallySizedBox(
+                  widthFactor: 0.7,
+                  child: Container(
+                    height: 16,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: shimmerColor,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FractionallySizedBox(
+                  widthFactor: 0.45,
+                  child: Container(
+                    height: 14,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: shimmerColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: shimmerColor,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildLoadingState() {
-    return Builder(builder: (context) {
-      final theme = Theme.of(context);
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 40),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CupertinoActivityIndicator(radius: 14),
-              const SizedBox(height: 14),
-              Text(
-                'Loading radio queue...',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    });
+  Widget _buildQueueLoadingIndicator(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(
+        6,
+        (index) => _buildShimmerItem(context),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState(BuildContext context) {
+    return Flexible(
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        physics: const BouncingScrollPhysics(),
+        itemCount: 6,
+        itemBuilder: (context, index) => _buildShimmerItem(context),
+      ),
+    );
   }
 
   Widget _buildStartRadioButton(BuildContext context) {
@@ -264,13 +306,18 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
         borderRadius: BorderRadius.circular(100),
         onPressed: () {
           final current = context.read<UpnextBloc>().currentSongData;
-          if (current != null) context.read<UpnextBloc>().add(StartRadioFromUpnextEvent(videoId: current.vId));
+          if (current != null) {
+            context
+                .read<UpnextBloc>()
+                .add(StartRadioFromUpnextEvent(videoId: current.vId));
+          }
         },
-        child: const Text("Start Radio", style: TextStyle(fontWeight: FontWeight.bold)),
+        child: const Text("Start Radio",
+            style: TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }
 
-  Widget _buildErrorState(BuildContext context, String msg) => Center(child: Text(msg));
+  Widget _buildErrorState(BuildContext context, String msg) =>
+      Center(child: Text(msg));
 }
-
