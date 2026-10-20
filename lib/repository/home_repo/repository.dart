@@ -241,9 +241,7 @@ class Repository {
           vId: song.videoId,
           songName: song.name,
           artist: song.artist,
-          thumbnail: quality.thumbnailQuality == ThumbnailQuality.low
-              ? getThumbnail(song.thumbnails)
-              : await getThumbnailUsingUrl(song.videoId),
+          thumbnail: getThumbnail(song.thumbnails, quality.thumbnailQuality),
           duration: timeFormate(song.duration ?? 0),
         ),
       );

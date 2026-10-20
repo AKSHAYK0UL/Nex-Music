@@ -21,9 +21,7 @@ class RepositoryHelperFunction {
           vId: quickPicksDataObj.videoId,
           songName: quickPicksDataObj.name,
           artist: quickPicksDataObj.artist,
-          thumbnail: quality == ThumbnailQuality.low
-              ? getThumbnail(quickPicksDataObj.thumbnails)
-              : await getThumbnailUsingUrl(quickPicksDataObj.videoId),
+          thumbnail: getThumbnail(quickPicksDataObj.thumbnails, quality),
           duration: timeFormate(quickPicksDataObj.duration ?? 0),
         ),
       );

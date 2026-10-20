@@ -143,12 +143,29 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
       if (shouldShowStartRadio) return _buildStartRadioButton(context);
       return _buildLoadingState();
     } else {
+      final showTrailingLoading = isLoading;
+      final showTrailingStartRadio = !isLoading && shouldShowStartRadio;
+      final extraItemCount =
+          (showTrailingLoading || showTrailingStartRadio) ? 1 : 0;
+
       return Flexible(
         child: ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: allPlaylistSongs.length,
+          itemCount: allPlaylistSongs.length + extraItemCount,
           physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
+            if (index == allPlaylistSongs.length) {
+              if (showTrailingLoading) {
+                return _buildQueueLoadingIndicator(context);
+              }
+              if (showTrailingStartRadio) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: _buildStartRadioButton(context),
+                );
+              }
+            }
+
             final songData = allPlaylistSongs[index];
             final isCurrent = index == currentSongIndex;
 
@@ -189,7 +206,56 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
     }
   }
 
-  Widget _buildLoadingState() => const Center(child: CupertinoActivityIndicator(radius: 15));
+  Widget _buildQueueLoadingIndicator(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CupertinoActivityIndicator(radius: 10),
+            const SizedBox(width: 12),
+            Text(
+              'Loading radio queue...',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Builder(builder: (context) {
+      final theme = Theme.of(context);
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CupertinoActivityIndicator(radius: 14),
+              const SizedBox(height: 14),
+              Text(
+                'Loading radio queue...',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
 
   Widget _buildStartRadioButton(BuildContext context) {
     return Center(

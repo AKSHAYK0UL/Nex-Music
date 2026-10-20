@@ -1380,6 +1380,7 @@ import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/utils/audioutils/audio_handler.dart';
 import 'package:nex_music/utils/audioutils/audioplayerstream.dart';
+import 'package:nex_music/helper_function/general/thumbnail.dart';
 
 part 'songstream_event.dart';
 part 'songstream_state.dart';
@@ -1390,6 +1391,19 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   final DbRepository _dbRepository;
   final HiveDataBaseSingleton _dbInstance;
   final AudioPlayerHandler _audioPlayerHandler;
+
+  Uri _resolveArtUri(Songmodel song) {
+    if (song.isLocal) {
+      return Uri.file(song.thumbnail);
+    }
+    final quality = _dbInstance.getData.thumbnailQuality;
+    final highRes = getHighResThumbnail(
+      song.thumbnail,
+      videoId: song.vId,
+      quality: quality,
+    );
+    return Uri.parse(highRes);
+  }
 
   bool _isPlaying = false;
   Songmodel? _songData;
@@ -1404,6 +1418,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   double _currentVolume = 0.5; // Current volume level
   bool _songLoaded = false;
   List<Songmodel> _storeQuicksPicksList = [];
+  bool _isRadioLoading = false;
 
   SongstreamBloc(
     this._repository,
@@ -1579,9 +1594,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       id: _songData!.vId,
       title: _songData!.songName,
       artist: _songData!.artist.name,
-      artUri: _songData!.isLocal
-          ? Uri.file(_songData!.thumbnail)
-          : Uri.parse(_songData!.thumbnail),
+      artUri: _resolveArtUri(_songData!),
       duration: songDuration,
     ));
 
@@ -1650,9 +1663,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       id: _songData!.vId,
       title: _songData!.songName,
       artist: _songData!.artist.name,
-      artUri: _songData!.isLocal
-          ? Uri.file(_songData!.thumbnail)
-          : Uri.parse(_songData!.thumbnail),
+      artUri: _resolveArtUri(_songData!),
       duration: songDuration,
     ));
 
@@ -1790,13 +1801,40 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // Start Radio Clear playlist and add radio songs
   Future<void> _startRadio(
       StartRadioEvent event, Emitter<SongstreamState> emit) async {
+    _isRadioLoading = true;
+    if (_songData != null) {
+      if (_isPlaying) {
+        emit(PlayingState(
+          songData: _songData!,
+          volume: _currentVolume,
+          isMuted: _isMute,
+        ));
+      } else {
+        emit(PausedState(
+          songData: _songData!,
+          volume: _currentVolume,
+          isMuted: _isMute,
+        ));
+      }
+    }
     try {
       final radioSongs = await _repository.getRadioSongs(event.videoId);
       if (radioSongs.isNotEmpty) {
         // Clear playlist and add radio songs
         _playlistSongs.clear();
-        _playlistSongs.addAll(radioSongs);
-        _currentSongIndex = 0;
+        if (_songData != null) {
+          // Keep currently playing song at index 0
+          _playlistSongs.add(_songData!);
+          for (final song in radioSongs) {
+            if (song.vId != _songData!.vId) {
+              _playlistSongs.add(song);
+            }
+          }
+          _currentSongIndex = 0;
+        } else {
+          _playlistSongs.addAll(radioSongs);
+          _currentSongIndex = 0;
+        }
 
         if (_songData == null) {
           add(GetSongStreamEvent(songData: radioSongs[0], songIndex: 0));
@@ -1818,6 +1856,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
     } catch (e) {
       print("Error starting radio: $e");
+    } finally {
+      _isRadioLoading = false;
+      add(UpdateUIEvent());
     }
   }
 
@@ -1859,6 +1900,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     // Set the song data
     _songData = event.songData;
     _playlistSongs.add(_songData!);
+    if (!_songData!.isLocal) {
+      _isRadioLoading = true;
+    }
 
     emit(LoadingState(
       songData: _songData!,
@@ -1870,9 +1914,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       id: _songData!.vId,
       title: _songData!.songName,
       artist: _songData!.artist.name,
-      artUri: _songData!.isLocal
-          ? Uri.file(_songData!.thumbnail)
-          : Uri.parse(_songData!.thumbnail),
+      artUri: _resolveArtUri(_songData!),
       duration: songDuration,
     ));
 
@@ -1932,45 +1974,45 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   // Helper method to load more radio songs in the background
   Future<void> _loadMoreRadioSongs(String videoId) async {
+    _isRadioLoading = true;
+    add(UpdateUIEvent());
     try {
       final moreRadioSongs = await _repository.getRadioSongs(videoId);
       if (moreRadioSongs.isNotEmpty) {
-        bool added = false;
         // Add new radio songs to playlist, avoiding duplicates
         for (final song in moreRadioSongs) {
           if (!_playlistSongs.any((s) => s.vId == song.vId)) {
             _playlistSongs.add(song);
-            added = true;
           }
-        }
-        if (added) {
-          add(UpdateUIEvent());
         }
       }
     } catch (e) {
       print("Error loading more radio songs: $e");
+    } finally {
+      _isRadioLoading = false;
+      add(UpdateUIEvent());
     }
   }
 
   // Helper method to generate radio songs for a given video ID
   Future<void> _generateRadioSongs(String videoId) async {
+    _isRadioLoading = true;
+    add(UpdateUIEvent());
     try {
       final radioSongs = await _repository.getRadioSongs(videoId);
       if (radioSongs.isNotEmpty) {
-        bool added = false;
         // Add radio songs to playlist after the current song
         for (final song in radioSongs) {
           if (!_playlistSongs.any((s) => s.vId == song.vId)) {
             _playlistSongs.add(song);
-            added = true;
           }
-        }
-        if (added) {
-          add(UpdateUIEvent());
         }
       }
     } catch (e) {
       print("Error generating radio songs: $e");
+    } finally {
+      _isRadioLoading = false;
+      add(UpdateUIEvent());
     }
   }
 
@@ -2151,6 +2193,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _playlistSongs = [];
     _currentSongIndex = -1;
     _firstSongPlayedIndex = 0;
+    _isRadioLoading = false;
   }
 
   void _cleanSongsPlaylist(
@@ -2189,6 +2232,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   double get getCurrentVolume => _currentVolume;
   List<Songmodel> get getPlaylistSongs => List.unmodifiable(_playlistSongs);
   int get getCurrentSongIndex => _currentSongIndex;
+  bool get isRadioLoading => _isRadioLoading;
 
   // New methods for upcoming songs  logic
   void _getUpcomingSongs(
@@ -2303,9 +2347,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       id: _songData!.vId,
       title: _songData!.songName,
       artist: _songData!.artist.name,
-      artUri: _songData!.isLocal
-          ? Uri.file(_songData!.thumbnail)
-          : Uri.parse(_songData!.thumbnail),
+      artUri: _resolveArtUri(_songData!),
       duration: songDuration,
     ));
 

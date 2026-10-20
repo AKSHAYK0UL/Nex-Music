@@ -10,7 +10,8 @@ import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/quality.dart';
 
 class QualitySetting extends StatefulWidget {
-  const QualitySetting({super.key});
+  final ValueNotifier<bool>? hasChangesNotifier;
+  const QualitySetting({super.key, this.hasChangesNotifier});
 
   @override
   State<QualitySetting> createState() => QualitySettingState();
@@ -21,6 +22,9 @@ class QualitySettingState extends State<QualitySetting> {
       ValueNotifier<ThumbnailQuality>(ThumbnailQuality.high);
   final ValueNotifier<AudioQuality> audioQualityNotifier =
       ValueNotifier<AudioQuality>(AudioQuality.high);
+
+  ThumbnailQuality? _initialThumbnailQuality;
+  AudioQuality? _initialAudioQuality;
 
   @override
   void initState() {
@@ -35,7 +39,15 @@ class QualitySettingState extends State<QualitySetting> {
     super.dispose();
   }
 
-  // Exposed method for the "Done" button in the AppBar
+  void _checkHasChanges() {
+    final hasChanges = (_initialThumbnailQuality != null &&
+            thumbnailQualityNotifier.value != _initialThumbnailQuality) ||
+        (_initialAudioQuality != null &&
+            audioQualityNotifier.value != _initialAudioQuality);
+    widget.hasChangesNotifier?.value = hasChanges;
+  }
+
+  // Exposed method for applying changes
   Future<void> applyChanges() async {
     context.read<sb.SongstreamBloc>().add(sb.CloseMiniPlayerEvent());
     await DefaultCacheManager().emptyCache();
@@ -49,6 +61,9 @@ class QualitySettingState extends State<QualitySetting> {
           ),
         );
     context.read<hs.HomesectionBloc>().add(hs.GetHomeSectonDataEvent());
+    _initialThumbnailQuality = thumbnailQualityNotifier.value;
+    _initialAudioQuality = audioQualityNotifier.value;
+    _checkHasChanges();
   }
 
   @override
@@ -60,8 +75,11 @@ class QualitySettingState extends State<QualitySetting> {
       listener: (context, state) {
         if (state is SuccessState) showSnackbar(context, "Changes Applied");
         if (state is QualityDataState) {
+          _initialThumbnailQuality ??= state.data.thumbnailQuality;
+          _initialAudioQuality ??= state.data.audioQuality;
           thumbnailQualityNotifier.value = state.data.thumbnailQuality;
           audioQualityNotifier.value = state.data.audioQuality;
+          _checkHasChanges();
         }
       },
       child: SingleChildScrollView(
@@ -131,7 +149,10 @@ class QualitySettingState extends State<QualitySetting> {
             return Column(
               children: [
                 ListTile(
-                  onTap: () => notifier.value = value,
+                  onTap: () {
+                    notifier.value = value;
+                    _checkHasChanges();
+                  },
                   tileColor: Colors.transparent,
                   hoverColor: Colors.transparent,
                   title: Text(
@@ -146,7 +167,7 @@ class QualitySettingState extends State<QualitySetting> {
                   ),
                   trailing: currentSelection == value
                       ? const Icon(CupertinoIcons.check_mark,
-                          color: CupertinoColors.activeBlue, size: 20)
+                          color: CupertinoColors.destructiveRed, size: 20)
                       : null,
                 ),
                 if (!isLast)

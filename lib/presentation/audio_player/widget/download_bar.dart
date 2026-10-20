@@ -37,9 +37,10 @@ class DownloadBar extends StatelessWidget {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(50),
             child: Transform.scale(
-              scaleX: quality == ThumbnailQuality.low && !songData.isLocal
-                  ? 1
-                  : 1.78,
+              scaleX: !songData.isLocal &&
+                      songData.thumbnail.contains('i.ytimg.com')
+                  ? 1.78
+                  : 1.0,
               scaleY: 1.0,
               child: cacheImage(
                 imageUrl: songData.thumbnail,

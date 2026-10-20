@@ -26,6 +26,8 @@ import 'package:nex_music/presentation/audio_player/widget/sleep_timer_indicator
 import 'package:nex_music/presentation/audio_player/widget/upcoming_songs_bottom_sheet.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/service/sleep_timer_service.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
+import 'package:nex_music/helper_function/general/thumbnail.dart';
 
 // Custom widget to detect upward swipes without interfering with Dismissible
 class _SwipeUpDetector extends StatefulWidget {
@@ -297,42 +299,53 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                   .read<FavoritesBloc>()
                                   .add(IsFavoritesEvent(vId: songData.vId));
                             }
-                            return Container(
-                              height: screenWidth * 0.88,
-                              width: screenWidth * 0.88,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 10),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    cacheImage(
-                                        imageUrl: currentSongData.thumbnail,
-                                        width: screenWidth * 0.88,
-                                        height: screenWidth * 0.88,
-                                        islocal: currentSongData.isLocal),
-                                    // Sleep Timer Indicator positioned at bottom center
-                                    const Positioned(
-                                      bottom: 5,
-                                      left: 0,
-                                      right: 0,
-                                      child: Center(
-                                        child: SleepTimerIndicator(),
-                                      ),
+                              final quality =
+                                  HiveDataBaseSingleton.instance.getData.thumbnailQuality;
+                              final highResUrl = currentSongData.isLocal
+                                  ? currentSongData.thumbnail
+                                  : getHighResThumbnail(
+                                      currentSongData.thumbnail,
+                                      videoId: currentSongData.vId,
+                                      quality: quality,
+                                    );
+
+                              return Container(
+                                height: screenWidth * 0.88,
+                                width: screenWidth * 0.88,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.2),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
                                     ),
                                   ],
                                 ),
-                              ),
-                            );
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      cacheImage(
+                                          imageUrl: highResUrl,
+                                          fallbackUrl: currentSongData.thumbnail,
+                                          width: screenWidth * 0.88,
+                                          height: screenWidth * 0.88,
+                                          islocal: currentSongData.isLocal),
+                                      // Sleep Timer Indicator positioned at bottom center
+                                      const Positioned(
+                                        bottom: 5,
+                                        left: 0,
+                                        right: 0,
+                                        child: Center(
+                                          child: SleepTimerIndicator(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
                           },
                         ),
 

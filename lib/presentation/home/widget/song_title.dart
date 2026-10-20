@@ -145,7 +145,7 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(screenSize * 0.0106),
             child: Transform.scale(
-              scaleX: quality == ThumbnailQuality.low ? 1 : 1.10,
+              scaleX: widget.songData.thumbnail.contains('i.ytimg.com') ? 1.10 : 1.0,
               child: cacheImage(
                 imageUrl: widget.songData.thumbnail,
                 width: screenSize * 0.0755,

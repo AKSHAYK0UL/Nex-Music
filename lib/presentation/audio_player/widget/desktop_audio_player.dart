@@ -12,6 +12,7 @@ import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/player.dart';
 import 'package:nex_music/presentation/audio_player/widget/streambuilder.dart';
+import 'package:nex_music/helper_function/general/thumbnail.dart';
 
 // ignore: must_be_immutable
 class DesktopAudioPlayer extends StatelessWidget {
@@ -56,6 +57,16 @@ class DesktopAudioPlayer extends StatelessWidget {
                     if (state is PausedState) {
                       songData = state.songData;
                     }
+                    final highResUrl = songData.isLocal
+                        ? songData.thumbnail
+                        : getHighResThumbnail(
+                            songData.thumbnail,
+                            videoId: songData.vId,
+                            quality: quality,
+                          );
+                    final isYouTubeVideo =
+                        songData.thumbnail.contains('i.ytimg.com');
+
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -68,11 +79,14 @@ class DesktopAudioPlayer extends StatelessWidget {
                             borderRadius:
                                 BorderRadius.circular(screenSize * 0.0131),
                             child: Transform.scale(
-                              scaleX:
-                                  quality == ThumbnailQuality.low ? 1 : 1.78,
+                              scaleX: quality == ThumbnailQuality.low ||
+                                      !isYouTubeVideo
+                                  ? 1.0
+                                  : 1.78,
                               scaleY: 1.0,
                               child: cacheImage(
-                                imageUrl: songData.thumbnail,
+                                imageUrl: highResUrl,
+                                fallbackUrl: songData.thumbnail,
                                 width: screenSize * 0.548,
                                 height: screenSize * 0.510,
                                 islocal: songData.isLocal,

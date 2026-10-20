@@ -32,9 +32,9 @@ class SectionHeader extends StatelessWidget {
             ),
             if (onTap != null)
               const Text(
-                "See All",
+                "See all",
                 style: TextStyle(
-                  color: Colors.redAccent, 
+                  color: Colors.redAccent,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),

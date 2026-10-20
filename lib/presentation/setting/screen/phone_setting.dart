@@ -1,5 +1,3 @@
-
-
 import 'dart:ui' as androidx_ui;
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -66,7 +64,6 @@ class Setting extends StatelessWidget {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         final bool isLoading = state is LoadingState;
-      
 
         return Stack(
           children: [
@@ -107,7 +104,6 @@ class Setting extends StatelessWidget {
                   ),
                 ),
               ),
-
               _buildSectionHeader("ACCOUNT", textSecondary),
               _buildGroupedContainer(theme.cardColor, [
                 _buildSettingsTile(
@@ -120,7 +116,6 @@ class Setting extends StatelessWidget {
                   onTap: () => context.push(RouterPath.userInfoRoute),
                 ),
               ]),
-
               _buildSectionHeader("PREFERENCES", textSecondary),
               _buildGroupedContainer(theme.cardColor, [
                 _buildSettingsTile(
@@ -160,7 +155,8 @@ class Setting extends StatelessWidget {
                     color: theme.dividerColor),
                 BlocBuilder<ThemeBloc, ThemeState>(
                   builder: (context, state) {
-                    final dark = state is ThemeLoadedState ? state.isDark : false;
+                    final dark =
+                        state is ThemeLoadedState ? state.isDark : false;
                     return _buildSwitchTile(
                       title: "Dark Mode",
                       icon: CupertinoIcons.moon_fill,
@@ -173,7 +169,6 @@ class Setting extends StatelessWidget {
                   },
                 ),
               ]),
-
               _buildSectionHeader("SESSION", textSecondary),
               _buildGroupedContainer(theme.cardColor, [
                 _buildSettingsTile(
@@ -201,25 +196,23 @@ class Setting extends StatelessWidget {
     isDark
         ? CupertinoColors.tertiarySystemBackground.darkColor
         : CupertinoColors.systemBackground.color;
-    final Color textColor = isDark
-        ? CupertinoColors.label.darkColor
-        : CupertinoColors.label.color;
+    final Color textColor =
+        isDark ? CupertinoColors.label.darkColor : CupertinoColors.label.color;
 
     return Positioned.fill(
       child: AbsorbPointer(
         child: BackdropFilter(
           filter: androidx_ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
           child: Container(
-            color: CupertinoColors.systemBackground
-                .withValues(alpha: 0.0),
+            color: CupertinoColors.systemBackground.withValues(alpha: 0.0),
             alignment: Alignment.center,
             child: CupertinoPopupSurface(
               // isRadiusApplied: true,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 180),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 28),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -338,7 +331,7 @@ class Setting extends StatelessWidget {
       ),
       trailing: CupertinoSwitch(
         value: value,
-        activeTrackColor: CupertinoColors.activeGreen,
+        activeTrackColor: CupertinoColors.destructiveRed,
         onChanged: onChanged,
       ),
     );
