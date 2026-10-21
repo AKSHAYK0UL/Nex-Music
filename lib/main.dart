@@ -20,6 +20,7 @@ import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/favorites_songs_bloc/bloc/favorites_songs_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
+import 'package:nex_music/bloc/lyrics_bloc/lyrics_bloc.dart';
 import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/playlist_bloc/playlist_bloc.dart';
 import 'package:nex_music/bloc/quality_bloc/bloc/quality_bloc.dart';
@@ -264,6 +265,10 @@ class MyApp extends StatelessWidget {
           BlocProvider(
             create: (context) =>
                 ThemeBloc(dbInstance)..add(GetThemeEvent()),
+          ),
+          BlocProvider(
+            create: (context) =>
+                LyricsBloc(repository: context.read<Repository>()),
           ),
         ],
         child: BlocListener<UserLoggedBloc, UserLoggedState>(

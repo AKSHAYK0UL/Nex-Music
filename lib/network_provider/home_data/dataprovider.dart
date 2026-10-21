@@ -1,6 +1,8 @@
 import 'package:dart_ytmusic_api/types.dart' as yt;
 import 'package:dart_ytmusic_api/types.dart';
 import 'package:dart_ytmusic_api/yt_music.dart';
+import 'package:nex_music/model/lyric_model.dart';
+import 'package:nex_music/network_provider/home_data/lyrics_network_provider.dart';
 import 'package:nex_music/secrets/gcp_key.dart';
 import 'package:nex_music/service/playlist_songs_getter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
@@ -8,12 +10,28 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 class DataProvider {
   final YTMusic _ytMusic;
   final YoutubeExplode _youtubeExplode;
+  final LyricsNetworkProvider _lyricsNetworkProvider;
 
   DataProvider({
     required YTMusic ytMusic,
     required YoutubeExplode youtubeExplode,
   })  : _ytMusic = ytMusic,
-        _youtubeExplode = youtubeExplode;
+        _youtubeExplode = youtubeExplode,
+        _lyricsNetworkProvider = LyricsNetworkProvider(ytMusic: ytMusic);
+
+  Future<LyricModel?> getLyrics({
+    required String title,
+    required String artist,
+    required String videoId,
+    int? durationSeconds,
+  }) {
+    return _lyricsNetworkProvider.fetchLyrics(
+      title: title,
+      artist: artist,
+      videoId: videoId,
+      durationSeconds: durationSeconds,
+    );
+  }
 
 //cancel all ongoing request
   void cancelRequest() {

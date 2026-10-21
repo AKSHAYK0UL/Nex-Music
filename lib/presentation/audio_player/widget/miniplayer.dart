@@ -26,6 +26,7 @@ class MiniPlayer extends StatefulWidget {
 class _MiniPlayerState extends State<MiniPlayer> {
   final HiveDataBaseSingleton _dataBaseSingleton =
       HiveDataBaseSingleton.instance;
+  DateTime? _lastNavTime;
 
   @override
   void initState() {
@@ -34,6 +35,24 @@ class _MiniPlayerState extends State<MiniPlayer> {
       quality = data.thumbnailQuality;
     });
     super.initState();
+  }
+
+  void _navigateToAudioPlayer(Songmodel songData) {
+    final now = DateTime.now();
+    if (_lastNavTime != null &&
+        now.difference(_lastNavTime!).inMilliseconds < 350) {
+      return;
+    }
+    _lastNavTime = now;
+    context.push(
+      RouterPath.audioPlayerRoute,
+      extra: {
+        "songindex": context.read<SongstreamBloc>().getFirstSongPlayedIndex,
+        'songdata': songData,
+        'route': SongMiniPlayerRoute.miniPlayerRoute,
+        "quality": quality,
+      },
+    );
   }
 
   @override
@@ -62,22 +81,17 @@ class _MiniPlayerState extends State<MiniPlayer> {
         }
 
         if (songData != null) {
-          void navigateToAudioPlayer() {
-            context.push(
-              RouterPath.audioPlayerRoute,
-              extra: {
-                "songindex": context.read<SongstreamBloc>().getFirstSongPlayedIndex,
-                'songdata': songData!,
-                'route': SongMiniPlayerRoute.miniPlayerRoute,
-                "quality": quality,
-              },
-            );
-          }
           return GestureDetector(
-            onTap: navigateToAudioPlayer,
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _navigateToAudioPlayer(songData!),
+            onVerticalDragUpdate: (details) {
+              if (details.primaryDelta != null && details.primaryDelta! < -4) {
+                _navigateToAudioPlayer(songData!);
+              }
+            },
             onVerticalDragEnd: (details) {
-              if (details.primaryVelocity! < 0) {
-                navigateToAudioPlayer();
+              if ((details.primaryVelocity ?? 0) < 0) {
+                _navigateToAudioPlayer(songData!);
               }
             },
             child: Container(

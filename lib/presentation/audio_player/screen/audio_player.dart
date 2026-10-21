@@ -24,12 +24,13 @@ import 'package:nex_music/presentation/audio_player/widget/volume_slider.dart';
 import 'package:nex_music/presentation/audio_player/widget/sleep_timer_widget.dart';
 import 'package:nex_music/presentation/audio_player/widget/sleep_timer_indicator.dart';
 import 'package:nex_music/presentation/audio_player/widget/upcoming_songs_bottom_sheet.dart';
+import 'package:nex_music/presentation/audio_player/widget/music_lyrics_view.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:nex_music/service/sleep_timer_service.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 
-// Custom widget to detect upward swipes without interfering with Dismissible
+// Custom widget to detect upward swipes reliably
 class _SwipeUpDetector extends StatefulWidget {
   final Widget child;
   final VoidCallback onSwipeUp;
@@ -45,39 +46,71 @@ class _SwipeUpDetector extends StatefulWidget {
 
 class _SwipeUpDetectorState extends State<_SwipeUpDetector> {
   double? _startY;
-  bool _isUpwardSwipe = false;
+  double? _startX;
+  double _lowestY = 0;
+  DateTime? _startTime;
+  DateTime? _lastTriggerTime;
+
+  void _trigger() {
+    final now = DateTime.now();
+    if (_lastTriggerTime != null &&
+        now.difference(_lastTriggerTime!).inMilliseconds < 450) {
+      return;
+    }
+    _lastTriggerTime = now;
+    widget.onSwipeUp();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Listener(
+      behavior: HitTestBehavior.translucent,
       onPointerDown: (event) {
         _startY = event.position.dy;
-        _isUpwardSwipe = false;
+        _startX = event.position.dx;
+        _lowestY = event.position.dy;
+        _startTime = DateTime.now();
       },
       onPointerMove: (event) {
         if (_startY != null) {
-          final delta = event.position.dy - _startY!;
-          // If moving upward (negative delta) mark as upward swipe
-          if (delta < -10) {
-            _isUpwardSwipe = true;
-          }
-          // If moving downward (positive delta) reset to allow Dismissible to work
-          if (delta > 10) {
-            _isUpwardSwipe = false;
-            _startY = null; // Reset to stop tracking
+          if (event.position.dy > _lowestY) {
+            _lowestY = event.position.dy;
           }
         }
       },
       onPointerUp: (event) {
-        if (_startY != null && _isUpwardSwipe) {
-          final delta = event.position.dy - _startY!;
-          // If the swipe was upward and significant, trigger the callback
-          if (delta < -100) {
-            widget.onSwipeUp();
+        if (_startY != null && _startX != null && _startTime != null) {
+          final dyTotal = event.position.dy - _startY!;
+          final dyFromLowest = event.position.dy - _lowestY;
+          final dx = (event.position.dx - _startX!).abs();
+          final elapsedMs =
+              DateTime.now().difference(_startTime!).inMilliseconds;
+
+          final upwardDist = (-dyTotal).clamp(0.0, double.infinity);
+          final upwardFromLowest = (-dyFromLowest).clamp(0.0, double.infinity);
+          final effectiveUpward =
+              upwardFromLowest > upwardDist ? upwardFromLowest : upwardDist;
+
+          final velocity =
+              elapsedMs > 0 ? (effectiveUpward / elapsedMs) * 1000 : 0.0;
+          final isVertical = effectiveUpward > dx * 0.75;
+
+          // Trigger on deliberate swipe, fast flick, or quick upward stroke
+          if (isVertical &&
+              (effectiveUpward > 40 ||
+                  (effectiveUpward > 20 && velocity > 220) ||
+                  (effectiveUpward > 25 && elapsedMs < 350))) {
+            _trigger();
           }
         }
         _startY = null;
-        _isUpwardSwipe = false;
+        _startX = null;
+        _startTime = null;
+      },
+      onPointerCancel: (_) {
+        _startY = null;
+        _startX = null;
+        _startTime = null;
       },
       child: widget.child,
     );
@@ -96,6 +129,7 @@ class AudioPlayerScreen extends StatefulWidget {
 class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   //  Add a GlobalKey to track the position of the menu button
   final GlobalKey _menuButtonKey = GlobalKey();
+  bool _isLyricsView = false;
 
   @override
   void initState() {
@@ -115,35 +149,47 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   }
 
   void _showMoreOptions(
-      BuildContext context, Songmodel songData, double screenSize) {
-    // 1. Find the button's position and size
+      BuildContext context, Songmodel songData, double screenSize,
+      {GlobalKey? buttonKey}) {
+    //  Find the button's position and size
+    final keyToUse = buttonKey ?? _menuButtonKey;
     final RenderBox? renderBox =
-        _menuButtonKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
+        keyToUse.currentContext?.findRenderObject() as RenderBox?;
 
-    final Offset offset = renderBox.localToGlobal(Offset.zero);
-    final Size buttonSize = renderBox.size;
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
-
-    //  Determine Position Logic
-    // If button is in the lower half of screen, show menu ABOVE it.
-    final bool showAbove = offset.dy > screenHeight / 2;
 
     // Configuration
     const double gap = 6.0; // Space between button and menu
     const double padding = 16.0; // Safe distance from screen edges
     const double menuWidth = 250.0;
 
-    //  Calculate Horizontal Position
-    // Align the right edge of the menu with the right edge of the button
-    double leftPosition = offset.dx + buttonSize.width - menuWidth;
+    final double leftPosition;
+    final double? bottomPos;
+    final double? topPos;
+    final double maxHeight;
 
-    // Clamp horizontal position so it doesn't go off-screen
-    if (leftPosition + menuWidth > screenWidth - padding) {
+    if (renderBox != null) {
+      final Offset offset = renderBox.localToGlobal(Offset.zero);
+      final Size buttonSize = renderBox.size;
+      final bool showAbove = offset.dy > screenHeight / 2;
+      double calcLeft = offset.dx + buttonSize.width - menuWidth;
+      if (calcLeft + menuWidth > screenWidth - padding) {
+        calcLeft = screenWidth - menuWidth - padding;
+      } else if (calcLeft < padding) {
+        calcLeft = padding;
+      }
+      leftPosition = calcLeft;
+      bottomPos = showAbove ? (screenHeight - offset.dy) + gap : null;
+      topPos = showAbove ? null : offset.dy + buttonSize.height + gap;
+      maxHeight = showAbove
+          ? offset.dy - (padding * 2)
+          : screenHeight - (offset.dy + buttonSize.height) - (padding * 2);
+    } else {
       leftPosition = screenWidth - menuWidth - padding;
-    } else if (leftPosition < padding) {
-      leftPosition = padding;
+      topPos = MediaQuery.paddingOf(context).top + 60;
+      bottomPos = null;
+      maxHeight = screenHeight - topPos - (padding * 2);
     }
 
     showModalBottomSheet(
@@ -168,20 +214,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   width: menuWidth,
 
                   // Vertical Alignment Logic:
-                  // If showing ABOVE: Anchor the BOTTOM of the menu to the top of the button
-                  bottom: showAbove ? (screenHeight - offset.dy) + gap : null,
-
-                  // If showing BELOW: Anchor the TOP of the menu to the bottom of the button
-                  top: showAbove ? null : offset.dy + buttonSize.height + gap,
+                  bottom: bottomPos,
+                  top: topPos,
 
                   child: ConstrainedBox(
                     // Responsive: Limit height so it doesn't go off-screen
                     constraints: BoxConstraints(
-                      maxHeight: showAbove
-                          ? offset.dy - (padding * 2)
-                          : screenHeight -
-                              (offset.dy + buttonSize.height) -
-                              (padding * 2),
+                      maxHeight: maxHeight,
                     ),
                     // Material wrapper ensures shadow and proper rendering
                     child: Material(
@@ -194,7 +233,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                           tabRouteENUM: TabRouteENUM.other,
                           menuType: SongMenuType.audioPlayer,
                           onTimerTap: () {
-                            context.pop(); 
+                            context.pop();
                             _showSleepTimerDialog(context); // Show timer
                           },
                         ),
@@ -224,570 +263,702 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final overlayStyle = isDark
+    final overlayStyle = _isLyricsView
         ? SystemUiOverlayStyle.light.copyWith(
             statusBarColor: Colors.transparent,
-            systemNavigationBarColor: theme.scaffoldBackgroundColor,
+            systemNavigationBarColor: Colors.black,
           )
-        : SystemUiOverlayStyle.dark.copyWith(
-            statusBarColor: Colors.transparent,
-            systemNavigationBarColor: theme.scaffoldBackgroundColor,
-          );
+        : (isDark
+            ? SystemUiOverlayStyle.light.copyWith(
+                statusBarColor: Colors.transparent,
+                systemNavigationBarColor: theme.scaffoldBackgroundColor,
+              )
+            : SystemUiOverlayStyle.dark.copyWith(
+                statusBarColor: Colors.transparent,
+                systemNavigationBarColor: theme.scaffoldBackgroundColor,
+              ));
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
-      child: BlocListener<DownloadBloc, DownloadState>(
-        listener: (context, state) {
-          if (state is DownloadErrorState) {
-            showSnackbar(context, state.errorMessage);
-          }
-        },
-        child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: Dismissible(
-            key: const Key('audio_player_dismiss'),
-            direction: DismissDirection.down,
-            onDismissed: (_) {
-              context.pop();
-            },
-            background: Container(color: Colors.transparent),
-            secondaryBackground: Container(color: Colors.transparent),
-            child: SizedBox.expand(
-              child: ColoredBox(
-                color: theme.scaffoldBackgroundColor,
-                child: SafeArea(
-                  child: _SwipeUpDetector(
-                    onSwipeUp: () => _showUpcomingSongsBottomSheet(context),
-                    child: Column(
-                      children: [
-                    SizedBox(height: screenSize * 0.01),
-                    //  Top Grab Handle
-                    Center(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () => context.pop(),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 6.0, horizontal: 20.0),
-                          child: Container(
-                            width: 40,
-                            height: 5,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.3),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                        const Spacer(flex: 1),
-
-                        // Album Art
-                        BlocBuilder<SongstreamBloc, SongstreamState>(
-                          buildWhen: (previous, current) => previous != current,
-                          builder: (context, state) {
-                            // Get current song from state first
-                            Songmodel currentSongData = songData;
-                            if (state is LoadingState) {
-                              currentSongData = state.songData;
-                              // Update favorites check with current song's vId
-                              context.read<FavoritesBloc>().add(
-                                  IsFavoritesEvent(vId: currentSongData.vId));
-                            } else if (state is PlayingState) {
-                              currentSongData = state.songData;
-                              // Update favorites check with current song's vId
-                              context.read<FavoritesBloc>().add(
-                                  IsFavoritesEvent(vId: currentSongData.vId));
-                            } else if (state is PausedState) {
-                              currentSongData = state.songData;
-                              // Update favorites check with current song's vId
-                              context.read<FavoritesBloc>().add(
-                                  IsFavoritesEvent(vId: currentSongData.vId));
-                            } else {
-                              // Fallback to route data if state doesn't have songData
-                              context
-                                  .read<FavoritesBloc>()
-                                  .add(IsFavoritesEvent(vId: songData.vId));
-                            }
-                              final quality =
-                                  HiveDataBaseSingleton.instance.getData.thumbnailQuality;
-                              final highResUrl = currentSongData.isLocal
-                                  ? currentSongData.thumbnail
-                                  : getHighResThumbnail(
-                                      currentSongData.thumbnail,
-                                      videoId: currentSongData.vId,
-                                      quality: quality,
-                                    );
-
-                              return Container(
-                                height: screenWidth * 0.88,
-                                width: screenWidth * 0.88,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.2),
-                                      blurRadius: 20,
-                                      offset: const Offset(0, 10),
+    return PopScope(
+      canPop: !_isLyricsView,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_isLyricsView) {
+          setState(() {
+            _isLyricsView = false;
+          });
+        }
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlayStyle,
+        child: BlocListener<DownloadBloc, DownloadState>(
+          listener: (context, state) {
+            if (state is DownloadErrorState) {
+              showSnackbar(context, state.errorMessage);
+            }
+          },
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Dismissible(
+              key: const Key('audio_player_dismiss'),
+              direction:
+                  _isLyricsView ? DismissDirection.none : DismissDirection.down,
+              resizeDuration: null,
+              movementDuration: const Duration(milliseconds: 100),
+              dismissThresholds: const {DismissDirection.down: 0.15},
+              onDismissed: (_) {
+                context.pop();
+              },
+              background: Container(color: Colors.transparent),
+              secondaryBackground: Container(color: Colors.transparent),
+              child: SizedBox.expand(
+                child: ColoredBox(
+                  color: theme.scaffoldBackgroundColor,
+                  child: _isLyricsView
+                      ? AppleMusicLyricsView(
+                          songData: songData,
+                          screenSize: screenSize,
+                          screenWidth: screenWidth,
+                          songIndex: songIndex,
+                          route: route,
+                          isPlaylist: widget.routeData["isplaylist"] ?? false,
+                          onCloseLyrics: () {
+                            setState(() {
+                              _isLyricsView = false;
+                            });
+                          },
+                          onOpenQueue: () =>
+                              _showUpcomingSongsBottomSheet(context),
+                          onShowOptions: (menuKey) => _showMoreOptions(
+                              context, songData, screenSize,
+                              buttonKey: menuKey),
+                        )
+                      : SafeArea(
+                          child: _SwipeUpDetector(
+                            onSwipeUp: () =>
+                                _showUpcomingSongsBottomSheet(context),
+                            child: Column(
+                              children: [
+                                SizedBox(height: screenSize * 0.01),
+                                //  Top Grab Handle
+                                Center(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () => context.pop(),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6.0, horizontal: 20.0),
+                                      child: Container(
+                                        width: 40,
+                                        height: 5,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.3),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
                                     ),
-                                  ],
+                                  ),
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Stack(
-                                    fit: StackFit.expand,
+
+                                const Spacer(flex: 1),
+
+                                // Album Art
+                                BlocBuilder<SongstreamBloc, SongstreamState>(
+                                  buildWhen: (previous, current) =>
+                                      previous != current,
+                                  builder: (context, state) {
+                                    // Get current song from state first
+                                    Songmodel currentSongData = songData;
+                                    if (state is LoadingState) {
+                                      currentSongData = state.songData;
+                                      // Update favorites check with current song's vId
+                                      context.read<FavoritesBloc>().add(
+                                          IsFavoritesEvent(
+                                              vId: currentSongData.vId));
+                                    } else if (state is PlayingState) {
+                                      currentSongData = state.songData;
+                                      // Update favorites check with current song's vId
+                                      context.read<FavoritesBloc>().add(
+                                          IsFavoritesEvent(
+                                              vId: currentSongData.vId));
+                                    } else if (state is PausedState) {
+                                      currentSongData = state.songData;
+                                      // Update favorites check with current song's vId
+                                      context.read<FavoritesBloc>().add(
+                                          IsFavoritesEvent(
+                                              vId: currentSongData.vId));
+                                    } else {
+                                      // Fallback to route data if state doesn't have songData
+                                      context.read<FavoritesBloc>().add(
+                                          IsFavoritesEvent(vId: songData.vId));
+                                    }
+                                    final quality = HiveDataBaseSingleton
+                                        .instance.getData.thumbnailQuality;
+                                    final highResUrl = currentSongData.isLocal
+                                        ? currentSongData.thumbnail
+                                        : getHighResThumbnail(
+                                            currentSongData.thumbnail,
+                                            videoId: currentSongData.vId,
+                                            quality: quality,
+                                          );
+
+                                    return Container(
+                                      height: screenWidth * 0.88,
+                                      width: screenWidth * 0.88,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.2),
+                                            blurRadius: 20,
+                                            offset: const Offset(0, 10),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            cacheImage(
+                                                imageUrl: highResUrl,
+                                                fallbackUrl:
+                                                    currentSongData.thumbnail,
+                                                width: screenWidth * 0.88,
+                                                height: screenWidth * 0.88,
+                                                islocal:
+                                                    currentSongData.isLocal),
+                                            // Sleep Timer Indicator positioned at bottom center
+                                            const Positioned(
+                                              bottom: 5,
+                                              left: 0,
+                                              right: 0,
+                                              child: Center(
+                                                child: SleepTimerIndicator(),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+
+                                const Spacer(flex: 1),
+
+                                //  Title, Artist & Like Button
+                                Padding(
+                                  // padding:
+                                  //     EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+                                  padding: EdgeInsets.only(
+                                      left: screenWidth * 0.08,
+                                      right: screenWidth * 0.05),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      cacheImage(
-                                          imageUrl: highResUrl,
-                                          fallbackUrl: currentSongData.thumbnail,
-                                          width: screenWidth * 0.88,
-                                          height: screenWidth * 0.88,
-                                          islocal: currentSongData.isLocal),
-                                      // Sleep Timer Indicator positioned at bottom center
-                                      const Positioned(
-                                        bottom: 5,
-                                        left: 0,
-                                        right: 0,
-                                        child: Center(
-                                          child: SleepTimerIndicator(),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            BlocBuilder<SongstreamBloc,
+                                                SongstreamState>(
+                                              builder: (context, state) {
+                                                // Get current song from state
+                                                Songmodel currentSongData =
+                                                    songData;
+                                                if (state is LoadingState) {
+                                                  currentSongData =
+                                                      state.songData;
+                                                } else if (state
+                                                    is PlayingState) {
+                                                  currentSongData =
+                                                      state.songData;
+                                                } else if (state
+                                                    is PausedState) {
+                                                  currentSongData =
+                                                      state.songData;
+                                                }
+                                                return animatedText(
+                                                  text:
+                                                      currentSongData.songName,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Serif',
+                                                    fontSize: 22,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                            const SizedBox(height: 4),
+                                            BlocBuilder<SongstreamBloc,
+                                                SongstreamState>(
+                                              builder: (context, state) {
+                                                // Get current song from state
+                                                Songmodel currentSongData =
+                                                    songData;
+                                                if (state is LoadingState) {
+                                                  currentSongData =
+                                                      state.songData;
+                                                } else if (state
+                                                    is PlayingState) {
+                                                  currentSongData =
+                                                      state.songData;
+                                                } else if (state
+                                                    is PausedState) {
+                                                  currentSongData =
+                                                      state.songData;
+                                                }
+                                                return animatedText(
+                                                  text: currentSongData
+                                                      .artist.name,
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withValues(alpha: 0.6),
+                                                    fontWeight: FontWeight.w400,
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      BlocBuilder<SongstreamBloc,
+                                          SongstreamState>(
+                                        buildWhen: (previous, current) =>
+                                            previous != current,
+                                        builder: (context, songState) {
+                                          // Get current song from state
+                                          Songmodel currentSongData = songData;
+                                          if (songState is LoadingState) {
+                                            currentSongData =
+                                                songState.songData;
+                                          } else if (songState
+                                              is PlayingState) {
+                                            currentSongData =
+                                                songState.songData;
+                                          } else if (songState is PausedState) {
+                                            currentSongData =
+                                                songState.songData;
+                                          }
+                                          return BlocBuilder<FavoritesBloc,
+                                              FavoritesState>(
+                                            buildWhen: (previous, current) {
+                                              // Rebuild when song changes or favorite state changes
+                                              if (previous
+                                                      is IsFavoritesState &&
+                                                  current is IsFavoritesState) {
+                                                return previous.vId !=
+                                                        current.vId ||
+                                                    previous.isFavorites !=
+                                                        current.isFavorites;
+                                              }
+                                              return previous != current;
+                                            },
+                                            builder: (context, favState) {
+                                              bool isFavorite = false;
+                                              if (favState
+                                                      is IsFavoritesState &&
+                                                  favState.vId ==
+                                                      currentSongData.vId) {
+                                                isFavorite =
+                                                    favState.isFavorites;
+                                              }
+                                              return IconButton(
+                                                onPressed: () {
+                                                  if (isFavorite) {
+                                                    context
+                                                        .read<FavoritesBloc>()
+                                                        .add(RemoveFromFavoritesEvent(
+                                                            vId: currentSongData
+                                                                .vId));
+                                                  } else {
+                                                    context
+                                                        .read<FavoritesBloc>()
+                                                        .add(AddToFavoritesEvent(
+                                                            song:
+                                                                currentSongData));
+                                                  }
+                                                },
+                                                icon: Icon(
+                                                  isFavorite
+                                                      ? CupertinoIcons
+                                                          .heart_fill
+                                                      : CupertinoIcons.heart,
+                                                  color: isFavorite
+                                                      ? Colors.red
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface
+                                                          .withValues(
+                                                              alpha: 0.6),
+                                                  size: 28,
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                // Progress Bar
+                                StreamBuilderWidget(screenSize: screenSize),
+                                const SizedBox(height: 7),
+
+                                // Controls (Prev, Play, Next)
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: screenWidth * 0.13),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      IconButton(
+                                        iconSize: 40,
+                                        onPressed: () {
+                                          context
+                                              .read<SongstreamBloc>()
+                                              .add(PlayPreviousSongEvent());
+                                        },
+                                        icon: const Icon(
+                                            CupertinoIcons.backward_fill),
+                                      ),
+                                      BlocBuilder<SongstreamBloc,
+                                          SongstreamState>(
+                                        buildWhen: (previous, current) =>
+                                            previous != current,
+                                        builder: (context, state) {
+                                          // Get current song from state
+                                          Songmodel currentSongData = songData;
+                                          if (state is LoadingState) {
+                                            currentSongData = state.songData;
+                                          } else if (state is PlayingState) {
+                                            currentSongData = state.songData;
+                                          } else if (state is PausedState) {
+                                            currentSongData = state.songData;
+                                          }
+                                          return SizedBox(
+                                            height: 80,
+                                            width: 80,
+                                            child: FittedBox(
+                                              fit: BoxFit.fill,
+                                              child: Player(
+                                                songData: currentSongData,
+                                                songIndex: songIndex,
+                                                screenSize: screenSize,
+                                                route: route,
+                                                isPlaylist: widget.routeData[
+                                                        "isplaylist"] ??
+                                                    false,
+                                                // widget
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        iconSize: 40,
+                                        onPressed: () {
+                                          context
+                                              .read<SongstreamBloc>()
+                                              .add(PlayNextSongEvent());
+                                        },
+                                        icon: const Icon(
+                                            CupertinoIcons.forward_fill),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                const SizedBox(height: 30),
+
+                                // Volume Slider
+                                VolumeSlider(screenWidth: screenWidth),
+
+                                const Spacer(flex: 2),
+
+                                // Bottom Actions
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: screenSize * 0.024,
+                                      left: screenWidth * 0.12,
+                                      right: screenWidth * 0.12),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      BlocBuilder<SongstreamBloc,
+                                          SongstreamState>(
+                                        builder: (context, songStreamState) {
+                                          Songmodel activeSong = songData;
+                                          if (songStreamState is PlayingState) {
+                                            activeSong =
+                                                songStreamState.songData;
+                                          } else if (songStreamState
+                                              is PausedState) {
+                                            activeSong =
+                                                songStreamState.songData;
+                                          } else if (songStreamState
+                                              is LoadingState) {
+                                            activeSong =
+                                                songStreamState.songData;
+                                          }
+                                          return IconButton(
+                                            onPressed: () {
+                                              context.pop();
+                                              final cached = context
+                                                  .read<Repository>()
+                                                  .getCachedArtist(
+                                                      activeSong
+                                                          .artist.artistId,
+                                                      activeSong.artist.name);
+                                              context.pushNamed(
+                                                  RouterName.artistName,
+                                                  extra: cached ??
+                                                      ArtistModel(
+                                                          artist:
+                                                              activeSong.artist,
+                                                          thumbnail: ""));
+                                            },
+                                            icon: Icon(
+                                              CupertinoIcons
+                                                  .person_crop_circle_fill,
+                                              color: Colors.red
+                                                  .withValues(alpha: 0.8),
+                                              size: 28.5,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _isLyricsView = true;
+                                          });
+                                        },
+                                        icon: Icon(
+                                          Icons.lyrics_outlined,
+                                          color:
+                                              Colors.red.withValues(alpha: 0.8),
+                                          size: 28.5,
+                                        ),
+                                      ),
+                                      BlocBuilder<SongstreamBloc,
+                                          SongstreamState>(
+                                        buildWhen: (previous, current) =>
+                                            previous != current,
+                                        builder: (context, state) {
+                                          return IconButton(
+                                            onPressed: () {
+                                              context
+                                                  .read<SongstreamBloc>()
+                                                  .add(LoopEvent());
+                                            },
+                                            // icon: Icon(
+                                            //   context
+                                            //           .read<SongstreamBloc>()
+                                            //           .getLoopStatus
+                                            //       ? FontAwesomeIcons.repeat
+                                            //       : FontAwesomeIcons.shuffle,
+                                            //   color: Colors.red.withValues(alpha: 0.8),
+                                            //   size: 23,
+                                            // ),
+                                            icon: FaIcon(
+                                              context
+                                                      .read<SongstreamBloc>()
+                                                      .getLoopStatus
+                                                  ? FontAwesomeIcons.repeat
+                                                  : FontAwesomeIcons.shuffle,
+                                              color: Colors.red
+                                                  .withValues(alpha: 0.8),
+                                              size: 23,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      // Download button with progress indicator
+                                      //  Wrap the Menu/Download button in a Container with the GlobalKey
+                                      Container(
+                                        key: _menuButtonKey,
+                                        child: BlocBuilder<SongstreamBloc,
+                                            SongstreamState>(
+                                          buildWhen: (previous, current) =>
+                                              previous != current,
+                                          builder: (context, songState) {
+                                            // Get current song from state
+                                            Songmodel currentSongData =
+                                                songData;
+                                            if (songState is LoadingState) {
+                                              currentSongData =
+                                                  songState.songData;
+                                            } else if (songState
+                                                is PlayingState) {
+                                              currentSongData =
+                                                  songState.songData;
+                                            } else if (songState
+                                                is PausedState) {
+                                              currentSongData =
+                                                  songState.songData;
+                                            }
+                                            return BlocBuilder<DownloadBloc,
+                                                DownloadState>(
+                                              builder: (context, state) {
+                                                final isDownloading = state
+                                                    is DownloadPercantageStatusState;
+
+                                                if (isDownloading) {
+                                                  return StreamBuilder<double>(
+                                                    stream:
+                                                        state.percentageStream,
+                                                    builder:
+                                                        (context, snapshot) {
+                                                      final progress =
+                                                          snapshot.data ?? 0.0;
+                                                      return GestureDetector(
+                                                        onTap: () =>
+                                                            _showMoreOptions(
+                                                                context,
+                                                                currentSongData,
+                                                                screenSize),
+                                                        child: SizedBox(
+                                                          width: 32,
+                                                          height: 32,
+                                                          child: Stack(
+                                                            alignment: Alignment
+                                                                .center,
+                                                            children: [
+                                                              // Circular progress indicator
+                                                              CircularProgressIndicator(
+                                                                value:
+                                                                    progress /
+                                                                        100,
+                                                                strokeWidth: 3,
+                                                                backgroundColor: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .onSurface
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.1),
+                                                                valueColor:
+                                                                    AlwaysStoppedAnimation<
+                                                                        Color>(
+                                                                  Colors.red
+                                                                      .withValues(
+                                                                          alpha:
+                                                                              0.6),
+                                                                ),
+                                                              ),
+                                                              // Cloud download icon
+                                                              Icon(
+                                                                CupertinoIcons
+                                                                    .cloud_download,
+                                                                color: Colors
+                                                                    .red
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.6),
+                                                                size: 16,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                } else {
+                                                  return IconButton(
+                                                    onPressed: () =>
+                                                        _showMoreOptions(
+                                                            context,
+                                                            currentSongData,
+                                                            screenSize),
+                                                    // icon: Icon(
+                                                    //   FontAwesomeIcons.list,
+                                                    //   color: Colors.red
+                                                    //       .withValues(alpha: 0.8),
+                                                    //   size: 24,
+                                                    // ),
+                                                    icon: FaIcon(
+                                                      FontAwesomeIcons.list,
+                                                      color: Colors.red
+                                                          .withValues(
+                                                              alpha: 0.8),
+                                                      size: 24,
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                            );
+                                          },
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              );
-                          },
-                        ),
-
-                        const Spacer(flex: 1),
-
-                        //  Title, Artist & Like Button
-                        Padding(
-                          // padding:
-                          //     EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
-                          padding: EdgeInsets.only(
-                              left: screenWidth * 0.08,
-                              right: screenWidth * 0.05),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    BlocBuilder<SongstreamBloc,
-                                        SongstreamState>(
-                                      builder: (context, state) {
-                                        // Get current song from state
-                                        Songmodel currentSongData = songData;
-                                        if (state is LoadingState) {
-                                          currentSongData = state.songData;
-                                        } else if (state is PlayingState) {
-                                          currentSongData = state.songData;
-                                        } else if (state is PausedState) {
-                                          currentSongData = state.songData;
-                                        }
-                                        return animatedText(
-                                          text: currentSongData.songName,
-                                          style: TextStyle(
-                                            fontFamily: 'Serif',
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    const SizedBox(height: 4),
-                                    BlocBuilder<SongstreamBloc,
-                                        SongstreamState>(
-                                      builder: (context, state) {
-                                        // Get current song from state
-                                        Songmodel currentSongData = songData;
-                                        if (state is LoadingState) {
-                                          currentSongData = state.songData;
-                                        } else if (state is PlayingState) {
-                                          currentSongData = state.songData;
-                                        } else if (state is PausedState) {
-                                          currentSongData = state.songData;
-                                        }
-                                        return animatedText(
-                                          text: currentSongData.artist.name,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurface
-                                                .withValues(alpha: 0.6),
-                                            fontWeight: FontWeight.w400,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              BlocBuilder<SongstreamBloc, SongstreamState>(
-                                buildWhen: (previous, current) =>
-                                    previous != current,
-                                builder: (context, songState) {
-                                  // Get current song from state
-                                  Songmodel currentSongData = songData;
-                                  if (songState is LoadingState) {
-                                    currentSongData = songState.songData;
-                                  } else if (songState is PlayingState) {
-                                    currentSongData = songState.songData;
-                                  } else if (songState is PausedState) {
-                                    currentSongData = songState.songData;
-                                  }
-                                  return BlocBuilder<FavoritesBloc,
-                                      FavoritesState>(
-                                    buildWhen: (previous, current) {
-                                      // Rebuild when song changes or favorite state changes
-                                      if (previous is IsFavoritesState &&
-                                          current is IsFavoritesState) {
-                                        return previous.vId != current.vId ||
-                                            previous.isFavorites !=
-                                                current.isFavorites;
+                                Center(
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () =>
+                                        _showUpcomingSongsBottomSheet(context),
+                                    onVerticalDragEnd: (details) {
+                                      if ((details.primaryVelocity ?? 0) < 0) {
+                                        _showUpcomingSongsBottomSheet(context);
                                       }
-                                      return previous != current;
                                     },
-                                    builder: (context, favState) {
-                                      bool isFavorite = false;
-                                      if (favState is IsFavoritesState &&
-                                          favState.vId == currentSongData.vId) {
-                                        isFavorite = favState.isFavorites;
-                                      }
-                                      return IconButton(
-                                        onPressed: () {
-                                          if (isFavorite) {
-                                            context.read<FavoritesBloc>().add(
-                                                RemoveFromFavoritesEvent(
-                                                    vId: currentSongData.vId));
-                                          } else {
-                                            context.read<FavoritesBloc>().add(
-                                                AddToFavoritesEvent(
-                                                    song: currentSongData));
-                                          }
-                                        },
-                                        icon: Icon(
-                                          isFavorite
-                                              ? CupertinoIcons.heart_fill
-                                              : CupertinoIcons.heart,
-                                          color: isFavorite
-                                              ? Colors.red
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface
-                                                  .withValues(alpha: 0.6),
-                                          size: 28,
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10.0, horizontal: 40.0),
+                                      child: Container(
+                                        width: 40,
+                                        height: 5,
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.3),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                         ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Progress Bar
-                        StreamBuilderWidget(screenSize: screenSize),
-                        const SizedBox(height: 7),
-
-                        // Controls (Prev, Play, Next)
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.13),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              IconButton(
-                                iconSize: 40,
-                                onPressed: () {
-                                  context
-                                      .read<SongstreamBloc>()
-                                      .add(PlayPreviousSongEvent());
-                                },
-                                icon: const Icon(CupertinoIcons.backward_fill),
-                              ),
-                              BlocBuilder<SongstreamBloc, SongstreamState>(
-                                buildWhen: (previous, current) =>
-                                    previous != current,
-                                builder: (context, state) {
-                                  // Get current song from state
-                                  Songmodel currentSongData = songData;
-                                  if (state is LoadingState) {
-                                    currentSongData = state.songData;
-                                  } else if (state is PlayingState) {
-                                    currentSongData = state.songData;
-                                  } else if (state is PausedState) {
-                                    currentSongData = state.songData;
-                                  }
-                                  return SizedBox(
-                                    height: 80,
-                                    width: 80,
-                                    child: FittedBox(
-                                      fit: BoxFit.fill,
-                                      child: Player(
-                                        songData: currentSongData,
-                                        songIndex: songIndex,
-                                        screenSize: screenSize,
-                                        route: route,
-                                        isPlaylist:
-                                            widget.routeData["isplaylist"] ??
-                                                false,
-                                        // widget
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                iconSize: 40,
-                                onPressed: () {
-                                  context
-                                      .read<SongstreamBloc>()
-                                      .add(PlayNextSongEvent());
-                                },
-                                icon: const Icon(CupertinoIcons.forward_fill),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 30),
-
-                        // Volume Slider
-                        VolumeSlider(screenWidth: screenWidth),
-
-                        const Spacer(flex: 2),
-
-                        // Bottom Actions
-                        Padding(
-                          padding: EdgeInsets.only(
-                              bottom: screenSize * 0.024,
-                              left: screenWidth * 0.12,
-                              right: screenWidth * 0.12),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              BlocBuilder<SongstreamBloc, SongstreamState>(
-                                builder: (context, songStreamState) {
-                                  Songmodel activeSong = songData;
-                                  if (songStreamState is PlayingState) {
-                                    activeSong = songStreamState.songData;
-                                  } else if (songStreamState is PausedState) {
-                                    activeSong = songStreamState.songData;
-                                  } else if (songStreamState is LoadingState) {
-                                    activeSong = songStreamState.songData;
-                                  }
-                                  return IconButton(
-                                    onPressed: () {
-                                      context.pop();
-                                      final cached = context
-                                          .read<Repository>()
-                                          .getCachedArtist(
-                                              activeSong.artist.artistId,
-                                              activeSong.artist.name);
-                                      context.pushNamed(RouterName.artistName,
-                                          extra: cached ??
-                                              ArtistModel(
-                                                  artist: activeSong.artist,
-                                                  thumbnail: ""));
-                                    },
-                                    icon: Icon(
-                                      CupertinoIcons.person_crop_circle_fill,
-                                      color: Colors.red.withValues(alpha: 0.8),
-                                      size: 28.5,
-                                    ),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.lyrics_outlined,
-                                  color: Colors.red.withValues(alpha: 0.8),
-                                  size: 28.5,
+                                  ),
                                 ),
-                              ),
-                              BlocBuilder<SongstreamBloc, SongstreamState>(
-                                buildWhen: (previous, current) =>
-                                    previous != current,
-                                builder: (context, state) {
-                                  return IconButton(
-                                    onPressed: () {
-                                      context
-                                          .read<SongstreamBloc>()
-                                          .add(LoopEvent());
-                                    },
-                                    // icon: Icon(
-                                    //   context
-                                    //           .read<SongstreamBloc>()
-                                    //           .getLoopStatus
-                                    //       ? FontAwesomeIcons.repeat
-                                    //       : FontAwesomeIcons.shuffle,
-                                    //   color: Colors.red.withValues(alpha: 0.8),
-                                    //   size: 23,
-                                    // ),
-                                      icon: FaIcon(
-                                      context
-                                              .read<SongstreamBloc>()
-                                              .getLoopStatus
-                                          ? FontAwesomeIcons.repeat
-                                          : FontAwesomeIcons.shuffle,
-                                      color: Colors.red.withValues(alpha: 0.8),
-                                      size: 23,
-                                    ),
-                                  );
-                                },
-                              ),
-                              // Download button with progress indicator
-                              //  Wrap the Menu/Download button in a Container with the GlobalKey
-                              Container(
-                                key: _menuButtonKey,
-                                child: BlocBuilder<SongstreamBloc,
-                                    SongstreamState>(
-                                  buildWhen: (previous, current) =>
-                                      previous != current,
-                                  builder: (context, songState) {
-                                    // Get current song from state
-                                    Songmodel currentSongData = songData;
-                                    if (songState is LoadingState) {
-                                      currentSongData = songState.songData;
-                                    } else if (songState is PlayingState) {
-                                      currentSongData = songState.songData;
-                                    } else if (songState is PausedState) {
-                                      currentSongData = songState.songData;
-                                    }
-                                    return BlocBuilder<DownloadBloc,
-                                        DownloadState>(
-                                      builder: (context, state) {
-                                        final isDownloading = state
-                                            is DownloadPercantageStatusState;
-
-                                        if (isDownloading) {
-                                          return StreamBuilder<double>(
-                                            stream: state.percentageStream,
-                                            builder: (context, snapshot) {
-                                              final progress =
-                                                  snapshot.data ?? 0.0;
-                                              return GestureDetector(
-                                                onTap: () => _showMoreOptions(
-                                                    context,
-                                                    currentSongData,
-                                                    screenSize),
-                                                child: SizedBox(
-                                                  width: 32,
-                                                  height: 32,
-                                                  child: Stack(
-                                                    alignment: Alignment.center,
-                                                    children: [
-                                                      // Circular progress indicator
-                                                      CircularProgressIndicator(
-                                                        value: progress / 100,
-                                                        strokeWidth: 3,
-                                                        backgroundColor:
-                                                            Theme.of(context)
-                                                                .colorScheme
-                                                                .onSurface
-                                                                .withValues(
-                                                                    alpha: 0.1),
-                                                        valueColor:
-                                                            AlwaysStoppedAnimation<
-                                                                Color>(
-                                                          Colors.red.withValues(
-                                                              alpha: 0.6),
-                                                        ),
-                                                      ),
-                                                      // Cloud download icon
-                                                      Icon(
-                                                        CupertinoIcons
-                                                            .cloud_download,
-                                                        color: Colors.red
-                                                            .withValues(
-                                                                alpha: 0.6),
-                                                        size: 16,
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          );
-                                        } else {
-                                          return IconButton(
-                                            onPressed: () => _showMoreOptions(
-                                                context,
-                                                currentSongData,
-                                                screenSize),
-                                            // icon: Icon(
-                                            //   FontAwesomeIcons.list,
-                                            //   color: Colors.red
-                                            //       .withValues(alpha: 0.8),
-                                            //   size: 24,
-                                            // ),
-                                            icon: FaIcon(
-                                              FontAwesomeIcons.list,
-                                              color: Colors.red
-                                                  .withValues(alpha: 0.8),
-                                              size: 24,
-                                            ),
-                                            
-                                          );
-                                        }
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Center(
-                          child: GestureDetector(
-                            onTap: () => _showUpcomingSongsBottomSheet(context),
-                            child: Container(
-                              width: 40,
-                              height: 5,
-                              margin: const EdgeInsets.only(bottom: 5),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                                //   child: Container(
+                                //     width: 40,
+                                //     height: 5,
+                                //     margin: const EdgeInsets.only(bottom: 5),
+                                //     decoration: BoxDecoration(
+                                //       color: Theme.of(context)
+                                //           .colorScheme
+                                //           .onSurface
+                                //           .withValues(alpha: 0.5),
+                                //       borderRadius: BorderRadius.circular(10),
+                                //     ),
+                                //   ),
+                                // ),
+                                // ),
+                              ],
                             ),
                           ),
                         ),
-                        //   child: Container(
-                        //     width: 40,
-                        //     height: 5,
-                        //     margin: const EdgeInsets.only(bottom: 5),
-                        //     decoration: BoxDecoration(
-                        //       color: Theme.of(context)
-                        //           .colorScheme
-                        //           .onSurface
-                        //           .withValues(alpha: 0.5),
-                        //       borderRadius: BorderRadius.circular(10),
-                        //     ),
-                        //   ),
-                        // ),
-                        // ),
-                      ],
-                    ),
-                  ),
                 ),
               ),
             ),

@@ -296,11 +296,12 @@ class AppRouter {
           name: RouterName.audioPlayerName,
           pageBuilder: (context, state) {
             final extra = state.extra as Map<String, dynamic>?;
-            print("EXTRAS ############### ${extra} ######################");
 
             return CustomTransitionPage(
               opaque: false,
               key: state.pageKey,
+              transitionDuration: const Duration(milliseconds: 250),
+              reverseTransitionDuration: const Duration(milliseconds: 120),
               child: Builder(
                 builder: (context) {
                   return AudioPlayerScreen(routeData: extra!);
@@ -310,7 +311,7 @@ class AppRouter {
                   (context, animation, secondaryAnimation, child) {
                 const begin = Offset(0.0, 1.0);
                 const end = Offset.zero;
-                const curve = Curves.easeInOut;
+                const curve = Curves.fastOutSlowIn;
 
                 var slideTween = Tween(begin: begin, end: end)
                     .chain(CurveTween(curve: curve));

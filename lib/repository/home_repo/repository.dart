@@ -6,6 +6,7 @@ import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/helper_function/repository/repository_helper_function.dart';
 import 'package:nex_music/model/artistmodel.dart';
+import 'package:nex_music/model/lyric_model.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/song_raw_data.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -16,6 +17,7 @@ class Repository {
   final YoutubeExplode _yt;
   final DataProvider _dataProvider;
   final HiveDataBaseSingleton _dbInstance;
+  final Map<String, LyricModel> _lyricsCache = {};
 
   Repository(
       {required DataProvider dataProvider,
@@ -24,6 +26,27 @@ class Repository {
       : _dataProvider = dataProvider,
         _yt = yt,
         _dbInstance = dbInstance;
+
+  Future<LyricModel?> getLyrics({
+    required String title,
+    required String artist,
+    required String videoId,
+    int? durationSeconds,
+  }) async {
+    if (_lyricsCache.containsKey(videoId)) {
+      return _lyricsCache[videoId];
+    }
+    final lyrics = await _dataProvider.getLyrics(
+      title: title,
+      artist: artist,
+      videoId: videoId,
+      durationSeconds: durationSeconds,
+    );
+    if (lyrics != null) {
+      _lyricsCache[videoId] = lyrics;
+    }
+    return lyrics;
+  }
 
 //cancel all ongoing request
   void cancelRequest() {
