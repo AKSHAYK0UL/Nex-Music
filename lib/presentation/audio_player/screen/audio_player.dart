@@ -130,6 +130,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   //  Add a GlobalKey to track the position of the menu button
   final GlobalKey _menuButtonKey = GlobalKey();
   bool _isLyricsView = false;
+  bool _isUpcomingSheetOpen = false;
 
   @override
   void initState() {
@@ -918,11 +919,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                     behavior: HitTestBehavior.opaque,
                                     onTap: () =>
                                         _showUpcomingSongsBottomSheet(context),
-                                    onVerticalDragEnd: (details) {
-                                      if ((details.primaryVelocity ?? 0) < 0) {
-                                        _showUpcomingSongsBottomSheet(context);
-                                      }
-                                    },
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
                                           vertical: 10.0, horizontal: 40.0),
@@ -995,6 +991,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   }
 
   void _showUpcomingSongsBottomSheet(BuildContext context) {
+    if (_isUpcomingSheetOpen) return;
+    _isUpcomingSheetOpen = true;
+
     showModalBottomSheet(
       useRootNavigator: true,
       context: context,
@@ -1018,6 +1017,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      _isUpcomingSheetOpen = false;
+    });
   }
 }

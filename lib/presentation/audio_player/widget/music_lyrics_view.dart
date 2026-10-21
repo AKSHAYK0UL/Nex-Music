@@ -755,11 +755,6 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onOpenQueue,
-        onVerticalDragEnd: (details) {
-          if ((details.primaryVelocity ?? 0) < 0) {
-            widget.onOpenQueue();
-          }
-        },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 40.0),
           child: Container(
