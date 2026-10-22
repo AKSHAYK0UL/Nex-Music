@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -137,19 +138,43 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
   final Map<int, GlobalKey> _lineKeys = {};
   int _lastActiveIndex = -1;
   bool _userIsScrolling = false;
+  Timer? _userScrollTimer;
   late Songmodel _currentSong;
+
+  static int? _parseDurationString(String? durationStr) {
+    if (durationStr == null || durationStr.trim().isEmpty) return null;
+    final parts = durationStr.trim().split(':');
+    if (parts.length == 2) {
+      final m = int.tryParse(parts[0]);
+      final s = int.tryParse(parts[1]);
+      if (m != null && s != null) return m * 60 + s;
+    } else if (parts.length == 3) {
+      final h = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      final s = int.tryParse(parts[2]);
+      if (h != null && m != null && s != null) return h * 3600 + m * 60 + s;
+    }
+    return null;
+  }
 
   @override
   void initState() {
     super.initState();
     _currentSong = widget.songData;
+    final streamSec = context.read<SongstreamBloc>().songDuration.inSeconds;
+    final durationSec =
+        streamSec > 0 ? streamSec : _parseDurationString(_currentSong.duration);
     context.read<LyricsBloc>().add(
-          LoadLyricsEvent(songData: _currentSong),
+          LoadLyricsEvent(
+            songData: _currentSong,
+            durationSeconds: durationSec,
+          ),
         );
   }
 
   @override
   void dispose() {
+    _userScrollTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -205,7 +230,20 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
             _lastActiveIndex = -1;
             _lineKeys.clear();
           });
-          context.read<LyricsBloc>().add(LoadLyricsEvent(songData: newSong));
+          if (_scrollController.hasClients) {
+            _scrollController.jumpTo(0);
+          }
+          final streamSec =
+              context.read<SongstreamBloc>().songDuration.inSeconds;
+          final durationSec = streamSec > 0
+              ? streamSec
+              : _parseDurationString(newSong.duration);
+          context.read<LyricsBloc>().add(
+                LoadLyricsEvent(
+                  songData: newSong,
+                  durationSeconds: durationSec,
+                ),
+              );
         }
       },
       child: Stack(
@@ -520,10 +558,19 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
               onNotification: (notification) {
                 if (notification is ScrollStartNotification &&
                     notification.dragDetails != null) {
+                  _userScrollTimer?.cancel();
                   _userIsScrolling = true;
                 } else if (notification is ScrollEndNotification) {
-                  Future.delayed(const Duration(seconds: 2), () {
-                    if (mounted) _userIsScrolling = false;
+                  _userScrollTimer?.cancel();
+                  _userScrollTimer = Timer(const Duration(seconds: 3), () {
+                    if (mounted) {
+                      setState(() {
+                        _userIsScrolling = false;
+                      });
+                      if (_lastActiveIndex >= 0) {
+                        _scrollToActiveLine(_lastActiveIndex);
+                      }
+                    }
                   });
                 }
                 return false;
@@ -545,22 +592,60 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
       builder: (context, snapshot) {
         final currentPosition = snapshot.data ?? Duration.zero;
 
-        // Find active line index
+        // Find active line index based on start and end timestamps
         int activeIndex = -1;
         for (int i = 0; i < lines.length; i++) {
-          if (lines[i].timestamp <= currentPosition) {
-            activeIndex = i;
+          final line = lines[i];
+          final nextLineStart =
+              (i + 1 < lines.length) ? lines[i + 1].timestamp : null;
+          final effectiveEnd = line.endTime ??
+              nextLineStart ??
+              (line.timestamp + const Duration(seconds: 12));
+
+          if (currentPosition >= line.timestamp) {
+            if (currentPosition < effectiveEnd) {
+              activeIndex = i;
+              break;
+            } else if (nextLineStart != null &&
+                currentPosition < nextLineStart) {
+              // Gap between line.endTime and nextLineStart
+              final gap = nextLineStart - (line.endTime ?? line.timestamp);
+              if (gap <= const Duration(seconds: 2)) {
+                // Short pause: keep line active for smooth experience
+                activeIndex = i;
+              } else {
+                // Long instrumental break: un-highlight active line
+                activeIndex = -1;
+              }
+              break;
+            }
           } else {
             break;
           }
         }
 
-        // Trigger auto-scroll on line change
-        if (activeIndex != _lastActiveIndex && activeIndex >= 0) {
+        // Trigger auto-scroll on line change or intro
+        if (activeIndex != _lastActiveIndex) {
           _lastActiveIndex = activeIndex;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollToActiveLine(activeIndex);
-          });
+          if (activeIndex >= 0) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollToActiveLine(activeIndex);
+            });
+          } else if (lines.isNotEmpty &&
+              currentPosition < lines.first.timestamp) {
+            // Intro before first line: ensure scroll is at top
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients &&
+                  _scrollController.offset > 0 &&
+                  !_userIsScrolling) {
+                _scrollController.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
+                );
+              }
+            });
+          }
         }
 
         final onSurface = Theme.of(context).colorScheme.onSurface;
@@ -573,13 +658,17 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
           itemBuilder: (context, index) {
             final line = lines[index];
             final isActive = index == activeIndex;
-            final isPast = index < activeIndex;
+            final isPast = activeIndex >= 0
+                ? index < activeIndex
+                : (line.endTime ?? line.timestamp) <= currentPosition;
 
             _lineKeys[index] ??= GlobalKey();
 
             return GestureDetector(
               key: _lineKeys[index],
               onTap: () {
+                _userScrollTimer?.cancel();
+                _userIsScrolling = false;
                 context.read<SongstreamBloc>().add(
                       SeekToEvent(position: line.timestamp),
                     );
@@ -589,7 +678,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
                 curve: Curves.easeOutCubic,
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: Text(
-                  line.text.isEmpty ? '♪' : line.text,
+                  line.text,
                   style: TextStyle(
                     color: isActive
                         ? (isDark ? Colors.white : onSurface)
@@ -698,7 +787,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
                       ? (isSyncOn
                           ? Icons.spatial_audio_off
                           : Icons.spatial_audio_off_outlined)
-                      : CupertinoIcons.quote_bubble,
+                      : Icons.spatial_audio_off_outlined,
                   color: hasSync
                       ? (isSyncOn
                           ? Colors.red.withValues(alpha: 0.8)

@@ -29,12 +29,17 @@ class LyricsBloc extends Bloc<LyricsEvent, LyricsState> {
 
     emit(LyricsLoadingState(songData: event.songData));
 
+    int? durationSec = event.durationSeconds;
+    if (durationSec == null || durationSec <= 0) {
+      durationSec = _parseDurationString(event.songData.duration);
+    }
+
     try {
       final lyrics = await _repository.getLyrics(
         title: event.songData.songName,
         artist: event.songData.artist.name,
         videoId: event.songData.vId,
-        durationSeconds: event.durationSeconds,
+        durationSeconds: durationSec,
       );
 
       if (lyrics != null && lyrics.hasLyrics) {
@@ -68,5 +73,21 @@ class LyricsBloc extends Bloc<LyricsEvent, LyricsState> {
         emit(current.copyWith(isSyncEnabled: !current.isSyncEnabled));
       }
     }
+  }
+
+  static int? _parseDurationString(String? durationStr) {
+    if (durationStr == null || durationStr.trim().isEmpty) return null;
+    final parts = durationStr.trim().split(':');
+    if (parts.length == 2) {
+      final m = int.tryParse(parts[0]);
+      final s = int.tryParse(parts[1]);
+      if (m != null && s != null) return m * 60 + s;
+    } else if (parts.length == 3) {
+      final h = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      final s = int.tryParse(parts[2]);
+      if (h != null && m != null && s != null) return h * 3600 + m * 60 + s;
+    }
+    return null;
   }
 }
