@@ -126,14 +126,33 @@ class AudioPlayerScreen extends StatefulWidget {
   State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
 }
 
-class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
+class _AudioPlayerScreenState extends State<AudioPlayerScreen>
+    with SingleTickerProviderStateMixin {
   //  Add a GlobalKey to track the position of the menu button
   final GlobalKey _menuButtonKey = GlobalKey();
-  bool _isLyricsView = false;
+  final ValueNotifier<bool> _isLyricsView = ValueNotifier<bool>(false);
   bool _isUpcomingSheetOpen = false;
+  late final AnimationController _lyricsAnimController;
+  late final Animation<Offset> _lyricsSlideAnimation;
 
   @override
   void initState() {
+    _lyricsAnimController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 280),
+      reverseDuration: const Duration(milliseconds: 230),
+    );
+    _lyricsSlideAnimation = Tween<Offset>(
+      begin: const Offset(0.0, 1.0),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _lyricsAnimController,
+        curve: Curves.fastOutSlowIn,
+        reverseCurve: Curves.fastOutSlowIn,
+      ),
+    );
+
     context.read<UserPlaylistBloc>().add(GetUserPlaylistsEvent());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Songmodel songData = widget.routeData["songdata"] as Songmodel;
@@ -147,6 +166,28 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       );
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _lyricsAnimController.dispose();
+    _isLyricsView.dispose();
+    super.dispose();
+  }
+
+  void _openLyrics() {
+    if (_lyricsAnimController.isAnimating) return;
+    _isLyricsView.value = true;
+    _lyricsAnimController.forward();
+  }
+
+  void _closeLyrics() {
+    if (_lyricsAnimController.isAnimating) return;
+    _lyricsAnimController.reverse().then((_) {
+      if (mounted) {
+        _isLyricsView.value = false;
+      }
+    });
   }
 
   void _showMoreOptions(
@@ -250,94 +291,125 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     );
   }
 
+  Songmodel _getCurrentlyPlayingSong(BuildContext context) {
+    final state = context.read<SongstreamBloc>().state;
+    if (state is LoadingState) return state.songData;
+    if (state is PlayingState) return state.songData;
+    if (state is PausedState) return state.songData;
+    return widget.routeData["songdata"] as Songmodel;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
-    // final routeData =
-    //     ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
 
-    Songmodel songData = widget.routeData["songdata"] as Songmodel;
+    Songmodel songData = _getCurrentlyPlayingSong(context);
     final route = widget.routeData["route"] as SongMiniPlayerRoute;
     final songIndex = widget.routeData["songindex"] as int;
-    // final quality = widget.routeData["quality"] as ThumbnailQuality;
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final overlayStyle = _isLyricsView
-        ? SystemUiOverlayStyle.light.copyWith(
-            statusBarColor: Colors.transparent,
-            systemNavigationBarColor: Colors.black,
-          )
-        : (isDark
-            ? SystemUiOverlayStyle.light.copyWith(
-                statusBarColor: Colors.transparent,
-                systemNavigationBarColor: theme.scaffoldBackgroundColor,
-              )
-            : SystemUiOverlayStyle.dark.copyWith(
-                statusBarColor: Colors.transparent,
-                systemNavigationBarColor: theme.scaffoldBackgroundColor,
-              ));
 
     return PopScope(
-      canPop: !_isLyricsView,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (_isLyricsView) {
-          setState(() {
-            _isLyricsView = false;
-          });
+        if (_lyricsAnimController.isAnimating) return;
+        if (_isLyricsView.value || _lyricsAnimController.value > 0) {
+          _closeLyrics();
+          return;
         }
+        context.pop();
       },
-      child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: overlayStyle,
-        child: BlocListener<DownloadBloc, DownloadState>(
-          listener: (context, state) {
-            if (state is DownloadErrorState) {
-              showSnackbar(context, state.errorMessage);
-            }
-          },
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _isLyricsView,
+        builder: (context, isLyrics, child) {
+          final overlayStyle = isLyrics
+              ? SystemUiOverlayStyle.light.copyWith(
+                  statusBarColor: Colors.transparent,
+                  systemNavigationBarColor: Colors.black,
+                )
+              : (isDark
+                  ? SystemUiOverlayStyle.light.copyWith(
+                      statusBarColor: Colors.transparent,
+                      systemNavigationBarColor: theme.scaffoldBackgroundColor,
+                    )
+                  : SystemUiOverlayStyle.dark.copyWith(
+                      statusBarColor: Colors.transparent,
+                      systemNavigationBarColor: theme.scaffoldBackgroundColor,
+                    ));
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: overlayStyle,
+            child: child!,
+          );
+        },
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<DownloadBloc, DownloadState>(
+              listener: (context, state) {
+                if (state is DownloadErrorState) {
+                  showSnackbar(context, state.errorMessage);
+                }
+              },
+            ),
+            BlocListener<SongstreamBloc, SongstreamState>(
+              listenWhen: (previous, current) {
+                String? prevId;
+                String? currId;
+                if (previous is LoadingState) prevId = previous.songData.vId;
+                if (previous is PlayingState) prevId = previous.songData.vId;
+                if (previous is PausedState) prevId = previous.songData.vId;
+                if (current is LoadingState) currId = current.songData.vId;
+                if (current is PlayingState) currId = current.songData.vId;
+                if (current is PausedState) currId = current.songData.vId;
+                return currId != null && currId != prevId;
+              },
+              listener: (context, state) {
+                Songmodel? currentSong;
+                if (state is LoadingState) currentSong = state.songData;
+                if (state is PlayingState) currentSong = state.songData;
+                if (state is PausedState) currentSong = state.songData;
+                if (currentSong != null) {
+                  context
+                      .read<FavoritesBloc>()
+                      .add(IsFavoritesEvent(vId: currentSong.vId));
+                }
+                setState(() {});
+              },
+            ),
+          ],
           child: Scaffold(
             backgroundColor: Colors.transparent,
-            body: Dismissible(
-              key: const Key('audio_player_dismiss'),
-              direction:
-                  _isLyricsView ? DismissDirection.none : DismissDirection.down,
-              resizeDuration: null,
-              movementDuration: const Duration(milliseconds: 100),
-              dismissThresholds: const {DismissDirection.down: 0.15},
-              onDismissed: (_) {
-                context.pop();
+            body: ValueListenableBuilder<bool>(
+              valueListenable: _isLyricsView,
+              builder: (context, isLyrics, child) {
+                return Dismissible(
+                  key: const Key('audio_player_dismiss'),
+                  direction:
+                      isLyrics ? DismissDirection.none : DismissDirection.down,
+                  resizeDuration: null,
+                  movementDuration: const Duration(milliseconds: 100),
+                  dismissThresholds: const {DismissDirection.down: 0.15},
+                  onDismissed: (_) {
+                    context.pop();
+                  },
+                  background: Container(color: Colors.transparent),
+                  secondaryBackground: Container(color: Colors.transparent),
+                  child: child!,
+                );
               },
-              background: Container(color: Colors.transparent),
-              secondaryBackground: Container(color: Colors.transparent),
               child: SizedBox.expand(
                 child: ColoredBox(
                   color: theme.scaffoldBackgroundColor,
-                  child: _isLyricsView
-                      ? AppleMusicLyricsView(
-                          songData: songData,
-                          screenSize: screenSize,
-                          screenWidth: screenWidth,
-                          songIndex: songIndex,
-                          route: route,
-                          isPlaylist: widget.routeData["isplaylist"] ?? false,
-                          onCloseLyrics: () {
-                            setState(() {
-                              _isLyricsView = false;
-                            });
-                          },
-                          onOpenQueue: () =>
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      SafeArea(
+                        child: _SwipeUpDetector(
+                          onSwipeUp: () =>
                               _showUpcomingSongsBottomSheet(context),
-                          onShowOptions: (menuKey) => _showMoreOptions(
-                              context, songData, screenSize,
-                              buttonKey: menuKey),
-                        )
-                      : SafeArea(
-                          child: _SwipeUpDetector(
-                            onSwipeUp: () =>
-                                _showUpcomingSongsBottomSheet(context),
-                            child: Column(
+                          child: Column(
                               children: [
                                 SizedBox(height: screenSize * 0.01),
                                 //  Top Grab Handle
@@ -368,33 +440,26 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
 
                                 // Album Art
                                 BlocBuilder<SongstreamBloc, SongstreamState>(
-                                  buildWhen: (previous, current) =>
-                                      previous != current,
+                                  buildWhen: (previous, current) {
+                                    String? prevId;
+                                    String? currId;
+                                    if (previous is LoadingState) prevId = previous.songData.vId;
+                                    if (previous is PlayingState) prevId = previous.songData.vId;
+                                    if (previous is PausedState) prevId = previous.songData.vId;
+                                    if (current is LoadingState) currId = current.songData.vId;
+                                    if (current is PlayingState) currId = current.songData.vId;
+                                    if (current is PausedState) currId = current.songData.vId;
+                                    return currId != null && currId != prevId;
+                                  },
                                   builder: (context, state) {
                                     // Get current song from state first
                                     Songmodel currentSongData = songData;
                                     if (state is LoadingState) {
                                       currentSongData = state.songData;
-                                      // Update favorites check with current song's vId
-                                      context.read<FavoritesBloc>().add(
-                                          IsFavoritesEvent(
-                                              vId: currentSongData.vId));
                                     } else if (state is PlayingState) {
                                       currentSongData = state.songData;
-                                      // Update favorites check with current song's vId
-                                      context.read<FavoritesBloc>().add(
-                                          IsFavoritesEvent(
-                                              vId: currentSongData.vId));
                                     } else if (state is PausedState) {
                                       currentSongData = state.songData;
-                                      // Update favorites check with current song's vId
-                                      context.read<FavoritesBloc>().add(
-                                          IsFavoritesEvent(
-                                              vId: currentSongData.vId));
-                                    } else {
-                                      // Fallback to route data if state doesn't have songData
-                                      context.read<FavoritesBloc>().add(
-                                          IsFavoritesEvent(vId: songData.vId));
                                     }
                                     final quality = HiveDataBaseSingleton
                                         .instance.getData.thumbnailQuality;
@@ -471,6 +536,17 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                           children: [
                                             BlocBuilder<SongstreamBloc,
                                                 SongstreamState>(
+                                              buildWhen: (previous, current) {
+                                                String? prevId;
+                                                String? currId;
+                                                if (previous is LoadingState) prevId = previous.songData.vId;
+                                                if (previous is PlayingState) prevId = previous.songData.vId;
+                                                if (previous is PausedState) prevId = previous.songData.vId;
+                                                if (current is LoadingState) currId = current.songData.vId;
+                                                if (current is PlayingState) currId = current.songData.vId;
+                                                if (current is PausedState) currId = current.songData.vId;
+                                                return currId != null && currId != prevId;
+                                              },
                                               builder: (context, state) {
                                                 // Get current song from state
                                                 Songmodel currentSongData =
@@ -504,6 +580,17 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                             const SizedBox(height: 4),
                                             BlocBuilder<SongstreamBloc,
                                                 SongstreamState>(
+                                              buildWhen: (previous, current) {
+                                                String? prevId;
+                                                String? currId;
+                                                if (previous is LoadingState) prevId = previous.songData.vId;
+                                                if (previous is PlayingState) prevId = previous.songData.vId;
+                                                if (previous is PausedState) prevId = previous.songData.vId;
+                                                if (current is LoadingState) currId = current.songData.vId;
+                                                if (current is PlayingState) currId = current.songData.vId;
+                                                if (current is PausedState) currId = current.songData.vId;
+                                                return currId != null && currId != prevId;
+                                              },
                                               builder: (context, state) {
                                                 // Get current song from state
                                                 Songmodel currentSongData =
@@ -643,8 +730,17 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                       ),
                                       BlocBuilder<SongstreamBloc,
                                           SongstreamState>(
-                                        buildWhen: (previous, current) =>
-                                            previous != current,
+                                        buildWhen: (previous, current) {
+                                          String? prevId;
+                                          String? currId;
+                                          if (previous is LoadingState) prevId = previous.songData.vId;
+                                          if (previous is PlayingState) prevId = previous.songData.vId;
+                                          if (previous is PausedState) prevId = previous.songData.vId;
+                                          if (current is LoadingState) currId = current.songData.vId;
+                                          if (current is PlayingState) currId = current.songData.vId;
+                                          if (current is PausedState) currId = current.songData.vId;
+                                          return currId != null && currId != prevId;
+                                        },
                                         builder: (context, state) {
                                           // Get current song from state
                                           Songmodel currentSongData = songData;
@@ -749,11 +845,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                                         },
                                       ),
                                       IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _isLyricsView = true;
-                                          });
-                                        },
+                                        onPressed: _openLyrics,
                                         icon: Icon(
                                           Icons.lyrics_outlined,
                                           color:
@@ -955,6 +1047,44 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                             ),
                           ),
                         ),
+
+                      // Animated Lyrics Page (Slides in from bottom to top, out top to bottom)
+                      AnimatedBuilder(
+                        animation: _lyricsAnimController,
+                        builder: (context, child) {
+                          if (_lyricsAnimController.value == 0 &&
+                              !_lyricsAnimController.isAnimating &&
+                              !_isLyricsView.value) {
+                            return const SizedBox.shrink();
+                          }
+                          return SlideTransition(
+                            position: _lyricsSlideAnimation,
+                            child: ClipRect(
+                              child: child!,
+                            ),
+                          );
+                        },
+                        child: AppleMusicLyricsView(
+                          songData: songData,
+                          screenSize: screenSize,
+                          screenWidth: screenWidth,
+                          songIndex: songIndex,
+                          route: route,
+                          isPlaylist:
+                              widget.routeData["isplaylist"] ?? false,
+                          onCloseLyrics: _closeLyrics,
+                          onOpenQueue: () =>
+                              _showUpcomingSongsBottomSheet(context),
+                          onShowOptions: (menuKey) => _showMoreOptions(
+                            context,
+                            songData,
+                            screenSize,
+                            buttonKey: menuKey,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

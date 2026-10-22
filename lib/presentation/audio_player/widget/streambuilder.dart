@@ -17,69 +17,74 @@ class StreamBuilderWidget extends StatefulWidget {
 
 class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
   late SongstreamBloc _songstreamBloc;
+  late Stream<AudioPlayerStream> _stream;
 
   @override
   void initState() {
     super.initState();
     _songstreamBloc = context.read<SongstreamBloc>();
+    _stream = _songstreamBloc.getAudioPlayerStreamData;
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<AudioPlayerStream>(
-      stream: _songstreamBloc.getAudioPlayerStreamData,
+      stream: _stream,
+      initialData: _songstreamBloc.currentAudioPlayerStream,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(height: 20);
-        }
-
-        final position = snapshot.data?.position;
-        final bufferedPosition = snapshot.data?.bufferPosition;
-        final duration = _songstreamBloc.songDuration;
+        final position =
+            snapshot.data?.position ?? _songstreamBloc.currentPosition;
+        final bufferedPosition = snapshot.data?.bufferPosition ??
+            _songstreamBloc.currentBufferedPosition;
+        final duration = _songstreamBloc.songDuration > Duration.zero
+            ? _songstreamBloc.songDuration
+            : (_songstreamBloc.songDurationOrParsed > Duration.zero
+                ? _songstreamBloc.songDurationOrParsed
+                : const Duration(seconds: 1));
 
         return RepaintBoundary(
-          child: Column(
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: widget.screenSize * 0.0388),
-                child: ProgressBar(
-                  progress: position ?? Duration.zero,
-                  buffered: bufferedPosition ?? Duration.zero,
-                  total: duration,
-                  barHeight: 5,
-                  thumbRadius: 6,
-                  timeLabelLocation: TimeLabelLocation.below,
-                  timeLabelPadding: 10,
-                  baseBarColor: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.16),
-                  bufferedBarColor: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.2),
-                  progressBarColor: Theme.of(context)
-                      .colorScheme
-                      .onSurface
-                      .withValues(alpha: 0.85),
-                  thumbColor: Theme.of(context).colorScheme.onSurface,
-                  timeLabelTextStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    fontFeatures: const [
-                      FontFeature.tabularFigures()
-                    ], // Keeps numbers aligned
-                  ),
-                  onSeek: (value) {
-                    _songstreamBloc.add(
-                      SeekToEvent(position: value),
-                    );
-                  },
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: widget.screenSize * 0.0388),
+            child: SizedBox(
+              height: 48,
+              child: ProgressBar(
+                progress: position,
+                buffered: bufferedPosition,
+                total: duration,
+                barHeight: 5,
+                thumbRadius: 6,
+                timeLabelLocation: TimeLabelLocation.below,
+                timeLabelPadding: 6,
+                baseBarColor: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.16),
+                bufferedBarColor: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.2),
+                progressBarColor: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.85),
+                thumbColor: Theme.of(context).colorScheme.onSurface,
+                timeLabelTextStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'monospace',
+                  fontFeatures: const [
+                    FontFeature.tabularFigures()
+                  ], // Keeps numbers aligned
                 ),
+                onSeek: (value) {
+                  _songstreamBloc.add(
+                    SeekToEvent(position: value),
+                  );
+                },
               ),
-            ],
+            ),
           ),
         );
       },

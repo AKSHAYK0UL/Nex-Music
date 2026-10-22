@@ -31,7 +31,17 @@ class _PlayerState extends State<Player> {
   Widget build(BuildContext context) {
     return BlocConsumer<SongstreamBloc, SongstreamState>(
       listenWhen: (previous, current) => previous != current,
-      buildWhen: (previous, current) => previous != current,
+      buildWhen: (previous, current) {
+        final wasLoading = previous is LoadingState;
+        final isLoading = current is LoadingState;
+        final wasPaused = previous is PausedState;
+        final isPaused = current is PausedState;
+        final wasError = previous is ErrorState;
+        final isError = current is ErrorState;
+        return wasLoading != isLoading ||
+            wasPaused != isPaused ||
+            wasError != isError;
+      },
       listener: (context, state) {
         if (state is ErrorState) {
           context.read<SongstreamBloc>().add(PauseEvent());

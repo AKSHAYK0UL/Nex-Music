@@ -1470,11 +1470,38 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _audioPlayer.setVolume(_currentVolume);
   }
 
+  Stream<AudioPlayerStream>? _audioPlayerStream;
   Stream<AudioPlayerStream> get getAudioPlayerStreamData =>
-      AudioPlayerStreamUtil.audioPlayerStreamData(
+      _audioPlayerStream ??= AudioPlayerStreamUtil.audioPlayerStreamData(
         songPosition: songPosition,
         bufferedPositionStream: bufferedPositionStream,
+      ).asBroadcastStream();
+
+  Duration get currentPosition => _audioPlayer.position;
+  Duration get currentBufferedPosition => _audioPlayer.bufferedPosition;
+  AudioPlayerStream get currentAudioPlayerStream => AudioPlayerStream(
+        position: _audioPlayer.position,
+        bufferPosition: _audioPlayer.bufferedPosition,
       );
+
+  Duration get songDurationOrParsed {
+    if (songDuration > Duration.zero) return songDuration;
+    final durStr = _songData?.duration;
+    if (durStr != null && durStr.isNotEmpty) {
+      final parts = durStr.split(':');
+      if (parts.length == 2) {
+        final m = int.tryParse(parts[0]) ?? 0;
+        final s = int.tryParse(parts[1]) ?? 0;
+        return Duration(minutes: m, seconds: s);
+      } else if (parts.length == 3) {
+        final h = int.tryParse(parts[0]) ?? 0;
+        final m = int.tryParse(parts[1]) ?? 0;
+        final s = int.tryParse(parts[2]) ?? 0;
+        return Duration(hours: h, minutes: m, seconds: s);
+      }
+    }
+    return Duration.zero;
+  }
 
   void _initializeAudioPlayerListeners() {
     _audioPlayer.durationStream.listen((duration) {
