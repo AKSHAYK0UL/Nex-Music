@@ -160,7 +160,17 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
   @override
   void initState() {
     super.initState();
-    _currentSong = widget.songData;
+    final songState = context.read<SongstreamBloc>().state;
+    if (songState is LoadingState) {
+      _currentSong = songState.songData;
+    } else if (songState is PlayingState) {
+      _currentSong = songState.songData;
+    } else if (songState is PausedState) {
+      _currentSong = songState.songData;
+    } else {
+      _currentSong = widget.songData;
+    }
+
     final streamSec = context.read<SongstreamBloc>().songDuration.inSeconds;
     final durationSec =
         streamSec > 0 ? streamSec : _parseDurationString(_currentSong.duration);
@@ -170,6 +180,40 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
             durationSeconds: durationSec,
           ),
         );
+  }
+
+  @override
+  void didUpdateWidget(covariant AppleMusicLyricsView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final songState = context.read<SongstreamBloc>().state;
+    Songmodel activeSong = widget.songData;
+    if (songState is LoadingState) {
+      activeSong = songState.songData;
+    } else if (songState is PlayingState) {
+      activeSong = songState.songData;
+    } else if (songState is PausedState) {
+      activeSong = songState.songData;
+    }
+
+    if (activeSong.vId != _currentSong.vId) {
+      setState(() {
+        _currentSong = activeSong;
+        _lastActiveIndex = -1;
+        _lineKeys.clear();
+      });
+      if (_scrollController.hasClients) {
+        _scrollController.jumpTo(0);
+      }
+      final streamSec = context.read<SongstreamBloc>().songDuration.inSeconds;
+      final durationSec =
+          streamSec > 0 ? streamSec : _parseDurationString(activeSong.duration);
+      context.read<LyricsBloc>().add(
+            LoadLyricsEvent(
+              songData: activeSong,
+              durationSeconds: durationSec,
+            ),
+          );
+    }
   }
 
   @override
@@ -367,6 +411,11 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onCloseLyrics,
+        onVerticalDragEnd: (details) {
+          if ((details.primaryVelocity ?? 0) > 150) {
+            widget.onCloseLyrics();
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 20.0),
           child: Container(
@@ -756,7 +805,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
           IconButton(
             onPressed: widget.onCloseLyrics,
             icon: Icon(
-              CupertinoIcons.play_circle_fill,
+              CupertinoIcons.arrow_left_circle_fill,
               color: Colors.red.withValues(alpha: 0.8),
               size: 28.5,
             ),

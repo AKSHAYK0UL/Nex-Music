@@ -32,23 +32,35 @@ class _PlayerState extends State<Player> {
     return BlocConsumer<SongstreamBloc, SongstreamState>(
       listenWhen: (previous, current) => previous != current,
       buildWhen: (previous, current) {
-        final wasLoading = previous is LoadingState;
-        final isLoading = current is LoadingState;
-        final wasPaused = previous is PausedState;
-        final isPaused = current is PausedState;
-        final wasError = previous is ErrorState;
-        final isError = current is ErrorState;
-        return wasLoading != isLoading ||
-            wasPaused != isPaused ||
-            wasError != isError;
+        String? idFrom(SongstreamState s) {
+          if (s is LoadingState) return s.songData.vId;
+          if (s is PlayingState) return s.songData.vId;
+          if (s is PausedState) return s.songData.vId;
+          return null;
+        }
+
+        final prevId = idFrom(previous);
+        final currId = idFrom(current);
+
+        // Different song (or no song ID yet) — always rebuild.
+        if (prevId == null || currId == null || prevId != currId) return true;
+
+        // Same song: only suppress (Playing|Paused) -> Loading transitions.
+        // Those are seek-buffering events — no need to flash a loading spinner.
+        // All other same-song transitions (Loading->Playing, Play<->Pause) rebuild.
+        if ((previous is PlayingState || previous is PausedState) &&
+            current is LoadingState) {
+          return false;
+        }
+
+        return true;
       },
       listener: (context, state) {
         if (state is ErrorState) {
           context.read<SongstreamBloc>().add(PauseEvent());
           //  print("################# ERROR PLAYER ${state.errorMessage} ################");
           if (state.errorMessage != "Error fetching song: Connection aborted") {
-
-showSnackbar(context, state.errorMessage);
+            showSnackbar(context, state.errorMessage);
           }
         }
       },
