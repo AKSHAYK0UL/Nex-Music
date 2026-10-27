@@ -231,7 +231,16 @@ class Repository {
     return RepositoryHelperFunction.convertVideoFullToSongModel(videoFull);
   }
 
+  final Map<String, ({SongRawData data, DateTime expiresAt})> _songUrlCache =
+      {};
+
   Future<SongRawData> getSongUrl(String songId, AudioQuality quality) async {
+    final cacheKey = '$songId-${quality.name}';
+    final cached = _songUrlCache[cacheKey];
+    if (cached != null && DateTime.now().isBefore(cached.expiresAt)) {
+      return cached.data;
+    }
+
     final manifest = await _dataProvider.songStreamUrl(songId);
 
     final audioStreams = manifest.audioOnly;
@@ -242,8 +251,25 @@ class Repository {
     final audioCodecs =
         RepositoryHelperFunction.audioCodecsFormate(audioStreams);
 
-    return SongRawData(
+    final rawData = SongRawData(
         url: selectedStream.url, codecs: audioCodecs, totalBytes: totalbytes);
+
+    if (_songUrlCache.length > 50) {
+      _songUrlCache.remove(_songUrlCache.keys.first);
+    }
+    _songUrlCache[cacheKey] = (
+      data: rawData,
+      expiresAt: DateTime.now().add(const Duration(hours: 3)),
+    );
+
+    return rawData;
+  }
+
+  // Preload a song URL into the memory cache in the background
+  void preloadSongUrl(String songId, AudioQuality quality) {
+    final cacheKey = '$songId-${quality.name}';
+    if (_songUrlCache.containsKey(cacheKey)) return;
+    getSongUrl(songId, quality).then((_) {}, onError: (_) {});
   }
 
   //Search suggestion

@@ -1475,6 +1475,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayerStream ??= AudioPlayerStreamUtil.audioPlayerStreamData(
         songPosition: songPosition,
         bufferedPositionStream: bufferedPositionStream,
+        durationStream: _audioPlayer.durationStream,
       ).asBroadcastStream();
 
   Duration get currentPosition => _audioPlayer.position;
@@ -1656,6 +1657,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
       // After song starts playing, call auto radio to populate playlist
       _generateRadioSongs(_songData!.vId);
+      _prefetchNextSong();
     } catch (e) {
       if (e is PlayerInterruptedException ||
           e.toString().contains('Loading interrupted')) {
@@ -1723,6 +1725,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         volume: _currentVolume,
         isMuted: _isMute,
       ));
+      _prefetchNextSong();
     } catch (e) {
       if (e is PlayerInterruptedException ||
           e.toString().contains('Loading interrupted')) {
@@ -1976,6 +1979,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
       // After song starts playing, call auto radio to populate playlist
       _generateRadioSongs(event.songData.vId);
+      _prefetchNextSong();
     } catch (e) {
       if (e is PlayerInterruptedException ||
           e.toString().contains('Loading interrupted')) {
@@ -2012,6 +2016,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
             _playlistSongs.add(song);
           }
         }
+        _prefetchNextSong();
       }
     } catch (e) {
       print("Error loading more radio songs: $e");
@@ -2034,12 +2039,26 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
             _playlistSongs.add(song);
           }
         }
+        _prefetchNextSong();
       }
     } catch (e) {
       print("Error generating radio songs: $e");
     } finally {
       _isRadioLoading = false;
       add(UpdateUIEvent());
+    }
+  }
+
+  // Helper method to prefetch the next song's audio URL in background
+  void _prefetchNextSong() {
+    if (_playlistSongs.isEmpty) return;
+    final nextIndex = _currentSongIndex + 1;
+    if (nextIndex >= 0 && nextIndex < _playlistSongs.length) {
+      final nextSong = _playlistSongs[nextIndex];
+      if (!nextSong.isLocal && nextSong.vId.isNotEmpty) {
+        final qualityInfo = _dbInstance.getData;
+        _repository.preloadSongUrl(nextSong.vId, qualityInfo.audioQuality);
+      }
     }
   }
 
@@ -2124,6 +2143,10 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _playlistSongs = event.songlist.toSet().toList();
     _currentSongIndex = -1;
     _firstSongPlayedIndex = 0;
+    if (_playlistSongs.isNotEmpty && !_playlistSongs.first.isLocal && _playlistSongs.first.vId.isNotEmpty) {
+      final qualityInfo = _dbInstance.getData;
+      _repository.preloadSongUrl(_playlistSongs.first.vId, qualityInfo.audioQuality);
+    }
   }
 
   void _addToPlayNext(AddToPlayNextEvent event, Emitter<SongstreamState> emit) {
@@ -2145,6 +2168,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
     // Insert at the next index
     _playlistSongs.insert(insertIndex, event.songData);
+    _prefetchNextSong();
 
     // Emit current state to trigger UI update
     if (_songData != null) {

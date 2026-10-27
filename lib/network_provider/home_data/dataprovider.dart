@@ -106,7 +106,11 @@ class DataProvider {
   }
 
   Future<StreamManifest> songStreamUrl(String songId) {
-    return _youtubeExplode.videos.streamsClient.getManifest(songId);
+    return _youtubeExplode.videos.streamsClient.getManifest(
+      songId,
+      requireWatchPage: false,
+      validateStreams: false,
+    );
   }
 
   Future<yt.SongFull> getSongForDeeplinkSearchSong(String songId) async {

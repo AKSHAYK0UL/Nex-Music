@@ -1642,8 +1642,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: f2697670a84b6401d53e44ac4270d1b0ab92c939
-      resolved-ref: f2697670a84b6401d53e44ac4270d1b0ab92c939
+      ref: cc761744fff035802c8e3af9f5b4e0975210cbee
+      resolved-ref: cc761744fff035802c8e3af9f5b4e0975210cbee
       url: "https://github.com/AKSHAYK0UL/Youtube-Client-Dart.git"
     source: git
     version: "2.4.0"

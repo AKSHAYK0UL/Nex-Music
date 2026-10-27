@@ -24,6 +24,8 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
   // ValueNotifier drives the ProgressBar  we fully control what is displayed.
   late final ValueNotifier<Duration> _displayPosition;
   late final ValueNotifier<Duration> _displayBuffered;
+  // Tracks the live total duration reported by the audio player.
+  late final ValueNotifier<Duration> _displayTotal;
 
   // While non-null we suppress stream updates that are lower than this target
   // (the "flash to zero" that just_audio emits during a seek).
@@ -37,6 +39,7 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
     final initial = _songstreamBloc.currentAudioPlayerStream;
     _displayPosition = ValueNotifier(initial.position);
     _displayBuffered = ValueNotifier(initial.bufferPosition);
+    _displayTotal = ValueNotifier(Duration.zero);
 
     _streamSubscription =
         _songstreamBloc.getAudioPlayerStreamData.listen(_onStreamEvent);
@@ -54,10 +57,14 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
 
     _displayPosition.value = incoming;
     _displayBuffered.value = event.bufferPosition;
+    // Update live total duration (non-zero values only)
+    if (event.totalDuration > Duration.zero) {
+      _displayTotal.value = event.totalDuration;
+    }
   }
 
   void _handleSeek(Duration value) {
-    // Immediately show the tapped position — no waiting for the stream.
+    // Immediately show the tapped position no waiting for the stream.
     _displayPosition.value = value;
     _pendingSeekPosition = value;
     _songstreamBloc.add(SeekToEvent(position: value));
@@ -68,12 +75,13 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
     _streamSubscription.cancel();
     _displayPosition.dispose();
     _displayBuffered.dispose();
+    _displayTotal.dispose();
     super.dispose();
   }
 
   // Parse "mm:ss" or "hh:mm:ss" duration string to Duration.
   Duration _parseDuration(String? raw) {
-    if (raw == null || raw.trim().isEmpty) return const Duration(seconds: 1);
+    if (raw == null || raw.trim().isEmpty) return Duration.zero;
     final parts = raw.trim().split(':');
     if (parts.length == 2) {
       final m = int.tryParse(parts[0]) ?? 0;
@@ -85,7 +93,17 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
       final s = int.tryParse(parts[2]) ?? 0;
       return Duration(hours: h, minutes: m, seconds: s);
     }
-    return const Duration(seconds: 1);
+    return Duration.zero;
+  }
+
+  // Pick the best duration: metadata string -> live stream -> bloc field -> fallback 0s
+  Duration _effectiveDuration(Duration metadataDuration) {
+    if (metadataDuration > Duration.zero) return metadataDuration;
+    if (_displayTotal.value > Duration.zero) return _displayTotal.value;
+    if (_songstreamBloc.songDuration > Duration.zero) {
+      return _songstreamBloc.songDuration;
+    }
+    return const Duration(seconds: 0);
   }
 
   @override
@@ -122,16 +140,19 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
           _pendingSeekPosition = null;
           _displayPosition.value = Duration.zero;
           _displayBuffered.value = Duration.zero;
+          // Reset live total so previous song's duration doesn't show over
+          _displayTotal.value = Duration.zero;
 
           final loadingSong = blocState.songData;
-
-          final total = _parseDuration(loadingSong.duration);
+          final metadataDuration = _parseDuration(loadingSong.duration);
 
           return _buildBar(
             context,
             progress: Duration.zero,
             buffered: Duration.zero,
-            total: total > Duration.zero ? total : const Duration(seconds: 1),
+            total: metadataDuration > Duration.zero
+                ? metadataDuration
+                : const Duration(seconds: 1),
             onSeek: null,
           );
         }
@@ -143,27 +164,30 @@ class _StreamBuilderWidgetState extends State<StreamBuilderWidget> {
         if (blocState is PausedState) {
           songDurationStr = blocState.songData.duration;
         }
-        final metadataDuration = songDurationStr != null
-            ? _parseDuration(songDurationStr)
-            : Duration.zero;
-        final duration = metadataDuration > Duration.zero
-            ? metadataDuration
-            : (_songstreamBloc.songDuration > Duration.zero
-                ? _songstreamBloc.songDuration
-                : const Duration(seconds: 1));
+        final metadataDuration = _parseDuration(songDurationStr);
 
+        // Wrap in _displayTotal listener so the bar auto-updates when the
+        // audio player reports the real duration (fixes artist songs with no
+        // pre-loaded duration).
         return ValueListenableBuilder<Duration>(
-          valueListenable: _displayPosition,
-          builder: (context, position, _) {
+          valueListenable: _displayTotal,
+          builder: (context, liveDuration, _) {
+            final effectiveDuration = _effectiveDuration(metadataDuration);
+
             return ValueListenableBuilder<Duration>(
-              valueListenable: _displayBuffered,
-              builder: (context, buffered, _) {
-                return _buildBar(
-                  context,
-                  progress: position,
-                  buffered: buffered,
-                  total: duration,
-                  onSeek: _handleSeek,
+              valueListenable: _displayPosition,
+              builder: (context, position, _) {
+                return ValueListenableBuilder<Duration>(
+                  valueListenable: _displayBuffered,
+                  builder: (context, buffered, _) {
+                    return _buildBar(
+                      context,
+                      progress: position,
+                      buffered: buffered,
+                      total: effectiveDuration,
+                      onSeek: _handleSeek,
+                    );
+                  },
                 );
               },
             );
