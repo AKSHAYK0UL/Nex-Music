@@ -9,8 +9,25 @@ class LyricsNetworkProvider {
   LyricsNetworkProvider({required YTMusic ytMusic}) : _ytMusic = ytMusic;
 
   static const String _lrclibBaseUrl = 'https://lrclib.net/api';
+  static const String _ytMusicBaseUrl = 'https://music.youtube.com/youtubei/v1';
+
   static const Map<String, String> _headers = {
     'User-Agent': 'NexMusic/1.0',
+  };
+
+  static const Map<String, String> _ytMusicHeaders = {
+    'Content-Type': 'application/json',
+    'User-Agent':
+        'com.google.android.apps.youtube.music/6.43.52 (Linux; U; Android 13; en_US)',
+  };
+
+  static const Map<String, dynamic> _ytMusicContext = {
+    'client': {
+      'clientName': 'ANDROID_MUSIC',
+      'clientVersion': '6.43.52',
+      'androidSdkVersion': 33,
+      'hl': 'en',
+    }
   };
 
   // Clean title of common metadata noise like "(Official Video)", "ft. Artist", etc.
@@ -67,6 +84,154 @@ class LyricsNetworkProvider {
     final split =
         cleaned.split(RegExp(r'[,&/]|\bfeat\.?\b', caseSensitive: false));
     return split.first.trim();
+  }
+
+  // Fetches native time-synchronized lyrics directly from YouTube Music's InnerTube API.
+  // Because it queries the exact videoId played on YouTube, timing is 100% matched to the audio stream.
+  Future<LyricModel?> fetchYouTubeMusicLyrics(String videoId) async {
+    if (videoId.trim().isEmpty) return null;
+    try {
+      //  Get next endpoint to resolve lyrics browseId
+      final nextUri = Uri.parse('$_ytMusicBaseUrl/next?prettyPrint=false');
+      final nextRes = await http
+          .post(
+            nextUri,
+            headers: _ytMusicHeaders,
+            body: jsonEncode({
+              'context': _ytMusicContext,
+              'videoId': videoId,
+            }),
+          )
+          .timeout(const Duration(seconds: 4));
+
+      if (nextRes.statusCode != 200) return null;
+
+      final nextJson = jsonDecode(nextRes.body) as Map<String, dynamic>;
+      final tabs = nextJson['contents']
+              ?['singleColumnMusicWatchNextResultsRenderer']?['tabbedRenderer']
+          ?['watchNextTabbedResultsRenderer']?['tabs'] as List?;
+
+      String? lyricsBrowseId;
+      if (tabs != null) {
+        for (final tab in tabs) {
+          final tabRenderer = tab['tabRenderer'];
+          final endpoint = tabRenderer?['endpoint']?['browseEndpoint'];
+          final bId = endpoint?['browseId'] as String?;
+          if (bId != null && bId.startsWith('MPLY')) {
+            lyricsBrowseId = bId;
+            break;
+          }
+        }
+      }
+
+      if (lyricsBrowseId == null) return null;
+
+      // Fetch lyrics details from browse endpoint
+      final browseUri = Uri.parse('$_ytMusicBaseUrl/browse?prettyPrint=false');
+      final browseRes = await http
+          .post(
+            browseUri,
+            headers: _ytMusicHeaders,
+            body: jsonEncode({
+              'context': _ytMusicContext,
+              'browseId': lyricsBrowseId,
+            }),
+          )
+          .timeout(const Duration(seconds: 4));
+
+      if (browseRes.statusCode != 200) return null;
+
+      final browseJson = jsonDecode(browseRes.body) as Map<String, dynamic>;
+      dynamic timedModel = browseJson['contents']?['elementRenderer']
+              ?['newElement']?['type']?['componentType']?['model']
+          ?['timedLyricsModel'];
+
+      if (timedModel == null) {
+        dynamic findTimed(dynamic node) {
+          if (node is Map) {
+            if (node.containsKey('timedLyricsModel')) {
+              return node['timedLyricsModel'];
+            }
+            for (final v in node.values) {
+              final r = findTimed(v);
+              if (r != null) return r;
+            }
+          } else if (node is List) {
+            for (final item in node) {
+              final r = findTimed(item);
+              if (r != null) return r;
+            }
+          }
+          return null;
+        }
+
+        timedModel = findTimed(browseJson);
+      }
+
+      final lyricsData = timedModel?['lyricsData'];
+      final rawLines = lyricsData?['timedLyricsData'] as List?;
+
+      if (rawLines != null && rawLines.isNotEmpty) {
+        final List<LyricLine> syncedLines = [];
+        final List<String> plainLines = [];
+
+        for (final item in rawLines) {
+          final text = (item['lyricLine'] as String? ?? '').trim();
+          final cueRange = item['cueRange'];
+
+          if (cueRange != null) {
+            final startMs = int.tryParse(
+                cueRange['startTimeMilliseconds']?.toString() ?? '');
+            final endMs =
+                int.tryParse(cueRange['endTimeMilliseconds']?.toString() ?? '');
+            if (startMs != null) {
+              final startDuration = Duration(milliseconds: startMs);
+              final endDuration =
+                  endMs != null ? Duration(milliseconds: endMs) : null;
+              syncedLines.add(
+                LyricLine(
+                  timestamp: startDuration,
+                  endTime: endDuration,
+                  text: text.isEmpty ? '♪' : text,
+                ),
+              );
+            }
+          }
+
+          if (text.isNotEmpty && text != '♪') {
+            plainLines.add(text);
+          }
+        }
+
+        if (syncedLines.isNotEmpty) {
+          return LyricModel(
+            plainLyrics: plainLines.isNotEmpty
+                ? plainLines.join('\n')
+                : syncedLines.map((e) => e.text).join('\n'),
+            syncedLyrics: syncedLines,
+          );
+        }
+
+        if (plainLines.isNotEmpty) {
+          return LyricModel(plainLyrics: plainLines.join('\n'));
+        }
+      }
+
+      // Check description shelf fallback for plain lyrics
+      final sectionList =
+          browseJson['contents']?['sectionListRenderer']?['contents'] as List?;
+      if (sectionList != null && sectionList.isNotEmpty) {
+        final desc = sectionList[0]?['musicDescriptionShelfRenderer']
+            ?['description']?['runs'] as List?;
+        if (desc != null && desc.isNotEmpty) {
+          final plainText = desc.map((r) => r['text'] ?? '').join('').trim();
+          if (plainText.isNotEmpty) {
+            return LyricModel(plainLyrics: plainText);
+          }
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
   // Finds the best candidate item from LRCLIB search results based on duration and title match
@@ -151,18 +316,86 @@ class LyricsNetworkProvider {
     return bestItem;
   }
 
-  // Fetches lyrics, prioritizing LRCLIB for synced lyrics, and falling back to dart_ytmusic_api.
+  // Fetches lyrics:
+  // 1. First priority: YouTube Music official native timed lyrics (exact videoId or track search fallback).
+  // 2. Second priority: LRCLIB synchronized lyrics (community LRC database).
+  // 3. Fallback: YouTube Music plain text lyrics.
   Future<LyricModel?> fetchLyrics({
     required String title,
     required String artist,
     required String videoId,
     int? durationSeconds,
   }) async {
+    LyricModel? ytFallbackLyrics;
+
+    //  YouTube Music Official API: Try native timed lyrics directly with played videoId first
+    if (videoId.trim().isNotEmpty) {
+      try {
+        final ytLyrics = await fetchYouTubeMusicLyrics(videoId);
+        if (ytLyrics != null) {
+          if (ytLyrics.hasSyncedLyrics) {
+            return ytLyrics;
+          }
+          ytFallbackLyrics = ytLyrics;
+        }
+      } catch (_) {}
+    }
+
     final cleanedTitle = cleanTitle(title);
     final cleanedArtist = cleanArtist(artist);
     final primary = primaryArtist(artist);
 
-    //  Try LRCLIB exact get
+    //  YouTube Music Track Search: If played videoId has no cueRange timed lyrics
+    // (e.g. it is an official music video or static layout), search YouTube Music for the official track version.
+    // Official tracks on YouTube Music almost always have official cueRange timed lyrics!
+    try {
+      await _ytMusic.initialize();
+      List<dynamic> searchCandidates = [];
+      try {
+        searchCandidates = await _ytMusic
+            .searchSongs('$cleanedTitle $primary')
+            .timeout(const Duration(seconds: 4));
+      } catch (_) {}
+
+      if (searchCandidates.isEmpty) {
+        try {
+          searchCandidates = await _ytMusic
+              .searchSongs(cleanedTitle)
+              .timeout(const Duration(seconds: 4));
+        } catch (_) {}
+      }
+
+      if (searchCandidates.isNotEmpty) {
+        final candidatesList = searchCandidates.toList();
+        if (durationSeconds != null && durationSeconds > 0) {
+          candidatesList.sort((a, b) {
+            final aDur = (a.duration as num?)?.toInt() ?? 0;
+            final bDur = (b.duration as num?)?.toInt() ?? 0;
+            final aDiff = aDur > 0 ? (aDur - durationSeconds).abs() : 999;
+            final bDiff = bDur > 0 ? (bDur - durationSeconds).abs() : 999;
+            return aDiff.compareTo(bDiff);
+          });
+        }
+
+        for (final candidate in candidatesList.take(3)) {
+          final candVideoId = candidate.videoId as String?;
+          if (candVideoId == null || candVideoId == videoId) continue;
+          try {
+            final candidateLyrics = await fetchYouTubeMusicLyrics(candVideoId);
+            if (candidateLyrics != null && candidateLyrics.hasSyncedLyrics) {
+              return candidateLyrics;
+            }
+            if (ytFallbackLyrics == null &&
+                candidateLyrics != null &&
+                candidateLyrics.hasLyrics) {
+              ytFallbackLyrics = candidateLyrics;
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+
+    // Try LRCLIB exact get
     for (final artistQuery in [primary, cleanedArtist]) {
       try {
         final queryParams = <String, String>{
@@ -198,14 +431,13 @@ class LyricsNetworkProvider {
           }
         }
       } catch (_) {
-        // Continue
+        // Continue to search
       }
     }
 
-    //  Try LRCLIB search endpoint (both structured search and general query)
+    // Try LRCLIB search endpoint
     List<dynamic> searchResults = [];
     try {
-      // Structured search with track_name and artist_name
       final structuredUri = Uri.parse('$_lrclibBaseUrl/search').replace(
         queryParameters: {
           'track_name': cleanedTitle,
@@ -224,7 +456,6 @@ class LyricsNetworkProvider {
 
     if (searchResults.isEmpty) {
       try {
-        // Fallback to text search
         final searchUri = Uri.parse('$_lrclibBaseUrl/search').replace(
           queryParameters: {
             'q': '$cleanedTitle $primary',
@@ -253,7 +484,6 @@ class LyricsNetworkProvider {
         final plainStr = bestCandidate['plainLyrics'] as String?;
         final candidateDuration = (bestCandidate['duration'] as num?)?.round();
 
-        // If duration difference is extreme (> 25s), avoid out-of-sync timestamps
         final durationDiff = (durationSeconds != null &&
                 durationSeconds > 0 &&
                 candidateDuration != null)
@@ -279,6 +509,11 @@ class LyricsNetworkProvider {
       }
     }
 
+    //  Fallback to YouTube Music plain text lyrics if obtained earlier
+    if (ytFallbackLyrics != null && ytFallbackLyrics.hasLyrics) {
+      return ytFallbackLyrics;
+    }
+
     //  Fallback to dart_ytmusic_api official lyrics
     try {
       await _ytMusic.initialize();
@@ -290,7 +525,7 @@ class LyricsNetworkProvider {
         return LyricModel(plainLyrics: ytLyrics);
       }
     } catch (_) {
-      // Both failed
+      // Failed
     }
 
     return null;

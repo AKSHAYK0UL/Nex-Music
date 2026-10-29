@@ -1410,6 +1410,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   Duration songDuration = Duration.zero;
   Stream<Duration>? songPosition;
   Stream<Duration>? bufferedPositionStream;
+  final StreamController<Duration> _seekPositionController =
+      StreamController<Duration>.broadcast();
+  Stream<Duration> get seekPositionStream => _seekPositionController.stream;
   List<Songmodel> _playlistSongs = [];
   int _currentSongIndex = -1;
   int _firstSongPlayedIndex = 0;
@@ -1761,6 +1764,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   void _seekTo(SeekToEvent event, Emitter<SongstreamState> emit) {
+    _seekPositionController.add(event.position);
     _audioPlayer.seek(event.position);
   }
 
@@ -2271,6 +2275,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   @override
   Future<void> close() {
+    _seekPositionController.close();
     _audioPlayer.dispose();
     return super.close();
   }

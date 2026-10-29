@@ -1072,6 +1072,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                           route: route,
                           isPlaylist:
                               widget.routeData["isplaylist"] ?? false,
+                          isLyricsVisible: _isLyricsView,
                           onCloseLyrics: _closeLyrics,
                           onOpenQueue: () =>
                               _showUpcomingSongsBottomSheet(context),

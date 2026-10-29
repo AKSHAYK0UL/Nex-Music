@@ -114,6 +114,7 @@ class AppleMusicLyricsView extends StatefulWidget {
   final VoidCallback onCloseLyrics;
   final VoidCallback onOpenQueue;
   final void Function(GlobalKey menuKey) onShowOptions;
+  final ValueNotifier<bool>? isLyricsVisible;
 
   const AppleMusicLyricsView({
     super.key,
@@ -126,6 +127,7 @@ class AppleMusicLyricsView extends StatefulWidget {
     required this.onCloseLyrics,
     required this.onOpenQueue,
     required this.onShowOptions,
+    this.isLyricsVisible,
   });
 
   @override
@@ -138,7 +140,10 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
   final Map<int, GlobalKey> _lineKeys = {};
   int _lastActiveIndex = -1;
   bool _userIsScrolling = false;
+  bool _initialScrollDone = false;
   Timer? _userScrollTimer;
+  StreamSubscription<Duration>? _seekSubscription;
+  Duration _syncOffset = Duration.zero;
   late Songmodel _currentSong;
 
   static int? _parseDurationString(String? durationStr) {
@@ -157,10 +162,39 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
     return null;
   }
 
+  void _onVisibilityChanged() {
+    if (widget.isLyricsVisible?.value == true) {
+      _userScrollTimer?.cancel();
+      _userIsScrolling = false;
+      _initialScrollDone = false;
+      _lastActiveIndex = -1;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final lyricsState = context.read<LyricsBloc>().state;
+        if (lyricsState is LyricsLoadedState &&
+            lyricsState.lyricModel.hasSyncedLyrics) {
+          final currentPos = context.read<SongstreamBloc>().currentPosition;
+          final activeIndex = LyricModel.findActiveLineIndex(
+            lyricsState.lyricModel.syncedLyrics,
+            currentPos,
+            offset: _syncOffset,
+          );
+          if (activeIndex >= 0) {
+            _lastActiveIndex = activeIndex;
+            _scrollToActiveLine(activeIndex, instant: true);
+            _initialScrollDone = true;
+          }
+        }
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    final songState = context.read<SongstreamBloc>().state;
+    widget.isLyricsVisible?.addListener(_onVisibilityChanged);
+    final songstreamBloc = context.read<SongstreamBloc>();
+    final songState = songstreamBloc.state;
     if (songState is LoadingState) {
       _currentSong = songState.songData;
     } else if (songState is PlayingState) {
@@ -171,7 +205,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
       _currentSong = widget.songData;
     }
 
-    final streamSec = context.read<SongstreamBloc>().songDuration.inSeconds;
+    final streamSec = songstreamBloc.songDuration.inSeconds;
     final durationSec =
         streamSec > 0 ? streamSec : _parseDurationString(_currentSong.duration);
     context.read<LyricsBloc>().add(
@@ -180,11 +214,59 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
             durationSeconds: durationSec,
           ),
         );
+
+    final lyricsBloc = context.read<LyricsBloc>();
+    // Listen to duration bar seek events to instantly synchronize lyrics on seek
+    _seekSubscription =
+        songstreamBloc.seekPositionStream.listen((seekPosition) {
+      if (!mounted) return;
+      _userScrollTimer?.cancel();
+      _userIsScrolling = false;
+      final lyricsState = lyricsBloc.state;
+      if (lyricsState is LyricsLoadedState &&
+          lyricsState.lyricModel.hasSyncedLyrics) {
+        final activeIndex = LyricModel.findActiveLineIndex(
+          lyricsState.lyricModel.syncedLyrics,
+          seekPosition,
+          offset: _syncOffset,
+        );
+        _lastActiveIndex = activeIndex;
+        if (activeIndex >= 0) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToActiveLine(activeIndex, instant: false);
+          });
+        }
+      }
+    });
+
+    // Auto-scroll immediately to currently playing line on screen open
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final lyricsState = context.read<LyricsBloc>().state;
+      if (lyricsState is LyricsLoadedState &&
+          lyricsState.lyricModel.hasSyncedLyrics) {
+        final currentPos = context.read<SongstreamBloc>().currentPosition;
+        final activeIndex = LyricModel.findActiveLineIndex(
+          lyricsState.lyricModel.syncedLyrics,
+          currentPos,
+          offset: _syncOffset,
+        );
+        if (activeIndex >= 0) {
+          _lastActiveIndex = activeIndex;
+          _scrollToActiveLine(activeIndex, instant: true);
+          _initialScrollDone = true;
+        }
+      }
+    });
   }
 
   @override
   void didUpdateWidget(covariant AppleMusicLyricsView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.isLyricsVisible != widget.isLyricsVisible) {
+      oldWidget.isLyricsVisible?.removeListener(_onVisibilityChanged);
+      widget.isLyricsVisible?.addListener(_onVisibilityChanged);
+    }
     final songState = context.read<SongstreamBloc>().state;
     Songmodel activeSong = widget.songData;
     if (songState is LoadingState) {
@@ -199,6 +281,8 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
       setState(() {
         _currentSong = activeSong;
         _lastActiveIndex = -1;
+        _initialScrollDone = false;
+        _syncOffset = Duration.zero;
         _lineKeys.clear();
       });
       if (_scrollController.hasClients) {
@@ -218,22 +302,152 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
 
   @override
   void dispose() {
+    widget.isLyricsVisible?.removeListener(_onVisibilityChanged);
+    _seekSubscription?.cancel();
     _userScrollTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _scrollToActiveLine(int index) {
+  void _scrollToActiveLine(int index, {bool instant = false}) {
     if (_userIsScrolling) return;
+    if (!_scrollController.hasClients) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _scrollToActiveLine(index, instant: instant);
+      });
+      return;
+    }
     final key = _lineKeys[index];
     if (key?.currentContext != null) {
       Scrollable.ensureVisible(
         key!.currentContext!,
         alignment: 0.35,
-        duration: const Duration(milliseconds: 350),
+        duration: instant ? Duration.zero : const Duration(milliseconds: 350),
         curve: Curves.easeOutCubic,
       );
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _scrollToActiveLine(index, instant: instant);
+      });
     }
+  }
+
+  // Dialog allowing users to fine-tune lyrics sync offset (e.g. ±0.5s)
+  void _showSyncOffsetDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogCtx, setDialogState) {
+            final theme = Theme.of(dialogCtx);
+            final isDark = theme.brightness == Brightness.dark;
+            final offsetSeconds = _syncOffset.inMilliseconds / 1000.0;
+            final offsetStr = offsetSeconds == 0.0
+                ? '0.0s'
+                : '${offsetSeconds > 0 ? "+" : ""}${offsetSeconds.toStringAsFixed(1)}s';
+
+            return ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.88)
+                      : theme.scaffoldBackgroundColor.withValues(alpha: 0.95),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Lyrics Timing Sync',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Adjust timing if lyrics appear too early or too late',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.6),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        offsetStr,
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          color: theme.colorScheme.onSurface,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton.filledTonal(
+                            onPressed: () {
+                              setState(() {
+                                _syncOffset -=
+                                    const Duration(milliseconds: 500);
+                              });
+                              setDialogState(() {});
+                            },
+                            icon: const Icon(CupertinoIcons.minus),
+                            tooltip: '-0.5s',
+                          ),
+                          const SizedBox(width: 20),
+                          OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                _syncOffset = Duration.zero;
+                              });
+                              setDialogState(() {});
+                            },
+                            child: const Text('Reset'),
+                          ),
+                          const SizedBox(width: 20),
+                          IconButton.filledTonal(
+                            onPressed: () {
+                              setState(() {
+                                _syncOffset +=
+                                    const Duration(milliseconds: 500);
+                              });
+                              setDialogState(() {});
+                            },
+                            icon: const Icon(CupertinoIcons.plus),
+                            tooltip: '+0.5s',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -251,7 +465,6 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
           );
 
     return BlocListener<SongstreamBloc, SongstreamState>(
-      // Only listen when the song ID actually changes so button taps never rebuild the tree
       listenWhen: (previous, current) {
         String? prevId;
         String? currId;
@@ -272,6 +485,8 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
           setState(() {
             _currentSong = newSong!;
             _lastActiveIndex = -1;
+            _initialScrollDone = false;
+            _syncOffset = Duration.zero;
             _lineKeys.clear();
           });
           if (_scrollController.hasClients) {
@@ -325,7 +540,6 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
                 _buildTopHeader(context, _currentSong, highResUrl),
 
                 // Lyrics Area with Blur / Fade ShaderMask on top and bottom lines
-                // (Completely isolated: scrolling here NEVER opens the bottom modal sheet)
                 Expanded(
                   child: _buildLyricsArea(context, isDark),
                 ),
@@ -434,7 +648,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
     );
   }
 
-  // Top Header (Mini Art + Song Title + Artist)
+  // Top Header (Mini Art + Song Title + Artist + Timing Sync Button)
   Widget _buildTopHeader(
       BuildContext context, Songmodel currentSong, String imageUrl) {
     return Padding(
@@ -501,6 +715,76 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
                 ),
               ],
             ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Timing Sync Offset Pill / Button
+          BlocBuilder<LyricsBloc, LyricsState>(
+            builder: (context, state) {
+              if (state is LyricsLoadedState &&
+                  state.lyricModel.hasSyncedLyrics) {
+                final offsetSeconds = _syncOffset.inMilliseconds / 1000.0;
+                final hasOffset = _syncOffset != Duration.zero;
+
+                return GestureDetector(
+                  onTap: () => _showSyncOffsetDialog(context),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: hasOffset
+                          ? Colors.red.withValues(alpha: 0.2)
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: hasOffset
+                            ? Colors.red.withValues(alpha: 0.5)
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          CupertinoIcons.timer,
+                          size: 13,
+                          color: hasOffset
+                              ? Colors.red
+                              : Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.7),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          hasOffset
+                              ? '${offsetSeconds > 0 ? "+" : ""}${offsetSeconds.toStringAsFixed(1)}s'
+                              : 'Sync',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: hasOffset
+                                ? Colors.red
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
           ),
         ],
       ),
@@ -582,6 +866,23 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
           final isSynced =
               state.isSyncEnabled && state.lyricModel.hasSyncedLyrics;
 
+          if (!_initialScrollDone && isSynced) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              final currentPos = context.read<SongstreamBloc>().currentPosition;
+              final idx = LyricModel.findActiveLineIndex(
+                state.lyricModel.syncedLyrics,
+                currentPos,
+                offset: _syncOffset,
+              );
+              if (idx >= 0) {
+                _lastActiveIndex = idx;
+                _scrollToActiveLine(idx, instant: true);
+                _initialScrollDone = true;
+              }
+            });
+          }
+
           final lyricsWidget = isSynced
               ? _buildSyncedLyricsList(state.lyricModel.syncedLyrics, isDark)
               : _buildPlainLyricsList(
@@ -634,54 +935,33 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
     );
   }
 
-  // Synced Lyrics List
+  // Synced Lyrics List - Fully rendered with SingleChildScrollView so ensureVisible works 100% reliably
   Widget _buildSyncedLyricsList(List<LyricLine> lines, bool isDark) {
+    final streamBloc = context.read<SongstreamBloc>();
+
     return StreamBuilder<Duration>(
-      stream: context.read<SongstreamBloc>().songPosition,
+      initialData: streamBloc.currentPosition,
+      stream: streamBloc.songPosition,
       builder: (context, snapshot) {
         final currentPosition = snapshot.data ?? Duration.zero;
 
-        // Find active line index based on start and end timestamps
-        int activeIndex = -1;
-        for (int i = 0; i < lines.length; i++) {
-          final line = lines[i];
-          final nextLineStart =
-              (i + 1 < lines.length) ? lines[i + 1].timestamp : null;
-          final effectiveEnd = line.endTime ??
-              nextLineStart ??
-              (line.timestamp + const Duration(seconds: 12));
-
-          if (currentPosition >= line.timestamp) {
-            if (currentPosition < effectiveEnd) {
-              activeIndex = i;
-              break;
-            } else if (nextLineStart != null &&
-                currentPosition < nextLineStart) {
-              // Gap between line.endTime and nextLineStart
-              final gap = nextLineStart - (line.endTime ?? line.timestamp);
-              if (gap <= const Duration(seconds: 2)) {
-                // Short pause: keep line active for smooth experience
-                activeIndex = i;
-              } else {
-                // Long instrumental break: un-highlight active line
-                activeIndex = -1;
-              }
-              break;
-            }
-          } else {
-            break;
-          }
-        }
+        // Find active line index using fast binary search with user offset applied
+        final activeIndex = LyricModel.findActiveLineIndex(
+          lines,
+          currentPosition,
+          offset: _syncOffset,
+        );
 
         // Trigger auto-scroll on line change or intro
         if (activeIndex != _lastActiveIndex) {
           _lastActiveIndex = activeIndex;
           if (activeIndex >= 0) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              _scrollToActiveLine(activeIndex);
+              _scrollToActiveLine(activeIndex, instant: !_initialScrollDone);
+              _initialScrollDone = true;
             });
           } else if (lines.isNotEmpty &&
-              currentPosition < lines.first.timestamp) {
+              (currentPosition + _syncOffset) < lines.first.timestamp) {
             // Intro before first line: ensure scroll is at top
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (_scrollController.hasClients &&
@@ -699,64 +979,107 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
 
         final onSurface = Theme.of(context).colorScheme.onSurface;
 
-        return ListView.builder(
+        return SingleChildScrollView(
           controller: _scrollController,
           physics: const BouncingScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 30.0),
-          itemCount: lines.length,
-          itemBuilder: (context, index) {
-            final line = lines[index];
-            final isActive = index == activeIndex;
-            final isPast = activeIndex >= 0
-                ? index < activeIndex
-                : (line.endTime ?? line.timestamp) <= currentPosition;
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: List.generate(lines.length, (index) {
+              final line = lines[index];
+              final isActive = index == activeIndex;
+              final isPast = activeIndex >= 0
+                  ? index < activeIndex
+                  : (line.endTime ?? line.timestamp) <=
+                      (currentPosition + _syncOffset);
 
-            _lineKeys[index] ??= GlobalKey();
+              _lineKeys[index] ??= GlobalKey();
 
-            return GestureDetector(
-              key: _lineKeys[index],
-              onTap: () {
-                _userScrollTimer?.cancel();
-                _userIsScrolling = false;
-                context.read<SongstreamBloc>().add(
-                      SeekToEvent(position: line.timestamp),
-                    );
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                child: Text(
-                  line.text,
-                  style: TextStyle(
-                    color: isActive
-                        ? (isDark ? Colors.white : onSurface)
-                        : (isDark
-                            ? Colors.white.withValues(
-                                alpha: isPast ? 0.35 : 0.45,
-                              )
-                            : onSurface.withValues(
-                                alpha: isPast ? 0.35 : 0.45,
-                              )),
-                    fontSize: isActive ? 28 : 22,
-                    fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                    letterSpacing: -0.5,
-                    height: 1.3,
-                    shadows: isActive
-                        ? [
-                            Shadow(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.35)
-                                  : Colors.red.withValues(alpha: 0.25),
-                              blurRadius: 16,
+              return GestureDetector(
+                key: _lineKeys[index],
+                onTap: () {
+                  _userScrollTimer?.cancel();
+                  _userIsScrolling = false;
+                  context.read<SongstreamBloc>().add(
+                        SeekToEvent(position: line.timestamp),
+                      );
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: line.text == '♪'
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              CupertinoIcons.music_note,
+                              size: isActive ? 24 : 18,
+                              color: isActive
+                                  ? (isDark ? Colors.white : onSurface)
+                                  : (isDark
+                                      ? Colors.white.withValues(
+                                          alpha: isPast ? 0.35 : 0.45,
+                                        )
+                                      : onSurface.withValues(
+                                          alpha: isPast ? 0.35 : 0.45,
+                                        )),
                             ),
-                          ]
-                        : null,
-                  ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Instrumental',
+                              style: TextStyle(
+                                color: isActive
+                                    ? (isDark ? Colors.white : onSurface)
+                                    : (isDark
+                                        ? Colors.white.withValues(
+                                            alpha: isPast ? 0.35 : 0.45,
+                                          )
+                                        : onSurface.withValues(
+                                            alpha: isPast ? 0.35 : 0.45,
+                                          )),
+                                fontSize: isActive ? 22 : 17,
+                                fontWeight: isActive
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          line.text,
+                          style: TextStyle(
+                            color: isActive
+                                ? (isDark ? Colors.white : onSurface)
+                                : (isDark
+                                    ? Colors.white.withValues(
+                                        alpha: isPast ? 0.35 : 0.45,
+                                      )
+                                    : onSurface.withValues(
+                                        alpha: isPast ? 0.35 : 0.45,
+                                      )),
+                            fontSize: isActive ? 28 : 22,
+                            fontWeight:
+                                isActive ? FontWeight.w800 : FontWeight.w600,
+                            letterSpacing: -0.5,
+                            height: 1.3,
+                            shadows: isActive
+                                ? [
+                                    Shadow(
+                                      color: isDark
+                                          ? Colors.white.withValues(alpha: 0.35)
+                                          : Colors.red.withValues(alpha: 0.25),
+                                      blurRadius: 16,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                        ),
                 ),
-              ),
-            );
-          },
+              );
+            }),
+          ),
         );
       },
     );
@@ -811,7 +1134,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
             ),
           ),
 
-          // Sync On / Off (disabled state if lyric has no sync)
+          // Sync On / Off (disabled state if lyric has no sync; long press opens timing sync dialog)
           BlocBuilder<LyricsBloc, LyricsState>(
             builder: (context, lyricsState) {
               final hasSync = lyricsState is LyricsLoadedState &&
@@ -831,6 +1154,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
                     showSnackbar(context, 'Synced lyrics not available');
                   }
                 },
+                onLongPress: hasSync ? () => _showSyncOffsetDialog(context) : null,
                 icon: Icon(
                   hasSync
                       ? (isSyncOn
@@ -851,7 +1175,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
             },
           ),
 
-          //  Shuffle and Sequence combined in one (exact copy of audio player)
+          // Shuffle and Sequence combined in one (exact copy of audio player)
           BlocBuilder<SongstreamBloc, SongstreamState>(
             buildWhen: (previous, current) => previous != current,
             builder: (context, state) {
@@ -870,7 +1194,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
             },
           ),
 
-          //  Menu (Three lines, exact copy of audio player)
+          // Menu (Three lines, exact copy of audio player)
           Container(
             key: _lyricsMenuButtonKey,
             child: IconButton(
@@ -887,7 +1211,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
     );
   }
 
-  //  Bottom Grab Pill (opens Up Next bottom sheet)
+  // Bottom Grab Pill (opens Up Next bottom sheet)
   Widget _buildBottomGrabPill(BuildContext context) {
     return Center(
       child: GestureDetector(
