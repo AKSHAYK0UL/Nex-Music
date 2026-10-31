@@ -59,11 +59,21 @@ class DownloadBloc extends Bloc<DownloadEvent, DownloadState> {
             return DownloadErrorState(errorMessage: error.toString());
           },
         );
+
+        // After download stream completes successfully, save lyrics in background.
+        if (state is DownloadCompletedState) {
+          _saveLyricsInBackground(event.songData);
+        }
       } else {
         emit(DownloadErrorState(errorMessage: "permission denied"));
       }
     } catch (e) {
       emit(DownloadErrorState(errorMessage: e.toString()));
     }
+  }
+
+  //Fetches and saves lyrics for the downloaded song in the background.
+  void _saveLyricsInBackground(Songmodel songData) {
+    _downloadRepo.saveLyricsForSong(songData, _repository).catchError((_) {});
   }
 }

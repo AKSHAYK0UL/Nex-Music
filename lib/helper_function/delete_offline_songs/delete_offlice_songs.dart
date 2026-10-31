@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:nex_music/core/exceptions/dir_not_exists.dart';
+import 'package:nex_music/helper_function/lyrics_cache/lyrics_cache.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -23,18 +24,18 @@ Future<void> deleteDownloadedSong(Songmodel songData) async {
 
     if (await songFile.exists()) {
       await songFile.delete();
-      return;
     }
 
     if (await thumbnailFile.exists()) {
       await thumbnailFile.delete();
-      return;
     }
 
     if (await metadataFile.exists()) {
       await metadataFile.delete();
-      return;
     }
+
+    // Also delete cached lyrics files (.lrc and .txt)
+    await deleteLyricsFiles(basePath);
   } catch (_) {
     rethrow;
   }

@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/helper_function/lyrics_cache/lyrics_cache.dart';
 import 'package:nex_music/model/lyric_model.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
@@ -35,7 +36,18 @@ class LyricsBloc extends Bloc<LyricsEvent, LyricsState> {
     }
 
     try {
-      final lyrics = await _repository.getLyrics(
+      LyricModel? lyrics;
+
+      // For offline/downloaded songs, try loading from disk first.
+      if (event.songData.isLocal) {
+        lyrics = await loadLyricsFromFile(
+          event.songData.songName,
+          event.songData.vId,
+        );
+      }
+
+      // Fall back to network if not found locally (or not a local song).
+      lyrics ??= await _repository.getLyrics(
         title: event.songData.songName,
         artist: event.songData.artist.name,
         videoId: event.songData.vId,
