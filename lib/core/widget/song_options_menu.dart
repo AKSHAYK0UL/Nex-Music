@@ -178,24 +178,16 @@ class SongOptionsMenu extends StatelessWidget {
             // Capture the root navigator context BEFORE popping so it stays alive
             final rootCtx = Navigator.of(context, rootNavigator: true).context;
             Navigator.pop(context);
-            final isPlayer = menuType == SongMenuType.audioPlayer;
             final isUpNext = tabRouteENUM == TabRouteENUM.upNext;
 
             navigateToArtistOrShowSheet(
               context: rootCtx,
               songData: songData,
-              onBeforeNavigate: (isPlayer || isUpNext)
+              onBeforeNavigate: isUpNext
                   ? () {
                       final nav = Navigator.of(rootCtx, rootNavigator: true);
-                      if (isUpNext) {
-                        // Pop UpcomingSongsBottomSheet
-                        if (nav.canPop()) nav.pop();
-                        // Pop AudioPlayerScreen
-                        if (nav.canPop()) nav.pop();
-                      } else if (isPlayer) {
-                        // Pop AudioPlayerScreen
-                        if (nav.canPop()) nav.pop();
-                      }
+                      // Pop UpcomingSongsBottomSheet so user returns to AudioPlayerScreen when navigating back from artist
+                      if (nav.canPop()) nav.pop();
                     }
                   : null,
             );

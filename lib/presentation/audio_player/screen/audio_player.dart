@@ -624,8 +624,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                                   navigateToArtistOrShowSheet(
                                                     context: context,
                                                     songData: currentSongData,
-                                                    onBeforeNavigate: () =>
-                                                        context.pop(),
                                                   );
                                                 },
                                                 child: animatedText(
@@ -838,8 +836,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                             navigateToArtistOrShowSheet(
                                               context: context,
                                               songData: activeSong,
-                                              onBeforeNavigate: () =>
-                                                  context.pop(),
                                             );
                                           },
                                           icon: Icon(
