@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/lyrics_bloc/lyrics_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/enum/lyrics_source.dart';
 import 'package:nex_music/enum/song_miniplayer_route.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/model/lyric_model.dart';
@@ -104,7 +107,7 @@ class _LyricsSwipeUpDetectorState extends State<_LyricsSwipeUpDetector> {
   }
 }
 
-class AppleMusicLyricsView extends StatefulWidget {
+class MusicLyricsView extends StatefulWidget {
   final Songmodel songData;
   final double screenSize;
   final double screenWidth;
@@ -116,7 +119,7 @@ class AppleMusicLyricsView extends StatefulWidget {
   final void Function(GlobalKey menuKey) onShowOptions;
   final ValueNotifier<bool>? isLyricsVisible;
 
-  const AppleMusicLyricsView({
+  const MusicLyricsView({
     super.key,
     required this.songData,
     required this.screenSize,
@@ -131,12 +134,11 @@ class AppleMusicLyricsView extends StatefulWidget {
   });
 
   @override
-  State<AppleMusicLyricsView> createState() => _AppleMusicLyricsViewState();
+  State<MusicLyricsView> createState() => _MusicLyricsViewState();
 }
 
-class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
+class _MusicLyricsViewState extends State<MusicLyricsView> {
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey _lyricsMenuButtonKey = GlobalKey();
   final Map<int, GlobalKey> _lineKeys = {};
   int _lastActiveIndex = -1;
   bool _userIsScrolling = false;
@@ -261,7 +263,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
   }
 
   @override
-  void didUpdateWidget(covariant AppleMusicLyricsView oldWidget) {
+  void didUpdateWidget(covariant MusicLyricsView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isLyricsVisible != widget.isLyricsVisible) {
       oldWidget.isLyricsVisible?.removeListener(_onVisibilityChanged);
@@ -332,118 +334,19 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
     }
   }
 
-  // Dialog allowing users to fine-tune lyrics sync offset (e.g. ±0.5s)
+  // bottom sheet for fine-tuning lyrics sync
   void _showSyncOffsetDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (dialogCtx, setDialogState) {
-            final theme = Theme.of(dialogCtx);
-            final isDark = theme.brightness == Brightness.dark;
-            final offsetSeconds = _syncOffset.inMilliseconds / 1000.0;
-            final offsetStr = offsetSeconds == 0.0
-                ? '0.0s'
-                : '${offsetSeconds > 0 ? "+" : ""}${offsetSeconds.toStringAsFixed(1)}s';
-
-            return ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  color: isDark
-                      ? Colors.black.withValues(alpha: 0.88)
-                      : theme.scaffoldBackgroundColor.withValues(alpha: 0.95),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Lyrics Timing Sync',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'Adjust timing if lyrics appear too early or too late',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.6),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        offsetStr,
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.w800,
-                          color: theme.colorScheme.onSurface,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton.filledTonal(
-                            onPressed: () {
-                              setState(() {
-                                _syncOffset -=
-                                    const Duration(milliseconds: 500);
-                              });
-                              setDialogState(() {});
-                            },
-                            icon: const Icon(CupertinoIcons.minus),
-                            tooltip: '-0.5s',
-                          ),
-                          const SizedBox(width: 20),
-                          OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                _syncOffset = Duration.zero;
-                              });
-                              setDialogState(() {});
-                            },
-                            child: const Text('Reset'),
-                          ),
-                          const SizedBox(width: 20),
-                          IconButton.filledTonal(
-                            onPressed: () {
-                              setState(() {
-                                _syncOffset +=
-                                    const Duration(milliseconds: 500);
-                              });
-                              setDialogState(() {});
-                            },
-                            icon: const Icon(CupertinoIcons.plus),
-                            tooltip: '+0.5s',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
-              ),
-            );
+        return _LyricsSyncTimerSheet(
+          initialOffset: _syncOffset,
+          onOffsetChanged: (newOffset) {
+            setState(() {
+              _syncOffset = newOffset;
+            });
           },
         );
       },
@@ -716,76 +619,6 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
               ],
             ),
           ),
-
-          const SizedBox(width: 8),
-
-          // Timing Sync Offset Pill / Button
-          BlocBuilder<LyricsBloc, LyricsState>(
-            builder: (context, state) {
-              if (state is LyricsLoadedState &&
-                  state.lyricModel.hasSyncedLyrics) {
-                final offsetSeconds = _syncOffset.inMilliseconds / 1000.0;
-                final hasOffset = _syncOffset != Duration.zero;
-
-                return GestureDetector(
-                  onTap: () => _showSyncOffsetDialog(context),
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: hasOffset
-                          ? Colors.red.withValues(alpha: 0.2)
-                          : Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: hasOffset
-                            ? Colors.red.withValues(alpha: 0.5)
-                            : Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.15),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          CupertinoIcons.timer,
-                          size: 13,
-                          color: hasOffset
-                              ? Colors.red
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.7),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          hasOffset
-                              ? '${offsetSeconds > 0 ? "+" : ""}${offsetSeconds.toStringAsFixed(1)}s'
-                              : 'Sync',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: hasOffset
-                                ? Colors.red
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
         ],
       ),
     );
@@ -935,7 +768,7 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
     );
   }
 
-  // Synced Lyrics List - Fully rendered with SingleChildScrollView so ensureVisible works 100% reliably
+  // Synced Lyrics List - Fully rendered with SingleChildScrollView
   Widget _buildSyncedLyricsList(List<LyricLine> lines, bool isDark) {
     final streamBloc = context.read<SongstreamBloc>();
 
@@ -1154,7 +987,8 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
                     showSnackbar(context, 'Synced lyrics not available');
                   }
                 },
-                onLongPress: hasSync ? () => _showSyncOffsetDialog(context) : null,
+                onLongPress:
+                    hasSync ? () => _showSyncOffsetDialog(context) : null,
                 icon: Icon(
                   hasSync
                       ? (isSyncOn
@@ -1194,20 +1028,80 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
             },
           ),
 
-          // Menu (Three lines, exact copy of audio player)
-          Container(
-            key: _lyricsMenuButtonKey,
-            child: IconButton(
-              onPressed: () => widget.onShowOptions(_lyricsMenuButtonKey),
-              icon: FaIcon(
-                FontAwesomeIcons.list,
-                color: Colors.red.withValues(alpha: 0.8),
-                size: 24,
-              ),
-            ),
+          // Lyrics Source Picker
+          BlocBuilder<LyricsBloc, LyricsState>(
+            builder: (context, lyricsState) {
+              final isLoaded = lyricsState is LyricsLoadedState;
+              return GestureDetector(
+                onTap: () => _showLyricsSourceSheet(context),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: isLoaded ? 0.1 : 0.05),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: isLoaded ? 0.2 : 0.1),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        CupertinoIcons.text_badge_checkmark,
+                        size: 14,
+                        color:
+                            Colors.red.withValues(alpha: isLoaded ? 0.85 : 0.4),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        isLoaded
+                            ? (lyricsState.source == LyricsSource.ytMusic
+                                ? 'YT'
+                                : 'LRC')
+                            : 'src',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.red
+                              .withValues(alpha: isLoaded ? 0.85 : 0.4),
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
+    );
+  }
+
+  // bottom sheet for switching lyrics source + sync timer
+  void _showLyricsSourceSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        return BlocProvider.value(
+          value: context.read<LyricsBloc>(),
+          child: _LyricsSourceSheet(
+            onSyncTap: () {
+              context.pop(sheetCtx);
+              _showSyncOffsetDialog(context);
+            },
+            syncOffset: _syncOffset,
+          ),
+        );
+      },
     );
   }
 
@@ -1230,6 +1124,745 @@ class _AppleMusicLyricsViewState extends State<AppleMusicLyricsView> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// Lyrics Source Bottom Sheet
+
+class _LyricsSourceSheet extends StatelessWidget {
+  final VoidCallback onSyncTap;
+  final Duration syncOffset;
+
+  const _LyricsSourceSheet({
+    required this.onSyncTap,
+    required this.syncOffset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final onSurface = theme.colorScheme.onSurface;
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(24, 14, 24, 32),
+          color: isDark
+              ? Colors.black.withValues(alpha: 0.85)
+              : theme.scaffoldBackgroundColor.withValues(alpha: 0.93),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Drag handle
+                Container(
+                  width: 38,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: onSurface.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 18),
+
+                // Title
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Lyrics Source',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: onSurface,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Switch between providers or adjust sync',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                BlocBuilder<LyricsBloc, LyricsState>(
+                  builder: (context, state) {
+                    final isLoaded = state is LyricsLoadedState;
+                    final activeSource =
+                        isLoaded ? state.source : LyricsSource.ytMusic;
+                    final hasYt = isLoaded && state.hasYtLyrics;
+                    final hasLrc = isLoaded && state.hasLrclibLyrics;
+                    final hasSynced =
+                        isLoaded && state.lyricModel.hasSyncedLyrics;
+
+                    return Column(
+                      children: [
+                        //  YT Music Option
+                        _SourceTile(
+                          label: 'Nex Music',
+                          subtitle: hasYt
+                              ? (state.ytLyrics!.hasSyncedLyrics
+                                  ? 'Synced lyrics'
+                                  : 'Plain lyrics')
+                              : 'Not available for this song',
+                          icon: CupertinoIcons.play_circle_fill,
+                          isActive: activeSource == LyricsSource.ytMusic,
+                          isAvailable: hasYt,
+                          onTap: hasYt
+                              ? () {
+                                  context.read<LyricsBloc>().add(
+                                        const SwitchLyricsSourceEvent(
+                                            LyricsSource.ytMusic),
+                                      );
+                                  context.pop(context);
+                                }
+                              : null,
+                        ),
+                        const SizedBox(height: 10),
+                        //  LRCLIB Option
+                        _SourceTile(
+                          label: 'LRCLIB',
+                          subtitle: hasLrc
+                              ? (state.lrclibLyrics!.hasSyncedLyrics
+                                  ? 'Synced lyrics'
+                                  : 'Plain lyrics')
+                              : 'Not available for this song',
+                          icon: CupertinoIcons.doc_text_fill,
+                          isActive: activeSource == LyricsSource.lrclib,
+                          isAvailable: hasLrc,
+                          onTap: hasLrc
+                              ? () {
+                                  context.read<LyricsBloc>().add(
+                                        const SwitchLyricsSourceEvent(
+                                            LyricsSource.lrclib),
+                                      );
+                                  context.pop(context);
+                                }
+                              : null,
+                        ),
+
+                        //  Sync Timer
+                        if (hasSynced) ...[
+                          const SizedBox(height: 14),
+                          const Divider(height: 1, thickness: 0.4)
+                        ],
+                        if (hasSynced)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: syncOffset != Duration.zero
+                                    ? Colors.red.withValues(alpha: 0.18)
+                                    : onSurface.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                CupertinoIcons.timer,
+                                size: 20,
+                                color: syncOffset != Duration.zero
+                                    ? Colors.red
+                                    : onSurface.withValues(alpha: 0.7),
+                              ),
+                            ),
+                            title: Text(
+                              'Sync Timer',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: onSurface,
+                              ),
+                            ),
+                            subtitle: Text(
+                              syncOffset == Duration.zero
+                                  ? 'Adjust timing if lyrics are early or late'
+                                  : 'Offset: ${syncOffset.inMilliseconds > 0 ? '+' : ''}${(syncOffset.inMilliseconds / 1000.0).toStringAsFixed(1)}s',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: syncOffset != Duration.zero
+                                    ? Colors.red.withValues(alpha: 0.85)
+                                    : onSurface.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            trailing: Icon(
+                              CupertinoIcons.chevron_right,
+                              size: 16,
+                              color: onSurface.withValues(alpha: 0.3),
+                            ),
+                            onTap: onSyncTap,
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceTile extends StatelessWidget {
+  final String label;
+  final String subtitle;
+  final IconData icon;
+  final bool isActive;
+  final bool isAvailable;
+  final VoidCallback? onTap;
+
+  const _SourceTile({
+    required this.label,
+    required this.subtitle,
+    required this.icon,
+    required this.isActive,
+    required this.isAvailable,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: isActive
+              ? Colors.red.withValues(alpha: isDark ? 0.18 : 0.1)
+              : onSurface.withValues(alpha: isAvailable ? 0.06 : 0.03),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive
+                ? Colors.red.withValues(alpha: 0.5)
+                : onSurface.withValues(alpha: isAvailable ? 0.12 : 0.06),
+            width: isActive ? 1.5 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Source icon
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isActive
+                    ? Colors.red.withValues(alpha: 0.2)
+                    : onSurface.withValues(alpha: isAvailable ? 0.08 : 0.04),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                size: 20,
+                color: isActive
+                    ? Colors.red
+                    : onSurface.withValues(alpha: isAvailable ? 0.65 : 0.3),
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // Labels
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: isActive
+                          ? Colors.red
+                          : onSurface.withValues(
+                              alpha: isAvailable ? 1.0 : 0.4),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isActive
+                          ? Colors.red.withValues(alpha: 0.75)
+                          : onSurface.withValues(
+                              alpha: isAvailable ? 0.5 : 0.3),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Checkmark if active
+            if (isActive)
+              const Icon(
+                CupertinoIcons.checkmark_circle_fill,
+                size: 20,
+                color: Colors.red,
+              )
+            else if (!isAvailable)
+              Icon(
+                CupertinoIcons.xmark_circle,
+                size: 18,
+                color: onSurface.withValues(alpha: 0.25),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+//  Lyrics Timing Sync Bottom Sheet
+
+class _LyricsSyncTimerSheet extends StatefulWidget {
+  final Duration initialOffset;
+  final ValueChanged<Duration> onOffsetChanged;
+
+  const _LyricsSyncTimerSheet({
+    required this.initialOffset,
+    required this.onOffsetChanged,
+  });
+
+  @override
+  State<_LyricsSyncTimerSheet> createState() => _LyricsSyncTimerSheetState();
+}
+
+class _LyricsSyncTimerSheetState extends State<_LyricsSyncTimerSheet> {
+  late Duration _offset;
+
+  @override
+  void initState() {
+    super.initState();
+    _offset = widget.initialOffset;
+  }
+
+  void _adjustOffset(Duration delta) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      final newMillis = _offset.inMilliseconds + delta.inMilliseconds;
+      // Clamp between -10.0s and +10.0s
+      final clampedMillis = newMillis.clamp(-10000, 10000);
+      _offset = Duration(milliseconds: clampedMillis);
+    });
+    widget.onOffsetChanged(_offset);
+  }
+
+  void _resetOffset() {
+    if (_offset == Duration.zero) return;
+    HapticFeedback.mediumImpact();
+    setState(() {
+      _offset = Duration.zero;
+    });
+    widget.onOffsetChanged(Duration.zero);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final onSurface = theme.colorScheme.onSurface;
+    final offsetSec = _offset.inMilliseconds / 1000.0;
+    final isZero = _offset == Duration.zero;
+    final offsetStr = isZero
+        ? '0.0s'
+        : '${offsetSec > 0 ? "+" : ""}${offsetSec.toStringAsFixed(1)}s';
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(22, 12, 22, 28),
+          color: isDark
+              ? Colors.black.withValues(alpha: 0.88)
+              : theme.scaffoldBackgroundColor.withValues(alpha: 0.94),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: onSurface.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(2.5),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Sync Timer',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: onSurface,
+                            letterSpacing: -0.4,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Fine-tune lyrics to match vocals',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      minimumSize: const Size(32, 32),
+                      color: isZero
+                          ? onSurface.withValues(alpha: 0.04)
+                          : Colors.red.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                      onPressed: isZero ? null : _resetOffset,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.arrow_counterclockwise,
+                            size: 13,
+                            color: isZero
+                                ? onSurface.withValues(alpha: 0.25)
+                                : Colors.red,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Reset',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isZero
+                                  ? onSurface.withValues(alpha: 0.25)
+                                  : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  width: double.infinity,
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF1C1C1E).withValues(alpha: 0.7)
+                        : Colors.white.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isZero
+                          ? onSurface.withValues(alpha: 0.08)
+                          : Colors.red.withValues(alpha: 0.35),
+                      width: isZero ? 1 : 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                            Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        offsetStr,
+                        style: TextStyle(
+                          fontSize: 46,
+                          fontWeight: FontWeight.w800,
+                          color: isZero ? onSurface : Colors.red,
+                          letterSpacing: -1.0,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isZero
+                              ? onSurface.withValues(alpha: 0.08)
+                              : Colors.red.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isZero
+                                  ? CupertinoIcons.checkmark_alt
+                                  : (_offset > Duration.zero
+                                      ? CupertinoIcons.forward_fill
+                                      : CupertinoIcons.backward_fill),
+                              size: 12,
+                              color: isZero
+                                  ? onSurface.withValues(alpha: 0.65)
+                                  : Colors.red,
+                            ),
+                            const SizedBox(width: 5),
+                            Text(
+                              isZero
+                                  ? 'In Sync (Default)'
+                                  : (_offset > Duration.zero
+                                      ? 'Lyrics advanced by ${offsetSec.abs().toStringAsFixed(1)}s (earlier)'
+                                      : 'Lyrics delayed by ${offsetSec.abs().toStringAsFixed(1)}s (later)'),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: isZero
+                                    ? onSurface.withValues(alpha: 0.65)
+                                    : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _StepButton(
+                        icon: CupertinoIcons.minus,
+                        label: '0.5s',
+                        subtitle: 'Delay lyrics',
+                        onTap: () =>
+                            _adjustOffset(const Duration(milliseconds: -500)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StepButton(
+                        icon: CupertinoIcons.plus,
+                        label: '0.5s',
+                        subtitle: 'Advance lyrics',
+                        onTap: () =>
+                            _adjustOffset(const Duration(milliseconds: 500)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _FineTuneButton(
+                        icon: CupertinoIcons.minus,
+                        label: '0.1s Fine',
+                        onTap: () =>
+                            _adjustOffset(const Duration(milliseconds: -100)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _FineTuneButton(
+                        icon: CupertinoIcons.plus,
+                        label: '0.1s Fine',
+                        onTap: () =>
+                            _adjustOffset(const Duration(milliseconds: 100)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Tap − if lyrics appear ahead of vocals · Tap + if lyrics appear late',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: onSurface.withValues(alpha: 0.45),
+                    height: 1.25,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(16),
+                    onPressed: () => context.pop(),
+                    child: const Text(
+                      'Done',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StepButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _StepButton({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final onSurface = theme.colorScheme.onSurface;
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onTap,
+      child: Container(
+        height: 56,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        decoration: BoxDecoration(
+          color: onSurface.withValues(alpha: isDark ? 0.08 : 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: onSurface.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: onSurface.withValues(alpha: 0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 16,
+                color: onSurface,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: onSurface,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w500,
+                    color: onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FineTuneButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _FineTuneButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final onSurface = theme.colorScheme.onSurface;
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onTap,
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: onSurface.withValues(alpha: isDark ? 0.05 : 0.035),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: onSurface.withValues(alpha: 0.07),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 13,
+              color: onSurface.withValues(alpha: 0.75),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ],
         ),
       ),
     );

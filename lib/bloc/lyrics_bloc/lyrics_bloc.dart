@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:nex_music/enum/lyrics_source.dart';
 import 'package:nex_music/helper_function/lyrics_cache/lyrics_cache.dart';
 import 'package:nex_music/model/lyric_model.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -16,6 +17,7 @@ class LyricsBloc extends Bloc<LyricsEvent, LyricsState> {
         super(LyricsInitialState()) {
     on<LoadLyricsEvent>(_onLoadLyrics);
     on<ToggleSyncLyricsEvent>(_onToggleSync);
+    on<SwitchLyricsSourceEvent>(_onSwitchSource);
   }
 
   Future<void> _onLoadLyrics(
@@ -36,42 +38,59 @@ class LyricsBloc extends Bloc<LyricsEvent, LyricsState> {
     }
 
     try {
-      LyricModel? lyrics;
-
       // For offline/downloaded songs, try loading from disk first.
       if (event.songData.isLocal) {
-        lyrics = await loadLyricsFromFile(
+        final cached = await loadLyricsFromFile(
           event.songData.songName,
           event.songData.vId,
         );
+        if (cached != null && cached.hasLyrics) {
+          emit(LyricsLoadedState(
+            songData: event.songData,
+            lyricModel: cached,
+            isSyncEnabled: cached.hasSyncedLyrics,
+            source: LyricsSource.ytMusic,
+            ytLyrics: cached,
+          ));
+          return;
+        }
       }
 
-      // Fall back to network if not found locally (or not a local song).
-      lyrics ??= await _repository.getLyrics(
+      // Fetch both sources in parallel
+      final both = await _repository.fetchBothLyricsSources(
         title: event.songData.songName,
         artist: event.songData.artist.name,
         videoId: event.songData.vId,
         durationSeconds: durationSec,
       );
 
-      if (lyrics != null && lyrics.hasLyrics) {
-        emit(
-          LyricsLoadedState(
-            songData: event.songData,
-            lyricModel: lyrics,
-            isSyncEnabled: lyrics.hasSyncedLyrics,
-          ),
-        );
+      final ytLyrics = both.ytLyrics;
+      final lrclibLyrics = both.lrclibLyrics;
+
+      // Pick best default: prefer YT ( perfect timing)
+      final primary =
+          (ytLyrics != null && ytLyrics.hasLyrics) ? ytLyrics : lrclibLyrics;
+      final defaultSource = (ytLyrics != null && ytLyrics.hasLyrics)
+          ? LyricsSource.ytMusic
+          : LyricsSource.lrclib;
+
+      if (primary != null && primary.hasLyrics) {
+        emit(LyricsLoadedState(
+          songData: event.songData,
+          lyricModel: primary,
+          isSyncEnabled: primary.hasSyncedLyrics,
+          source: defaultSource,
+          ytLyrics: ytLyrics,
+          lrclibLyrics: lrclibLyrics,
+        ));
       } else {
         emit(LyricsNotFoundState(songData: event.songData));
       }
     } catch (e) {
-      emit(
-        LyricsErrorState(
-          errorMessage: e.toString(),
-          songData: event.songData,
-        ),
-      );
+      emit(LyricsErrorState(
+        errorMessage: e.toString(),
+        songData: event.songData,
+      ));
     }
   }
 
@@ -83,6 +102,77 @@ class LyricsBloc extends Bloc<LyricsEvent, LyricsState> {
       final current = state as LyricsLoadedState;
       if (current.lyricModel.hasSyncedLyrics) {
         emit(current.copyWith(isSyncEnabled: !current.isSyncEnabled));
+      }
+    }
+  }
+
+  Future<void> _onSwitchSource(
+    SwitchLyricsSourceEvent event,
+    Emitter<LyricsState> emit,
+  ) async {
+    if (state is! LyricsLoadedState) return;
+    final current = state as LyricsLoadedState;
+    if (current.source == event.source) return;
+
+    // Check if we already have the target source cached in state
+    final targetLyrics = event.source == LyricsSource.ytMusic
+        ? current.ytLyrics
+        : current.lrclibLyrics;
+
+    if (targetLyrics != null && targetLyrics.hasLyrics) {
+      // Instant switch already cached
+      emit(current.copyWith(
+        lyricModel: targetLyrics,
+        source: event.source,
+        isSyncEnabled: targetLyrics.hasSyncedLyrics,
+      ));
+    } else {
+      // Need to fetch show loading briefly then restore
+      emit(LyricsLoadingState(songData: current.songData));
+      try {
+        final durationSec = _parseDurationString(current.songData.duration);
+        LyricModel? fetched;
+        if (event.source == LyricsSource.ytMusic) {
+          fetched = await _repository.getLyricsYtOnly(
+            title: current.songData.songName,
+            artist: current.songData.artist.name,
+            videoId: current.songData.vId,
+            durationSeconds: durationSec,
+          );
+        } else {
+          fetched = await _repository.getLyricsLrclibOnly(
+            title: current.songData.songName,
+            artist: current.songData.artist.name,
+            videoId: current.songData.vId,
+            durationSeconds: durationSec,
+          );
+        }
+
+        if (fetched != null && fetched.hasLyrics) {
+          emit(current.copyWith(
+            lyricModel: fetched,
+            source: event.source,
+            isSyncEnabled: fetched.hasSyncedLyrics,
+            ytLyrics: event.source == LyricsSource.ytMusic
+                ? fetched
+                : current.ytLyrics,
+            lrclibLyrics: event.source == LyricsSource.lrclib
+                ? fetched
+                : current.lrclibLyrics,
+          ));
+        } else {
+          // Revert to previous state with error snack handled by UI
+          emit(current.copyWith(
+            ytLyrics: event.source == LyricsSource.ytMusic
+                ? const LyricModel()
+                : current.ytLyrics,
+            lrclibLyrics: event.source == LyricsSource.lrclib
+                ? const LyricModel()
+                : current.lrclibLyrics,
+          ));
+        }
+      } catch (_) {
+        emit(current);
       }
     }
   }

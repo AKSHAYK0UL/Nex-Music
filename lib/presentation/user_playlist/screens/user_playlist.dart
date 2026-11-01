@@ -127,6 +127,16 @@ class _UserPlaylistState extends State<UserPlaylist> {
     );
   }
 
+  DateTime _parseTimestamp(dynamic timestamp) {
+    if (timestamp == null) return DateTime.now();
+    if (timestamp is DateTime) return timestamp;
+    try {
+      return (timestamp as dynamic).toDate() as DateTime? ?? DateTime.now();
+    } catch (_) {
+      return DateTime.fromMillisecondsSinceEpoch(0);
+    }
+  }
+
   List<UserPlaylistModel> _filterCreatedPlaylists(
       List<UserPlaylistModel> playlists) {
     List<UserPlaylistModel> result = playlists
@@ -144,23 +154,15 @@ class _UserPlaylistState extends State<UserPlaylist> {
         break;
       case PlaylistSortType.timeAsc:
         result.sort((a, b) {
-          final timeA = a.timestamp is DateTime
-              ? a.timestamp
-              : (a.timestamp as dynamic).toDate();
-          final timeB = b.timestamp is DateTime
-              ? b.timestamp
-              : (b.timestamp as dynamic).toDate();
+          final timeA = _parseTimestamp(a.timestamp);
+          final timeB = _parseTimestamp(b.timestamp);
           return timeA.compareTo(timeB);
         });
         break;
       case PlaylistSortType.timeDesc:
         result.sort((a, b) {
-          final timeA = a.timestamp is DateTime
-              ? a.timestamp
-              : (a.timestamp as dynamic).toDate();
-          final timeB = b.timestamp is DateTime
-              ? b.timestamp
-              : (b.timestamp as dynamic).toDate();
+          final timeA = _parseTimestamp(a.timestamp);
+          final timeB = _parseTimestamp(b.timestamp);
           return timeB.compareTo(timeA);
         });
         break;
@@ -183,17 +185,8 @@ class _UserPlaylistState extends State<UserPlaylist> {
           : b.playlistName.compareTo(a.playlistName));
     } else {
       filtered.sort((a, b) {
-        final aTimestamp = a.timestamp;
-        final bTimestamp = b.timestamp;
-
-        if (aTimestamp == null || bTimestamp == null) return 0;
-
-        DateTime aTime = aTimestamp is DateTime
-            ? aTimestamp
-            : (aTimestamp as dynamic).toDate();
-        DateTime bTime = bTimestamp is DateTime
-            ? bTimestamp
-            : (bTimestamp as dynamic).toDate();
+        final aTime = _parseTimestamp(a.timestamp);
+        final bTime = _parseTimestamp(b.timestamp);
 
         return _sortType == PlaylistSortType.timeAsc
             ? aTime.compareTo(bTime)

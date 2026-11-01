@@ -416,13 +416,26 @@ class LyricsNetworkProvider {
           final data = jsonDecode(response.body) as Map<String, dynamic>;
           final syncedStr = data['syncedLyrics'] as String?;
           final plainStr = data['plainLyrics'] as String?;
+          final itemDuration = (data['duration'] as num?)?.round();
 
-          final syncedLines = syncedStr != null
+          // Calculate duration difference to judge timing reliability.
+          final durDiff = (durationSeconds != null &&
+                  durationSeconds > 0 &&
+                  itemDuration != null)
+              ? (itemDuration - durationSeconds).abs()
+              : 0;
+
+          // Only use synced lyrics when the duration is close enough (≤5s)
+          // to guarantee the timestamps will align with playback.
+          final syncedLines = (syncedStr != null && durDiff <= 5)
               ? LyricModel.parseLrc(syncedStr)
               : <LyricLine>[];
 
-          if (syncedLines.isNotEmpty ||
-              (plainStr != null && plainStr.trim().isNotEmpty)) {
+          // Plain lyrics have no timestamps so a wider tolerance (≤20s) is fine.
+          final hasPlain = plainStr != null && plainStr.trim().isNotEmpty;
+          final plainOk = durDiff <= 20 || itemDuration == null;
+
+          if (syncedLines.isNotEmpty || (hasPlain && plainOk)) {
             return LyricModel(
               plainLyrics:
                   plainStr ?? (syncedLines.map((e) => e.text).join('\n')),
@@ -490,9 +503,10 @@ class LyricsNetworkProvider {
             ? (candidateDuration - durationSeconds).abs()
             : 0;
 
+        // Only use synced lyrics when duration diff ≤5s any larger gap
         if (syncedStr != null &&
             syncedStr.trim().isNotEmpty &&
-            durationDiff <= 25) {
+            durationDiff <= 5) {
           final syncedLines = LyricModel.parseLrc(syncedStr);
           if (syncedLines.isNotEmpty) {
             return LyricModel(
@@ -503,7 +517,10 @@ class LyricsNetworkProvider {
           }
         }
 
-        if (plainStr != null && plainStr.trim().isNotEmpty) {
+        // Plain lyrics have no timing accept up to 20s difference.
+        if (plainStr != null &&
+            plainStr.trim().isNotEmpty &&
+            durationDiff <= 20) {
           return LyricModel(plainLyrics: plainStr);
         }
       }
@@ -526,6 +543,214 @@ class LyricsNetworkProvider {
       }
     } catch (_) {
       // Failed
+    }
+
+    return null;
+  }
+
+  // Fetches ONLY from YT Music (videoId direct + search fallback).
+  // Returns null if YT Music has no lyrics for this track.
+  Future<LyricModel?> fetchYtMusicOnly({
+    required String title,
+    required String artist,
+    required String videoId,
+    int? durationSeconds,
+  }) async {
+    LyricModel? ytFallbackLyrics;
+
+    if (videoId.trim().isNotEmpty) {
+      try {
+        final ytLyrics = await fetchYouTubeMusicLyrics(videoId);
+        if (ytLyrics != null) {
+          if (ytLyrics.hasSyncedLyrics) return ytLyrics;
+          ytFallbackLyrics = ytLyrics;
+        }
+      } catch (_) {}
+    }
+
+    final cleanedTitle = cleanTitle(title);
+    final primary = primaryArtist(artist);
+
+    try {
+      await _ytMusic.initialize();
+      List<dynamic> searchCandidates = [];
+      try {
+        searchCandidates = await _ytMusic
+            .searchSongs('$cleanedTitle $primary')
+            .timeout(const Duration(seconds: 4));
+      } catch (_) {}
+      if (searchCandidates.isEmpty) {
+        try {
+          searchCandidates = await _ytMusic
+              .searchSongs(cleanedTitle)
+              .timeout(const Duration(seconds: 4));
+        } catch (_) {}
+      }
+
+      if (searchCandidates.isNotEmpty) {
+        final candidatesList = searchCandidates.toList();
+        if (durationSeconds != null && durationSeconds > 0) {
+          candidatesList.sort((a, b) {
+            final aDur = (a.duration as num?)?.toInt() ?? 0;
+            final bDur = (b.duration as num?)?.toInt() ?? 0;
+            final aDiff = aDur > 0 ? (aDur - durationSeconds).abs() : 999;
+            final bDiff = bDur > 0 ? (bDur - durationSeconds).abs() : 999;
+            return aDiff.compareTo(bDiff);
+          });
+        }
+        for (final candidate in candidatesList.take(3)) {
+          final candVideoId = candidate.videoId as String?;
+          if (candVideoId == null || candVideoId == videoId) continue;
+          try {
+            final candidateLyrics = await fetchYouTubeMusicLyrics(candVideoId);
+            if (candidateLyrics != null && candidateLyrics.hasSyncedLyrics) {
+              return candidateLyrics;
+            }
+            ytFallbackLyrics ??= candidateLyrics;
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+
+    if (ytFallbackLyrics != null && ytFallbackLyrics.hasLyrics) {
+      return ytFallbackLyrics;
+    }
+
+    // last optuion dart_ytmusic_api plain lyrics
+    try {
+      await _ytMusic.initialize();
+      final ytLyrics =
+          await _ytMusic.getLyrics(videoId).timeout(const Duration(seconds: 5));
+      if (ytLyrics != null && ytLyrics.trim().isNotEmpty) {
+        return LyricModel(plainLyrics: ytLyrics);
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
+  // Fetches ONLY from LRCLIB.
+  // Returns null if LRCLIB has no matching lyrics within the duration tolerance.
+  Future<LyricModel?> fetchLrclibOnly({
+    required String title,
+    required String artist,
+    int? durationSeconds,
+  }) async {
+    final cleanedTitle = cleanTitle(title);
+    final cleanedArtist = cleanArtist(artist);
+    final primary = primaryArtist(artist);
+
+    // Try LRCLIB exact get
+    for (final artistQuery in [primary, cleanedArtist]) {
+      try {
+        final queryParams = <String, String>{
+          'track_name': cleanedTitle,
+          'artist_name': artistQuery,
+        };
+        if (durationSeconds != null && durationSeconds > 0) {
+          queryParams['duration'] = durationSeconds.toString();
+        }
+        final uri = Uri.parse('$_lrclibBaseUrl/get')
+            .replace(queryParameters: queryParams);
+        final response = await http
+            .get(uri, headers: _headers)
+            .timeout(const Duration(seconds: 4));
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body) as Map<String, dynamic>;
+          final syncedStr = data['syncedLyrics'] as String?;
+          final plainStr = data['plainLyrics'] as String?;
+          final itemDuration = (data['duration'] as num?)?.round();
+
+          final durDiff = (durationSeconds != null &&
+                  durationSeconds > 0 &&
+                  itemDuration != null)
+              ? (itemDuration - durationSeconds).abs()
+              : 0;
+
+          final syncedLines = (syncedStr != null && durDiff <= 5)
+              ? LyricModel.parseLrc(syncedStr)
+              : <LyricLine>[];
+          final hasPlain = plainStr != null && plainStr.trim().isNotEmpty;
+          final plainOk = durDiff <= 20 || itemDuration == null;
+
+          if (syncedLines.isNotEmpty || (hasPlain && plainOk)) {
+            return LyricModel(
+              plainLyrics:
+                  plainStr ?? syncedLines.map((e) => e.text).join('\n'),
+              syncedLyrics: syncedLines,
+            );
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Try LRCLIB search endpoint
+    List<dynamic> searchResults = [];
+    try {
+      final structuredUri = Uri.parse('$_lrclibBaseUrl/search').replace(
+        queryParameters: {
+          'track_name': cleanedTitle,
+          'artist_name': primary,
+        },
+      );
+      final structRes = await http
+          .get(structuredUri, headers: _headers)
+          .timeout(const Duration(seconds: 4));
+      if (structRes.statusCode == 200) {
+        searchResults = jsonDecode(structRes.body) as List<dynamic>;
+      }
+    } catch (_) {}
+
+    if (searchResults.isEmpty) {
+      try {
+        final searchUri = Uri.parse('$_lrclibBaseUrl/search').replace(
+          queryParameters: {'q': '$cleanedTitle $primary'},
+        );
+        final searchRes = await http
+            .get(searchUri, headers: _headers)
+            .timeout(const Duration(seconds: 4));
+        if (searchRes.statusCode == 200) {
+          searchResults = jsonDecode(searchRes.body) as List<dynamic>;
+        }
+      } catch (_) {}
+    }
+
+    if (searchResults.isNotEmpty) {
+      final bestCandidate = _findBestCandidate(
+        results: searchResults,
+        targetTitle: cleanedTitle,
+        targetArtist: primary,
+        durationSeconds: durationSeconds,
+      );
+      if (bestCandidate != null) {
+        final syncedStr = bestCandidate['syncedLyrics'] as String?;
+        final plainStr = bestCandidate['plainLyrics'] as String?;
+        final candidateDuration = (bestCandidate['duration'] as num?)?.round();
+        final durationDiff = (durationSeconds != null &&
+                durationSeconds > 0 &&
+                candidateDuration != null)
+            ? (candidateDuration - durationSeconds).abs()
+            : 0;
+
+        if (syncedStr != null &&
+            syncedStr.trim().isNotEmpty &&
+            durationDiff <= 5) {
+          final syncedLines = LyricModel.parseLrc(syncedStr);
+          if (syncedLines.isNotEmpty) {
+            return LyricModel(
+              plainLyrics:
+                  plainStr ?? syncedLines.map((e) => e.text).join('\n'),
+              syncedLyrics: syncedLines,
+            );
+          }
+        }
+        if (plainStr != null &&
+            plainStr.trim().isNotEmpty &&
+            durationDiff <= 20) {
+          return LyricModel(plainLyrics: plainStr);
+        }
+      }
     }
 
     return null;

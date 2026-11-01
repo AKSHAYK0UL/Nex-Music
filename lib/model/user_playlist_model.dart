@@ -26,7 +26,7 @@ class UserPlaylistModel {
       displayMode: data['displayMode'] ?? 'color',
       isPublic: data['isPublic'] ?? false,
       thumbnails: thumbnails.isNotEmpty ? thumbnails : (data['thumbnails'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
-      timestamp: data['timestamp'],
+      timestamp: data['timestamp'] ?? DateTime.now(),
     );
   }
 

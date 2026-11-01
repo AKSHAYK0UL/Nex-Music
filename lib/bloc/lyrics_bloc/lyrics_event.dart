@@ -23,3 +23,12 @@ final class LoadLyricsEvent extends LyricsEvent {
 final class ToggleSyncLyricsEvent extends LyricsEvent {
   const ToggleSyncLyricsEvent();
 }
+
+// Switch the active lyrics source between YT Music and LRCLIB.
+final class SwitchLyricsSourceEvent extends LyricsEvent {
+  final LyricsSource source;
+  const SwitchLyricsSourceEvent(this.source);
+
+  @override
+  List<Object?> get props => [source];
+}

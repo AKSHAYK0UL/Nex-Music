@@ -1,0 +1,1 @@
+enum LyricsSource { ytMusic, lrclib }

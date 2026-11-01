@@ -8,10 +8,9 @@ import 'package:nex_music/bloc/saved_artists_bloc/bloc/saved_artists_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
-import 'package:go_router/go_router.dart';
-import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/helper_function/check_song_downloaded/check_song_downloaded.dart';
 import 'package:nex_music/model/artistmodel.dart';
+import 'package:nex_music/helper_function/general/artist_helper.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
@@ -176,24 +175,29 @@ class SongOptionsMenu extends StatelessWidget {
               Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black,
           iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () {
-            Navigator.pop(context); // Pop the bottom sheet
+            // Capture the root navigator context BEFORE popping so it stays alive
+            final rootCtx = Navigator.of(context, rootNavigator: true).context;
+            Navigator.pop(context);
+            final isPlayer = menuType == SongMenuType.audioPlayer;
+            final isUpNext = tabRouteENUM == TabRouteENUM.upNext;
 
-            // If in audio player, pop it first to show bottom nav
-            if (menuType == SongMenuType.audioPlayer) {
-              context.pop();
-            }
-
-            final cached = context
-                .read<Repository>()
-                .getCachedArtist(songData.artist.artistId, songData.artist.name);
-
-            context.pushNamed(
-              RouterName.artistName,
-              extra: cached ??
-                  ArtistModel(
-                    artist: songData.artist,
-                    thumbnail: "",
-                  ),
+            navigateToArtistOrShowSheet(
+              context: rootCtx,
+              songData: songData,
+              onBeforeNavigate: (isPlayer || isUpNext)
+                  ? () {
+                      final nav = Navigator.of(rootCtx, rootNavigator: true);
+                      if (isUpNext) {
+                        // Pop UpcomingSongsBottomSheet
+                        if (nav.canPop()) nav.pop();
+                        // Pop AudioPlayerScreen
+                        if (nav.canPop()) nav.pop();
+                      } else if (isPlayer) {
+                        // Pop AudioPlayerScreen
+                        if (nav.canPop()) nav.pop();
+                      }
+                    }
+                  : null,
             );
           },
         ));
@@ -298,14 +302,18 @@ class SongOptionsMenu extends StatelessWidget {
                         showSnackbar(context, "Artist removed from saved");
                       } else {
                         final repo = context.read<Repository>();
-                        final cached = repo.getCachedArtist(artistId, songData.artist.name);
+                        final cached = repo.getCachedArtist(
+                            artistId, songData.artist.name);
                         if (cached != null && cached.thumbnail.isNotEmpty) {
                           context.read<SavedArtistsBloc>().add(
                                 AddToSavedArtistsEvent(artist: cached),
                               );
                           showSnackbar(context, "Artist saved");
                         } else {
-                          repo.resolveArtist(ArtistModel(artist: songData.artist, thumbnail: "")).then((resolved) {
+                          repo
+                              .resolveArtist(ArtistModel(
+                                  artist: songData.artist, thumbnail: ""))
+                              .then((resolved) {
                             if (context.mounted) {
                               context.read<SavedArtistsBloc>().add(
                                     AddToSavedArtistsEvent(artist: resolved),

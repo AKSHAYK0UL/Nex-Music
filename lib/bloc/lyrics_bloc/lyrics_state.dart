@@ -23,26 +23,47 @@ final class LyricsLoadedState extends LyricsState {
   final LyricModel lyricModel;
   final bool isSyncEnabled;
 
+  // Which source the active [lyricModel] came from.
+  final LyricsSource source;
+
+  // Cached alternative source lyrics (null if not yet fetched / unavailable).
+  final LyricModel? ytLyrics;
+  final LyricModel? lrclibLyrics;
+
   const LyricsLoadedState({
     required this.songData,
     required this.lyricModel,
     this.isSyncEnabled = true,
+    this.source = LyricsSource.ytMusic,
+    this.ytLyrics,
+    this.lrclibLyrics,
   });
 
   LyricsLoadedState copyWith({
     Songmodel? songData,
     LyricModel? lyricModel,
     bool? isSyncEnabled,
+    LyricsSource? source,
+    LyricModel? ytLyrics,
+    LyricModel? lrclibLyrics,
   }) {
     return LyricsLoadedState(
       songData: songData ?? this.songData,
       lyricModel: lyricModel ?? this.lyricModel,
       isSyncEnabled: isSyncEnabled ?? this.isSyncEnabled,
+      source: source ?? this.source,
+      ytLyrics: ytLyrics ?? this.ytLyrics,
+      lrclibLyrics: lrclibLyrics ?? this.lrclibLyrics,
     );
   }
 
+  // Whether the alternative source has lyrics available.
+  bool get hasYtLyrics => ytLyrics != null && ytLyrics!.hasLyrics;
+  bool get hasLrclibLyrics => lrclibLyrics != null && lrclibLyrics!.hasLyrics;
+
   @override
-  List<Object?> get props => [songData, lyricModel, isSyncEnabled];
+  List<Object?> get props =>
+      [songData, lyricModel, isSyncEnabled, source, ytLyrics, lrclibLyrics];
 }
 
 final class LyricsNotFoundState extends LyricsState {

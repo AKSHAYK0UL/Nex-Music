@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
@@ -11,13 +12,10 @@ import 'package:nex_music/core/ui_component/animatedtext.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
-import 'package:go_router/go_router.dart';
-import 'package:nex_music/core/route/go_router/go_router.dart';
-import 'package:nex_music/model/artistmodel.dart';
+import 'package:nex_music/helper_function/general/artist_helper.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/bottom_sheet_button.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
-import 'package:nex_music/repository/home_repo/repository.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> showBottomOptionSheet({
@@ -130,7 +128,6 @@ Future<void> showBottomOptionSheet({
                 icon: Icons.playlist_add,
                 screenSize: screenSize,
                 onPressed: () {
-                  ;
                   final rootContext =
                       Navigator.of(context, rootNavigator: true).context;
                   context.pop();
@@ -144,17 +141,12 @@ Future<void> showBottomOptionSheet({
                 icon: Icons.person,
                 screenSize: screenSize,
                 onPressed: () {
+                  final rootCtx =
+                      Navigator.of(context, rootNavigator: true).context;
                   Navigator.of(context).pop();
-                  final cached = context
-                      .read<Repository>()
-                      .getCachedArtist(songData.artist.artistId, songData.artist.name);
-                  context.pushNamed(
-                    RouterName.artistName,
-                    extra: cached ??
-                        ArtistModel(
-                          artist: songData.artist,
-                          thumbnail: "",
-                        ),
+                  navigateToArtistOrShowSheet(
+                    context: rootCtx,
+                    songData: songData,
                   );
                 },
               ),

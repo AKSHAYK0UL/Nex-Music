@@ -33,6 +33,32 @@ class DataProvider {
     );
   }
 
+  Future<LyricModel?> getLyricsYtOnly({
+    required String title,
+    required String artist,
+    required String videoId,
+    int? durationSeconds,
+  }) {
+    return _lyricsNetworkProvider.fetchYtMusicOnly(
+      title: title,
+      artist: artist,
+      videoId: videoId,
+      durationSeconds: durationSeconds,
+    );
+  }
+
+  Future<LyricModel?> getLyricsLrclibOnly({
+    required String title,
+    required String artist,
+    int? durationSeconds,
+  }) {
+    return _lyricsNetworkProvider.fetchLrclibOnly(
+      title: title,
+      artist: artist,
+      durationSeconds: durationSeconds,
+    );
+  }
+
 //cancel all ongoing request
   void cancelRequest() {
     // _ytMusic.dio.close();//remove in new version 1.3.6

@@ -138,16 +138,6 @@ class AppRouter {
                         return const SizedBox();
                       },
                     ),
-                    GoRoute(
-                      path: RouterPath.artistRoute,
-                      name: RouterName.artistName,
-                      builder: (context, state) {
-                        final artist = state.extra as ArtistModel;
-                        return ArtistFullScreen(
-                          artist: artist,
-                        );
-                      },
-                    ),
                   ],
                 ),
               ],
@@ -340,6 +330,17 @@ class AppRouter {
           name: RouterName.qualityName,
           builder: (context, state) => const QualitySettingsScreen(),
         ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: RouterPath.artistRoute,
+          name: RouterName.artistName,
+          builder: (context, state) {
+            final artist = state.extra as ArtistModel;
+            return ArtistFullScreen(
+              artist: artist,
+            );
+          },
+        ),
       ],
     );
   }
@@ -383,7 +384,7 @@ class RouterPath {
   static const String offlineDownloadsRoute = '/offline_downloads';
   static const String podcastsRoute = '/podcasts';
   static const String audioBooksRoute = '/audio-books';
-  static const String artistRoute = 'artist';
+  static const String artistRoute = '/artist';
 }
 
 // Name class

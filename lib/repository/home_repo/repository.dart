@@ -48,6 +48,70 @@ class Repository {
     return lyrics;
   }
 
+  final Map<String, LyricModel> _ytLyricsCache = {};
+  final Map<String, LyricModel> _lrclibLyricsCache = {};
+
+  Future<LyricModel?> getLyricsYtOnly({
+    required String title,
+    required String artist,
+    required String videoId,
+    int? durationSeconds,
+  }) async {
+    if (_ytLyricsCache.containsKey(videoId)) return _ytLyricsCache[videoId];
+    final lyrics = await _dataProvider.getLyricsYtOnly(
+      title: title,
+      artist: artist,
+      videoId: videoId,
+      durationSeconds: durationSeconds,
+    );
+    if (lyrics != null) _ytLyricsCache[videoId] = lyrics;
+    return lyrics;
+  }
+
+  Future<LyricModel?> getLyricsLrclibOnly({
+    required String title,
+    required String artist,
+    required String videoId,
+    int? durationSeconds,
+  }) async {
+    if (_lrclibLyricsCache.containsKey(videoId)) {
+      return _lrclibLyricsCache[videoId];
+    }
+    final lyrics = await _dataProvider.getLyricsLrclibOnly(
+      title: title,
+      artist: artist,
+      durationSeconds: durationSeconds,
+    );
+    if (lyrics != null) _lrclibLyricsCache[videoId] = lyrics;
+    return lyrics;
+  }
+
+  // Fetches both YT Music and LRCLIB lyrics in parallel.
+  // Returns a record of (ytLyrics, lrclibLyrics) either may be null.
+  Future<({LyricModel? ytLyrics, LyricModel? lrclibLyrics})>
+      fetchBothLyricsSources({
+    required String title,
+    required String artist,
+    required String videoId,
+    int? durationSeconds,
+  }) async {
+    final results = await Future.wait([
+      getLyricsYtOnly(
+        title: title,
+        artist: artist,
+        videoId: videoId,
+        durationSeconds: durationSeconds,
+      ).catchError((_) => null as LyricModel?),
+      getLyricsLrclibOnly(
+        title: title,
+        artist: artist,
+        videoId: videoId,
+        durationSeconds: durationSeconds,
+      ).catchError((_) => null as LyricModel?),
+    ]);
+    return (ytLyrics: results[0], lrclibLyrics: results[1]);
+  }
+
 //cancel all ongoing request
   void cancelRequest() {
     _dataProvider.cancelRequest();
@@ -328,12 +392,21 @@ class Repository {
   final Map<String, ArtistModel> _artistDetailsCache = {};
 
   ArtistModel? getCachedArtist(String? artistId, String? artistName) {
+    final nameKey = (artistName ?? '').trim().toLowerCase();
     if (artistId != null &&
         artistId.isNotEmpty &&
         _artistDetailsCache.containsKey(artistId)) {
-      return _artistDetailsCache[artistId];
+      final cached = _artistDetailsCache[artistId];
+      if (cached != null) {
+        final cachedName = cached.artist.name.trim().toLowerCase();
+        if (nameKey.isEmpty ||
+            cachedName == nameKey ||
+            cachedName.contains(nameKey) ||
+            nameKey.contains(cachedName)) {
+          return cached;
+        }
+      }
     }
-    final nameKey = (artistName ?? '').trim().toLowerCase();
     if (nameKey.isNotEmpty && _artistDetailsCache.containsKey(nameKey)) {
       return _artistDetailsCache[nameKey];
     }
@@ -363,13 +436,21 @@ class Repository {
     final artistId = artist.artist.artistId;
     final artistName = artist.artist.name.trim();
 
+    final nameKey = artistName.toLowerCase();
+
     // Check cache first
     if (artistId != null &&
         artistId.isNotEmpty &&
         _artistDetailsCache.containsKey(artistId)) {
-      return _artistDetailsCache[artistId]!;
+      final cached = _artistDetailsCache[artistId]!;
+      final cachedName = cached.artist.name.trim().toLowerCase();
+      if (nameKey.isEmpty ||
+          cachedName == nameKey ||
+          cachedName.contains(nameKey) ||
+          nameKey.contains(cachedName)) {
+        return cached;
+      }
     }
-    final nameKey = artistName.toLowerCase();
     if (nameKey.isNotEmpty && _artistDetailsCache.containsKey(nameKey)) {
       return _artistDetailsCache[nameKey]!;
     }
@@ -382,7 +463,14 @@ class Repository {
     if (resolvedId != null && resolvedId.isNotEmpty) {
       try {
         final full = await _dataProvider.getArtist(resolvedId);
-        if (full.thumbnails.isNotEmpty) {
+        final fullNameLower = full.name.trim().toLowerCase();
+        // Verify full.name actually matches artistName (not a record label channel like T-Series or Speed Records)
+        final isNameMatch = nameKey.isEmpty ||
+            fullNameLower == nameKey ||
+            fullNameLower.contains(nameKey) ||
+            nameKey.contains(fullNameLower);
+
+        if (isNameMatch && full.thumbnails.isNotEmpty) {
           final thumb = getThumbnail(full.thumbnails);
           if (thumb.isNotEmpty) {
             final resolved = ArtistModel(
@@ -397,20 +485,28 @@ class Repository {
       } catch (_) {}
     }
 
-    //  If artistId is missing or getArtist failed, search the artist by name
+    // If artistId was missing, invalid, or belonged to a label rather than the artist, search by name
     if (artistName.isNotEmpty) {
       try {
         final searched = await searchArtist(artistName);
         if (searched.isNotEmpty) {
-          final match = searched.firstWhere(
-            (a) => a.artist.name.trim().toLowerCase() == nameKey,
-            orElse: () => searched.first,
-          );
-          if (match.thumbnail.isNotEmpty) {
+          // Find an artist in search results whose name actually matches
+          ArtistModel? match;
+          for (final a in searched) {
+            final aNameLower = a.artist.name.trim().toLowerCase();
+            if (aNameLower == nameKey ||
+                aNameLower.contains(nameKey) ||
+                nameKey.contains(aNameLower)) {
+              match = a;
+              break;
+            }
+          }
+
+          if (match != null && match.thumbnail.isNotEmpty) {
             final resolved = ArtistModel(
               artist: ArtistBasic(
                 name: match.artist.name,
-                artistId: match.artist.artistId ?? resolvedId,
+                artistId: match.artist.artistId,
               ),
               thumbnail: match.thumbnail,
             );
