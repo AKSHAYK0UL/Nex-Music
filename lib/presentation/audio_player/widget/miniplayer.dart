@@ -103,7 +103,10 @@ class _MiniPlayerState extends State<MiniPlayer> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.05),
                     offset: const Offset(0, -1),
                     blurRadius: 2,
                   )
@@ -121,7 +124,10 @@ class _MiniPlayerState extends State<MiniPlayer> {
                             borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.1),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -177,7 +183,8 @@ class _MiniPlayerState extends State<MiniPlayer> {
                               Container(
                                 width: 20,
                                 height: 20,
-                                margin: const EdgeInsets.symmetric(horizontal: 15),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 15),
                                 child: CircularProgressIndicator(
                                   strokeWidth: 4,
                                   color: titleColor,
@@ -195,7 +202,9 @@ class _MiniPlayerState extends State<MiniPlayer> {
                                   size: 26,
                                 ),
                                 onPressed: () {
-                                  context.read<SongstreamBloc>().add(PlayPauseEvent());
+                                  context
+                                      .read<SongstreamBloc>()
+                                      .add(PlayPauseEvent());
                                 },
                               ),
                             IconButton(
@@ -207,7 +216,9 @@ class _MiniPlayerState extends State<MiniPlayer> {
                                 size: 26,
                               ),
                               onPressed: () {
-                                context.read<SongstreamBloc>().add(PlayNextSongEvent());
+                                context
+                                    .read<SongstreamBloc>()
+                                    .add(PlayNextSongEvent());
                               },
                             ),
                           ],
@@ -218,10 +229,12 @@ class _MiniPlayerState extends State<MiniPlayer> {
                   StreamBuilder<Duration>(
                     stream: context.read<SongstreamBloc>().songPosition,
                     builder: (context, snapshot) {
-                      final duration = context.read<SongstreamBloc>().songDuration;
+                      final duration =
+                          context.read<SongstreamBloc>().songDuration;
                       final position = snapshot.data ?? Duration.zero;
-                      final sliderValue = duration.inMilliseconds > 0 
-                          ? (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0)
+                      final sliderValue = duration.inMilliseconds > 0
+                          ? (position.inMilliseconds / duration.inMilliseconds)
+                              .clamp(0.0, 1.0)
                           : 0.0;
                       return Positioned(
                         bottom: 0,
@@ -229,8 +242,12 @@ class _MiniPlayerState extends State<MiniPlayer> {
                         right: 0,
                         child: LinearProgressIndicator(
                           value: sliderValue,
-                          valueColor: const AlwaysStoppedAnimation<Color>(kAppleAccent),
-                          backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+                          valueColor:
+                              const AlwaysStoppedAnimation<Color>(kAppleAccent),
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.15),
                           minHeight: 2,
                         ),
                       );

@@ -440,18 +440,24 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                 buildWhen: (previous, current) {
                                   String? prevId;
                                   String? currId;
-                                  if (previous is LoadingState)
+                                  if (previous is LoadingState) {
                                     prevId = previous.songData.vId;
-                                  if (previous is PlayingState)
+                                  }
+                                  if (previous is PlayingState) {
                                     prevId = previous.songData.vId;
-                                  if (previous is PausedState)
+                                  }
+                                  if (previous is PausedState) {
                                     prevId = previous.songData.vId;
-                                  if (current is LoadingState)
+                                  }
+                                  if (current is LoadingState) {
                                     currId = current.songData.vId;
-                                  if (current is PlayingState)
+                                  }
+                                  if (current is PlayingState) {
                                     currId = current.songData.vId;
-                                  if (current is PausedState)
+                                  }
+                                  if (current is PausedState) {
                                     currId = current.songData.vId;
+                                  }
                                   return currId != null && currId != prevId;
                                 },
                                 builder: (context, state) {
@@ -540,18 +546,24 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                             buildWhen: (previous, current) {
                                               String? prevId;
                                               String? currId;
-                                              if (previous is LoadingState)
+                                              if (previous is LoadingState) {
                                                 prevId = previous.songData.vId;
-                                              if (previous is PlayingState)
+                                              }
+                                              if (previous is PlayingState) {
                                                 prevId = previous.songData.vId;
-                                              if (previous is PausedState)
+                                              }
+                                              if (previous is PausedState) {
                                                 prevId = previous.songData.vId;
-                                              if (current is LoadingState)
+                                              }
+                                              if (current is LoadingState) {
                                                 currId = current.songData.vId;
-                                              if (current is PlayingState)
+                                              }
+                                              if (current is PlayingState) {
                                                 currId = current.songData.vId;
-                                              if (current is PausedState)
+                                              }
+                                              if (current is PausedState) {
                                                 currId = current.songData.vId;
+                                              }
                                               return currId != null &&
                                                   currId != prevId;
                                             },
@@ -589,18 +601,24 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                             buildWhen: (previous, current) {
                                               String? prevId;
                                               String? currId;
-                                              if (previous is LoadingState)
+                                              if (previous is LoadingState) {
                                                 prevId = previous.songData.vId;
-                                              if (previous is PlayingState)
+                                              }
+                                              if (previous is PlayingState) {
                                                 prevId = previous.songData.vId;
-                                              if (previous is PausedState)
+                                              }
+                                              if (previous is PausedState) {
                                                 prevId = previous.songData.vId;
-                                              if (current is LoadingState)
+                                              }
+                                              if (current is LoadingState) {
                                                 currId = current.songData.vId;
-                                              if (current is PlayingState)
+                                              }
+                                              if (current is PlayingState) {
                                                 currId = current.songData.vId;
-                                              if (current is PausedState)
+                                              }
+                                              if (current is PausedState) {
                                                 currId = current.songData.vId;
+                                              }
                                               return currId != null &&
                                                   currId != prevId;
                                             },
@@ -743,18 +761,24 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                       buildWhen: (previous, current) {
                                         String? prevId;
                                         String? currId;
-                                        if (previous is LoadingState)
+                                        if (previous is LoadingState) {
                                           prevId = previous.songData.vId;
-                                        if (previous is PlayingState)
+                                        }
+                                        if (previous is PlayingState) {
                                           prevId = previous.songData.vId;
-                                        if (previous is PausedState)
+                                        }
+                                        if (previous is PausedState) {
                                           prevId = previous.songData.vId;
-                                        if (current is LoadingState)
+                                        }
+                                        if (current is LoadingState) {
                                           currId = current.songData.vId;
-                                        if (current is PlayingState)
+                                        }
+                                        if (current is PlayingState) {
                                           currId = current.songData.vId;
-                                        if (current is PausedState)
+                                        }
+                                        if (current is PausedState) {
                                           currId = current.songData.vId;
+                                        }
                                         return currId != null &&
                                             currId != prevId;
                                       },
