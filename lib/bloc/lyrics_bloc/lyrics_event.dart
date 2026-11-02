@@ -32,3 +32,19 @@ final class SwitchLyricsSourceEvent extends LyricsEvent {
   @override
   List<Object?> get props => [source];
 }
+
+// save sync time config to Hive + Firestore for [songId] / [source].
+final class UpdateLyricSyncOffsetEvent extends LyricsEvent {
+  final String songId;
+  final LyricsSource source;
+  final Duration offset;
+
+  const UpdateLyricSyncOffsetEvent({
+    required this.songId,
+    required this.source,
+    required this.offset,
+  });
+
+  @override
+  List<Object?> get props => [songId, source, offset];
+}

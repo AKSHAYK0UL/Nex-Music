@@ -91,6 +91,7 @@ Future<void> main() async {
   await Hive.openBox<HiveQuality>(qualitySettingsBox);
   await Hive.openBox<bool>(thinkBox);
   await Hive.openBox<bool>(themeBox);
+  await Hive.openBox<int>(lyricsSyncOffsetsBox);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final audioHandler = await AudioService.init(
     builder: () => AudioPlayerHandler(audioPlayer),
@@ -267,8 +268,11 @@ class MyApp extends StatelessWidget {
                 ThemeBloc(dbInstance)..add(GetThemeEvent()),
           ),
           BlocProvider(
-            create: (context) =>
-                LyricsBloc(repository: context.read<Repository>()),
+            create: (context) => LyricsBloc(
+              repository: context.read<Repository>(),
+              dbRepository: context.read<DbRepository>(),
+              dbInstance: dbInstance,
+            ),
           ),
         ],
         child: BlocListener<UserLoggedBloc, UserLoggedState>(

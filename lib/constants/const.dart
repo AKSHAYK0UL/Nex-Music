@@ -11,3 +11,5 @@ const savedArtistsCollection = "savedArtists";
 const searchHistoryCollection = "searchHistory";
 const publicPlaylistsCollection = "publicPlaylists";
 const savedPlaylistsCollection = "savedPlaylists";
+const lyricsSyncOffsetsCollection = "lyric_sync_offsets";
+const lyricsSyncOffsetsBox = "lyricsSyncOffsets";

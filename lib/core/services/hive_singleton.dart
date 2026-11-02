@@ -95,4 +95,28 @@ class HiveDataBaseSingleton {
     if (box.isEmpty) return false;
     return box.values.first;
   }
+
+  // LYRICS SYNC Box
+  Box<int> get getLyricsSyncBox {
+    return Hive.box<int>(lyricsSyncOffsetsBox);
+  }
+
+  Duration getLyricSyncOffset(String videoId, String sourceName) {
+    try {
+      final ms = getLyricsSyncBox.get('${videoId}_$sourceName') ?? 0;
+      return Duration(milliseconds: ms);
+    } catch (_) {
+      return Duration.zero;
+    }
+  }
+
+  Future<void> saveLyricSyncOffset(
+    String videoId,
+    String sourceName,
+    int offsetMs,
+  ) async {
+    try {
+      await getLyricsSyncBox.put('${videoId}_$sourceName', offsetMs);
+    } catch (_) {}
+  }
 }

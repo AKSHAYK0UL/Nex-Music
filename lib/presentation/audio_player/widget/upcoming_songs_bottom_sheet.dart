@@ -53,7 +53,7 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
                   ? theme.cardColor
                   : Colors.white.withValues(alpha: 0.85),
               borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
+                  const BorderRadius.vertical(top: Radius.circular(22)),
               border: Border(
                 top: BorderSide(
                   color: theme.dividerColor.withValues(alpha: 0.2),
@@ -92,7 +92,7 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
 
         if (!isDark) {
           return ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
               child: content,
@@ -100,7 +100,10 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
           );
         }
 
-        return content;
+        return ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+          child: content,
+        );
       },
     );
   }
@@ -303,7 +306,7 @@ class UpcomingSongsBottomSheet extends StatelessWidget {
     return Center(
       child: CupertinoButton(
         color: Colors.redAccent,
-        borderRadius: BorderRadius.circular(100),
+        borderRadius: BorderRadius.circular(0),
         onPressed: () {
           final current = context.read<UpnextBloc>().currentSongData;
           if (current != null) {

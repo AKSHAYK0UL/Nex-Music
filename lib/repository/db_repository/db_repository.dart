@@ -10,6 +10,7 @@ import 'package:nex_music/network_provider/home_data/playlist_db_provide.dart';
 import 'package:nex_music/network_provider/home_data/saved_artists_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/saved_playlists_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/search_history_db_provider.dart';
+import 'package:nex_music/network_provider/home_data/lyrics_sync_db_provider.dart';
 import 'package:nex_music/model/user_playlist_model.dart';
 
 class DbRepository {
@@ -19,6 +20,7 @@ class DbRepository {
   final SavedArtistsDBProvider _savedArtistsDBProvider;
   final SavedPlaylistsDBProvider _savedPlaylistsDBProvider;
   final SearchHistoryDBProvider _searchHistoryDBProvider;
+  final LyricsSyncDBProvider _lyricsSyncDBProvider;
 
   // Tracks the last buffered vId to avoid duplicate entries for the same song.
   String? _lastBufferedVId;
@@ -35,12 +37,14 @@ class DbRepository {
     required SavedArtistsDBProvider savedArtistsDBProvider,
     required SavedPlaylistsDBProvider savedPlaylistsDBProvider,
     required SearchHistoryDBProvider searchHistoryDBProvider,
+    required LyricsSyncDBProvider lyricsSyncDBProvider,
   })  : _dbDataProvider = dbDataProvider,
         _favoritesDBProvider = favoritesDBProvider,
         _playlistDbProvider = playlistDbProvider,
         _savedArtistsDBProvider = savedArtistsDBProvider,
         _savedPlaylistsDBProvider = savedPlaylistsDBProvider,
-        _searchHistoryDBProvider = searchHistoryDBProvider;
+        _searchHistoryDBProvider = searchHistoryDBProvider,
+        _lyricsSyncDBProvider = lyricsSyncDBProvider;
 
   // Adds a recently played song to Firebase with microsecond timestamp
   // for precise ordering Only adds the song if it has been playing for
@@ -411,6 +415,25 @@ class DbRepository {
       rethrow;
     } catch (_) {
       rethrow;
+    }
+  }
+
+  // Lyrics Sync Offset methods
+  Future<void> saveLyricSyncOffset(
+    String videoId,
+    String sourceName,
+    int offsetMs,
+  ) async {
+    try {
+      await _lyricsSyncDBProvider.saveSyncOffset(videoId, sourceName, offsetMs);
+    } catch (_) {}
+  }
+
+  Future<Map<String, dynamic>?> getLyricSyncOffsets(String videoId) async {
+    try {
+      return await _lyricsSyncDBProvider.getSyncOffsets(videoId);
+    } catch (_) {
+      return null;
     }
   }
 }

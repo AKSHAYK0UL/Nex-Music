@@ -30,6 +30,10 @@ final class LyricsLoadedState extends LyricsState {
   final LyricModel? ytLyrics;
   final LyricModel? lrclibLyrics;
 
+  // Per-provider saved sync offsets (populated from storage on load/switch).
+  final Duration ytSyncOffset;
+  final Duration lrclibSyncOffset;
+
   const LyricsLoadedState({
     required this.songData,
     required this.lyricModel,
@@ -37,7 +41,13 @@ final class LyricsLoadedState extends LyricsState {
     this.source = LyricsSource.ytMusic,
     this.ytLyrics,
     this.lrclibLyrics,
+    this.ytSyncOffset = Duration.zero,
+    this.lrclibSyncOffset = Duration.zero,
   });
+
+  // Returns the active sync offset for the current [source].
+  Duration get syncOffset =>
+      source == LyricsSource.ytMusic ? ytSyncOffset : lrclibSyncOffset;
 
   LyricsLoadedState copyWith({
     Songmodel? songData,
@@ -46,6 +56,8 @@ final class LyricsLoadedState extends LyricsState {
     LyricsSource? source,
     LyricModel? ytLyrics,
     LyricModel? lrclibLyrics,
+    Duration? ytSyncOffset,
+    Duration? lrclibSyncOffset,
   }) {
     return LyricsLoadedState(
       songData: songData ?? this.songData,
@@ -54,6 +66,8 @@ final class LyricsLoadedState extends LyricsState {
       source: source ?? this.source,
       ytLyrics: ytLyrics ?? this.ytLyrics,
       lrclibLyrics: lrclibLyrics ?? this.lrclibLyrics,
+      ytSyncOffset: ytSyncOffset ?? this.ytSyncOffset,
+      lrclibSyncOffset: lrclibSyncOffset ?? this.lrclibSyncOffset,
     );
   }
 
@@ -62,8 +76,16 @@ final class LyricsLoadedState extends LyricsState {
   bool get hasLrclibLyrics => lrclibLyrics != null && lrclibLyrics!.hasLyrics;
 
   @override
-  List<Object?> get props =>
-      [songData, lyricModel, isSyncEnabled, source, ytLyrics, lrclibLyrics];
+  List<Object?> get props => [
+        songData,
+        lyricModel,
+        isSyncEnabled,
+        source,
+        ytLyrics,
+        lrclibLyrics,
+        ytSyncOffset,
+        lrclibSyncOffset
+      ];
 }
 
 final class LyricsNotFoundState extends LyricsState {

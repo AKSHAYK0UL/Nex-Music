@@ -170,6 +170,10 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
       _userIsScrolling = false;
       _initialScrollDone = false;
       _lastActiveIndex = -1;
+      final lyricsState = context.read<LyricsBloc>().state;
+      if (lyricsState is LyricsLoadedState) {
+        _syncOffset = lyricsState.syncOffset;
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final lyricsState = context.read<LyricsBloc>().state;
@@ -205,6 +209,15 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
       _currentSong = songState.songData;
     } else {
       _currentSong = widget.songData;
+    }
+
+    final initialLyricsState = context.read<LyricsBloc>().state;
+    if (initialLyricsState is LyricsLoadedState &&
+        initialLyricsState.songData.vId == _currentSong.vId) {
+      _syncOffset = initialLyricsState.syncOffset;
+    } else {
+      _syncOffset = HiveDataBaseSingleton.instance
+          .getLyricSyncOffset(_currentSong.vId, LyricsSource.ytMusic.name);
     }
 
     final streamSec = songstreamBloc.songDuration.inSeconds;
@@ -284,7 +297,8 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
         _currentSong = activeSong;
         _lastActiveIndex = -1;
         _initialScrollDone = false;
-        _syncOffset = Duration.zero;
+        _syncOffset = HiveDataBaseSingleton.instance
+            .getLyricSyncOffset(activeSong.vId, LyricsSource.ytMusic.name);
         _lineKeys.clear();
       });
       if (_scrollController.hasClients) {
@@ -336,21 +350,46 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
 
   // bottom sheet for fine-tuning lyrics sync
   void _showSyncOffsetDialog(BuildContext context) {
+    final lyricsBloc = context.read<LyricsBloc>();
+    final lyricsState = lyricsBloc.state;
+    final initialOffset =
+        lyricsState is LyricsLoadedState ? lyricsState.syncOffset : _syncOffset;
+    final activeSource = lyricsState is LyricsLoadedState
+        ? lyricsState.source
+        : LyricsSource.ytMusic;
+    bool donePressed = false;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (dialogContext) {
         return _LyricsSyncTimerSheet(
-          initialOffset: _syncOffset,
+          initialOffset: initialOffset,
           onOffsetChanged: (newOffset) {
+            // Live update local state so lyrics scroll in real time.
             setState(() {
               _syncOffset = newOffset;
             });
           },
+          onDone: (finalOffset) {
+            donePressed = true;
+            // Dispatch persistent save to bloc.
+            lyricsBloc.add(UpdateLyricSyncOffsetEvent(
+              songId: _currentSong.vId,
+              source: activeSource,
+              offset: finalOffset,
+            ));
+          },
         );
       },
-    );
+    ).then((_) {
+      // If user dismissed sheet without tapping Done, revert live preview to saved offset
+      if (!donePressed && mounted) {
+        setState(() {
+          _syncOffset = initialOffset;
+        });
+      }
+    });
   }
 
   @override
@@ -389,7 +428,8 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
             _currentSong = newSong!;
             _lastActiveIndex = -1;
             _initialScrollDone = false;
-            _syncOffset = Duration.zero;
+            _syncOffset = HiveDataBaseSingleton.instance
+                .getLyricSyncOffset(newSong.vId, LyricsSource.ytMusic.name);
             _lineKeys.clear();
           });
           if (_scrollController.hasClients) {
@@ -408,116 +448,133 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
               );
         }
       },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          RepaintBoundary(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                cacheImage(
-                  imageUrl: highResUrl,
-                  fallbackUrl: _currentSong.thumbnail,
-                  width: double.infinity,
-                  height: double.infinity,
-                  islocal: _currentSong.isLocal,
-                ),
-                BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-                  child: Container(
-                    color: isDark
-                        ? Colors.black.withValues(alpha: 0.75)
-                        : theme.scaffoldBackgroundColor.withValues(alpha: 0.88),
+      child: BlocListener<LyricsBloc, LyricsState>(
+        // Sync _syncOffset from bloc state whenever offset changes
+        // (handles restore after pop/reopen, provider switch, and cross-device cloud load).
+        listenWhen: (prev, curr) {
+          if (curr is! LyricsLoadedState) return false;
+          if (prev is! LyricsLoadedState) return true;
+          return curr.syncOffset != prev.syncOffset;
+        },
+        listener: (context, state) {
+          if (state is LyricsLoadedState && mounted) {
+            setState(() {
+              _syncOffset = state.syncOffset;
+            });
+          }
+        },
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            RepaintBoundary(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  cacheImage(
+                    imageUrl: highResUrl,
+                    fallbackUrl: _currentSong.thumbnail,
+                    width: double.infinity,
+                    height: double.infinity,
+                    islocal: _currentSong.isLocal,
                   ),
-                ),
-              ],
+                  BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
+                    child: Container(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.75)
+                          : theme.scaffoldBackgroundColor
+                              .withValues(alpha: 0.88),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // Main Content inside SafeArea
-          SafeArea(
-            child: Column(
-              children: [
-                _buildTopGrabHandle(),
+            // Main Content inside SafeArea
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildTopGrabHandle(),
 
-                _buildTopHeader(context, _currentSong, highResUrl),
+                  _buildTopHeader(context, _currentSong, highResUrl),
 
-                // Lyrics Area with Blur / Fade ShaderMask on top and bottom lines
-                Expanded(
-                  child: _buildLyricsArea(context, isDark),
-                ),
+                  // Lyrics Area with Blur / Fade ShaderMask on top and bottom lines
+                  Expanded(
+                    child: _buildLyricsArea(context, isDark),
+                  ),
 
-                // Bottom controls area with swipe-up detector to open queue
-                _LyricsSwipeUpDetector(
-                  onSwipeUp: widget.onOpenQueue,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      StreamBuilderWidget(screenSize: widget.screenSize),
-                      const SizedBox(height: 7),
+                  // Bottom controls area with swipe-up detector to open queue
+                  _LyricsSwipeUpDetector(
+                    onSwipeUp: widget.onOpenQueue,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        StreamBuilderWidget(screenSize: widget.screenSize),
+                        const SizedBox(height: 7),
 
-                      // Controls (Prev, Play/Pause, Next)
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: widget.screenWidth * 0.13),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            IconButton(
-                              iconSize: 40,
-                              onPressed: () {
-                                context
-                                    .read<SongstreamBloc>()
-                                    .add(PlayPreviousSongEvent());
-                              },
-                              icon: const Icon(CupertinoIcons.backward_fill),
-                            ),
-                            SizedBox(
-                              height: 80,
-                              width: 80,
-                              child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: Player(
-                                  songData: _currentSong,
-                                  songIndex: widget.songIndex,
-                                  screenSize: widget.screenSize,
-                                  route: widget.route,
-                                  isPlaylist: widget.isPlaylist,
+                        // Controls (Prev, Play/Pause, Next)
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: widget.screenWidth * 0.13),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              IconButton(
+                                iconSize: 40,
+                                onPressed: () {
+                                  context
+                                      .read<SongstreamBloc>()
+                                      .add(PlayPreviousSongEvent());
+                                },
+                                icon: const Icon(CupertinoIcons.backward_fill),
+                              ),
+                              SizedBox(
+                                height: 80,
+                                width: 80,
+                                child: FittedBox(
+                                  fit: BoxFit.fill,
+                                  child: Player(
+                                    songData: _currentSong,
+                                    songIndex: widget.songIndex,
+                                    screenSize: widget.screenSize,
+                                    route: widget.route,
+                                    isPlaylist: widget.isPlaylist,
+                                  ),
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              iconSize: 40,
-                              onPressed: () {
-                                context
-                                    .read<SongstreamBloc>()
-                                    .add(PlayNextSongEvent());
-                              },
-                              icon: const Icon(CupertinoIcons.forward_fill),
-                            ),
-                          ],
+                              IconButton(
+                                iconSize: 40,
+                                onPressed: () {
+                                  context
+                                      .read<SongstreamBloc>()
+                                      .add(PlayNextSongEvent());
+                                },
+                                icon: const Icon(CupertinoIcons.forward_fill),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 30),
+                        const SizedBox(height: 30),
 
-                      // Volume Slider
-                      VolumeSlider(screenWidth: widget.screenWidth),
+                        // Volume Slider
+                        VolumeSlider(screenWidth: widget.screenWidth),
 
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      // Bottom Action Buttons matching audio player styling & layout
-                      _buildBottomActionButtons(context),
+                        // Bottom Action Buttons matching audio player styling & layout
+                        _buildBottomActionButtons(context),
 
-                      // Bottom grab pill (tap opens up next bottom sheet)
-                      _buildBottomGrabPill(context),
-                    ],
+                        // Bottom grab pill (tap opens up next bottom sheet)
+                        _buildBottomGrabPill(context),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1054,7 +1111,7 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        CupertinoIcons.text_badge_checkmark,
+                        Icons.lyrics_outlined,
                         size: 14,
                         color:
                             Colors.red.withValues(alpha: isLoaded ? 0.85 : 0.4),
@@ -1063,9 +1120,9 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
                       Text(
                         isLoaded
                             ? (lyricsState.source == LyricsSource.ytMusic
-                                ? 'YT'
+                                ? 'NEX'
                                 : 'LRC')
-                            : 'src',
+                            : 'SRC',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
@@ -1098,7 +1155,6 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
               context.pop(sheetCtx);
               _showSyncOffsetDialog(context);
             },
-            syncOffset: _syncOffset,
           ),
         );
       },
@@ -1134,11 +1190,9 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
 
 class _LyricsSourceSheet extends StatelessWidget {
   final VoidCallback onSyncTap;
-  final Duration syncOffset;
 
   const _LyricsSourceSheet({
     required this.onSyncTap,
-    required this.syncOffset,
   });
 
   @override
@@ -1175,7 +1229,7 @@ class _LyricsSourceSheet extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Lyrics Source',
+                    'Lyrics Setting',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
@@ -1206,6 +1260,9 @@ class _LyricsSourceSheet extends StatelessWidget {
                     final hasLrc = isLoaded && state.hasLrclibLyrics;
                     final hasSynced =
                         isLoaded && state.lyricModel.hasSyncedLyrics;
+                    // Read active sync offset directly from bloc state.
+                    final currentSyncOffset =
+                        isLoaded ? state.syncOffset : Duration.zero;
 
                     return Column(
                       children: [
@@ -1265,7 +1322,7 @@ class _LyricsSourceSheet extends StatelessWidget {
                               width: 42,
                               height: 42,
                               decoration: BoxDecoration(
-                                color: syncOffset != Duration.zero
+                                color: currentSyncOffset != Duration.zero
                                     ? Colors.red.withValues(alpha: 0.18)
                                     : onSurface.withValues(alpha: 0.08),
                                 borderRadius: BorderRadius.circular(12),
@@ -1273,7 +1330,7 @@ class _LyricsSourceSheet extends StatelessWidget {
                               child: Icon(
                                 CupertinoIcons.timer,
                                 size: 20,
-                                color: syncOffset != Duration.zero
+                                color: currentSyncOffset != Duration.zero
                                     ? Colors.red
                                     : onSurface.withValues(alpha: 0.7),
                               ),
@@ -1287,12 +1344,12 @@ class _LyricsSourceSheet extends StatelessWidget {
                               ),
                             ),
                             subtitle: Text(
-                              syncOffset == Duration.zero
+                              currentSyncOffset == Duration.zero
                                   ? 'Adjust timing if lyrics are early or late'
-                                  : 'Offset: ${syncOffset.inMilliseconds > 0 ? '+' : ''}${(syncOffset.inMilliseconds / 1000.0).toStringAsFixed(1)}s',
+                                  : 'Offset: ${currentSyncOffset.inMilliseconds > 0 ? '+' : ''}${(currentSyncOffset.inMilliseconds / 1000.0).toStringAsFixed(1)}s',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: syncOffset != Duration.zero
+                                color: currentSyncOffset != Duration.zero
                                     ? Colors.red.withValues(alpha: 0.85)
                                     : onSurface.withValues(alpha: 0.5),
                               ),
@@ -1436,10 +1493,12 @@ class _SourceTile extends StatelessWidget {
 class _LyricsSyncTimerSheet extends StatefulWidget {
   final Duration initialOffset;
   final ValueChanged<Duration> onOffsetChanged;
+  final ValueChanged<Duration> onDone;
 
   const _LyricsSyncTimerSheet({
     required this.initialOffset,
     required this.onOffsetChanged,
+    required this.onDone,
   });
 
   @override
@@ -1714,7 +1773,10 @@ class _LyricsSyncTimerSheetState extends State<_LyricsSyncTimerSheet> {
                     padding: EdgeInsets.zero,
                     color: Colors.red,
                     borderRadius: BorderRadius.circular(16),
-                    onPressed: () => context.pop(),
+                    onPressed: () {
+                      widget.onDone(_offset);
+                      context.pop();
+                    },
                     child: const Text(
                       'Done',
                       style: TextStyle(
