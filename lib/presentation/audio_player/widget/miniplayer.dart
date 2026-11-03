@@ -179,7 +179,10 @@ class _MiniPlayerState extends State<MiniPlayer> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (state is LoadingState)
+                            if (state is LoadingState ||
+                                context
+                                    .read<SongstreamBloc>()
+                                    .isSongLoading)
                               Container(
                                 width: 20,
                                 height: 20,

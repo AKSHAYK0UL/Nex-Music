@@ -27,10 +27,59 @@ class Player extends StatefulWidget {
 }
 
 class _PlayerState extends State<Player> {
+  // Tracks whether we are in a loading/buffering state.
+  // BlocListener so it is ALWAYS up-to-date regardless of buildWhen.
+  final ValueNotifier<bool> _isLoading = ValueNotifier(false);
+
+  // Tracks whether the current playback is paused (vs playing).
+  final ValueNotifier<bool> _isPaused = ValueNotifier(false);
+
+  @override
+  void initState() {
+    super.initState();
+    // Sync with the current bloc state immediately on mount.
+    _syncWithState(context.read<SongstreamBloc>().state);
+  }
+
+  @override
+  void didUpdateWidget(covariant Player oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncWithState(context.read<SongstreamBloc>().state);
+  }
+
+  @override
+  void dispose() {
+    _isLoading.dispose();
+    _isPaused.dispose();
+    super.dispose();
+  }
+
+  void _syncWithState(SongstreamState state) {
+    final bloc = context.read<SongstreamBloc>();
+    final isActuallyLoading = state is LoadingState ||
+        (!bloc.getSongLoaded && bloc.getCurrentSongData != null);
+    _isLoading.value = isActuallyLoading;
+    _isPaused.value = state is PausedState || state is SongstreamInitial;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SongstreamBloc, SongstreamState>(
+      // Listen to ALL state changes
       listenWhen: (previous, current) => previous != current,
+      listener: (context, state) {
+        if (state is ErrorState) {
+          context.read<SongstreamBloc>().add(PauseEvent());
+          if (state.errorMessage != "Error fetching song: Connection aborted") {
+            showSnackbar(context, state.errorMessage);
+          }
+        }
+        // Always sync notifiers this fires even when buildWhen returns false.
+        _syncWithState(state);
+      },
+      // Only rebuild the widget tree when the song ID changes.
+      // Loading/paused icons are driven by ValueListenableBuilders above,
+      // so they update instantly without needing a full BlocBuilder rebuild.
       buildWhen: (previous, current) {
         String? idFrom(SongstreamState s) {
           if (s is LoadingState) return s.songData.vId;
@@ -42,84 +91,55 @@ class _PlayerState extends State<Player> {
         final prevId = idFrom(previous);
         final currId = idFrom(current);
 
-        // Different song (or no song ID yet) — always rebuild.
+        // Different song rebuild so the widget tree is fresh.
         if (prevId == null || currId == null || prevId != currId) return true;
 
-        // Same song: only suppress (Playing|Paused) -> Loading transitions.
-        // Those are seek-buffering events — no need to flash a loading spinner.
-        // All other same-song transitions (Loading->Playing, Play<->Pause) rebuild.
-        if ((previous is PlayingState || previous is PausedState) &&
-            current is LoadingState) {
-          return false;
-        }
-
-        return true;
-      },
-      listener: (context, state) {
-        if (state is ErrorState) {
-          context.read<SongstreamBloc>().add(PauseEvent());
-          //  print("################# ERROR PLAYER ${state.errorMessage} ################");
-          if (state.errorMessage != "Error fetching song: Connection aborted") {
-            showSnackbar(context, state.errorMessage);
-          }
-        }
+        // Same song no structural rebuild needed; notifiers handle the icons.
+        return false;
       },
       builder: (context, state) {
-        if (state is LoadingState) {
-          // return Center(
-          //   child: CircleAvatar(
-          //     backgroundColor: accentColor,
-          //     radius: widget.screenSize * 0.0520,
-          //     child: CircularProgressIndicator(
-          //       color: secondaryColor,
-          //       strokeWidth: 4,
-          //     ),
-          //   ),
-          // );
+        return ValueListenableBuilder<bool>(
+          valueListenable: _isLoading,
+          builder: (context, isLoading, _) {
+            if (isLoading) {
+              return Center(
+                child: CircleAvatar(
+                  backgroundColor: Colors.transparent,
+                  radius: widget.screenSize * 0.0520,
+                  child: CircularProgressIndicator(
+                    color: Theme.of(context).iconTheme.color,
+                    strokeWidth: 7,
+                  ),
+                ),
+              );
+            }
 
-          return Center(
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: widget.screenSize * 0.0520,
-              child: CircularProgressIndicator(
-                color: Theme.of(context).iconTheme.color,
-                strokeWidth: 7,
-              ),
-            ),
-          );
-        }
-
-        return Center(
-          child: GestureDetector(
-            onTap: () {
-              context.read<SongstreamBloc>().add(PlayPauseEvent());
-            },
-            // child: CircleAvatar(
-            //   backgroundColor: accentColor,
-            //   radius: widget.screenSize * 0.0520,
-            //   child: Center(
-            //     child: Icon(
-            //       state is PausedState ? Icons.play_arrow : Icons.pause,
-            //       size: widget.screenSize * 0.0791,
-            //       color: secondaryColor,
-            //     ),
-            //   ),
-            // ),
-
-            child: CircleAvatar(
-              backgroundColor: Colors.transparent,
-              radius: widget.screenSize * 0.0520,
-              child: Center(
-                child: Icon(
-                  state is PausedState
-                      ? CupertinoIcons.play_fill
-                      : CupertinoIcons.pause_fill,
-                  size: widget.screenSize * 0.0650,
-                  color: Theme.of(context).iconTheme.color,
+            return Center(
+              child: GestureDetector(
+                onTap: () {
+                  context.read<SongstreamBloc>().add(PlayPauseEvent());
+                },
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _isPaused,
+                  builder: (context, isPaused, _) {
+                    return CircleAvatar(
+                      backgroundColor: Colors.transparent,
+                      radius: widget.screenSize * 0.0520,
+                      child: Center(
+                        child: Icon(
+                          isPaused
+                              ? CupertinoIcons.play_fill
+                              : CupertinoIcons.pause_fill,
+                          size: widget.screenSize * 0.0650,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

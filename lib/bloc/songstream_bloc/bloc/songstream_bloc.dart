@@ -1738,8 +1738,38 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     }
   }
 
+  // Helper to emit the appropriate state for playback controls/queue updates without overriding loading states
+  void _emitPlaybackState(Emitter<SongstreamState> emit) {
+    if (_songData == null) {
+      emit(SongstreamInitial());
+      return;
+    }
+    if (state is LoadingState || !_songLoaded) {
+      emit(LoadingState(
+        songData: _songData!,
+        volume: _currentVolume,
+        isMuted: _isMute,
+      ));
+    } else if (_isPlaying) {
+      emit(PlayingState(
+        songData: _songData!,
+        volume: _currentVolume,
+        isMuted: _isMute,
+      ));
+    } else {
+      emit(PausedState(
+        songData: _songData!,
+        volume: _currentVolume,
+        isMuted: _isMute,
+      ));
+    }
+  }
+
 //emit pause/play state
   void _togglePlayPause(PlayPauseEvent event, Emitter<SongstreamState> emit) {
+    if (state is LoadingState || !_songLoaded) {
+      return;
+    }
     _isPlaying ? add(PauseEvent()) : add(PlayEvent());
   }
 
@@ -1771,17 +1801,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   void _toggleLoop(LoopEvent event, Emitter<SongstreamState> emit) {
     _audioPlayer.setLoopMode(
         _audioPlayer.loopMode == LoopMode.one ? LoopMode.off : LoopMode.one);
-    emit(_isPlaying
-        ? PlayingState(
-            songData: _songData!,
-            volume: _currentVolume,
-            isMuted: _isMute,
-          )
-        : PausedState(
-            songData: _songData!,
-            volume: _currentVolume,
-            isMuted: _isMute,
-          ));
+    _emitPlaybackState(emit);
   }
 
   //Mute Audio Player
@@ -1794,17 +1814,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _currentVolume = _storedVolume;
       _audioPlayer.setVolume(_currentVolume);
     }
-    emit(_isPlaying
-        ? PlayingState(
-            songData: _songData!,
-            volume: _currentVolume,
-            isMuted: _isMute,
-          )
-        : PausedState(
-            songData: _songData!,
-            volume: _currentVolume,
-            isMuted: _isMute,
-          ));
+    _emitPlaybackState(emit);
   }
 
   // Set Volume
@@ -1819,17 +1829,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     } else if (_isMute && _currentVolume > 0.0) {
       _isMute = false;
     }
-    emit(_isPlaying
-        ? PlayingState(
-            songData: _songData!,
-            volume: _currentVolume,
-            isMuted: _isMute,
-          )
-        : PausedState(
-            songData: _songData!,
-            volume: _currentVolume,
-            isMuted: _isMute,
-          ));
+    _emitPlaybackState(emit);
   }
 
   // Start Radio Clear playlist and add radio songs
@@ -1837,19 +1837,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       StartRadioEvent event, Emitter<SongstreamState> emit) async {
     _isRadioLoading = true;
     if (_songData != null) {
-      if (_isPlaying) {
-        emit(PlayingState(
-          songData: _songData!,
-          volume: _currentVolume,
-          isMuted: _isMute,
-        ));
-      } else {
-        emit(PausedState(
-          songData: _songData!,
-          volume: _currentVolume,
-          isMuted: _isMute,
-        ));
-      }
+      _emitPlaybackState(emit);
     }
     try {
       final radioSongs = await _repository.getRadioSongs(event.videoId);
@@ -1873,19 +1861,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         if (_songData == null) {
           add(GetSongStreamEvent(songData: radioSongs[0], songIndex: 0));
         } else {
-          if (_isPlaying) {
-            emit(PlayingState(
-              songData: _songData!,
-              volume: _currentVolume,
-              isMuted: _isMute,
-            ));
-          } else {
-            emit(PausedState(
-              songData: _songData!,
-              volume: _currentVolume,
-              isMuted: _isMute,
-            ));
-          }
+          _emitPlaybackState(emit);
         }
       }
     } catch (e) {
@@ -2138,7 +2114,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   void _updateUIFromBackground(
       UpdateUIEvent event, Emitter<SongstreamState> emit) {
     if (state.runtimeType != CloseMiniPlayerState) {
-      _isPlaying ? add(PlayEvent()) : add(PauseEvent());
+      _emitPlaybackState(emit);
     }
   }
 
@@ -2176,19 +2152,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
     // Emit current state to trigger UI update
     if (_songData != null) {
-      if (_isPlaying) {
-        emit(PlayingState(
-          songData: _songData!,
-          volume: _currentVolume,
-          isMuted: _isMute,
-        ));
-      } else {
-        emit(PausedState(
-          songData: _songData!,
-          volume: _currentVolume,
-          isMuted: _isMute,
-        ));
-      }
+      _emitPlaybackState(emit);
     }
   }
 
@@ -2217,19 +2181,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
       // Emit current state to trigger UI update
       if (_songData != null) {
-        if (_isPlaying) {
-          emit(PlayingState(
-            songData: _songData!,
-            volume: _currentVolume,
-            isMuted: _isMute,
-          ));
-        } else {
-          emit(PausedState(
-            songData: _songData!,
-            volume: _currentVolume,
-            isMuted: _isMute,
-          ));
-        }
+        _emitPlaybackState(emit);
       } else {
         emit(SongstreamInitial());
       }
@@ -2289,6 +2241,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   List<Songmodel> get getPlaylistSongs => List.unmodifiable(_playlistSongs);
   int get getCurrentSongIndex => _currentSongIndex;
   bool get isRadioLoading => _isRadioLoading;
+  bool get getSongLoaded => _songLoaded;
+  bool get isSongLoading => state is LoadingState || (!_songLoaded && _songData != null);
 
   // New methods for upcoming songs  logic
   void _getUpcomingSongs(
