@@ -120,24 +120,6 @@ class AppRouter {
                         );
                       },
                     ),
-                    GoRoute(
-                      path: RouterPath.showPlaylistSongsRoute,
-                      name: RouterName.showPlaylistSongsName,
-                      builder: (context, state) {
-                        final extra = state.extra;
-                        if (extra is PlayListmodel) {
-                          return ShowPlaylist(
-                            playlistData: extra,
-                          );
-                        } else if (extra is Map<String, dynamic>) {
-                          return ShowPlaylist(
-                            playlistData: extra['playlistData'] as PlayListmodel,
-                            isAlbum: extra['isAlbum'] as bool? ?? false,
-                          );
-                        }
-                        return const SizedBox();
-                      },
-                    ),
                   ],
                 ),
               ],
@@ -339,6 +321,25 @@ class AppRouter {
             return ArtistFullScreen(
               artist: artist,
             );
+          },
+        ),
+        GoRoute(
+          parentNavigatorKey: rootNavigatorKey,
+          path: RouterPath.showPlaylistSongsRoute,
+          name: RouterName.showPlaylistSongsName,
+          builder: (context, state) {
+            final extra = state.extra;
+            if (extra is PlayListmodel) {
+              return ShowPlaylist(
+                playlistData: extra,
+              );
+            } else if (extra is Map<String, dynamic>) {
+              return ShowPlaylist(
+                playlistData: extra['playlistData'] as PlayListmodel,
+                isAlbum: extra['isAlbum'] as bool? ?? false,
+              );
+            }
+            return const SizedBox();
           },
         ),
       ],
