@@ -24,7 +24,7 @@ void showCupertinoCreatePlaylist(BuildContext context) {
             height: 200,
             decoration: BoxDecoration(
              
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha:0.7),
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(20)),
             ),
@@ -55,7 +55,7 @@ void showCupertinoCreatePlaylist(BuildContext context) {
                     style: const TextStyle(color: Colors.black),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha:0.05),
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),

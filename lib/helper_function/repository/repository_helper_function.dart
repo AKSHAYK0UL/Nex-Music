@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'package:dart_ytmusic_api/types.dart';
+import 'package:flutter/widgets.dart';
 import 'package:nex_music/enum/quality.dart';
 import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
@@ -39,7 +40,7 @@ class RepositoryHelperFunction {
       if (section.contents.isNotEmpty) {
         for (int j = 0; j < section.contents.length; j++) {
           var content = section.contents[j];
-          print("HOME SECTION ############################# ${content.runtimeType} ##############################");
+          debugPrint("HOME SECTION ############################# ${content.runtimeType} ##############################");
           if (content is PlaylistDetailed) {
             playlists.add(
               PlayListmodel(
@@ -66,7 +67,7 @@ class RepositoryHelperFunction {
       if (section.contents.isNotEmpty) {
         for (int j = 0; j < section.contents.length; j++) {
           var content = section.contents[j];
-          print("HOME SECTION ############################# ${content.runtimeType} ##############################");
+          debugPrint("HOME SECTION ############################# ${content.runtimeType} ##############################");
           if (content is AlbumDetailed) {
             albums.add(
               PlayListmodel(

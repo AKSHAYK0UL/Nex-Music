@@ -184,7 +184,7 @@ class _EmptyDownloadsView extends StatelessWidget {
             Icon(
               CupertinoIcons.cloud_download,
               size: 80,
-              color: Colors.red.withOpacity(0.8),
+              color: Colors.red.withValues(alpha:0.8),
             ),
             const SizedBox(height: 25),
              Text(

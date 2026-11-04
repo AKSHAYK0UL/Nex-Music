@@ -33,13 +33,11 @@ class SongColumView extends StatelessWidget {
                 rowIndex * 3 + columnIndex; // Calculate the actual index (changed from 4 to 3)
             if (index < quickPicksLength) {
               final songData = quickPicks[index];
-              return SizedBox(
-                child: RecentSongTile(
-                  showDelete: false,
-                  songData: songData,
-                  songIndex: index,
-                  tabRouteENUM: TabRouteENUM.other,
-                ),
+              return RecentSongTile(
+                showDelete: false,
+                songData: songData,
+                songIndex: index,
+                tabRouteENUM: TabRouteENUM.other,
               );
             } else {
               return const SizedBox();
@@ -59,13 +57,11 @@ class FeaturedCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.sizeOf(context);
-    
     // Safety check for empty songs list
     if (songs.isEmpty) {
-      return SizedBox(
-        height: screenSize.height * 0.460,
-        child: const Center(
+      return const SizedBox(
+        height: 255,
+        child: Center(
           child: Text(
             'No songs available',
             style: TextStyle(
@@ -76,22 +72,18 @@ class FeaturedCarousel extends StatelessWidget {
         ),
       );
     }
-    
-    return SizedBox(
-      height: screenSize.height * 0.370, // Same height as original
-      child: PageView.builder(
-        controller: PageController(viewportFraction: 0.92), // Peeking effect
-        padEnds: false,
-        itemCount: (songs.length / 3).ceil(), // Calculate the number of horizontal items (changed from 4 to 3)
-        itemBuilder: (context, rowIndex) {
-          // final double leftPadding = rowIndex == 0 ? 20.0 : 8.0;
-          //  final double rightPadding = rowIndex == (songs.length / 3).ceil() - 1 ? 20.0 : 0.0;
 
+    return SizedBox(
+      height: 255, // 3 tiles × 85px each no space
+      child: PageView.builder(
+        controller: PageController(viewportFraction: 0.92),
+        padEnds: false,
+        itemCount: (songs.length / 3).ceil(),
+        itemBuilder: (context, rowIndex) {
           return SongColumView(
-              rowIndex: rowIndex,
-              quickPicksLength: songs.length,
-              quickPicks: songs,
-            
+            rowIndex: rowIndex,
+            quickPicksLength: songs.length,
+            quickPicks: songs,
           );
         },
       ),
@@ -111,27 +103,28 @@ class PlaylistCarousel extends StatelessWidget {
     final itemCount = playlists.length > 8 ? 8 : playlists.length;
 
     return SizedBox(
-      height: screenSize.height * 0.38,
+      height: screenSize.height * 0.30,
       child: PageView.builder(
         controller: PageController(viewportFraction: 0.92),
         padEnds: false,
         itemCount: itemCount,
         itemBuilder: (context, index) {
           final playlist = playlists[index];
-          
-          // final double leftPadding = index == 0 ? 20.0 : 8.0;
-           final double rightPadding = index == itemCount - 1 ? 14.0 : 0.0;
+          final double rightPadding = index == itemCount - 1 ? 14.0 : 0.0;
 
           return Padding(
             padding: EdgeInsets.only(left: 14, right: rightPadding),
-            child: BuildPlaylistAlbumCard(isAlbum: false,playlist: playlist,screenSize:screenSize ),
+            child: BuildPlaylistAlbumCard(
+              isAlbum: false,
+              playlist: playlist,
+              screenSize: screenSize,
+            ),
           );
         },
       ),
     );
   }
 }
-  
 
 // Album Carousel Component
 class AlbumCarousel extends StatelessWidget {
@@ -145,20 +138,22 @@ class AlbumCarousel extends StatelessWidget {
     final itemCount = albums.length > 8 ? 8 : albums.length;
 
     return SizedBox(
-      height: screenSize.height * 0.38,
+      height: screenSize.height * 0.30,
       child: PageView.builder(
         controller: PageController(viewportFraction: 0.92),
         padEnds: false,
         itemCount: itemCount,
         itemBuilder: (context, index) {
           final album = albums[index];
-          
-          // final double leftPadding = index == 0 ? 20.0 : 8.0;
           final double rightPadding = index == itemCount - 1 ? 14.0 : 0.0;
 
           return Padding(
             padding: EdgeInsets.only(left: 14, right: rightPadding),
-            child: BuildPlaylistAlbumCard(isAlbum: true,playlist: album,screenSize:screenSize ),
+            child: BuildPlaylistAlbumCard(
+              isAlbum: true,
+              playlist: album,
+              screenSize: screenSize,
+            ),
           );
         },
       ),

@@ -9,7 +9,6 @@ import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/songmodel.dart';
-import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:nex_music/bloc/user_playlist_bloc/bloc/user_playlist_bloc.dart';
@@ -195,8 +194,17 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                      
                       IconButton(
                         onPressed: () async {
-                          await Share.share(
-                              "Check out my playlist: $_playlistName");
+                          // await Share.share(
+                          //     "Check out my playlist: $_playlistName");
+                            await SharePlus.instance.share(
+                        ShareParams(
+                          title:_playlistName ,
+                          
+                          text: "Check out my playlist: $_playlistName",
+                        ),
+                      );
+                        
+                       
                         },
                         icon: Icon(
                           CupertinoIcons.share,
@@ -235,8 +243,8 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                                               : kPrimary,
                                           widget.colorValue != null
                                               ? Color(widget.colorValue!)
-                                                  .withOpacity(0.6)
-                                              : kPrimary.withOpacity(0.6),
+                                                  .withValues(alpha:0.6)
+                                              : kPrimary.withValues(alpha:0.6),
                                         ],
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
@@ -255,10 +263,10 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                                 begin: Alignment.topCenter,
                                 end: Alignment.bottomCenter,
                                 colors: [
-                                  Colors.black.withOpacity(0.1),
+                                  Colors.black.withValues(alpha:0.1),
                                   Colors.transparent,
-                                  Colors.black.withOpacity(0.4),
-                                  Colors.black.withOpacity(0.85),
+                                  Colors.black.withValues(alpha:0.4),
+                                  Colors.black.withValues(alpha:0.85),
                                 ],
                                 stops: const [0.0, 0.4, 0.7, 1.0],
                               ),
@@ -296,7 +304,7 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                                   "$totalSongs SONGS",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.7),
+                                    color: Colors.white.withValues(alpha:0.7),
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
                                     letterSpacing: 0.5,
@@ -355,7 +363,7 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                                               width: 50,
                                               decoration: BoxDecoration(
                                                 color: Colors.white
-                                                    .withOpacity(0.2),
+                                                    .withValues(alpha:0.2),
                                                 shape: BoxShape.circle,
                                               ),
                                               child: const Icon(
@@ -391,7 +399,7 @@ class _UserPlaylistSongsState extends State<UserPlaylistSongs> {
                                                 boxShadow: [
                                                   BoxShadow(
                                                     color: kPrimaryPink
-                                                        .withOpacity(0.4),
+                                                        .withValues(alpha:0.4),
                                                     blurRadius: 15,
                                                     offset: const Offset(0, 5),
                                                   )

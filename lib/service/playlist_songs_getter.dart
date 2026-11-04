@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 // Model
@@ -59,7 +60,7 @@ Future<List<String>> _fetchAllVideoIds({
   const maxPages = 500; //safety net
 
   final isMix = playlistId.startsWith('RD');
-  print('[fetchAllVideoIds] START playlistId=$playlistId type=${isMix ? "MIX/RADIO" : "NORMAL"}');
+  debugPrint('[fetchAllVideoIds] START playlistId=$playlistId type=${isMix ? "MIX/RADIO" : "NORMAL"}');
 
   final ids = <String>[];
   final seenIds = <String>{};       // dedupe video IDs
@@ -73,7 +74,7 @@ Future<List<String>> _fetchAllVideoIds({
     // Cycle detection: if we've already used this exact pageToken before,
     // the API is looping (this is what happens on Mix/Radio playlists)
     if (pageToken != null && seenTokens.contains(pageToken)) {
-      print('[fetchAllVideoIds] CYCLE DETECTED at page=$pageCount — pageToken repeated. '
+      debugPrint('[fetchAllVideoIds] CYCLE DETECTED at page=$pageCount — pageToken repeated. '
           'Likely a Mix/Radio playlist (isMix=$isMix). Stopping pagination.');
       break;
     }
@@ -88,7 +89,7 @@ Future<List<String>> _fetchAllVideoIds({
     };
 
     final uri = Uri.parse(baseUrl).replace(queryParameters: params);
-    print('[fetchAllVideoIds] page=$pageCount pageToken=${pageToken ?? "(first)"}');
+    debugPrint('[fetchAllVideoIds] page=$pageCount pageToken=${pageToken ?? "(first)"}');
 
     Map<String, dynamic>? body;
     var attempt = 0;
@@ -100,25 +101,25 @@ Future<List<String>> _fetchAllVideoIds({
 
         if (response.statusCode == 429 ||
             (response.statusCode >= 500 && response.statusCode < 600)) {
-          print('[fetchAllVideoIds] page=$pageCount attempt=$attempt TRANSIENT ${response.statusCode}');
+          debugPrint('[fetchAllVideoIds] page=$pageCount attempt=$attempt TRANSIENT ${response.statusCode}');
           throw http.ClientException('Transient HTTP ${response.statusCode}');
         }
 
         _assertOk(response, 'playlistItems.list');
         body = jsonDecode(response.body) as Map<String, dynamic>;
-        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt SUCCESS');
+        debugPrint('[fetchAllVideoIds] page=$pageCount attempt=$attempt SUCCESS');
         break;
       } on TimeoutException catch (e) {
-        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt TIMEOUT: $e');
+        debugPrint('[fetchAllVideoIds] page=$pageCount attempt=$attempt TIMEOUT: $e');
         if (attempt > maxRetries) rethrow;
       } on SocketException catch (e) {
-        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt SOCKET ERROR: $e');
+        debugPrint('[fetchAllVideoIds] page=$pageCount attempt=$attempt SOCKET ERROR: $e');
         if (attempt > maxRetries) rethrow;
       } on http.ClientException catch (e) {
-        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt CLIENT EXCEPTION: $e');
+        debugPrint('[fetchAllVideoIds] page=$pageCount attempt=$attempt CLIENT EXCEPTION: $e');
         if (attempt > maxRetries) rethrow;
       } on FormatException catch (e) {
-        print('[fetchAllVideoIds] page=$pageCount attempt=$attempt MALFORMED JSON: $e');
+        debugPrint('[fetchAllVideoIds] page=$pageCount attempt=$attempt MALFORMED JSON: $e');
         if (attempt > maxRetries) rethrow;
       }
 
@@ -140,15 +141,15 @@ Future<List<String>> _fetchAllVideoIds({
     //  if tokens didn't repeat, if a
     // full page came back with zero new video IDs, we're looping .
     if (items.isNotEmpty && newOnThisPage == 0) {
-      print('[fetchAllVideoIds] page=$pageCount returned only already-seen IDs — stopping.');
+      debugPrint('[fetchAllVideoIds] page=$pageCount returned only already-seen IDs — stopping.');
       break;
     }
 
     pageToken = body['nextPageToken'] as String?;
-    print('[fetchAllVideoIds] page=$pageCount done, newIds=$newOnThisPage, runningTotal=${ids.length}');
+    debugPrint('[fetchAllVideoIds] page=$pageCount done, newIds=$newOnThisPage, runningTotal=${ids.length}');
   } while (pageToken != null && pageCount < maxPages);
 
-  print('[fetchAllVideoIds] DONE playlistId=$playlistId totalIds=${ids.length} pagesFetched=$pageCount');
+  debugPrint('[fetchAllVideoIds] DONE playlistId=$playlistId totalIds=${ids.length} pagesFetched=$pageCount');
   return ids;
 }
 

@@ -32,7 +32,7 @@ ThemeData themeData(BuildContext context, {bool isDark = false}) {
       secondary: surface,
       surface: surface,
       onSurface: AppColors.text(isDark),
-      onBackground: AppColors.text(isDark),
+      // onBackground: AppColors.text(isDark),
     ),
     appBarTheme: appBarTheme(screenSize, isDark: isDark).copyWith(
       systemOverlayStyle: SystemUiOverlayStyle(

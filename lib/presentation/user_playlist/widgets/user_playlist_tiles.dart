@@ -23,12 +23,12 @@ class AddPlaylistTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
                 color: const Color(0xFF1A1A2E),
                 border: Border.all(
-                  color: kPrimary.withOpacity(0.5),
+                  color: kPrimary.withValues(alpha:0.5),
                   width: 1.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: kPrimary.withOpacity(0.08),
+                    color: kPrimary.withValues(alpha:0.08),
                     blurRadius: 20,
                     spreadRadius: 2,
                   ),
@@ -49,7 +49,7 @@ class AddPlaylistTile extends StatelessWidget {
                         shape: BoxShape.circle,
                         gradient: RadialGradient(
                           colors: [
-                            kPrimary.withOpacity(0.18),
+                            kPrimary.withValues(alpha:0.18),
                             Colors.transparent,
                           ],
                         ),
@@ -70,14 +70,14 @@ class AddPlaylistTile extends StatelessWidget {
                             gradient: LinearGradient(
                               colors: [
                                 kPrimary,
-                                kPrimary.withOpacity(0.6),
+                                kPrimary.withValues(alpha:0.6),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: kPrimary.withOpacity(0.45),
+                                color: kPrimary.withValues(alpha:0.45),
                                 blurRadius: 14,
                                 offset: const Offset(0, 4),
                               ),
@@ -128,7 +128,7 @@ class _DotGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = kPrimary.withOpacity(0.06)
+      ..color = kPrimary.withValues(alpha:0.06)
       ..strokeWidth = 1.5
       ..style = PaintingStyle.fill;
 
@@ -259,7 +259,7 @@ class UserPlaylistTile extends StatelessWidget {
                       begin: Alignment.bottomCenter,
                       end: Alignment.topCenter,
                       colors: [
-                        Colors.black.withOpacity(0.45),
+                        Colors.black.withValues(alpha:0.45),
                         Colors.transparent,
                       ],
                     ),
@@ -277,7 +277,7 @@ class UserPlaylistTile extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.45),
+                      color: Colors.black.withValues(alpha:0.45),
                       shape: BoxShape.circle,
                     ),
                     child:
@@ -338,7 +338,7 @@ class UserPlaylistTile extends StatelessWidget {
           bottom: -10,
           child: Icon(
             Icons.music_note_rounded,
-            color: Colors.white.withOpacity(0.10),
+            color: Colors.white.withValues(alpha:0.10),
             size: 90,
           ),
         ),
@@ -349,7 +349,7 @@ class UserPlaylistTile extends StatelessWidget {
           top: -6,
           child: Icon(
             Icons.music_note_rounded,
-            color: Colors.white.withOpacity(0.06),
+            color: Colors.white.withValues(alpha:0.06),
             size: 54,
           ),
         ),
@@ -364,7 +364,7 @@ class UserPlaylistTile extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.35),
+                  color: Colors.black.withValues(alpha:0.35),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.close, color: Colors.white, size: 14),

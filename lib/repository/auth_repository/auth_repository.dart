@@ -73,6 +73,7 @@ class AuthRepository {
   Future<void> googleSignIn() async {
     await _googleSignIn.initialize();
 
+    // ignore: unnecessary_nullable_for_final_variable_declarations
     final GoogleSignInAccount? gUser =
         await _googleSignIn.authenticate();
 

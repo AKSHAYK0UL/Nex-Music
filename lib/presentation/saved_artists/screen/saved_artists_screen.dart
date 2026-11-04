@@ -29,7 +29,7 @@ class _SavedArtistsScreenState extends State<SavedArtistsScreen> {
 
   List<ArtistModel> _filterArtists(List<ArtistModel> artists) {
     final filtered = artists
-        .where((a) => (a.artist.name ?? '')
+        .where((a) => (a.artist.name)
             .toLowerCase()
             .contains(_searchQuery.toLowerCase()))
         .toList();
@@ -37,8 +37,8 @@ class _SavedArtistsScreenState extends State<SavedArtistsScreen> {
     if (_sortType == PlaylistSortType.nameAsc ||
         _sortType == PlaylistSortType.nameDesc) {
       filtered.sort((a, b) => _sortType == PlaylistSortType.nameAsc
-          ? (a.artist.name ?? '').compareTo(b.artist.name ?? '')
-          : (b.artist.name ?? '').compareTo(a.artist.name ?? ''));
+          ? (a.artist.name ).compareTo(b.artist.name )
+          : (b.artist.name ).compareTo(a.artist.name ));
     } else {
       filtered.sort((a, b) {
         final aTimestamp = a.timestamp;

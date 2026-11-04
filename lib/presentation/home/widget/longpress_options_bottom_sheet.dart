@@ -78,8 +78,14 @@ Future<void> showBottomOptionSheet({
                   children: [
                     IconButton(
                       onPressed: () async {
-                        await Share.share(
-                            "https://music.youtube.com/watch?v=${songData.vId}");
+                        // await Share.share(
+                        //     "https://music.youtube.com/watch?v=${songData.vId}");
+                         await SharePlus.instance.share(
+                        ShareParams(
+                          title: songData.songName,
+                          text:"https://music.youtube.com/watch?v=${songData.vId}",
+                        ),
+                      );
                         if (!context.mounted) return;
                         context.pop();
                       },

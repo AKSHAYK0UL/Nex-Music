@@ -56,8 +56,14 @@ Future<void> showLongPressOptions({
                     ),
                     trailing: IconButton(
                       onPressed: () async {
-                        await Share.share(
-                            "https://music.youtube.com/watch?v=${songData.vId}");
+                        // await Share.share(
+                        //     "https://music.youtube.com/watch?v=${songData.vId}");
+                         await SharePlus.instance.share(
+                        ShareParams(
+                          title: songData.songName,
+                          text:"https://music.youtube.com/watch?v=${songData.vId}",
+                        ),
+                      );
                         if (!context.mounted) return;
                         Navigator.of(context).pop();
                       },
@@ -265,8 +271,14 @@ Future<void> showLongPressOptions({
                 ),
                 trailing: IconButton(
                   onPressed: () async {
-                    await Share.share(
-                        "https://music.youtube.com/watch?v=${songData.vId}");
+                    // await Share.share(
+                    //     "https://music.youtube.com/watch?v=${songData.vId}");
+                     await SharePlus.instance.share(
+                        ShareParams(
+                          title: songData.songName,
+                          text:"https://music.youtube.com/watch?v=${songData.vId}",
+                        ),
+                      );
                     if (!context.mounted) return;
                     Navigator.of(context).pop();
                   },

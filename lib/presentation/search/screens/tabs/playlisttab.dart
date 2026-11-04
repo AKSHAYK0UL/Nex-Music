@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/searchedplaylist_bloc/bloc/searchedplaylist_bloc.dart';
 import 'package:nex_music/core/ui_component/loading_disk.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
-import 'package:nex_music/presentation/home/widget/playlistgridview.dart';
 
 class PlaylistTab extends StatefulWidget {
   final String inputText;

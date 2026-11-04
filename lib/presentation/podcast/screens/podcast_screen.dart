@@ -132,7 +132,7 @@ class PodcastsScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 14, vertical: 7),
                         decoration: BoxDecoration(
-                          color: kPrimary.withOpacity(0.1),
+                          color: kPrimary.withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: const Text(
@@ -170,7 +170,7 @@ class PodcastsScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                     Text(
                       'My Subscriptions',
                       style: TextStyle(
                           fontSize: 22,
@@ -215,7 +215,7 @@ class PodcastsScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                     Text(
                       'Latest Episodes',
                       style: TextStyle(
                           fontSize: 22,
@@ -312,7 +312,7 @@ class PodcastDetailScreen extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       podcast.gradientColors.first,
-                      podcast.gradientColors.first.withOpacity(0.15),
+                      podcast.gradientColors.first.withValues(alpha:0.15),
                     ],
                   ),
                 ),
@@ -332,7 +332,7 @@ class PodcastDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.35),
+                            color: Colors.black.withValues(alpha:0.35),
                             blurRadius: 24,
                             offset: const Offset(0, 10),
                           ),
@@ -353,7 +353,7 @@ class PodcastDetailScreen extends StatelessWidget {
                     Text(
                       podcast.author,
                       style: TextStyle(
-                          fontSize: 14, color: Colors.white.withOpacity(0.75)),
+                          fontSize: 14, color: Colors.white.withValues(alpha:0.75)),
                     ),
                     const SizedBox(height: 16),
                     _SubscribeButton(),
@@ -434,7 +434,7 @@ class _FeaturedBanner extends StatelessWidget {
                 width: 170,
                 height: 170,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.07),
+                  color: Colors.white.withValues(alpha:0.07),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -446,7 +446,7 @@ class _FeaturedBanner extends StatelessWidget {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha:0.05),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -461,7 +461,7 @@ class _FeaturedBanner extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha:0.2),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Text(
@@ -540,7 +540,7 @@ class _PodcastCard extends StatelessWidget {
                     Center(
                       child: Icon(
                         Icons.podcasts,
-                        color: Colors.white.withOpacity(0.25),
+                        color: Colors.white.withValues(alpha:0.25),
                         size: 64,
                       ),
                     ),

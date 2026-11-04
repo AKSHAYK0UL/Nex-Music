@@ -63,12 +63,12 @@ Widget _buildBody(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
 
           const _SubHeader(title: "Top Picks For You"),
           FeaturedCarousel(songs: state.quickPicks),
 
-          // const SizedBox(height: 5),
+          const SizedBox(height: 26),
 
           // Made For You Playlists
           SectionHeader(
@@ -87,7 +87,7 @@ Widget _buildBody(
             playlists: state.playlist.take(7).toList(),
           ),
 
-          const SizedBox(height: 35),
+          const SizedBox(height: 26),
 
           // New Albums
           SectionHeader(
@@ -106,7 +106,7 @@ Widget _buildBody(
             albums: state.albums.take(7).toList(),
           ),
 
-          const SizedBox(height: 35),
+          const SizedBox(height: 26),
 
           // Global Hits
           if (state.globalHitsPlaylists.isNotEmpty) ...[
@@ -124,7 +124,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.globalHitsPlaylists.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Globally
@@ -143,7 +143,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.trendingGloballyPlaylists.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Punjabi Playlists
@@ -162,7 +162,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.trendingPunjabiPlaylists.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Punjabi Albums
@@ -181,7 +181,7 @@ Widget _buildBody(
             AlbumCarousel(
               albums: state.trendingPunjabiAlbums.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Hindi Playlists
@@ -200,7 +200,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.trendingHindiPlaylists.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Hindi Albums
@@ -219,7 +219,7 @@ Widget _buildBody(
             AlbumCarousel(
               albums: state.trendingHindiAlbums.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending English Playlists
@@ -238,7 +238,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.trendingEnglishPlaylists.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Phonk Playlists
@@ -257,7 +257,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.trendingPhonkPlaylists.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Phonk Albums
@@ -276,7 +276,7 @@ Widget _buildBody(
             AlbumCarousel(
               albums: state.trendingPhonkAlbums.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Brazilian Phonk Playlists
@@ -295,7 +295,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.trendingBrazilianPhonkPlaylists.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Trending Brazilian Phonk Albums
@@ -314,7 +314,7 @@ Widget _buildBody(
             AlbumCarousel(
               albums: state.trendingBrazilianPhonkAlbums.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Nonstop Punjabi Mashup
@@ -333,7 +333,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.nonstopPunjabiMashup.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Nonstop Hindi Mashup
@@ -352,7 +352,7 @@ Widget _buildBody(
             PlaylistCarousel(
               playlists: state.nonstopHindiMashup.take(7).toList(),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 26),
           ],
 
           // Nonstop English Mashup
@@ -396,20 +396,30 @@ class _HomeLayout extends StatelessWidget {
       slivers: [
         SliverAppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    // backgroundColor: Colors.amber,
+
           elevation: 0,
           pinned: true,
           expandedHeight: 80.0,
           flexibleSpace: FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.fromLTRB(14, 0, 0, 10),
-            title: Text(
-              "Home",
-              style: TextStyle(
-                fontFamily: 'serif',
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: -0.5,
-              ),
+            
+            titlePadding: const EdgeInsets.fromLTRB(14, 0, 14, 07),
+            // title: Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children:[ 
+            title:Text(
+                "Home",
+                style: TextStyle(
+                  fontFamily: 'serif',
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  letterSpacing: -0.5,
+                ),
+              
+              // ),
+              // GestureDetector(child: Icon(Icons.radio_outlined,size: 20,),),
+              // ],
             ),
           ),
         ),

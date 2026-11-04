@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
 
@@ -20,11 +21,9 @@ class AudioPlayerHandler extends BaseAudioHandler {
   @override
   Future<void> pause() => _player.pause();
 
-//TODO:
   @override
   Future<void> setRepeatMode(AudioServiceRepeatMode repeatMode) async {}
 
-//TODO:
   @override
   Future<void> setShuffleMode(AudioServiceShuffleMode shuffleMode) async {}
 
@@ -80,13 +79,13 @@ class AudioPlayerHandler extends BaseAudioHandler {
   @override
   Future<void> skipToNext() async {
     songstreamBloc?.add(PlayNextSongEvent());
-    print("SKIP TO NEXT CLICKED");
+    debugPrint("SKIP TO NEXT CLICKED");
   }
 
   @override
   Future<void> skipToPrevious() async {
     songstreamBloc?.add(PlayPreviousSongEvent());
-    print("SKIP TO PREVIOUS CLICKED");
+    debugPrint("SKIP TO PREVIOUS CLICKED");
   }
 }
 
@@ -103,6 +102,7 @@ extension on ProcessingState {
         return AudioProcessingState.ready;
       case ProcessingState.completed:
         return AudioProcessingState.completed;
+      // ignore: unreachable_switch_default
       default:
         return AudioProcessingState.idle;
     }

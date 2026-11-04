@@ -141,8 +141,14 @@ class DesktopAudioPlayer extends StatelessWidget {
                                             "Like",
                                             screenSize),
                                         buildOptionButton(context, () async {
-                                          await Share.share(
-                                              "https://music.youtube.com/watch?v=${songData.vId}");
+                                          // await Share.share(
+                                          //     "https://music.youtube.com/watch?v=${songData.vId}");
+                                           await SharePlus.instance.share(
+                        ShareParams(
+                          title: songData.songName,
+                          text:"https://music.youtube.com/watch?v=${songData.vId}",
+                        ),
+                      );
                                         }, Icons.share, "Share", screenSize),
                                       ],
                                     ),

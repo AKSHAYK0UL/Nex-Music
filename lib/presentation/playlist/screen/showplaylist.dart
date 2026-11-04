@@ -120,12 +120,12 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
     final Color kPrimaryPink = const Color(0xFFFF2D55);
 
     // Calculate bottom padding for the mini-player
-    final currentState = context.watch<ss.SongstreamBloc>().state;
-    double bottomPadding = (currentState is ss.PausedState ||
-            currentState is ss.PlayingState ||
-            currentState is ss.LoadingState)
-        ? 90.0
-        : 0.0;
+    // final currentState = context.watch<ss.SongstreamBloc>().state;
+    // double bottomPadding = (currentState is ss.PausedState ||
+    //         currentState is ss.PlayingState ||
+    //         currentState is ss.LoadingState)
+    //     ? 90.0
+    //     : 0.0;
 
     return BlocBuilder<PlaylistBloc, PlaylistState>(
       buildWhen: (previous, current) => previous != current,
@@ -206,8 +206,12 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                   //  SHARE BUTTON
                   IconButton(
                     onPressed: () async {
-                      await Share.share(
-                        "Check out this playlist: ${widget.playlistData.playlistName}\nhttps://music.youtube.com/playlist?list=${widget.playlistData.playListId}",
+                      await SharePlus.instance.share(
+                        ShareParams(
+                          title: widget.playlistData.playlistName,
+                          
+                          text: "Check out this playlist: ${widget.playlistData.playlistName}\nhttps://music.youtube.com/playlist?list=${widget.playlistData.playListId}",
+                        ),
                       );
                     },
                     icon: Icon(
@@ -457,7 +461,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                                   break;
                                                 }
                                               }
-                                              if (mounted) {
+                                              if (context.mounted) {
                                                 final finalShuffled =
                                                     List<Songmodel>.from(
                                                         allSongs)
@@ -528,7 +532,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                                   break;
                                                 }
                                               }
-                                              if (mounted) {
+                                              if (context.mounted) {
                                                 context
                                                     .read<ss.SongstreamBloc>()
                                                     .add(ss

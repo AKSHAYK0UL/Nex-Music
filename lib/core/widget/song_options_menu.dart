@@ -154,9 +154,15 @@ class SongOptionsMenu extends StatelessWidget {
           iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () async {
             Navigator.pop(context);
-            await Share.share(
-              "https://music.youtube.com/watch?v=${songData.vId}",
-            );
+              await SharePlus.instance.share(
+                        ShareParams(
+                          title: songData.songName,
+                          text:"https://music.youtube.com/watch?v=${songData.vId}",
+                        ),
+                      );
+            // await Share.share(
+            //   "https://music.youtube.com/watch?v=${songData.vId}",
+            // );
           },
         ));
         items.add(_buildDivider(context));
@@ -331,9 +337,15 @@ class SongOptionsMenu extends StatelessWidget {
           iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () async {
             Navigator.pop(context);
-            await Share.share(
-              "https://music.youtube.com/watch?v=${songData.vId}",
-            );
+             await SharePlus.instance.share(
+                        ShareParams(
+                          title: songData.songName,
+                          text:"https://music.youtube.com/watch?v=${songData.vId}",
+                        ),
+                      );
+            // await Share.share(
+            //   "https://music.youtube.com/watch?v=${songData.vId}",
+            // );
           },
         ));
         items.add(_buildDivider(context));
@@ -399,9 +411,15 @@ class SongOptionsMenu extends StatelessWidget {
           iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
           onTap: () async {
             Navigator.pop(context);
-            await Share.share(
-              "https://music.youtube.com/watch?v=${songData.vId}",
-            );
+            // await Share.share(
+            //   "https://music.youtube.com/watch?v=${songData.vId}",
+            // );
+             await SharePlus.instance.share(
+                        ShareParams(
+                          title: songData.songName,
+                          text:"https://music.youtube.com/watch?v=${songData.vId}",
+                        ),
+                      );
           },
         ));
         items.add(_buildDivider(context));

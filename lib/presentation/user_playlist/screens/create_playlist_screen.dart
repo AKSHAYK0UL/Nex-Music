@@ -64,6 +64,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
       widget.onCreate(
         name: _nameController.text.trim(),
         description: _descController.text.trim(),
+        // ignore: deprecated_member_use
         colorValue: _selectedColor.value,
         displayMode: _displayMode,
         isPublic: _isPublic,
@@ -180,7 +181,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                     //       onPressed: _canCreate ? _handleCreate : null,
                     //       style: TextButton.styleFrom(
                     //         backgroundColor: _canCreate
-                    //             ? kPrimary.withOpacity(0.1)
+                    //             ? kPrimary.withValues(alpha:0.1)
                     //             : Colors.transparent,
                     //         shape: RoundedRectangleBorder(
                     //             borderRadius: BorderRadius.circular(8)),
@@ -281,7 +282,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
                         boxShadow: _canCreate
                             ? [
                                 BoxShadow(
-                                  color: kPrimary.withOpacity(0.35),
+                                  color: kPrimary.withValues(alpha:0.35),
                                   blurRadius: 16,
                                   offset: const Offset(0, 6),
                                 )
@@ -329,7 +330,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
         boxShadow: [
           BoxShadow(
             color: (_displayMode == 'color' ? _selectedColor : Colors.black)
-                .withOpacity(0.25),
+                .withValues(alpha:0.25),
             blurRadius: 28,
             offset: const Offset(0, 12),
           ),
@@ -390,7 +391,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
         color: shade,
         child: Center(
           child: Icon(Icons.music_note_rounded,
-              color: Colors.white.withOpacity(0.5), size: 22),
+              color: Colors.white.withValues(alpha:0.5), size: 22),
         ),
       );
 
@@ -413,7 +414,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
         right: -10,
         bottom: -8,
         child: Icon(Icons.music_note_rounded,
-            color: Colors.white.withOpacity(0.12), size: 80),
+            color: Colors.white.withValues(alpha:0.12), size: 80),
       ),
       const Center(
         child: Icon(Icons.music_note_rounded, color: Colors.white70, size: 52),
@@ -472,7 +473,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                          color: c.withOpacity(0.55),
+                          color: c.withValues(alpha:0.55),
                           blurRadius: 12,
                           spreadRadius: 1)
                     ]
@@ -505,7 +506,7 @@ class _CreatePlaylistScreenState extends State<CreatePlaylistScreen> {
             height: 38,
             decoration: BoxDecoration(
               color: _isPublic
-                  ? const Color(0xFF22C55E).withOpacity(0.15)
+                  ? const Color(0xFF22C55E).withValues(alpha:0.15)
                   : theme.colorScheme.onSurface.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
@@ -597,7 +598,7 @@ class _ModeTab extends StatelessWidget {
             boxShadow: isActive
                 ? [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.07),
+                      color: Colors.black.withValues(alpha:0.07),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     )

@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:nex_music/helper_function/storage_permission/storage_permission.dart';
@@ -48,7 +49,7 @@ class OfflineSongsBloc extends Bloc<OfflineSongsEvent, OfflineSongsState> {
       await _downloadRepo.deleteDownLoadedSong(event.songData);
       add(LoadOfflineSongsEvent());
     } catch (e) {
-      print("DELETE ERROR ${e.toString()}@@@@@");
+      debugPrint("DELETE ERROR ${e.toString()}@@@@@");
       emit(OfflineSongsErrorState(errorMessage: e.toString()));
     }
   }

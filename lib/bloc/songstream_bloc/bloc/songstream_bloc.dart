@@ -529,10 +529,8 @@
 //           add(PauseEvent());
 //         }
 //       } else if (event.type == AudioInterruptionType.duck) {
-//         //TODO
 //         // Lower the volume
 //       } else if (event.type == AudioInterruptionType.unknown) {
-//         //TODO
 //         // Unknown interruption
 //       }
 //     });
@@ -1371,6 +1369,7 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart';
 import 'package:audio_session/audio_session.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
@@ -1572,11 +1571,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
           add(PauseEvent());
         }
       } else if (event.type == AudioInterruptionType.duck) {
-        //TODO
-        // Lower the volume
+        
       } else if (event.type == AudioInterruptionType.unknown) {
-        //TODO
-        // Unknown interruption
+        
       }
     });
   }
@@ -1584,7 +1581,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 // Grab the song URL, update the "Recently Played" list and start playing.
   Future<void> _getSongUrl(
       GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
-    print("SONG ID ${event.songData.vId}@@@");
+    debugPrint("SONG ID ${event.songData.vId}@@@");
     if (_songData != null &&
         event.songData.vId == _songData!.vId &&
         event.songData.isLocal == _songData!.isLocal) {
@@ -1865,7 +1862,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         }
       }
     } catch (e) {
-      print("Error starting radio: $e");
+      debugPrint("Error starting radio: $e");
     } finally {
       _isRadioLoading = false;
       add(UpdateUIEvent());
@@ -1999,7 +1996,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         _prefetchNextSong();
       }
     } catch (e) {
-      print("Error loading more radio songs: $e");
+      debugPrint("Error loading more radio songs: $e");
     } finally {
       _isRadioLoading = false;
       add(UpdateUIEvent());
@@ -2022,7 +2019,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         _prefetchNextSong();
       }
     } catch (e) {
-      print("Error generating radio songs: $e");
+      debugPrint("Error generating radio songs: $e");
     } finally {
       _isRadioLoading = false;
       add(UpdateUIEvent());

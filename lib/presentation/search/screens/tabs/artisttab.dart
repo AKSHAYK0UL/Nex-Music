@@ -40,8 +40,9 @@ class _ArtistTabState extends State<ArtistTab>
       builder: (context, state) {
         if (state is LoadingState) return loadingDisk();
         if (state is ArtistDataState) {
-          if (state.artists.isEmpty)
+          if (state.artists.isEmpty) {
             return _buildEmptyState("No artists found");
+          }
 
           return GridView.builder(
             padding: const EdgeInsets.all(20),

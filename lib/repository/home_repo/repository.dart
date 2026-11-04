@@ -14,6 +14,7 @@ import 'package:nex_music/network_provider/home_data/dataprovider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class Repository {
+  // ignore: unused_field
   final YoutubeExplode _yt;
   final DataProvider _dataProvider;
   final HiveDataBaseSingleton _dbInstance;
@@ -234,8 +235,8 @@ class Repository {
     String playlistId,
     int index,
   ) async {
-    print(
-        "##################### SONG PLAYLISTID ${playlistId} ##############################");
+    debugPrint(
+        "##################### SONG PLAYLISTID $playlistId ##############################");
 
     // Get song IDs stream
 
@@ -243,19 +244,19 @@ class Repository {
     //     await _dataProvider.getSongIdFromPlayList(playlistId).toList();
     final songStream = await _dataProvider.getSongIdFromPlayList(playlistId);
 
-    print(
-        "##################### SONG STREAMs ${songStream} ##############################");
+    debugPrint(
+        "##################### SONG STREAMs songStream ##############################");
     final totalSongs = songStream.length;
 
     // 2️ Prepare IDs & durations
     final songIds =
         songStream.skip(index).map((video) => video.videoId).take(20).toList();
-    print(
-        "##################### SONG IDS ${songIds} ##############################");
+    debugPrint(
+        "##################### SONG IDS $songIds ##############################");
 
     final songsDuration = songStream
         .skip(index)
-        .map((video) => video.duration!.inSeconds)
+        .map((video) => video.duration.inSeconds)
         .take(20)
         .toList();
 

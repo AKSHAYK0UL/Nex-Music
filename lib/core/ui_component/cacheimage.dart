@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/widgets.dart';
 
 Widget cacheImage({
-  required imageUrl,
+  required String imageUrl,
   required double width,
   required double height,
   bool islocal = false,
