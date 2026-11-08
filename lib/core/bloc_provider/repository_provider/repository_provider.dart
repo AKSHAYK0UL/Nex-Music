@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/network_provider/home_data/auth_provider.dart';
+import 'package:nex_music/network_provider/home_data/cdn_cache_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/dataprovider.dart';
 import 'package:nex_music/network_provider/home_data/db_network_provider.dart';
 import 'package:nex_music/network_provider/home_data/favorites_db_provider.dart';
@@ -15,8 +16,10 @@ import 'package:nex_music/network_provider/home_data/saved_playlists_db_provider
 import 'package:nex_music/network_provider/home_data/search_history_db_provider.dart';
 import 'package:nex_music/network_provider/home_data/lyrics_sync_db_provider.dart';
 import 'package:nex_music/repository/auth_repository/auth_repository.dart';
+import 'package:nex_music/repository/cdn_cache_repository.dart';
 import 'package:nex_music/repository/db_repository/db_repository.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
+import 'package:nex_music/secrets/gcp_key.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class RepositoryProviderClass {
@@ -43,11 +46,16 @@ class RepositoryProviderClass {
   RepositoryProvider<Repository> get repositoryProvider => RepositoryProvider(
         create: (context) => Repository(
           dataProvider: DataProvider(
-            ytMusic: YTMusic(),
+            ytMusic: YTMusic(apiKey: ytApIKey),
             youtubeExplode: YoutubeExplode(),
           ),
           yt: YoutubeExplode(),
           dbInstance: HiveDataBaseSingleton.instance,
+          cdnCacheRepository: CdnCacheRepository(
+            dbProvider: CdnCacheDbProvider(
+              firestoreInstance: firebaseFirestore,
+            ),
+          ),
         ),
       );
 

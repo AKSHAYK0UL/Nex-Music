@@ -119,4 +119,26 @@ class HiveDataBaseSingleton {
       await getLyricsSyncBox.put('${videoId}_$sourceName', offsetMs);
     } catch (_) {}
   }
+
+  // CDN PREFERENCE Box stores a single bool (true = CDN enabled).
+  Box<bool> get _cdnBox => Hive.box<bool>(cdnPreferenceBox);
+
+  // Returns true when the user has CDN cache loading enabled.
+  // Defaults to true (opt-in by default).
+  bool get cdnEnabled {
+    final box = _cdnBox;
+    if (box.isEmpty) return true;
+    return box.values.first;
+  }
+
+  Future<void> saveCdnEnabled(bool value) async {
+    try {
+      final box = _cdnBox;
+      if (box.isEmpty) {
+        await box.add(value);
+      } else {
+        await box.putAt(0, value);
+      }
+    } catch (_) {}
+  }
 }

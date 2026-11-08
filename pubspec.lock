@@ -412,11 +412,12 @@ packages:
   dart_ytmusic_api:
     dependency: "direct main"
     description:
-      name: dart_ytmusic_api
-      sha256: bb6848090f4d1466d832364f8037be35956a46f5049bf3a896cd2ab90d472c29
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.7"
+      path: "."
+      ref: "9185d9ae37c4fbc8d9275485db9cfaecf07b4d66"
+      resolved-ref: "9185d9ae37c4fbc8d9275485db9cfaecf07b4d66"
+      url: "https://github.com/AKSHAYK0UL/dart_ytmusic_api.git"
+    source: git
+    version: "1.4.0"
   dbus:
     dependency: transitive
     description:
@@ -473,6 +474,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  dotenv:
+    dependency: transitive
+    description:
+      name: dotenv
+      sha256: "379e64b6fc82d3df29461d349a1796ecd2c436c480d4653f3af6872eccbc90e1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.2.0"
   equatable:
     dependency: "direct main"
     description:

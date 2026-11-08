@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dart_ytmusic_api/types.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
@@ -6,11 +7,13 @@ import 'package:nex_music/helper_function/general/thumbnail.dart';
 import 'package:nex_music/helper_function/general/timeformate.dart';
 import 'package:nex_music/helper_function/repository/repository_helper_function.dart';
 import 'package:nex_music/model/artistmodel.dart';
+import 'package:nex_music/model/cdn_cache_model.dart';
 import 'package:nex_music/model/lyric_model.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/song_raw_data.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/network_provider/home_data/dataprovider.dart';
+import 'package:nex_music/repository/cdn_cache_repository.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class Repository {
@@ -19,11 +22,18 @@ class Repository {
   final DataProvider _dataProvider;
   final HiveDataBaseSingleton _dbInstance;
   final Map<String, LyricModel> _lyricsCache = {};
+  String? _activePlaylistId;
+  List<Songmodel> _activePlaylistSongs = [];
+
+  // Optional CDN cache repository injected only when the CDN feature is
+  // enabled.  When null every call falls back to the regular YouTube path.
+  CdnCacheRepository? cdnCacheRepository;
 
   Repository(
       {required DataProvider dataProvider,
       required YoutubeExplode yt,
-      required HiveDataBaseSingleton dbInstance})
+      required HiveDataBaseSingleton dbInstance,
+      this.cdnCacheRepository})
       : _dataProvider = dataProvider,
         _yt = yt,
         _dbInstance = dbInstance;
@@ -122,6 +132,7 @@ class Repository {
   Future<
       ({
         List<Songmodel> quickPicks,
+        List<HomeSection> homeSections,
         List<PlayListmodel> playlist,
         List<PlayListmodel> albums,
         List<PlayListmodel> globalHitsPlaylists,
@@ -141,89 +152,209 @@ class Repository {
       })> homeScreenSongsList(String inputPrompt) async {
     final quality = _dbInstance.getData;
 
-    // Fetch main home data first (required)
+    // Fetch main home data (getHome(country:'IN')) + search-based quick picks in parallel
     final networkData = await _dataProvider.homeScreenSongs(inputPrompt);
 
-    final quickPicks = await RepositoryHelperFunction.getQuickPicks(
-        networkData.quickPicks, quality.thumbnailQuality);
+    final homeSections = networkData.homeSectionData;
 
-    final playlist =
-        RepositoryHelperFunction.getPlaylists(networkData.homeSectionData);
+    //   Quick Picks
+    // Prefer SongDetailed items from the top_picks / recommended section.
+    // Fall back to the searchSongs result if no songs were found there.
+    List<Songmodel> quickPicks = [];
+    final topPicksSection = homeSections.firstWhere(
+      (s) => s.stableTitle == 'top_picks' || s.stableTitle == 'recommended',
+      orElse: () => HomeSection(title: '', stableTitle: '', contents: []),
+    );
+    final topPickSongs =
+        topPicksSection.contents.whereType<SongDetailed>().toList();
+    if (topPickSongs.isNotEmpty) {
+      quickPicks = await RepositoryHelperFunction.getQuickPicks(
+          topPickSongs, quality.thumbnailQuality);
+    }
+    // Fall back to search-based quick picks
+    if (quickPicks.isEmpty) {
+      quickPicks = await RepositoryHelperFunction.getQuickPicks(
+          networkData.quickPicks, quality.thumbnailQuality);
+    }
 
-    final albums =
-        RepositoryHelperFunction.getAlbums(networkData.homeSectionData);
+    //  Map HomeSection list to named fields by stableTitle
+    // Helper: extract PlayListmodel list from a section's PlaylistDetailed contents
+    List<PlayListmodel> playlistsFrom(HomeSection s) =>
+        s.contents.whereType<PlaylistDetailed>().map((p) {
+          final id = p.playlistId.isNotEmpty ? p.playlistId : p.playlistId;
+          return PlayListmodel(
+            playListId: id,
+            playlistName: p.name,
+            artistBasic: p.artist,
+            thumbnail: getThumbnail(p.thumbnails),
+          );
+        }).toList();
 
-    // Fetch trending data in parallel (optional - failures return empty lists)
-    final trendingResults = await Future.wait([
-      // Global sections
-      _safeSearchPlaylist("global hits playlist"),
-      _safeSearchPlaylist("trending globally playlist"),
+    // Helper: extract PlayListmodel list from a section's AlbumDetailed contents
+    List<PlayListmodel> albumsFrom(HomeSection s) =>
+        s.contents.whereType<AlbumDetailed>().map((a) {
+          return PlayListmodel(
+            playListId: a.albumId.isNotEmpty ? a.albumId : a.playlistId,
+            playlistName: a.name,
+            artistBasic: a.artist,
+            thumbnail: getThumbnail(a.thumbnails),
+          );
+        }).toList();
 
-      // Trending Punjabi
-      _safeSearchPlaylist("trending punjabi playlist"),
-      _safeSearchAlbums("trending punjabi album"),
+    // Helper: extract both playlists and album-like playlists from a section
+    List<PlayListmodel> mixedPlaylistsFrom(HomeSection s) {
+      final result = <PlayListmodel>[];
+      for (final c in s.contents) {
+        if (c is PlaylistDetailed) {
+          result.add(PlayListmodel(
+            playListId: c.playlistId,
+            playlistName: c.name,
+            artistBasic: c.artist,
+            thumbnail: getThumbnail(c.thumbnails),
+          ));
+        } else if (c is AlbumDetailed) {
+          result.add(PlayListmodel(
+            playListId: c.albumId.isNotEmpty ? c.albumId : c.playlistId,
+            playlistName: c.name,
+            artistBasic: c.artist,
+            thumbnail: getThumbnail(c.thumbnails),
+          ));
+        }
+      }
+      return result;
+    }
 
-      // Trending Hindi
-      _safeSearchPlaylist("trending hindi playlist"),
-      _safeSearchAlbums("trending hindi album"),
+    // Find first section matching one or more stable slugs
+    HomeSection? findSection(List<String> slugs) {
+      for (final s in homeSections) {
+        if (slugs.contains(s.stableTitle)) return s;
+      }
+      return null;
+    }
 
-      // Trending English
-      _safeSearchPlaylist("trending english playlist"),
+    // Find first section whose title contains any of the given keywords
+    HomeSection? findByKeyword(List<String> keywords) {
+      for (final s in homeSections) {
+        final t = s.title.toLowerCase();
+        if (keywords.any((k) => t.contains(k))) return s;
+      }
+      return null;
+    }
 
-      // Trending Phonk
-      _safeSearchPlaylist("phonk playlist"),
-      _safeSearchAlbums("phonk album"),
+    //  "Made For You" playlists (top_picks section playlists, or any playlist section)
+    final madeForYouSection =
+        findSection(['top_picks', 'recommended', 'mixed_for_you']) ??
+            findByKeyword(['made for you', 'top pick', 'quick pick']);
+    final playlist = madeForYouSection != null
+        ? mixedPlaylistsFrom(madeForYouSection)
+            .where((p) =>
+                !p.playListId.startsWith('MPREb_') &&
+                !p.playListId.startsWith('OLAK'))
+            .toList()
+        : RepositoryHelperFunction.getPlaylists(homeSections);
 
-      // Trending Brazilian Phonk
-      _safeSearchPlaylist("brazilian phonk playlist"),
-      _safeSearchAlbums("brazilian phonk album"),
+    //  Albums (new_releases or top_albums section)
+    final albumSection = findSection(['new_releases', 'top_albums']) ??
+        findByKeyword(['new release', 'top album', 'album', 'release']);
+    final albums = albumSection != null
+        ? albumsFrom(albumSection)
+            .followedBy(playlistsFrom(albumSection).where((p) =>
+                p.playListId.startsWith('MPREb_') ||
+                p.playListId.startsWith('OLAK')))
+            .toList()
+        : RepositoryHelperFunction.getAlbums(homeSections);
 
-      // Nonstop Mashup
-      _safeSearchPlaylist("nonstop punjabi mashup"),
-      _safeSearchPlaylist("nonstop hindi mashup"),
-      _safeSearchPlaylist("nonstop english mashup"),
-    ]);
+    //  Trending / Charts sections
+    final trendingSection = findSection(['trending', 'charts']) ??
+        findByKeyword(['trending', 'chart', 'top song']);
+    final globalHitsPlaylists = trendingSection != null
+        ? mixedPlaylistsFrom(trendingSection)
+        : <PlayListmodel>[];
+
+    //  "Trending globally" second trending-like section, or empty
+    final trendingSections = homeSections
+        .where((s) => s.stableTitle == 'trending' || s.stableTitle == 'charts')
+        .toList();
+    final trendingGloballyPlaylists = trendingSections.length > 1
+        ? mixedPlaylistsFrom(trendingSections[1])
+        : <PlayListmodel>[];
+
+    // Punjabi sections
+    final punjabiSection = findByKeyword(['punjabi']);
+    final trendingPunjabiPlaylists = punjabiSection != null
+        ? playlistsFrom(punjabiSection)
+        : <PlayListmodel>[];
+    final trendingPunjabiAlbums =
+        punjabiSection != null ? albumsFrom(punjabiSection) : <PlayListmodel>[];
+
+    //  Hindi sections
+    final hindiSection = findByKeyword(['hindi']);
+    final trendingHindiPlaylists =
+        hindiSection != null ? playlistsFrom(hindiSection) : <PlayListmodel>[];
+    final trendingHindiAlbums =
+        hindiSection != null ? albumsFrom(hindiSection) : <PlayListmodel>[];
+
+    //  English sections
+    final englishSection = findByKeyword(['english']);
+    final trendingEnglishPlaylists = englishSection != null
+        ? playlistsFrom(englishSection)
+        : <PlayListmodel>[];
+
+    //  Phonk sections
+    final phonkSection = findByKeyword(['phonk']);
+    final trendingPhonkPlaylists =
+        phonkSection != null ? playlistsFrom(phonkSection) : <PlayListmodel>[];
+    final trendingPhonkAlbums =
+        phonkSection != null ? albumsFrom(phonkSection) : <PlayListmodel>[];
+
+    //  Brazilian Phonk sections
+    final brazilianPhonkSection =
+        findByKeyword(['brazilian phonk', 'brazil phonk']);
+    final trendingBrazilianPhonkPlaylists = brazilianPhonkSection != null
+        ? playlistsFrom(brazilianPhonkSection)
+        : <PlayListmodel>[];
+    final trendingBrazilianPhonkAlbums = brazilianPhonkSection != null
+        ? albumsFrom(brazilianPhonkSection)
+        : <PlayListmodel>[];
+
+    //  Mashup sections
+    final punjabiMashupSection =
+        findByKeyword(['punjabi mashup', 'nonstop punjabi']);
+    final nonstopPunjabiMashup = punjabiMashupSection != null
+        ? mixedPlaylistsFrom(punjabiMashupSection)
+        : <PlayListmodel>[];
+
+    final hindiMashupSection = findByKeyword(['hindi mashup', 'nonstop hindi']);
+    final nonstopHindiMashup = hindiMashupSection != null
+        ? mixedPlaylistsFrom(hindiMashupSection)
+        : <PlayListmodel>[];
+
+    final englishMashupSection =
+        findByKeyword(['english mashup', 'nonstop english']);
+    final nonstopEnglishMashup = englishMashupSection != null
+        ? mixedPlaylistsFrom(englishMashupSection)
+        : <PlayListmodel>[];
 
     return (
       quickPicks: quickPicks,
+      homeSections: homeSections,
       playlist: playlist,
       albums: albums,
-      globalHitsPlaylists: trendingResults[0],
-      trendingGloballyPlaylists: trendingResults[1],
-      trendingPunjabiPlaylists: trendingResults[2],
-      trendingPunjabiAlbums: trendingResults[3],
-      trendingHindiPlaylists: trendingResults[4],
-      trendingHindiAlbums: trendingResults[5],
-      trendingEnglishPlaylists: trendingResults[6],
-      trendingPhonkPlaylists: trendingResults[7],
-      trendingPhonkAlbums: trendingResults[8],
-      trendingBrazilianPhonkPlaylists: trendingResults[9],
-      trendingBrazilianPhonkAlbums: trendingResults[10],
-      nonstopPunjabiMashup: trendingResults[11],
-      nonstopHindiMashup: trendingResults[12],
-      nonstopEnglishMashup: trendingResults[13],
+      globalHitsPlaylists: globalHitsPlaylists,
+      trendingGloballyPlaylists: trendingGloballyPlaylists,
+      trendingPunjabiPlaylists: trendingPunjabiPlaylists,
+      trendingPunjabiAlbums: trendingPunjabiAlbums,
+      trendingHindiPlaylists: trendingHindiPlaylists,
+      trendingHindiAlbums: trendingHindiAlbums,
+      trendingEnglishPlaylists: trendingEnglishPlaylists,
+      trendingPhonkPlaylists: trendingPhonkPlaylists,
+      trendingPhonkAlbums: trendingPhonkAlbums,
+      trendingBrazilianPhonkPlaylists: trendingBrazilianPhonkPlaylists,
+      trendingBrazilianPhonkAlbums: trendingBrazilianPhonkAlbums,
+      nonstopPunjabiMashup: nonstopPunjabiMashup,
+      nonstopHindiMashup: nonstopHindiMashup,
+      nonstopEnglishMashup: nonstopEnglishMashup,
     );
-  }
-
-  // Safe wrapper for playlist search - returns empty list on error
-  Future<List<PlayListmodel>> _safeSearchPlaylist(String query) async {
-    try {
-      final playlists = await _dataProvider.searchPlaylist(query);
-      return RepositoryHelperFunction.getPlaylistDetailedToPlayListModel(
-          playlists);
-    } catch (e) {
-      return [];
-    }
-  }
-
-  // Safe wrapper for album search - returns empty list on error
-  Future<List<PlayListmodel>> _safeSearchAlbums(String query) async {
-    try {
-      final albums = await _dataProvider.searchAlbums(query);
-      return RepositoryHelperFunction.albumsToPlaylist(albums);
-    } catch (e) {
-      return [];
-    }
   }
 
   Future<
@@ -233,50 +364,244 @@ class Repository {
         String playListDuration
       })> getPlayList(
     String playlistId,
-    int index,
-  ) async {
+    int index, {
+    bool isAlbum = false,
+  }) async {
+    // Fast path: if the playlist songs are already in memory and index is within cached range
+    if (_activePlaylistId == playlistId &&
+        _activePlaylistSongs.isNotEmpty &&
+        index < _activePlaylistSongs.length) {
+      final pagedSongs = _activePlaylistSongs.skip(index).take(20).toList();
+      return (
+        playlistSongs: pagedSongs,
+        playlistSize: _activePlaylistSongs.length,
+        playListDuration: "",
+      );
+    }
+
     debugPrint(
-        "##################### SONG PLAYLISTID $playlistId ##############################");
+        "##################### FETCHING ${isAlbum ? 'ALBUM' : 'PLAYLIST'} $playlistId (index=$index) ##############################");
 
-    // Get song IDs stream
+    try {
+      if (isAlbum) {
+        // Fetch Album via dart_ytmusic_api
+        final album = await _dataProvider.getAlbum(playlistId);
+        final allSongs =
+            RepositoryHelperFunction.convertSongDetailedListToSongModelList(
+          album.songs,
+        );
+        _activePlaylistId = playlistId;
+        _activePlaylistSongs = allSongs;
+        final pagedSongs = allSongs.skip(index).take(20).toList();
+        return (
+          playlistSongs: pagedSongs,
+          playlistSize: allSongs.length,
+          playListDuration: "",
+        );
+      } else {
+        // Fetch Playlist via dart_ytmusic_api (getPlaylistVideos)
+        final playlistVideos =
+            await _dataProvider.getPlaylistVideos(playlistId);
+        final allSongs =
+            RepositoryHelperFunction.convertVideoDetailedListToSongModelList(
+          playlistVideos,
+        );
+        _activePlaylistId = playlistId;
+        _activePlaylistSongs = allSongs;
+        final pagedSongs = allSongs.skip(index).take(20).toList();
+        return (
+          playlistSongs: pagedSongs,
+          playlistSize: allSongs.length,
+          playListDuration: "",
+        );
+      }
+    } catch (e) {
+      debugPrint('[Repository] Failed to fetch via ytMusic: $e');
+      if (isAlbum) {
+        try {
+          final playlistVideos =
+              await _dataProvider.getPlaylistVideos(playlistId);
+          final allSongs =
+              RepositoryHelperFunction.convertVideoDetailedListToSongModelList(
+            playlistVideos,
+          );
+          _activePlaylistId = playlistId;
+          _activePlaylistSongs = allSongs;
+          final pagedSongs = allSongs.skip(index).take(20).toList();
+          return (
+            playlistSongs: pagedSongs,
+            playlistSize: allSongs.length,
+            playListDuration: "",
+          );
+        } catch (_) {}
+      }
+      rethrow;
+    }
+  }
 
-    // final songStream =
-    //     await _dataProvider.getSongIdFromPlayList(playlistId).toList();
-    final songStream = await _dataProvider.getSongIdFromPlayList(playlistId);
+  //  CDN aware playlist/album loader
 
-    debugPrint(
-        "##################### SONG STREAMs songStream ##############################");
-    final totalSongs = songStream.length;
+  // Loads a playlist or album using the CDN cache-first strategy when the
 
-    // 2️ Prepare IDs & durations
-    final songIds =
-        songStream.skip(index).map((video) => video.videoId).take(20).toList();
-    debugPrint(
-        "##################### SONG IDS $songIds ##############################");
+  Future<
+      ({
+        List<Songmodel> playlistSongs,
+        int playlistSize,
+        String playListDuration,
+        bool fromCache,
+      })> getPlayListWithCdn(
+    String playlistId,
+    int index, {
+    required String playlistName,
+    required bool isAlbum,
+  }) async {
+    final cdn = cdnCacheRepository;
 
-    final songsDuration = songStream
-        .skip(index)
-        .map((video) => video.duration.inSeconds)
-        .take(20)
-        .toList();
+    // CDN disabled or unavailable straight YouTube path.
+    if (cdn == null || !_dbInstance.cdnEnabled) {
+      final result = await getPlayList(playlistId, index, isAlbum: isAlbum);
+      return (
+        playlistSongs: result.playlistSongs,
+        playlistSize: result.playlistSize,
+        playListDuration: result.playListDuration,
+        fromCache: false,
+      );
+    }
 
-    // 3️ Fetch songs (NETWORK / MAIN ISOLATE)
-    final songsList = await _dataProvider.getPlayListSongs(songIds);
+    // Pagination pages beyond 0: CDN is not involved (songs already loaded).
+    if (index > 0) {
+      final result = await getPlayList(playlistId, index, isAlbum: isAlbum);
+      return (
+        playlistSongs: result.playlistSongs,
+        playlistSize: result.playlistSize,
+        playListDuration: result.playListDuration,
+        fromCache: false,
+      );
+    }
 
-    // 4️ CPU-heavy mapping in isolate
-    final playlistSongs = await compute(
-      playlistSongsCompute,
-      (
-        songs: songsList,
-        durations: songsDuration,
-      ),
-    );
+    // CDN lookup for first page.
+    CdnCacheModel? cacheEntry;
+    try {
+      cacheEntry = await cdn.getFromCache(playlistId, isAlbum: isAlbum);
+    } catch (_) {
+      cacheEntry = null;
+    }
 
+    //  cache hit, entry is fresh (< 48 h).
+    if (cacheEntry != null && !cacheEntry.isExpired()) {
+      debugPrint(
+          '[Repository] CDN HIT $playlistId (${cacheEntry.songs.length} songs). Background sync scheduled.');
+      final cachedSongs = List<Songmodel>.unmodifiable(cacheEntry.songs);
+      unawaited(cdn.backgroundSync(
+        playlistId,
+        isAlbum: isAlbum,
+        cachedSongs: cachedSongs,
+        ytFetcher: () => _fetchAllSongsFromYt(playlistId, isAlbum: isAlbum),
+      ));
+      return (
+        playlistSongs: cacheEntry.songs,
+        playlistSize: cacheEntry.songs.length,
+        playListDuration: '',
+        fromCache: true,
+      );
+    }
+
+    // cache hit but expired.
+    if (cacheEntry != null && cacheEntry.isExpired()) {
+      debugPrint('[Repository] CDN EXPIRED $playlistId. Fetching fresh data.');
+      try {
+        final allSongs =
+            await _fetchAllSongsFromYt(playlistId, isAlbum: isAlbum);
+        if (allSongs.isNotEmpty) {
+          unawaited(cdn.updateCache(playlistId, allSongs, isAlbum: isAlbum));
+        }
+        return (
+          playlistSongs: allSongs,
+          playlistSize: allSongs.length,
+          playListDuration: '',
+          fromCache: false,
+        );
+      } catch (e) {
+        // YT failed  gracefully fall back to stale cache.
+        debugPrint(
+            '[Repository] CDN expired refresh failed, using stale data: $e');
+        return (
+          playlistSongs: cacheEntry.songs,
+          playlistSize: cacheEntry.songs.length,
+          playListDuration: '',
+          fromCache: true,
+        );
+      }
+    }
+
+    //  no cache entry  fetch from YouTube, save to CDN in background.
+    debugPrint('[Repository] CDN MISS $playlistId. Fetching from YouTube.');
+    final result = await getPlayList(playlistId, 0, isAlbum: isAlbum);
+    unawaited(_fetchAllAndSaveToCdn(
+      playlistId: playlistId,
+      playlistName: playlistName,
+      isAlbum: isAlbum,
+      cdn: cdn,
+    ));
     return (
-      playlistSongs: playlistSongs,
-      playlistSize: totalSongs,
-      playListDuration: "",
+      playlistSongs: result.playlistSongs,
+      playlistSize: result.playlistSize,
+      playListDuration: result.playListDuration,
+      fromCache: false,
     );
+  }
+
+  // Fetches the **complete** song list from YouTube (all pages, no limit).
+  // Used by CDN cache writes and background sync.
+  Future<List<Songmodel>> _fetchAllSongsFromYt(
+    String playlistId, {
+    bool isAlbum = false,
+  }) async {
+    try {
+      if (isAlbum) {
+        final album = await _dataProvider.getAlbum(playlistId);
+        return RepositoryHelperFunction.convertSongDetailedListToSongModelList(
+          album.songs,
+        );
+      } else {
+        final playlistVideos =
+            await _dataProvider.getPlaylistVideos(playlistId);
+        return RepositoryHelperFunction.convertVideoDetailedListToSongModelList(
+          playlistVideos,
+        );
+      }
+    } catch (e) {
+      debugPrint('[Repository] _fetchAllSongsFromYt ytMusic failed: $e');
+      if (isAlbum) {
+        try {
+          final playlistVideos =
+              await _dataProvider.getPlaylistVideos(playlistId);
+          return RepositoryHelperFunction
+              .convertVideoDetailedListToSongModelList(
+            playlistVideos,
+          );
+        } catch (_) {}
+      }
+      return [];
+    }
+  }
+
+  // Fetches all songs and saves them to the CDN. Fire-and-forget
+  Future<void> _fetchAllAndSaveToCdn({
+    required String playlistId,
+    required String playlistName,
+    required bool isAlbum,
+    required CdnCacheRepository cdn,
+  }) async {
+    try {
+      final allSongs = await _fetchAllSongsFromYt(playlistId, isAlbum: isAlbum);
+      if (allSongs.isNotEmpty) {
+        await cdn.saveToCache(playlistId, playlistName, allSongs,
+            isAlbum: isAlbum);
+      }
+    } catch (e) {
+      debugPrint('[Repository] _fetchAllAndSaveToCdn failed (suppressed): $e');
+    }
   }
 
   //###########

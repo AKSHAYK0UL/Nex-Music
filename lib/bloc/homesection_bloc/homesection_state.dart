@@ -14,32 +14,40 @@ final class ErrorState extends HomesectionState {
 
 final class HomeSectionStateData extends HomesectionState {
   final List<Songmodel> quickPicks;
+
+  // The ordered list of home sections returned directly by getHome(country:'IN').
+  // Each section has a title, stableTitle, and heterogeneous contents
+  // (AlbumDetailed | PlaylistDetailed | SongDetailed).
+  final List<HomeSection> homeSections;
+
+  // Legacy named fields (kept for backwards compat)
+
   final List<PlayListmodel> playlist;
   final List<PlayListmodel> albums;
-  
+
   // Global sections
   final List<PlayListmodel> globalHitsPlaylists;
   final List<PlayListmodel> trendingGloballyPlaylists;
-  
+
   // Trending Punjabi
   final List<PlayListmodel> trendingPunjabiPlaylists;
   final List<PlayListmodel> trendingPunjabiAlbums;
-  
+
   // Trending Hindi
   final List<PlayListmodel> trendingHindiPlaylists;
   final List<PlayListmodel> trendingHindiAlbums;
-  
+
   // Trending English
   final List<PlayListmodel> trendingEnglishPlaylists;
-  
+
   // Trending Phonk
   final List<PlayListmodel> trendingPhonkPlaylists;
   final List<PlayListmodel> trendingPhonkAlbums;
-  
+
   // Trending Brazilian Phonk
   final List<PlayListmodel> trendingBrazilianPhonkPlaylists;
   final List<PlayListmodel> trendingBrazilianPhonkAlbums;
-  
+
   // Nonstop Mashup
   final List<PlayListmodel> nonstopPunjabiMashup;
   final List<PlayListmodel> nonstopHindiMashup;
@@ -47,6 +55,7 @@ final class HomeSectionStateData extends HomesectionState {
 
   HomeSectionStateData({
     required this.quickPicks,
+    required this.homeSections,
     required this.playlist,
     required this.albums,
     required this.globalHitsPlaylists,

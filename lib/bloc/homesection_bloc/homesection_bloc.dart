@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dart_ytmusic_api/types.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/helper_function/recommendation/recommendation.dart';
 import 'package:nex_music/model/playlistmodel.dart';
@@ -34,13 +35,13 @@ class HomesectionBloc extends Bloc<HomesectionEvent, HomesectionState> {
           await _repository.homeScreenSongsList(inputPrompt);
 
       final playlistsSet = homeSectionData.playlist.toSet();
-      final albumsSet = homeSectionData.albums.toSet();
 
       emit(
         HomeSectionStateData(
           quickPicks: homeSectionData.quickPicks,
+          homeSections: homeSectionData.homeSections,
           playlist: playlistsSet.toList(),
-          albums: albumsSet.toList(),
+          albums: homeSectionData.albums,
           globalHitsPlaylists: homeSectionData.globalHitsPlaylists,
           trendingGloballyPlaylists: homeSectionData.trendingGloballyPlaylists,
           trendingPunjabiPlaylists: homeSectionData.trendingPunjabiPlaylists,

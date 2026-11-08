@@ -4,7 +4,6 @@ import 'package:dart_ytmusic_api/yt_music.dart';
 import 'package:nex_music/model/lyric_model.dart';
 import 'package:nex_music/network_provider/home_data/lyrics_network_provider.dart';
 import 'package:nex_music/secrets/gcp_key.dart';
-import 'package:nex_music/service/playlist_songs_getter.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class DataProvider {
@@ -65,16 +64,22 @@ class DataProvider {
     _youtubeExplode.close();
   }
 
+  Future<void> _ensureInitialized() async {
+    if (!_ytMusic.hasInitialized) {
+      await _ytMusic.initialize(dataApiKey: ytApIKey);
+    }
+  }
+
   //get home section data
   Future<
       ({
         List<yt.HomeSection> homeSectionData,
         List<yt.SongDetailed> quickPicks
       })> homeScreenSongs(String inputPrompt) async {
-    await _ytMusic.initialize();
+    await _ensureInitialized();
     final fetchedData = await Future.wait(
       [
-        _ytMusic.getHomeSections(),
+        _ytMusic.getHome(country: 'IN'),
         _ytMusic.searchSongs(inputPrompt),
       ],
     );
@@ -86,49 +91,22 @@ class DataProvider {
     return (homeSectionData: homeSectionData, quickPicks: quickPicks);
   }
 
-  // Stream<Video> getSongIdFromPlayList(String playlistID) async* {
-  //   String id = playlistID;
-
-  //   // Handle full URLs if passed accidentally
-  //   if (id.contains('list=')) {
-  //     id = id.split('list=')[1].split('&')[0];
-  //   }
-
-  //   try {
-  //     // Try fetching with the original ID first
-  //     yield* _youtubeExplode.playlists.getVideos(id);
-  //   } catch (e) {
-  //     // For YT Music specific IDs (like Mixes starting with RD or Artist IDs UC)
-  //     // YoutubeExplode often requires the 'VL' prefix to treat them as playlists.
-  //     if (!id.startsWith('VL') && (id.startsWith('RD') || id.startsWith('UC') || id.startsWith('PL') == false)) {
-  //       try {
-  //         yield* _youtubeExplode.playlists.getVideos('VL$id');
-  //       } catch (_) {
-  //         // If both fail, rethrow the original error
-  //         rethrow;
-  //       }
-  //     } else {
-  //       rethrow;
-  //     }
-  //   }
-  // }
-  Future<List<VideoMetadata>> getSongIdFromPlayList(String playlistID) async {
-    try {
-      return await fetchPlaylistVideoMetadata(
-        playlistId: playlistID,
-        apiKey: ytApIKey,
-      );
-    } catch (_) {
-      rethrow;
-    }
+  // Get playlist videos via YTMusic
+  Future<List<yt.VideoDetailed>> getPlaylistVideos(String playlistId) async {
+    await _ensureInitialized();
+    return await _ytMusic.getPlaylistVideos(playlistId);
   }
 
-  //TESTING
+  // Get full album via YTMusic
+  Future<yt.AlbumFull> getAlbum(String albumId) async {
+    await _ensureInitialized();
+    return await _ytMusic.getAlbum(albumId);
+  }
 
-  Future<List<yt.SongFull>> getPlayListSongs(List<String> songIds) async {
-    final results =
-        await Future.wait(songIds.map((id) => _ytMusic.getSong(id)));
-    return results;
+  // Get full playlist details via YTMusic
+  Future<yt.PlaylistFull> getPlaylist(String playlistId) async {
+    await _ensureInitialized();
+    return await _ytMusic.getPlaylist(playlistId);
   }
 
   Future<StreamManifest> songStreamUrl(String songId) {
@@ -202,11 +180,3 @@ class DataProvider {
     return await _ytMusic.getUpNexts(videoId);
   }
 }
-
-
-//TODO:
-// _ytMusic.getAlbum(albumId)
-// _ytMusic.getArtist(artistId)
-// _ytMusic.getArtistSingles(artistId)
-// _ytMusic.getPlaylist(playlistId)
-// _ytMusic.getTimedLyrics(videoId)

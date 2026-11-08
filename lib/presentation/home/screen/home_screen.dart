@@ -2,9 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dart_ytmusic_api/types.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/ui_component/loading.dart';
+import 'package:nex_music/helper_function/general/thumbnail.dart';
+import 'package:nex_music/helper_function/general/timeformate.dart';
+import 'package:nex_music/model/playlistmodel.dart';
+import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/new_components/section_header.dart';
 import 'package:nex_music/presentation/home/widget/songcolumview.dart';
 
@@ -65,318 +70,112 @@ Widget _buildBody(
         children: [
           const SizedBox(height: 5),
 
-          const _SubHeader(title: "Top Picks For You"),
-          FeaturedCarousel(songs: state.quickPicks),
-
-          const SizedBox(height: 26),
-
-          // Made For You Playlists
-          SectionHeader(
-            title: "Made For You",
-            // onTap: () => context.push(RouterPath.showAllPlaylistsRoute),
-            onTap: () => context.push(
-              RouterPath.showAllGenericRoute,
-              extra: {
-                'title': 'Made For You',
-                'items': state.playlist,
-                'isAlbum': false,
-              },
-            ),
-          ),
-          PlaylistCarousel(
-            playlists: state.playlist.take(7).toList(),
-          ),
-
-          const SizedBox(height: 26),
-
-          // New Albums
-          SectionHeader(
-            title: "New Albums",
-            // onTap: () => context.push(RouterPath.showAllAlbumsRoute),
-            onTap: () => context.push(
-              RouterPath.showAllGenericRoute,
-              extra: {
-                'title': 'New Albums',
-                'items': state.albums,
-                'isAlbum': true,
-              },
-            ),
-          ),
-          AlbumCarousel(
-            albums: state.albums.take(7).toList(),
-          ),
-
-          const SizedBox(height: 26),
-
-          // Global Hits
-          if (state.globalHitsPlaylists.isNotEmpty) ...[
-            SectionHeader(
-              title: "Global Hits",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Global Hits',
-                  'items': state.globalHitsPlaylists,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.globalHitsPlaylists.take(7).toList(),
-            ),
+          // Quick Picks always shown at the top
+          if (state.quickPicks.isNotEmpty) ...[
+            const _SubHeader(title: "Top Picks For You"),
+            FeaturedCarousel(songs: state.quickPicks),
             const SizedBox(height: 26),
           ],
 
-          // Trending Globally
-          if (state.trendingGloballyPlaylists.isNotEmpty) ...[
-            SectionHeader(
-              title: "Trending Globally",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Trending Globally',
-                  'items': state.trendingGloballyPlaylists,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.trendingGloballyPlaylists.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending Punjabi Playlists
-          if (state.trendingPunjabiPlaylists.isNotEmpty) ...[
-            SectionHeader(
-              title: "Trending Punjabi Playlists",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Trending Punjabi Playlists',
-                  'items': state.trendingPunjabiPlaylists,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.trendingPunjabiPlaylists.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending Punjabi Albums
-          if (state.trendingPunjabiAlbums.isNotEmpty) ...[
-            SectionHeader(
-              title: "Trending Punjabi Albums",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Trending Punjabi Albums',
-                  'items': state.trendingPunjabiAlbums,
-                  'isAlbum': true,
-                },
-              ),
-            ),
-            AlbumCarousel(
-              albums: state.trendingPunjabiAlbums.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending Hindi Playlists
-          if (state.trendingHindiPlaylists.isNotEmpty) ...[
-            SectionHeader(
-              title: "Trending Hindi Playlists",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Trending Hindi Playlists',
-                  'items': state.trendingHindiPlaylists,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.trendingHindiPlaylists.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending Hindi Albums
-          if (state.trendingHindiAlbums.isNotEmpty) ...[
-            SectionHeader(
-              title: "Trending Hindi Albums",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Trending Hindi Albums',
-                  'items': state.trendingHindiAlbums,
-                  'isAlbum': true,
-                },
-              ),
-            ),
-            AlbumCarousel(
-              albums: state.trendingHindiAlbums.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending English Playlists
-          if (state.trendingEnglishPlaylists.isNotEmpty) ...[
-            SectionHeader(
-              title: "Trending English Playlists",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Trending English Playlists',
-                  'items': state.trendingEnglishPlaylists,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.trendingEnglishPlaylists.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending Phonk Playlists
-          if (state.trendingPhonkPlaylists.isNotEmpty) ...[
-            SectionHeader(
-              title: "Trending Phonk Playlists",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Trending Phonk Playlists',
-                  'items': state.trendingPhonkPlaylists,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.trendingPhonkPlaylists.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending Phonk Albums
-          if (state.trendingPhonkAlbums.isNotEmpty) ...[
-            SectionHeader(
-              title: "Trending Phonk Albums",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Trending Phonk Albums',
-                  'items': state.trendingPhonkAlbums,
-                  'isAlbum': true,
-                },
-              ),
-            ),
-            AlbumCarousel(
-              albums: state.trendingPhonkAlbums.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending Brazilian Phonk Playlists
-          if (state.trendingBrazilianPhonkPlaylists.isNotEmpty) ...[
-            SectionHeader(
-              title: "Brazilian Phonk Playlists",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Brazilian Phonk Playlists',
-                  'items': state.trendingBrazilianPhonkPlaylists,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.trendingBrazilianPhonkPlaylists.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Trending Brazilian Phonk Albums
-          if (state.trendingBrazilianPhonkAlbums.isNotEmpty) ...[
-            SectionHeader(
-              title: "Brazilian Phonk Albums",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Brazilian Phonk Albums',
-                  'items': state.trendingBrazilianPhonkAlbums,
-                  'isAlbum': true,
-                },
-              ),
-            ),
-            AlbumCarousel(
-              albums: state.trendingBrazilianPhonkAlbums.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Nonstop Punjabi Mashup
-          if (state.nonstopPunjabiMashup.isNotEmpty) ...[
-            SectionHeader(
-              title: "Nonstop Punjabi Mashup",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Nonstop Punjabi Mashup',
-                  'items': state.nonstopPunjabiMashup,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.nonstopPunjabiMashup.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Nonstop Hindi Mashup
-          if (state.nonstopHindiMashup.isNotEmpty) ...[
-            SectionHeader(
-              title: "Nonstop Hindi Mashup",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Nonstop Hindi Mashup',
-                  'items': state.nonstopHindiMashup,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.nonstopHindiMashup.take(7).toList(),
-            ),
-            const SizedBox(height: 26),
-          ],
-
-          // Nonstop English Mashup
-          if (state.nonstopEnglishMashup.isNotEmpty) ...[
-            SectionHeader(
-              title: "Nonstop English Mashup",
-              onTap: () => context.push(
-                RouterPath.showAllGenericRoute,
-                extra: {
-                  'title': 'Nonstop English Mashup',
-                  'items': state.nonstopEnglishMashup,
-                  'isAlbum': false,
-                },
-              ),
-            ),
-            PlaylistCarousel(
-              playlists: state.nonstopEnglishMashup.take(7).toList(),
-            ),
-          ],
+          // Dynamic sections render exactly what getHome(country:'IN') returned
+          ...state.homeSections
+              .where((s) =>
+                  // Skip top_picks since we render it as the featured carousel above
+                  s.stableTitle != 'top_picks' &&
+                  s.stableTitle != 'recommended' &&
+                  s.contents.isNotEmpty)
+              .map((section) => _buildSection(context, section)),
 
           const SizedBox(height: 30),
         ],
       ),
     ),
+  );
+}
+
+// Converts a HomeSection from getHome() into a carousel widget.
+// Albums -> AlbumCarousel, everything else -> PlaylistCarousel
+Widget _buildSection(BuildContext context, HomeSection section) {
+  // Separate albums, playlists, and songs from the section contents
+  final albums = <PlayListmodel>[];
+  final playlists = <PlayListmodel>[];
+  final songs = <Songmodel>[];
+
+  for (final item in section.contents) {
+    if (item is AlbumDetailed) {
+      albums.add(PlayListmodel(
+        playListId: item.albumId.isNotEmpty ? item.albumId : item.playlistId,
+        playlistName: item.name,
+        artistBasic: item.artist,
+        thumbnail: getThumbnail(item.thumbnails),
+      ));
+    } else if (item is PlaylistDetailed) {
+      if (item.playlistId.startsWith('MPREb_') ||
+          item.playlistId.startsWith('OLAK')) {
+        // Album  as playlist
+        albums.add(PlayListmodel(
+          playListId: item.playlistId,
+          playlistName: item.name,
+          artistBasic: item.artist,
+          thumbnail: getThumbnail(item.thumbnails),
+        ));
+      } else {
+        playlists.add(PlayListmodel(
+          playListId: item.playlistId,
+          playlistName: item.name,
+          artistBasic: item.artist,
+          thumbnail: getThumbnail(item.thumbnails),
+        ));
+      }
+    } else if (item is SongDetailed) {
+      songs.add(Songmodel(
+        vId: item.videoId,
+        songName: item.name,
+        artist: item.artist,
+        thumbnail: getThumbnail(item.thumbnails),
+        duration: timeFormate(item.duration ?? 0),
+      ));
+    }
+  }
+
+  //  If this is a song section (e.g. Trending, New music videos)
+  if (songs.isNotEmpty && albums.isEmpty && playlists.isEmpty) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SubHeader(title: section.title),
+        FeaturedCarousel(songs: songs),
+        const SizedBox(height: 26),
+      ],
+    );
+  }
+
+  //  Decide album vs playlist
+  final isAlbumSection = albums.isNotEmpty && playlists.isEmpty;
+  final displayItems =
+      isAlbumSection ? albums : (playlists.isNotEmpty ? playlists : albums);
+
+  if (displayItems.isEmpty) return const SizedBox.shrink();
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SectionHeader(
+        title: section.title,
+        onTap: () => context.push(
+          RouterPath.showAllGenericRoute,
+          extra: {
+            'title': section.title,
+            'items': displayItems,
+            'isAlbum': isAlbumSection,
+          },
+        ),
+      ),
+      isAlbumSection
+          ? AlbumCarousel(albums: displayItems.take(7).toList())
+          : PlaylistCarousel(playlists: displayItems.take(7).toList()),
+      const SizedBox(height: 26),
+    ],
   );
 }
 
@@ -396,27 +195,26 @@ class _HomeLayout extends StatelessWidget {
       slivers: [
         SliverAppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                    // backgroundColor: Colors.amber,
+          // backgroundColor: Colors.amber,
 
           elevation: 0,
           pinned: true,
           expandedHeight: 80.0,
           flexibleSpace: FlexibleSpaceBar(
-            
             titlePadding: const EdgeInsets.fromLTRB(14, 0, 14, 07),
             // title: Row(
             //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children:[ 
-            title:Text(
-                "Home",
-                style: TextStyle(
-                  fontFamily: 'serif',
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                  letterSpacing: -0.5,
-                ),
-              
+            //   children:[
+            title: Text(
+              "Home",
+              style: TextStyle(
+                fontFamily: 'serif',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+                letterSpacing: -0.5,
+              ),
+
               // ),
               // GestureDetector(child: Icon(Icons.radio_outlined,size: 20,),),
               // ],

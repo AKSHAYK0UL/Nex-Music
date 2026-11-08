@@ -25,6 +25,9 @@ class Setting extends StatelessWidget {
   final ValueNotifier<bool> _recommendationNotifier = ValueNotifier<bool>(
     HiveDataBaseSingleton.instance.recommendationStatus,
   );
+  final ValueNotifier<bool> _cdnNotifier = ValueNotifier<bool>(
+    HiveDataBaseSingleton.instance.cdnEnabled,
+  );
 
   void _showLogoutDialog(BuildContext context) {
     showCupertinoDialog(
@@ -144,6 +147,27 @@ class Setting extends StatelessWidget {
                       onChanged: (newValue) async {
                         await _hiveDbInstance.saveRecommendation(newValue);
                         _recommendationNotifier.value = newValue;
+                      },
+                    );
+                  },
+                ),
+                Divider(
+                    height: 1,
+                    indent: 56,
+                    endIndent: 0,
+                    color: theme.dividerColor),
+                ValueListenableBuilder<bool>(
+                  valueListenable: _cdnNotifier,
+                  builder: (context, value, _) {
+                    return _buildSwitchTile(
+                      title: "Fast Load (CDN Cache)",
+                      icon: CupertinoIcons.bolt_fill,
+                      iconColor: const Color(0xFF34C759),
+                      textColor: theme.colorScheme.onSurface,
+                      value: value,
+                      onChanged: (newValue) async {
+                        await _hiveDbInstance.saveCdnEnabled(newValue);
+                        _cdnNotifier.value = newValue;
                       },
                     );
                   },

@@ -22,8 +22,12 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
     emit(LoadingState());
     debugPrint(event.playlistId);
     try {
-      final playlistData =
-          await repository.getPlayList(event.playlistId, index);
+      final playlistData = await repository.getPlayListWithCdn(
+        event.playlistId,
+        index,
+        playlistName: event.playlistName,
+        isAlbum: event.isAlbum,
+      );
       playlistSize = playlistData.playlistSize;
       index = playlistData.playlistSongs.length;
       emit(
@@ -51,9 +55,12 @@ class PlaylistBloc extends Bloc<PlaylistEvent, PlaylistState> {
         emit(currentState.copyWith(isLoading: true));
         debugPrint("Loading More Data");
 
-        // Fetch more songs
-        final playlistData =
-            await repository.getPlayList(event.playlistId, index);
+        // Fetch more songs always from YouTube for pagination beyond page 1
+        final playlistData = await repository.getPlayList(
+          event.playlistId,
+          index,
+          isAlbum: event.isAlbum,
+        );
         index = currentState.playlistSongs.length +
             playlistData.playlistSongs.length;
 

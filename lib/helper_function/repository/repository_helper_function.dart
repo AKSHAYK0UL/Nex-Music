@@ -36,12 +36,17 @@ class RepositoryHelperFunction {
 
     for (int i = 0; i < homeSection.length; i++) {
       HomeSection section = homeSection[i];
+      final titleLower = section.title.toLowerCase();
+      if (titleLower.contains("album") || titleLower.contains("release")) {
+        continue;
+      }
 
       if (section.contents.isNotEmpty) {
         for (int j = 0; j < section.contents.length; j++) {
           var content = section.contents[j];
-          debugPrint("HOME SECTION ############################# ${content.runtimeType} ##############################");
-          if (content is PlaylistDetailed) {
+          if (content is PlaylistDetailed &&
+              !content.playlistId.startsWith("MPREb_") &&
+              !content.playlistId.startsWith("OLAK")) {
             playlists.add(
               PlayListmodel(
                 playListId: content.playlistId,
@@ -63,12 +68,28 @@ class RepositoryHelperFunction {
 
     for (int i = 0; i < homeSection.length; i++) {
       HomeSection section = homeSection[i];
+      final titleLower = section.title.toLowerCase();
+      final isAlbumSection =
+          titleLower.contains("album") || titleLower.contains("release");
 
       if (section.contents.isNotEmpty) {
         for (int j = 0; j < section.contents.length; j++) {
           var content = section.contents[j];
-          debugPrint("HOME SECTION ############################# ${content.runtimeType} ##############################");
           if (content is AlbumDetailed) {
+            albums.add(
+              PlayListmodel(
+                playListId: content.albumId.isNotEmpty
+                    ? content.albumId
+                    : content.playlistId,
+                playlistName: content.name,
+                artistBasic: content.artist,
+                thumbnail: getThumbnail(content.thumbnails),
+              ),
+            );
+          } else if (content is PlaylistDetailed &&
+              (isAlbumSection ||
+                  content.playlistId.startsWith("MPREb_") ||
+                  content.playlistId.startsWith("OLAK"))) {
             albums.add(
               PlayListmodel(
                 playListId: content.playlistId,
@@ -147,7 +168,7 @@ class RepositoryHelperFunction {
       final data = album[i];
       playlist.add(
         PlayListmodel(
-          playListId: data.playlistId.isNotEmpty ? data.playlistId : data.albumId,
+          playListId: data.albumId.isNotEmpty ? data.albumId : data.playlistId,
           playlistName: data.name,
           artistBasic: data.artist,
           thumbnail: getThumbnail(data.thumbnails),
@@ -155,6 +176,54 @@ class RepositoryHelperFunction {
       );
     }
     return playlist;
+  }
+
+  // VideoDetailed to SongModel
+  static Songmodel convertVideoDetailedToSongModel(
+    VideoDetailed video, {
+    ThumbnailQuality quality = ThumbnailQuality.medium,
+  }) {
+    return Songmodel(
+      vId: video.videoId,
+      songName: video.name,
+      artist: video.artist,
+      thumbnail: getThumbnail(video.thumbnails, quality),
+      duration: timeFormate(video.duration ?? 0),
+    );
+  }
+
+  // List of VideoDetailed to list of Songmodel
+  static List<Songmodel> convertVideoDetailedListToSongModelList(
+    List<VideoDetailed> videos, {
+    ThumbnailQuality quality = ThumbnailQuality.medium,
+  }) {
+    return videos
+        .map((v) => convertVideoDetailedToSongModel(v, quality: quality))
+        .toList();
+  }
+
+  // SongDetailed to SongModel
+  static Songmodel convertSongDetailedToSongModel(
+    SongDetailed song, {
+    ThumbnailQuality quality = ThumbnailQuality.medium,
+  }) {
+    return Songmodel(
+      vId: song.videoId,
+      songName: song.name,
+      artist: song.artist,
+      thumbnail: getThumbnail(song.thumbnails, quality),
+      duration: timeFormate(song.duration ?? 0),
+    );
+  }
+
+  // List of SongDetailed to list of Songmodel
+  static List<Songmodel> convertSongDetailedListToSongModelList(
+    List<SongDetailed> songs, {
+    ThumbnailQuality quality = ThumbnailQuality.medium,
+  }) {
+    return songs
+        .map((s) => convertSongDetailedToSongModel(s, quality: quality))
+        .toList();
   }
 
   //SongFull to SongModel

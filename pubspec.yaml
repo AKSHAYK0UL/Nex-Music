@@ -39,7 +39,6 @@ dependencies:
   # just_audio: ^0.9.46
 
   flutter_bloc: ^9.1.1 
-  dart_ytmusic_api: ^1.3.7
   hexcolor: ^3.0.1
   cached_network_image: ^3.4.1
   lottie: ^3.2.0
@@ -61,10 +60,12 @@ dependencies:
   app_links: ^6.3.2
   bloc_concurrency: ^0.3.0
   audio_service: ^0.18.18
-  # youtube_explode_dart:
-  #   git:
-  #     url: https://github.com/anandnet/youtube_explode_dart.git
-  #     ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024  
+  # dart_ytmusic_api:
+  #   path: dart_ytmusic_api
+  dart_ytmusic_api:
+    git:
+      url: https://github.com/AKSHAYK0UL/dart_ytmusic_api.git
+      ref: 9185d9ae37c4fbc8d9275485db9cfaecf07b4d66  
   youtube_explode_dart:
     git:
       url: https://github.com/AKSHAYK0UL/Youtube-Client-Dart.git

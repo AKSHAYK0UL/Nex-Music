@@ -103,7 +103,7 @@ class PlaylistCarousel extends StatelessWidget {
     final itemCount = playlists.length > 8 ? 8 : playlists.length;
 
     return SizedBox(
-      height: screenSize.height * 0.30,
+      height: screenSize.height * 0.35,
       child: PageView.builder(
         controller: PageController(viewportFraction: 0.92),
         padEnds: false,
@@ -138,7 +138,7 @@ class AlbumCarousel extends StatelessWidget {
     final itemCount = albums.length > 8 ? 8 : albums.length;
 
     return SizedBox(
-      height: screenSize.height * 0.30,
+      height: screenSize.height * 0.35,
       child: PageView.builder(
         controller: PageController(viewportFraction: 0.92),
         padEnds: false,

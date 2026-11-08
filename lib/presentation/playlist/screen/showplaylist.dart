@@ -38,7 +38,11 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
     super.initState();
     context
         .read<PlaylistBloc>()
-        .add(GetPlaylistEvent(playlistId: widget.playlistData.playListId));
+        .add(GetPlaylistEvent(
+          playlistId: widget.playlistData.playListId,
+          playlistName: widget.playlistData.playlistName,
+          isAlbum: widget.isAlbum,
+        ));
     context
         .read<SavedPlaylistsBloc>()
         .add(IsPlaylistSavedEvent(playlistId: widget.playlistData.playListId));
@@ -70,7 +74,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
       final state = context.read<PlaylistBloc>().state;
       if (state is PlaylistDataState && !state.isLoading) {
         context.read<PlaylistBloc>().add(
-              LoadMoreSongsEvent(playlistId: widget.playlistData.playListId),
+              LoadMoreSongsEvent(
+                playlistId: widget.playlistData.playListId,
+                isAlbum: widget.isAlbum,
+              ),
             );
       }
     }
@@ -448,7 +455,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                                       await repo.getPlayList(
                                                           widget.playlistData
                                                               .playListId,
-                                                          fetchIndex);
+                                                          fetchIndex, isAlbum: widget.isAlbum);
                                                   if (data
                                                       .playlistSongs.isEmpty) {
                                                     break;
@@ -519,7 +526,7 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                                                       await repo.getPlayList(
                                                           widget.playlistData
                                                               .playListId,
-                                                          fetchIndex);
+                                                          fetchIndex, isAlbum: widget.isAlbum);
                                                   if (data
                                                       .playlistSongs.isEmpty) {
                                                     break;

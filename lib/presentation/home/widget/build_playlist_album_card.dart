@@ -83,6 +83,7 @@ class BuildPlaylistAlbumCard extends StatelessWidget {
                       width: double.infinity,
                       height: double.infinity,
                       islocal: false,
+                      
                     ),
 
                     // Gradient Overlay
