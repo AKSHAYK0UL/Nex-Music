@@ -13,6 +13,7 @@ import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/model/saved_playlist_model.dart';
 import 'package:nex_music/model/songmodel.dart';
+import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -151,6 +152,9 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
                 playlistState.errorMessage,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
+            ),
+            bottomNavigationBar: MiniPlayer(
+              screenSize: MediaQuery.sizeOf(context).width,
             ),
           );
         }
@@ -622,6 +626,9 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
               // SliverPadding(
               //     padding: EdgeInsets.only(bottom: bottomPadding + 20)),
             ],
+          ),
+          bottomNavigationBar: MiniPlayer(
+            screenSize: MediaQuery.sizeOf(context).width,
           ),
         );
       },
