@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
+import 'package:nex_music/bloc/download_manager_bloc/bloc/download_manager_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
@@ -13,6 +13,7 @@ import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/helper_function/general/artist_helper.dart';
+import 'package:nex_music/model/download_task_model.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/bottom_sheet_button.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
@@ -159,37 +160,40 @@ Future<void> showBottomOptionSheet({
 
               tabRouteENUM == TabRouteENUM.download
                   ? const SizedBox()
-                  : BlocConsumer<DownloadBloc, DownloadState>(
-                      listener: (context, state) {
-                      if (state is DownloadErrorState) {
-                        showSnackbar(context, state.errorMessage);
-                      }
-                      // if (state is DownloadPercantageStatusState) {
-                      //   showSnackbar(context, "Downloading...");
-                      // }
-                    }, builder: (context, state) {
-                      return bottomSheetButton(
-                        context: context,
-                        label: "Download",
-                        icon: Icons.downloading_sharp,
-                        screenSize: screenSize,
-                        color: state is DownloadPercantageStatusState
-                            ? Colors.grey.shade700
-                            : textColor,
-                        labelColor: state is DownloadPercantageStatusState
-                            ? Colors.grey.shade700
-                            : textColor,
-                        onPressed: state is DownloadPercantageStatusState
-                            ? null
-                            : () {
-                                context
-                                    .read<DownloadBloc>()
-                                    .add(DownloadSongEvent(songData: songData));
-
-                                Navigator.of(context).pop();
-                              },
-                      );
-                    }),
+                  : BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
+                      buildWhen: (prev, curr) =>
+                          prev.task(songData.vId) !=
+                          curr.task(songData.vId),
+                      builder: (context, state) {
+                        final task = state.task(songData.vId);
+                        final isActive = task != null &&
+                            (task.status == DownloadTaskStatus.downloading ||
+                                task.status == DownloadTaskStatus.queued ||
+                                task.status == DownloadTaskStatus.paused);
+                        final label = isActive
+                            ? (task.status == DownloadTaskStatus.paused
+                                ? 'Paused · ${task.progress.toInt()}%'
+                                : 'Downloading… ${task.progress.toInt()}%')
+                            : "Download";
+                        return bottomSheetButton(
+                          context: context,
+                          label: label,
+                          icon: Icons.downloading_sharp,
+                          screenSize: screenSize,
+                          color: isActive ? Colors.grey.shade700 : textColor,
+                          labelColor:
+                              isActive ? Colors.grey.shade700 : textColor,
+                          onPressed: isActive
+                              ? null
+                              : () {
+                                  context.read<DownloadManagerBloc>().add(
+                                        EnqueueDownloadEvent(
+                                            songData: songData),
+                                      );
+                                  Navigator.of(context).pop();
+                                },
+                        );
+                      }),
               if (showDelete)
                 bottomSheetButton(
                   context: context,

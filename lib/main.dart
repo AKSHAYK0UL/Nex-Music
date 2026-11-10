@@ -17,6 +17,7 @@ import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/deep_link_bloc/bloc/deeplink_bloc.dart';
 import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
+import 'package:nex_music/bloc/download_manager_bloc/bloc/download_manager_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/favorites_songs_bloc/bloc/favorites_songs_bloc.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
@@ -45,6 +46,7 @@ import 'package:nex_music/core/bloc_provider/repository_provider/repository_prov
 import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_registrar.g.dart';
+import 'package:nex_music/core/services/download_notification_service.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/theme.dart';
 import 'package:nex_music/helper_function/storage_permission/storage_permission.dart';
@@ -65,6 +67,9 @@ OverlayEntry? overlayEntry;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize download notification service early.
+  await DownloadNotificationService().init();
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.white,
@@ -233,6 +238,14 @@ class MyApp extends StatelessWidget {
                 ),
               ),
               StoragePermission(DeviceInfoPlugin()),
+            ),
+          ),
+          BlocProvider(
+            create: (context) => DownloadManagerBloc(
+              context.read<Repository>(),
+              DownloadRepo(DownloadProvider(dio: Dio())),
+              StoragePermission(DeviceInfoPlugin()),
+              DownloadNotificationService(),
             ),
           ),
           BlocProvider(

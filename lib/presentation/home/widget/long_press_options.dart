@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
+import 'package:nex_music/bloc/download_manager_bloc/bloc/download_manager_bloc.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/song_dialog_bloc/bloc/song_dialog_bloc.dart';
@@ -12,6 +12,7 @@ import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/helper_function/general/artist_helper.dart';
+import 'package:nex_music/model/download_task_model.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_dialog.dart';
 import 'package:share_plus/share_plus.dart';
@@ -158,16 +159,24 @@ Future<void> showLongPressOptions({
                           size: screenSize * 0.0320,
                         ),
                       ),
-                      BlocBuilder<DownloadBloc, DownloadState>(
-                        buildWhen: (previous, current) => previous != current,
+                      BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
+                        buildWhen: (prev, curr) =>
+                            prev.task(songData.vId) !=
+                            curr.task(songData.vId),
                         builder: (context, state) {
+                          final task = state.task(songData.vId);
+                          final isActive = task != null &&
+                              (task.status == DownloadTaskStatus.downloading ||
+                                  task.status == DownloadTaskStatus.queued ||
+                                  task.status == DownloadTaskStatus.paused);
                           return TextButton.icon(
-                            onPressed: state is DownloadPercantageStatusState
+                            onPressed: isActive
                                 ? null
                                 : () {
-                                    context.read<DownloadBloc>().add(
-                                        DownloadSongEvent(songData: songData));
-
+                                    context.read<DownloadManagerBloc>().add(
+                                          EnqueueDownloadEvent(
+                                              songData: songData),
+                                        );
                                     Navigator.of(context).pop();
                                   },
                             label: Text(
@@ -176,10 +185,9 @@ Future<void> showLongPressOptions({
                                   .textTheme
                                   .labelMedium
                                   ?.copyWith(
-                                      color:
-                                          state is DownloadPercantageStatusState
-                                              ? Colors.grey.shade700
-                                              : textColor),
+                                      color: isActive
+                                          ? Colors.grey.shade700
+                                          : textColor),
                             ),
                             style: TextButton.styleFrom(
                               alignment: Alignment.centerLeft,
@@ -190,7 +198,7 @@ Future<void> showLongPressOptions({
                             ),
                             icon: Icon(
                               Icons.downloading_sharp,
-                              color: state is DownloadPercantageStatusState
+                              color: isActive
                                   ? Colors.grey.shade700
                                   : textColor,
                               size: screenSize * 0.0320,
@@ -371,51 +379,53 @@ Future<void> showLongPressOptions({
                   ),
                   tabRouteENUM == TabRouteENUM.download
                       ? const SizedBox()
-                      : BlocConsumer<DownloadBloc, DownloadState>(
-                          listener: (context, state) {
-                          if (state is DownloadErrorState) {
-                            showSnackbar(context, state.errorMessage);
-                          }
-                          if (state is DownloadPercantageStatusState) {
-                            showSnackbar(context, "Downloading...");
-                          }
-                        }, builder: (context, state) {
-                          return TextButton.icon(
-                            onPressed: state is DownloadPercantageStatusState
-                                ? null
-                                : () {
-                                    context.read<DownloadBloc>().add(
-                                        DownloadSongEvent(songData: songData));
-
-                                    Navigator.of(context).pop();
-                                  },
-                            label: Text(
-                              "Download",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
-                                  ?.copyWith(
-                                      color:
-                                          state is DownloadPercantageStatusState
-                                              ? Colors.grey.shade700
-                                              : textColor),
-                            ),
-                            style: TextButton.styleFrom(
-                              alignment: Alignment.centerLeft,
-                              overlayColor: backgroundColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                      : BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
+                          buildWhen: (prev, curr) =>
+                              prev.task(songData.vId) !=
+                              curr.task(songData.vId),
+                          builder: (context, state) {
+                            final task = state.task(songData.vId);
+                            final isActive = task != null &&
+                                (task.status ==
+                                        DownloadTaskStatus.downloading ||
+                                    task.status == DownloadTaskStatus.queued ||
+                                    task.status == DownloadTaskStatus.paused);
+                            return TextButton.icon(
+                              onPressed: isActive
+                                  ? null
+                                  : () {
+                                      context
+                                          .read<DownloadManagerBloc>()
+                                          .add(EnqueueDownloadEvent(
+                                              songData: songData));
+                                      Navigator.of(context).pop();
+                                    },
+                              label: Text(
+                                "Download",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium
+                                    ?.copyWith(
+                                        color: isActive
+                                            ? Colors.grey.shade700
+                                            : textColor),
                               ),
-                            ),
-                            icon: Icon(
-                              Icons.downloading_sharp,
-                              color: state is DownloadPercantageStatusState
-                                  ? Colors.grey.shade700
-                                  : textColor,
-                              size: screenSize * 0.0320,
-                            ),
-                          );
-                        }),
+                              style: TextButton.styleFrom(
+                                alignment: Alignment.centerLeft,
+                                overlayColor: backgroundColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              icon: Icon(
+                                Icons.downloading_sharp,
+                                color: isActive
+                                    ? Colors.grey.shade700
+                                    : textColor,
+                                size: screenSize * 0.0320,
+                              ),
+                            );
+                          }),
                   if (showDelete)
                     TextButton.icon(
                       onPressed: () {

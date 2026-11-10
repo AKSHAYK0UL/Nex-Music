@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:nex_music/helper_function/delete_offline_songs/delete_offlice_songs.dart';
 import 'package:nex_music/helper_function/load_offline_songs/loadsong.dart';
@@ -15,7 +16,12 @@ class DownloadRepo {
 
   DownloadRepo(this._downloadProvider);
 
-  Stream<double> downloadSong(SongRawData songRawInfo, Songmodel songData) {
+  Stream<double> downloadSong(
+    SongRawData songRawInfo,
+    Songmodel songData, {
+    CancelToken? cancelToken,
+    int resumeFromBytes = 0,
+  }) {
     try {
       final actualDownformat =
           songRawInfo.codecs.contains("mp") ? "m4a" : "opus";
@@ -24,6 +30,8 @@ class DownloadRepo {
         songRawInfo,
         actualDownformat,
         songData.toJson(),
+        cancelToken: cancelToken,
+        resumeFromBytes: resumeFromBytes,
       );
     } catch (_) {
       rethrow;

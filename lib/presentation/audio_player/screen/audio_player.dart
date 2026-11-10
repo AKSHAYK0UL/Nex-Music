@@ -4,7 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
+import 'package:nex_music/bloc/download_manager_bloc/bloc/download_manager_bloc.dart';
+import 'package:nex_music/model/download_task_model.dart';
 import 'package:nex_music/bloc/favorites_bloc/bloc/favorites_bloc.dart';
 import 'package:nex_music/bloc/sleep_timer_bloc/bloc/sleep_timer_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
@@ -344,10 +345,21 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         },
         child: MultiBlocListener(
           listeners: [
-            BlocListener<DownloadBloc, DownloadState>(
+            BlocListener<DownloadManagerBloc, DownloadManagerState>(
+              listenWhen: (previous, current) {
+                for (final vId in current.tasks.keys) {
+                  final prev = previous.task(vId);
+                  final curr = current.task(vId);
+                  if (curr?.status == DownloadTaskStatus.error &&
+                      prev?.status != DownloadTaskStatus.error) { return true; }
+                }
+                return false;
+              },
               listener: (context, state) {
-                if (state is DownloadErrorState) {
-                  showSnackbar(context, state.errorMessage);
+                for (final task in state.tasks.values) {
+                  if (task.status == DownloadTaskStatus.error) {
+                    showSnackbar(context, task.errorMessage ?? 'Download failed');
+                  }
                 }
               },
             ),
@@ -936,20 +948,21 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                             currentSongData =
                                                 songState.songData;
                                           }
-                                          return BlocBuilder<DownloadBloc,
-                                              DownloadState>(
+                                          return BlocBuilder<DownloadManagerBloc,
+                                              DownloadManagerState>(
+                                            buildWhen: (prev, curr) =>
+                                                prev.task(currentSongData.vId) !=
+                                                    curr.task(currentSongData.vId),
                                             builder: (context, state) {
-                                              final isDownloading = state
-                                                  is DownloadPercantageStatusState;
+                                              final task = state.task(currentSongData.vId);
+                                              final isDownloading = task != null &&
+                                                  task.status ==
+                                                      DownloadTaskStatus.downloading;
+                                              final progress =
+                                                  task?.progress ?? 0.0;
 
                                               if (isDownloading) {
-                                                return StreamBuilder<double>(
-                                                  stream:
-                                                      state.percentageStream,
-                                                  builder: (context, snapshot) {
-                                                    final progress =
-                                                        snapshot.data ?? 0.0;
-                                                    return GestureDetector(
+                                                return GestureDetector(
                                                       onTap: () =>
                                                           _showMoreOptions(
                                                               context,
@@ -998,8 +1011,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                                         ),
                                                       ),
                                                     );
-                                                  },
-                                                );
                                               } else {
                                                 return IconButton(
                                                   onPressed: () =>

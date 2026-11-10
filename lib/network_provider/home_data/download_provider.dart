@@ -18,11 +18,17 @@ class DownloadProvider {
     );
   }
 
+  // Downloads a song and streams progress events (00 – 100).
+  //cancelToken can be cancelled externally to abort the download.
+  // resumeFromBytes is the number of bytes already written to disk;
+  // when non-zero a Range header is sent so the download resumes.
   Stream<double> downloadSong(
     SongRawData songRawInfo,
     String actualDownformat,
-    Map<String, dynamic> songDataMap,
-  ) {
+    Map<String, dynamic> songDataMap, {
+    CancelToken? cancelToken,
+    int resumeFromBytes = 0,
+  }) {
     final fileName = songDataMap["song_name"] + songDataMap["v_id"];
     final thumbnailUrl =
         "https://i.ytimg.com/vi/${songDataMap["v_id"]}/maxresdefault.jpg";
@@ -33,9 +39,7 @@ class DownloadProvider {
       try {
         final Directory? externalDir = await getExternalStorageDirectory();
         if (externalDir == null) {
-          // controller.add(-1);
           controller.addError("Directory not exist");
-
           await controller.close();
           return;
         }
@@ -50,60 +54,87 @@ class DownloadProvider {
         final thumbnailFilePath = "$basePath.jpg";
         final metadataFilePath = "$basePath.json";
 
-        debugPrint('Downloading to: $basePath');
+        debugPrint('Downloading to: $basePath (resumeFrom: $resumeFromBytes)');
 
-        // Download song
+        //  Download audio file 
         if (!await File(songFilePath).exists()) {
+          final int totalBytes = songRawInfo.totalBytes;
+
+          // Build range header: start from resumeFromBytes if resuming.
+          final String rangeHeader = resumeFromBytes > 0
+              ? 'bytes=$resumeFromBytes-$totalBytes'
+              : 'bytes=0-$totalBytes';
+
           await _dio.download(
             songRawInfo.url.toString(),
             songFilePath,
             deleteOnError: true,
-            options: Options(
-                headers: {"Range": 'bytes=0-${songRawInfo.totalBytes}'}),
+            cancelToken: cancelToken,
+            options: Options(headers: {"Range": rangeHeader}),
             onReceiveProgress: (received, total) {
-              if (total > 0) {
-                final percent = (received / total) * 100;
+              // `total` from the response may be the remaining bytes when
+              // resuming add the already downloaded bytes for true percent.
+              final int actualReceived = received + resumeFromBytes;
+              final int actualTotal =
+                  (total > 0) ? (total + resumeFromBytes) : totalBytes;
+              if (actualTotal > 0) {
+                final percent = (actualReceived / actualTotal) * 100;
                 debugPrint("DOWNLOAD PERCENTAGE $percent %");
-                controller.add(percent);
+                controller.add(percent.clamp(0.0, 100.0));
               }
             },
           );
         } else {
           debugPrint('File already exists: $songFilePath');
-
           controller.addError(FileExistException());
           await controller.close();
+          return;
         }
 
-        // Download thumbnail
+        //  Download thumbnail 
         if (!await File(thumbnailFilePath).exists()) {
-          // print("Thumbnail URL ${thumbnailUrl} @@@@@@");
           try {
-            await _dio.download(thumbnailUrl, thumbnailFilePath);
+            await _dio.download(
+              thumbnailUrl,
+              thumbnailFilePath,
+              cancelToken: cancelToken,
+            );
           } catch (e) {
-            // debugPrint("Failed to download thumbnail: $e");
-            debugPrint('File already exists: $thumbnailFilePath');
-
-            controller.addError(FileExistException());
-            // controller.addError("Failed to download thumbnail");
+            debugPrint("Thumbnail download failed (non-fatal): $e");
+            // Try a lower resolution fallback thumbnail.
+            try {
+              final fallback =
+                  "https://i.ytimg.com/vi/${songDataMap["v_id"]}/hqdefault.jpg";
+              await _dio.download(
+                fallback,
+                thumbnailFilePath,
+                cancelToken: cancelToken,
+              );
+            } catch (_) {}
           }
         }
 
-        // Save metadata
+        //  Save metadata 
         if (!await File(metadataFilePath).exists()) {
           try {
             await File(metadataFilePath).writeAsString(jsonEncode(metadata));
           } catch (e) {
-            // debugPrint("Failed to write metadata: $e");
-            // controller.addError("Failed to write metadata");
-            debugPrint('File already exists: $metadataFilePath');
-
-            controller.addError(FileExistException());
+            debugPrint("Failed to write metadata: $e");
           }
         }
 
         controller.add(100.0);
         await controller.close();
+      } on DioException catch (e) {
+        if (e.type == DioExceptionType.cancel) {
+          // Cancelled
+          debugPrint('Download cancelled for ${songDataMap["song_name"]}');
+          await controller.close();
+        } else {
+          debugPrint('Dio Download Error: $e');
+          controller.addError("Download Error: ${e.message}");
+          await controller.close();
+        }
       } catch (e) {
         debugPrint('Download Error: $e');
         controller.addError("Download Error");

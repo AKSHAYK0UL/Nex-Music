@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/connectivity_bloc/bloc/connectivity_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
-import 'package:nex_music/core/ui_component/global_download_indicator.dart';
 
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/home/navbar/widget/navbarwidget.dart';
@@ -106,7 +105,7 @@ class _NavBarShellState extends State<NavBarShell> with WidgetsBindingObserver {
           ],
         ),
         // : MiniPlayer(screenSize: screenSize),
-        floatingActionButton: const GlobalDownloadIndicator(),
+        // floatingActionButton: const GlobalDownloadIndicator(),
       ),
     );
   }

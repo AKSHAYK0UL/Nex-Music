@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nex_music/bloc/download_bloc/bloc/download_bloc.dart';
+import 'package:nex_music/bloc/download_manager_bloc/bloc/download_manager_bloc.dart';
 import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/bloc/saved_artists_bloc/bloc/saved_artists_bloc.dart';
 import 'package:nex_music/bloc/songstream_bloc/bloc/songstream_bloc.dart';
@@ -11,6 +11,7 @@ import 'package:nex_music/enum/tab_route.dart';
 import 'package:nex_music/helper_function/check_song_downloaded/check_song_downloaded.dart';
 import 'package:nex_music/model/artistmodel.dart';
 import 'package:nex_music/helper_function/general/artist_helper.dart';
+import 'package:nex_music/model/download_task_model.dart';
 import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/user_playlist/widgets/add_to_playlist_bottom_sheet.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
@@ -435,33 +436,34 @@ class SongOptionsMenu extends StatelessWidget {
     return FutureBuilder<bool>(
       future: isSongDownloaded(songData),
       builder: (context, snapshot) {
-        // Check actual file existence, not just songData.isLocal
         final isDownloaded = snapshot.data ?? false;
 
-        return BlocBuilder<DownloadBloc, DownloadState>(
+        return BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
+          buildWhen: (prev, curr) =>
+              prev.task(songData.vId) != curr.task(songData.vId),
           builder: (context, state) {
-            final isDownloading = state is DownloadPercantageStatusState;
+            final task = state.task(songData.vId);
+            final isActiveTask = task != null &&
+                (task.status == DownloadTaskStatus.downloading ||
+                    task.status == DownloadTaskStatus.queued ||
+                    task.status == DownloadTaskStatus.paused);
 
-            if (isDownloading) {
-              return StreamBuilder<double>(
-                stream: state.percentageStream,
-                builder: (context, snapshot) {
-                  final progress = snapshot.data ?? 0.0;
-                  return _buildMenuItem(
-                    "Downloading... ${progress.toInt()}%",
-                    CupertinoIcons.cloud_download,
-                    textColor: Colors.grey,
-                    iconColor: Colors.grey,
-                    onTap: null,
-                    isLast: isLast,
-                  );
-                },
+            if (isActiveTask) {
+              final label = task.status == DownloadTaskStatus.paused
+                  ? 'Paused · ${task.progress.toInt()}%'
+                  : 'Downloading… ${task.progress.toInt()}%';
+              return _buildMenuItem(
+                label,
+                CupertinoIcons.cloud_download,
+                textColor: Colors.grey,
+                iconColor: Colors.grey,
+                onTap: null,
+                isLast: isLast,
               );
             } else if (isDownloaded) {
               if (tabRouteENUM == TabRouteENUM.download) {
                 return const SizedBox.shrink();
               }
-
               return _buildMenuItem(
                 "Remove from Downloads",
                 CupertinoIcons.trash,
@@ -485,8 +487,8 @@ class SongOptionsMenu extends StatelessWidget {
                 iconColor: Theme.of(context).iconTheme.color ?? Colors.black87,
                 onTap: () {
                   Navigator.pop(context);
-                  context.read<DownloadBloc>().add(
-                        DownloadSongEvent(songData: songData),
+                  context.read<DownloadManagerBloc>().add(
+                        EnqueueDownloadEvent(songData: songData),
                       );
                 },
                 isLast: isLast,

@@ -106,6 +106,7 @@ dependencies:
   # sign_in_button: ^4.0.1
   # persistent_bottom_nav_bar:
   go_router: ^17.2.3
+  flutter_local_notifications: 17.2.4
 
 
 
