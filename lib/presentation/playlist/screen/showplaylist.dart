@@ -627,8 +627,10 @@ class _ShowPlaylistState extends State<ShowPlaylist> {
               //     padding: EdgeInsets.only(bottom: bottomPadding + 20)),
             ],
           ),
-          bottomNavigationBar: MiniPlayer(
-            screenSize: MediaQuery.sizeOf(context).width,
+          bottomNavigationBar: SafeArea(
+            child: MiniPlayer(
+              screenSize: MediaQuery.sizeOf(context).width,
+            ),
           ),
         );
       },
