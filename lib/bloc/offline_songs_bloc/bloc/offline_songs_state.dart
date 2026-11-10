@@ -13,7 +13,7 @@ final class OfflineSongsErrorState extends OfflineSongsState {
 }
 
 final class OfflineSongsDataState extends OfflineSongsState {
-  final Stream<List<Songmodel>> data;
+  final List<Songmodel> songs;
 
-  OfflineSongsDataState({required this.data});
+  OfflineSongsDataState({required this.songs});
 }

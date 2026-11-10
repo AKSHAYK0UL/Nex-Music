@@ -26,8 +26,14 @@ class OfflineSongsBloc extends Bloc<OfflineSongsEvent, OfflineSongsState> {
       final storagePermissionStatus =
           await _storagePermission.checkStoragePermissionStatus;
       if (storagePermissionStatus) {
-        final streamData = _downloadRepo.loadOfflineSongs;
-        emit(OfflineSongsDataState(data: streamData));
+        // Collect the async* generator into a list, emitting each incremental
+        // batch so the UI updates progressively  no stream stored in state.
+        await emit.forEach<List<Songmodel>>(
+          _downloadRepo.loadOfflineSongs,
+          onData: (songs) => OfflineSongsDataState(songs: songs),
+          onError: (_, __) =>
+              OfflineSongsErrorState(errorMessage: "Failed to load downloads"),
+        );
       } else {
         final requestStoragePermission =
             await _storagePermission.requestStoragePermission;

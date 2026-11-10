@@ -11,7 +11,6 @@ import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/core/wrapper/song_filter_wrapper.dart';
 import 'package:nex_music/enum/tab_route.dart';
-import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 import 'package:nex_music/presentation/saved/widgets/active_download_tile.dart';
@@ -226,37 +225,25 @@ class _DownloadedTab extends StatelessWidget {
         }
 
         if (state is OfflineSongsDataState) {
-          return StreamBuilder<List<Songmodel>>(
-            stream: state.data,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CupertinoActivityIndicator(
-                      color: Colors.red, radius: 15),
-                );
+          final songs = state.songs;
+
+          return SongFilterWrapper(
+            title: '',
+            songs: songs,
+            tabRoute: TabRouteENUM.download,
+            builder: (context, filteredSongs) {
+              if (filteredSongs.isEmpty) {
+                return const _EmptyDownloadsView();
               }
-
-              final songs = snapshot.data ?? [];
-
-              return SongFilterWrapper(
-                title: '',
-                songs: songs,
-                tabRoute: TabRouteENUM.download,
-                builder: (context, filteredSongs) {
-                  if (filteredSongs.isEmpty) {
-                    return const _EmptyDownloadsView();
-                  }
-                  return ListView.builder(
-                    padding: EdgeInsets.zero,
-                    itemCount: filteredSongs.length,
-                    itemBuilder: (context, index) {
-                      return RecentSongTile(
-                        songData: filteredSongs[index],
-                        songIndex: index,
-                        tabRouteENUM: TabRouteENUM.download,
-                        playlistSongs: filteredSongs,
-                      );
-                    },
+              return ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: filteredSongs.length,
+                itemBuilder: (context, index) {
+                  return RecentSongTile(
+                    songData: filteredSongs[index],
+                    songIndex: index,
+                    tabRouteENUM: TabRouteENUM.download,
+                    playlistSongs: filteredSongs,
                   );
                 },
               );
@@ -366,9 +353,9 @@ class _EmptyPendingView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              CupertinoIcons.checkmark_circle,
-              size: 80,
-              color: Colors.green.withValues(alpha: 0.8),
+              Icons.downloading_rounded,
+                size: 80,
+              color: Colors.red.withValues(alpha: 0.8),
             ),
             const SizedBox(height: 25),
             Text(
@@ -383,7 +370,7 @@ class _EmptyPendingView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Songs you download will appear here while in progress.',
+              'Songs currently downloading, paused, or pending will appear here.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,
