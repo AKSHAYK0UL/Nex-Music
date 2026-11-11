@@ -9,15 +9,11 @@ import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
+import 'package:nex_music/core/wrapper/song_filter_wrapper.dart';
 import 'package:nex_music/enum/tab_route.dart';
-import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
-import 'package:nex_music/presentation/library/widgets/sort_button.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 import 'package:nex_music/presentation/saved/widgets/active_download_tile.dart';
-
-//  Sort enum 
-enum _SortType { nameAsc, nameDesc, timeAsc, timeDesc }
 
 
 class SavedSongs extends StatefulWidget {
@@ -32,6 +28,7 @@ class _SavedSongsState extends State<SavedSongs>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
   bool _isRefreshing = false;
+
 
   @override
   void initState() {
@@ -109,105 +106,111 @@ class _SavedSongsState extends State<SavedSongs>
               ]
             : null,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Downloads',
-                  style: TextStyle(
-                    fontFamily: 'serif',
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-             
-                _SortButtons(notifier: _sortNotifier),
-              ],
-            ),
-          ),
+      body: BlocBuilder<OfflineSongsBloc, OfflineSongsState>(
+        builder: (context, state) {
+          if (state is OfflineSongsLoadingState) {
+            return const Center(
+              child: CupertinoActivityIndicator(color: Colors.red, radius: 15),
+            );
+          }
+          if (state is OfflineSongsErrorState) {
+            return Center(
+              child: Text(state.errorMessage,
+                  style: const TextStyle(color: Colors.red)),
+            );
+          }
+          if (state is OfflineSongsDataState) {
+            return SongFilterWrapper(
+              title: 'Downloads',
+              songs: state.songs,
+              tabRoute: TabRouteENUM.download,
+              builder: (context, filteredSongs) {
+                return Column(
+                  children: [
+                    // Tab bar
+                    BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
+                      buildWhen: (p, c) =>
+                          p.activeTasks.length != c.activeTasks.length,
+                      builder: (context, dmState) {
+                        final count = dmState.activeTasks.length;
+                        return Padding(
 
-          // Search field shared, matches Playlists screen 
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: CupertinoSearchTextField(
-              controller: _searchController,
-              placeholder: 'Find in Downloads',
-              cursorColor: Colors.red,
-              onChanged: (v) => _searchNotifier.value = v,
-            ),
-          ),
-
-          // Tab bar 
-          BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
-            buildWhen: (p, c) =>
-                p.activeTasks.length != c.activeTasks.length,
-            builder: (context, dmState) {
-              final count = dmState.activeTasks.length;
-              return TabBar(
-                controller: _tabController,
-                indicatorColor: Colors.red,
-                labelColor: Colors.red,
-                dividerColor: Colors.transparent,
-                unselectedLabelColor: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withValues(alpha: 0.6),
-                tabs: [
-                  const Tab(text: 'Saved'),
-                  Tab(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('Pending'),
-                        if (count > 0) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              '$count',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: TabBar(
+                            controller: _tabController,
+                            indicatorColor: Colors.red,
+                            labelColor: Colors.red,
+                            dividerColor: Colors.transparent,
+                            unselectedLabelColor: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
+                            tabs: [
+                              const Tab(text: 'Saved'),
+                              Tab(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text('Pending'),
+                                    if (count > 0) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: Text(
+                                          '$count',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ],
-                      ],
+                        );
+                      },
                     ),
-                  ),
-                ],
-              );
-            },
-          ),
 
-          // Tab views 
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _DownloadedTab(
-                  searchNotifier: _searchNotifier,
-                  sortNotifier: _sortNotifier,
-                ),
-                _PendingTab(searchNotifier: _searchNotifier),
-              ],
-            ),
-          ),
-        ],
+                    // Tab views
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          filteredSongs.isEmpty
+                              ? const _EmptyDownloadsView()
+                              : ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  itemCount: filteredSongs.length,
+                                  itemBuilder: (context, index) =>
+                                      RecentSongTile(
+                                    songData: filteredSongs[index],
+                                    songIndex: index,
+                                    tabRouteENUM: TabRouteENUM.download,
+                                    playlistSongs: filteredSongs,
+                                  ),
+                                ),
+                          // Pending tab  shows all pending tasks
+                          const _PendingTab(),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
+          return const SizedBox();
+        },
       ),
       bottomNavigationBar: widget.isoffline
           ? SafeArea(
@@ -216,218 +219,17 @@ class _SavedSongsState extends State<SavedSongs>
           : const SizedBox(),
     );
   }
-
-  // Shared state for search and sort, passed into both tabs via ValueNotifier
-  final _searchNotifier = ValueNotifier<String>('');
-  final _sortNotifier = ValueNotifier<_SortType>(_SortType.timeDesc);
-  final _searchController = TextEditingController();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-}
-
-// Sort buttons widget 
-class _SortButtons extends StatefulWidget {
-  final ValueNotifier<_SortType> notifier;
-  const _SortButtons({required this.notifier});
-
-  @override
-  State<_SortButtons> createState() => _SortButtonsState();
-}
-
-class _SortButtonsState extends State<_SortButtons> {
-  @override
-  void initState() {
-    super.initState();
-    widget.notifier.addListener(_rebuild);
-  }
-
-  void _rebuild() => setState(() {});
-
-  @override
-  void dispose() {
-    widget.notifier.removeListener(_rebuild);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final sort = widget.notifier.value;
-    final isName =
-        sort == _SortType.nameAsc || sort == _SortType.nameDesc;
-    final isTime =
-        sort == _SortType.timeAsc || sort == _SortType.timeDesc;
-
-    return Row(
-      children: [
-        SortButton(
-          label: 'Name',
-          isActive: isName,
-          isDesc: sort == _SortType.nameDesc,
-          onTap: () {
-            widget.notifier.value = sort == _SortType.nameAsc
-                ? _SortType.nameDesc
-                : _SortType.nameAsc;
-          },
-        ),
-        const SizedBox(width: 15),
-        SortButton(
-          label: 'Time',
-          isActive: isTime,
-          isDesc: sort == _SortType.timeDesc,
-          onTap: () {
-            widget.notifier.value = sort == _SortType.timeDesc
-                ? _SortType.timeAsc
-                : _SortType.timeDesc;
-          },
-        ),
-      ],
-    );
-  }
-}
-
-// Tab 1 Downloaded songs
-class _DownloadedTab extends StatefulWidget {
-  final ValueNotifier<String> searchNotifier;
-  final ValueNotifier<_SortType> sortNotifier;
-
-  const _DownloadedTab({
-    required this.searchNotifier,
-    required this.sortNotifier,
-  });
-
-  @override
-  State<_DownloadedTab> createState() => _DownloadedTabState();
-}
-
-class _DownloadedTabState extends State<_DownloadedTab> {
-  @override
-  void initState() {
-    super.initState();
-    widget.searchNotifier.addListener(_rebuild);
-    widget.sortNotifier.addListener(_rebuild);
-  }
-
-  void _rebuild() => setState(() {});
-
-  @override
-  void dispose() {
-    widget.searchNotifier.removeListener(_rebuild);
-    widget.sortNotifier.removeListener(_rebuild);
-    super.dispose();
-  }
-
-  List<Songmodel> _apply(List<Songmodel> songs) {
-    final q = widget.searchNotifier.value.toLowerCase();
-    List<Songmodel> result = q.isEmpty
-        ? List.from(songs)
-        : songs
-            .where((s) => s.songName.toLowerCase().contains(q))
-            .toList();
-
-    switch (widget.sortNotifier.value) {
-      case _SortType.nameAsc:
-        result.sort((a, b) =>
-            a.songName.toLowerCase().compareTo(b.songName.toLowerCase()));
-        break;
-      case _SortType.nameDesc:
-        result.sort((a, b) =>
-            b.songName.toLowerCase().compareTo(a.songName.toLowerCase()));
-        break;
-      case _SortType.timeAsc:
-        result.sort((a, b) => _ts(a).compareTo(_ts(b)));
-        break;
-      case _SortType.timeDesc:
-        result.sort((a, b) => _ts(b).compareTo(_ts(a)));
-        break;
-    }
-    return result;
-  }
-
-  DateTime _ts(Songmodel s) {
-    final t = s.timestamp;
-    if (t == null) return DateTime.fromMillisecondsSinceEpoch(0);
-    try {
-      // Firestore Timestamp has a .toDate() method
-      return (t as dynamic).toDate() as DateTime;
-    } catch (_) {
-      return DateTime.fromMillisecondsSinceEpoch(0);
-    }
-  }
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<OfflineSongsBloc, OfflineSongsState>(
-      builder: (context, state) {
-        if (state is OfflineSongsLoadingState) {
-          return const Center(
-            child: CupertinoActivityIndicator(color: Colors.red, radius: 15),
-          );
-        }
-        if (state is OfflineSongsErrorState) {
-          return Center(
-            child: Text(state.errorMessage,
-                style: const TextStyle(color: Colors.red)),
-          );
-        }
-        if (state is OfflineSongsDataState) {
-          final filtered = _apply(state.songs);
-
-          if (filtered.isEmpty) {
-            return const _EmptyDownloadsView();
-          }
-
-          return ListView.builder(
-            padding: EdgeInsets.zero,
-            itemCount: filtered.length,
-            itemBuilder: (context, index) => RecentSongTile(
-              songData: filtered[index],
-              songIndex: index,
-              tabRouteENUM: TabRouteENUM.download,
-              playlistSongs: filtered,
-            ),
-          );
-        }
-        return const SizedBox();
-      },
-    );
-  }
 }
 
 // Tab 2 Pending / in-progress downloads
-class _PendingTab extends StatefulWidget {
-  final ValueNotifier<String> searchNotifier;
-  const _PendingTab({required this.searchNotifier});
-
-  @override
-  State<_PendingTab> createState() => _PendingTabState();
-}
-
-class _PendingTabState extends State<_PendingTab> {
-  @override
-  void initState() {
-    super.initState();
-    widget.searchNotifier.addListener(_rebuild);
-  }
-
-  void _rebuild() => setState(() {});
-
-  @override
-  void dispose() {
-    widget.searchNotifier.removeListener(_rebuild);
-    super.dispose();
-  }
+class _PendingTab extends StatelessWidget {
+  const _PendingTab();
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
       builder: (context, state) {
-        final q = widget.searchNotifier.value.toLowerCase();
-        final tasks = state.activeTasks.where((t) {
-          return q.isEmpty ||
-              t.songData.songName.toLowerCase().contains(q);
-        }).toList();
+        final tasks = state.activeTasks;
 
         if (tasks.isEmpty) {
           return const _EmptyPendingView();
