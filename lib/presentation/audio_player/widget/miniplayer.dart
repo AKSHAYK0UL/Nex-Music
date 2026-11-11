@@ -26,7 +26,8 @@ class MiniPlayer extends StatefulWidget {
 class _MiniPlayerState extends State<MiniPlayer> {
   final HiveDataBaseSingleton _dataBaseSingleton =
       HiveDataBaseSingleton.instance;
-  DateTime? _lastNavTime;
+  // Prevents multiple navigations from a single swipe gesture.
+  bool _hasNavigated = false;
 
   @override
   void initState() {
@@ -38,12 +39,8 @@ class _MiniPlayerState extends State<MiniPlayer> {
   }
 
   void _navigateToAudioPlayer(Songmodel songData) {
-    final now = DateTime.now();
-    if (_lastNavTime != null &&
-        now.difference(_lastNavTime!).inMilliseconds < 350) {
-      return;
-    }
-    _lastNavTime = now;
+    if (_hasNavigated) return;
+    _hasNavigated = true;
     context.push(
       RouterPath.audioPlayerRoute,
       extra: {
@@ -93,6 +90,7 @@ class _MiniPlayerState extends State<MiniPlayer> {
               if ((details.primaryVelocity ?? 0) < 0) {
                 _navigateToAudioPlayer(songData!);
               }
+              _hasNavigated = false;
             },
             child: Container(
               height: 64,
