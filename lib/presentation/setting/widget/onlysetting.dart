@@ -22,9 +22,12 @@ class QualitySettingState extends State<QualitySetting> {
       ValueNotifier<ThumbnailQuality>(ThumbnailQuality.high);
   final ValueNotifier<AudioQuality> audioQualityNotifier =
       ValueNotifier<AudioQuality>(AudioQuality.high);
+  final ValueNotifier<AudioQuality> downloadQualityNotifier =
+      ValueNotifier<AudioQuality>(AudioQuality.high);
 
   ThumbnailQuality? _initialThumbnailQuality;
   AudioQuality? _initialAudioQuality;
+  AudioQuality? _initialDownloadQuality;
 
   @override
   void initState() {
@@ -36,6 +39,7 @@ class QualitySettingState extends State<QualitySetting> {
   void dispose() {
     thumbnailQualityNotifier.dispose();
     audioQualityNotifier.dispose();
+    downloadQualityNotifier.dispose();
     super.dispose();
   }
 
@@ -43,7 +47,9 @@ class QualitySettingState extends State<QualitySetting> {
     final hasChanges = (_initialThumbnailQuality != null &&
             thumbnailQualityNotifier.value != _initialThumbnailQuality) ||
         (_initialAudioQuality != null &&
-            audioQualityNotifier.value != _initialAudioQuality);
+            audioQualityNotifier.value != _initialAudioQuality) ||
+        (_initialDownloadQuality != null &&
+            downloadQualityNotifier.value != _initialDownloadQuality);
     widget.hasChangesNotifier?.value = hasChanges;
   }
 
@@ -57,12 +63,14 @@ class QualitySettingState extends State<QualitySetting> {
           SaveQualityEvent(
             hiveQuality: HiveQuality(
                 thumbnailQuality: thumbnailQualityNotifier.value,
-                audioQuality: audioQualityNotifier.value),
+                audioQuality: audioQualityNotifier.value,
+                downloadQuality: downloadQualityNotifier.value),
           ),
         );
     context.read<hs.HomesectionBloc>().add(hs.GetHomeSectonDataEvent());
     _initialThumbnailQuality = thumbnailQualityNotifier.value;
     _initialAudioQuality = audioQualityNotifier.value;
+    _initialDownloadQuality = downloadQualityNotifier.value;
     _checkHasChanges();
   }
 
@@ -77,8 +85,10 @@ class QualitySettingState extends State<QualitySetting> {
         if (state is QualityDataState) {
           _initialThumbnailQuality ??= state.data.thumbnailQuality;
           _initialAudioQuality ??= state.data.audioQuality;
+          _initialDownloadQuality ??= state.data.downloadQuality;
           thumbnailQualityNotifier.value = state.data.thumbnailQuality;
           audioQualityNotifier.value = state.data.audioQuality;
+          downloadQualityNotifier.value = state.data.downloadQuality;
           _checkHasChanges();
         }
       },
@@ -95,6 +105,10 @@ class QualitySettingState extends State<QualitySetting> {
             _buildSectionHeader(context, "STREAMING AUDIO", subtextColor),
             _buildGroupedContainer(context, [
               _buildRadioList(AudioQuality.values, audioQualityNotifier),
+            ]),
+            _buildSectionHeader(context, "DOWNLOAD AUDIO", subtextColor),
+            _buildGroupedContainer(context, [
+              _buildRadioList(AudioQuality.values, downloadQualityNotifier),
             ]),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 10),

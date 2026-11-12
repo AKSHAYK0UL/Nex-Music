@@ -22,13 +22,15 @@ class HiveDataBaseSingleton {
       if (box.isEmpty) {
         await box.add(HiveQuality(
             thumbnailQuality: data.thumbnailQuality,
-            audioQuality: data.audioQuality));
+            audioQuality: data.audioQuality,
+            downloadQuality: data.downloadQuality));
       } else {
         await box.putAt(
             0,
             HiveQuality(
                 thumbnailQuality: data.thumbnailQuality,
-                audioQuality: data.audioQuality));
+                audioQuality: data.audioQuality,
+                downloadQuality: data.downloadQuality));
       }
     } catch (_) {
       rethrow;
@@ -40,7 +42,8 @@ class HiveDataBaseSingleton {
     final box = getBox;
     return HiveQuality(
         thumbnailQuality: box.values.first.thumbnailQuality,
-        audioQuality: box.values.first.audioQuality);
+        audioQuality: box.values.first.audioQuality,
+        downloadQuality: box.values.first.downloadQuality);
   }
 
   // THINK Box

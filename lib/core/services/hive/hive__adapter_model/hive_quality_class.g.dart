@@ -19,17 +19,20 @@ class HiveQualityAdapter extends TypeAdapter<HiveQuality> {
     return HiveQuality(
       thumbnailQuality: fields[0] as ThumbnailQuality,
       audioQuality: fields[1] as AudioQuality,
+      downloadQuality: fields[2] as AudioQuality? ?? AudioQuality.high,
     );
   }
 
   @override
   void write(BinaryWriter writer, HiveQuality obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.thumbnailQuality)
       ..writeByte(1)
-      ..write(obj.audioQuality);
+      ..write(obj.audioQuality)
+      ..writeByte(2)
+      ..write(obj.downloadQuality);
   }
 
   @override

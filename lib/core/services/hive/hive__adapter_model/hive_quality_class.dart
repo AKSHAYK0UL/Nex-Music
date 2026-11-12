@@ -6,8 +6,10 @@ part 'hive_quality_class.g.dart';
 class HiveQuality extends HiveObject {
   ThumbnailQuality thumbnailQuality;
   AudioQuality audioQuality;
+  AudioQuality downloadQuality;
   HiveQuality({
     required this.thumbnailQuality,
     required this.audioQuality,
+    this.downloadQuality = AudioQuality.high,
   });
 }

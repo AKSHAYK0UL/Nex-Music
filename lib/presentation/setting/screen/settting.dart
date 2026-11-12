@@ -106,41 +106,43 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: ValueListenableBuilder<bool>(
-        valueListenable: _hasChangesNotifier,
-        builder: (context, hasChanges, child) {
-          if (!hasChanges) {
-            return const SizedBox.shrink();
-          }
-          return SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+      bottomNavigationBar: SafeArea(
+        child: ValueListenableBuilder<bool>(
+          valueListenable: _hasChangesNotifier,
+          builder: (context, hasChanges, child) {
+            if (!hasChanges) {
+              return const SizedBox.shrink();
+            }
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                  onPressed: () => _showRestartDialog(context),
-                  child: const Text(
-                    "Apply Changes",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      letterSpacing: 0.2,
+                    onPressed: () => _showRestartDialog(context),
+                    child: const Text(
+                      "Apply Changes",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 0.2,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/core/exceptions/file_exist.dart';
 import 'package:nex_music/core/services/download_notification_service.dart';
-import 'package:nex_music/enum/quality.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/helper_function/storage_permission/storage_permission.dart';
 import 'package:nex_music/model/download_task_model.dart';
 import 'package:nex_music/model/songmodel.dart';
@@ -267,7 +267,7 @@ class DownloadManagerBloc
     () async {
       try {
         final songRawInfo =
-            await _repository.getSongUrl(vId, AudioQuality.high);
+            await _repository.getSongUrl(vId, HiveDataBaseSingleton.instance.getData.downloadQuality);
 
         // Mark as actively downloading once the URL is ready.
         add(_ProgressUpdateEvent(
