@@ -147,6 +147,7 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
   StreamSubscription<Duration>? _seekSubscription;
   Duration _syncOffset = Duration.zero;
   late Songmodel _currentSong;
+  final ValueNotifier<bool> _isLocked = ValueNotifier(false);
 
   static int? _parseDurationString(String? durationStr) {
     if (durationStr == null || durationStr.trim().isEmpty) return null;
@@ -322,6 +323,7 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
     _seekSubscription?.cancel();
     _userScrollTimer?.cancel();
     _scrollController.dispose();
+    _isLocked.dispose();
     super.dispose();
   }
 
@@ -492,88 +494,146 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
 
             // Main Content inside SafeArea
             SafeArea(
-              child: Column(
-                children: [
-                  _buildTopGrabHandle(),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _isLocked,
+                builder: (context, isLocked, _) {
+                  return Stack(
+                    children: [
+                      // AbsorbPointer blocks all touches when locked, except the
+                      // lock button which lives outside this layer
+                      AbsorbPointer(
+                        absorbing: isLocked,
+                        child: Column(
+                          children: [
+                            _buildTopGrabHandle(),
 
-                  _buildTopHeader(context, _currentSong, highResUrl),
+                            _buildTopHeader(context, _currentSong, highResUrl),
 
-                  // Lyrics Area with Blur / Fade ShaderMask on top and bottom lines
-                  Expanded(
-                    child: _buildLyricsArea(context, isDark),
-                  ),
+                            // Lyrics Area with Blur / Fade ShaderMask on top and bottom lines
+                            Expanded(
+                              child: _buildLyricsArea(context, isDark),
+                            ),
 
-                  // Bottom controls area with swipe-up detector to open queue
-                  _LyricsSwipeUpDetector(
-                    onSwipeUp: widget.onOpenQueue,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        StreamBuilderWidget(screenSize: widget.screenSize),
-                        const SizedBox(height: 7),
+                            // Bottom controls area with swipe-up detector to open queue
+                            _LyricsSwipeUpDetector(
+                              onSwipeUp: widget.onOpenQueue,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StreamBuilderWidget(
+                                      screenSize: widget.screenSize),
+                                  const SizedBox(height: 7),
 
-                        // Controls (Prev, Play/Pause, Next)
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: widget.screenWidth * 0.13),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              IconButton(
-                                iconSize: 40,
-                                onPressed: () {
-                                  context
-                                      .read<SongstreamBloc>()
-                                      .add(PlayPreviousSongEvent());
-                                },
-                                icon: const Icon(CupertinoIcons.backward_fill),
-                              ),
-                              SizedBox(
-                                height: 80,
-                                width: 80,
-                                child: FittedBox(
-                                  fit: BoxFit.fill,
-                                  child: Player(
-                                    songData: _currentSong,
-                                    songIndex: widget.songIndex,
-                                    screenSize: widget.screenSize,
-                                    route: widget.route,
-                                    isPlaylist: widget.isPlaylist,
+                                  // Controls (Prev, Play/Pause, Next)
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: widget.screenWidth * 0.13),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        IconButton(
+                                          iconSize: 40,
+                                          onPressed: () {
+                                            context
+                                                .read<SongstreamBloc>()
+                                                .add(PlayPreviousSongEvent());
+                                          },
+                                          icon: const Icon(
+                                              CupertinoIcons.backward_fill),
+                                        ),
+                                        SizedBox(
+                                          height: 80,
+                                          width: 80,
+                                          child: FittedBox(
+                                            fit: BoxFit.fill,
+                                            child: Player(
+                                              songData: _currentSong,
+                                              songIndex: widget.songIndex,
+                                              screenSize: widget.screenSize,
+                                              route: widget.route,
+                                              isPlaylist: widget.isPlaylist,
+                                            ),
+                                          ),
+                                        ),
+                                        IconButton(
+                                          iconSize: 40,
+                                          onPressed: () {
+                                            context
+                                                .read<SongstreamBloc>()
+                                                .add(PlayNextSongEvent());
+                                          },
+                                          icon: const Icon(
+                                              CupertinoIcons.forward_fill),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
+
+                                  const SizedBox(height: 30),
+
+                                  // Volume Slider
+                                  VolumeSlider(screenWidth: widget.screenWidth),
+
+                                  const SizedBox(height: 16),
+
+                                  // Bottom Action Buttons matching audio player styling & layout
+                                  _buildBottomActionButtons(context),
+
+                                  // Bottom grab pill (tap opens up next bottom sheet)
+                                  _buildBottomGrabPill(context),
+                                ],
                               ),
-                              IconButton(
-                                iconSize: 40,
-                                onPressed: () {
-                                  context
-                                      .read<SongstreamBloc>()
-                                      .add(PlayNextSongEvent());
-                                },
-                                icon: const Icon(CupertinoIcons.forward_fill),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                      ),
 
-                        const SizedBox(height: 30),
-
-                        // Volume Slider
-                        VolumeSlider(screenWidth: widget.screenWidth),
-
-                        const SizedBox(height: 16),
-
-                        // Bottom Action Buttons matching audio player styling & layout
-                        _buildBottomActionButtons(context),
-
-                        // Bottom grab pill (tap opens up next bottom sheet)
-                        _buildBottomGrabPill(context),
-                      ],
-                    ),
-                  ),
-                ],
+                      // Lock button overlay  always on top 
+                      Positioned(
+                        top: 30,
+                        right: 16,
+                        child: _buildLockButton(isLocked),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Lock Button — tappable even when screen is locked
+  Widget _buildLockButton(bool isLocked) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        _isLocked.value = !_isLocked.value;
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isLocked
+              ? Colors.red.withValues(alpha: 0.18)
+              : onSurface.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isLocked
+                ? Colors.red.withValues(alpha: 0.45)
+                : onSurface.withValues(alpha: 0.12),
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          isLocked ? CupertinoIcons.lock_fill : CupertinoIcons.lock_open,
+          size: 18,
+          color: isLocked ? Colors.red : onSurface.withValues(alpha: 0.55),
         ),
       ),
     );
@@ -673,6 +733,7 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                // Divider(),
               ],
             ),
           ),
