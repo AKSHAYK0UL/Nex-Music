@@ -56,27 +56,46 @@ class DownloadProvider {
 
         debugPrint('Downloading to: $basePath (resumeFrom: $resumeFromBytes)');
 
-        //  Download audio file 
-        if (!await File(songFilePath).exists()) {
-          final int totalBytes = songRawInfo.totalBytes;
+        final audioFile = File(songFilePath);
+        final metadataFile = File(metadataFilePath);
 
-          // Build range header: start from resumeFromBytes if resuming.
-          final String rangeHeader = resumeFromBytes > 0
-              ? 'bytes=$resumeFromBytes-$totalBytes'
+        // Check if fully downloaded (both metadata and audio file exist)
+        if (await metadataFile.exists() && await audioFile.exists()) {
+          debugPrint('File already completely downloaded: $songFilePath');
+          controller.addError(FileExistException());
+          await controller.close();
+          return;
+        }
+
+        // Determine starting byte offset (from disk if resuming)
+        int startByte = 0;
+        if (resumeFromBytes > 0 && await audioFile.exists()) {
+          startByte = await audioFile.length();
+        } else if (resumeFromBytes == 0 && await audioFile.exists()) {
+          // Fresh download requested, delete any old partial audio file
+          try {
+            await audioFile.delete();
+          } catch (_) {}
+        }
+
+        final int totalBytes = songRawInfo.totalBytes;
+
+        //  Download audio file (only if remaining bytes need to be downloaded)
+        if (startByte < totalBytes) {
+          final String rangeHeader = startByte > 0
+              ? 'bytes=$startByte-$totalBytes'
               : 'bytes=0-$totalBytes';
 
           await _dio.download(
             songRawInfo.url.toString(),
             songFilePath,
-            deleteOnError: true,
+            deleteOnError: false, // Keep partial download for resume
             cancelToken: cancelToken,
             options: Options(headers: {"Range": rangeHeader}),
             onReceiveProgress: (received, total) {
-              // `total` from the response may be the remaining bytes when
-              // resuming add the already downloaded bytes for true percent.
-              final int actualReceived = received + resumeFromBytes;
+              final int actualReceived = received + startByte;
               final int actualTotal =
-                  (total > 0) ? (total + resumeFromBytes) : totalBytes;
+                  (total > 0) ? (total + startByte) : totalBytes;
               if (actualTotal > 0) {
                 final percent = (actualReceived / actualTotal) * 100;
                 debugPrint(
@@ -87,11 +106,6 @@ class DownloadProvider {
               }
             },
           );
-        } else {
-          debugPrint('File already exists: $songFilePath');
-          controller.addError(FileExistException());
-          await controller.close();
-          return;
         }
 
         //  Download thumbnail 

@@ -15,7 +15,6 @@ import 'package:nex_music/presentation/audio_player/widget/miniplayer.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 import 'package:nex_music/presentation/saved/widgets/active_download_tile.dart';
 
-
 class SavedSongs extends StatefulWidget {
   final bool isoffline;
   const SavedSongs({super.key, required this.isoffline});
@@ -29,13 +28,13 @@ class _SavedSongsState extends State<SavedSongs>
   late final TabController _tabController;
   bool _isRefreshing = false;
 
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
+      context.read<DownloadManagerBloc>().add(RestorePausedDownloadsEvent());
     });
   }
 
@@ -134,7 +133,6 @@ class _SavedSongsState extends State<SavedSongs>
                       builder: (context, dmState) {
                         final count = dmState.activeTasks.length;
                         return Padding(
-
                           padding: const EdgeInsets.only(bottom: 12),
                           child: TabBar(
                             controller: _tabController,
@@ -214,8 +212,7 @@ class _SavedSongsState extends State<SavedSongs>
       ),
       bottomNavigationBar: widget.isoffline
           ? SafeArea(
-              child: MiniPlayer(
-                  screenSize: MediaQuery.sizeOf(context).height))
+              child: MiniPlayer(screenSize: MediaQuery.sizeOf(context).height))
           : const SizedBox(),
     );
   }
@@ -242,8 +239,7 @@ class _PendingTab extends StatelessWidget {
             final task = tasks[index];
             return BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
               buildWhen: (prev, curr) =>
-                  prev.task(task.songData.vId) !=
-                  curr.task(task.songData.vId),
+                  prev.task(task.songData.vId) != curr.task(task.songData.vId),
               builder: (context, s) {
                 final current = s.task(task.songData.vId);
                 if (current == null) return const SizedBox.shrink();

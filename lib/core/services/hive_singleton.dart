@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:nex_music/constants/const.dart';
+import 'package:nex_music/core/services/hive/hive__adapter_model/hive_paused_download.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
 
 class HiveDataBaseSingleton {
@@ -143,5 +145,37 @@ class HiveDataBaseSingleton {
         await box.putAt(0, value);
       }
     } catch (_) {}
+  }
+
+  // PAUSED DOWNLOADS Box — keyed by vId.
+  Box<HivePausedDownload> get _pausedBox =>
+      Hive.box<HivePausedDownload>(pausedDownloadsBox);
+
+  // Persist a single paused/pending task.
+  Future<void> savePausedDownload(HivePausedDownload entry) async {
+    try {
+      await _pausedBox.put(entry.vId, entry);
+    } catch (e) {
+      debugPrint('Error saving paused download (${entry.vId}): $e');
+    }
+  }
+
+  // Remove a single entry (task completed or cancelled).
+  Future<void> removePausedDownload(String vId) async {
+    try {
+      await _pausedBox.delete(vId);
+    } catch (e) {
+      debugPrint('Error removing paused download ($vId): $e');
+    }
+  }
+
+  // All currently persisted paused tasks.
+  List<HivePausedDownload> get allPausedDownloads {
+    try {
+      return _pausedBox.values.toList();
+    } catch (e) {
+      debugPrint('Error getting all paused downloads: $e');
+      return [];
+    }
   }
 }

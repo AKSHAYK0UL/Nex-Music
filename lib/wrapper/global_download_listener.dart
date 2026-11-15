@@ -6,11 +6,41 @@ import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/model/download_task_model.dart';
 
 // Listens to DownloadManagerBloc globally and reloads offline songs
-// whenever any download completes.
-class GlobalDownloadListenerWrapper extends StatelessWidget {
+// whenever any download completes, and persists active downloads on app lifecycle changes.
+class GlobalDownloadListenerWrapper extends StatefulWidget {
   final Widget child;
 
   const GlobalDownloadListenerWrapper({super.key, required this.child});
+
+  @override
+  State<GlobalDownloadListenerWrapper> createState() =>
+      _GlobalDownloadListenerWrapperState();
+}
+
+class _GlobalDownloadListenerWrapperState
+    extends State<GlobalDownloadListenerWrapper> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached ||
+        state == AppLifecycleState.inactive) {
+      try {
+        context.read<DownloadManagerBloc>().persistActiveDownloads();
+      } catch (_) {}
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +72,7 @@ class GlobalDownloadListenerWrapper extends StatelessWidget {
         // If a task was removed (completed task evicted), reload.
         context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
       },
-      child: child,
+      child: widget.child,
     );
   }
 }

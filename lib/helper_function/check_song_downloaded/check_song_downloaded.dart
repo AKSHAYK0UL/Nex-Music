@@ -11,10 +11,13 @@ Future<bool> isSongDownloaded(Songmodel songData) async {
     final downloadDir = Directory('${externalDir.path}/downloads');
     if (!downloadDir.existsSync()) return false;
 
-    // Check for both possible audio formats
-    final baseFileName = songData.vId.replaceAll(RegExp(r'[^\w\s-]'), '_');
-    final m4aPath = '${downloadDir.path}/$baseFileName.m4a';
-    final opusPath = '${downloadDir.path}/$baseFileName.opus';
+    final fileName = songData.songName + songData.vId;
+    final basePath = '${downloadDir.path}/$fileName';
+    final metadataFile = File('$basePath.json');
+    if (!metadataFile.existsSync()) return false;
+
+    final m4aPath = '$basePath.m4a';
+    final opusPath = '$basePath.opus';
 
     return File(m4aPath).existsSync() || File(opusPath).existsSync();
   } catch (e) {

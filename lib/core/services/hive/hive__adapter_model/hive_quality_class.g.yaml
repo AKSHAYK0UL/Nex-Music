@@ -5,9 +5,11 @@ nextTypeId: 1
 types:
   HiveQuality:
     typeId: 0
-    nextIndex: 2
+    nextIndex: 3
     fields:
       thumbnailQuality:
         index: 0
       audioQuality:
         index: 1
+      downloadQuality:
+        index: 2

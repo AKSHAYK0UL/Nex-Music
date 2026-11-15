@@ -50,3 +50,6 @@ final class _DownloadErrorEvent extends DownloadManagerEvent {
   final String errorMessage;
   _DownloadErrorEvent({required this.vId, required this.errorMessage});
 }
+
+// Reload paused tasks from Hive on app startup.
+final class RestorePausedDownloadsEvent extends DownloadManagerEvent {}

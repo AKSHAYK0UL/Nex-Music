@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/core/exceptions/file_exist.dart';
 import 'package:nex_music/core/services/download_notification_service.dart';
+import 'package:nex_music/core/services/hive/hive__adapter_model/hive_paused_download.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/helper_function/storage_permission/storage_permission.dart';
 import 'package:nex_music/model/download_task_model.dart';
@@ -42,13 +44,88 @@ class DownloadManagerBloc
     on<PauseDownloadEvent>(_onPause);
     on<ResumeDownloadEvent>(_onResume);
     on<CancelDownloadEvent>(_onCancel);
+    on<RestorePausedDownloadsEvent>(_onRestore);
     on<_ProgressUpdateEvent>(_onProgress);
     on<_DownloadCompletedEvent>(_onCompleted);
     on<_DownloadErrorEvent>(_onError);
     on<_RemoveCompletedTaskEvent>(_onRemoveCompleted);
+
+    // Restore any paused downloads left over from a previous session.
+    add(RestorePausedDownloadsEvent());
   }
 
-  //  Public event handlers 
+  //  Public event handlers
+
+  // Restore paused tasks persisted in Hive from the previous app session.
+  Future<void> _onRestore(RestorePausedDownloadsEvent event,
+      Emitter<DownloadManagerState> emit) async {
+    try {
+      final saved = HiveDataBaseSingleton.instance.allPausedDownloads;
+      if (saved.isEmpty) return;
+
+      Directory? downloadDir;
+      try {
+        final Directory? externalDir = await getExternalStorageDirectory();
+        if (externalDir != null) {
+          downloadDir = Directory('${externalDir.path}/downloads');
+        }
+      } catch (_) {}
+
+      var newState = state;
+      for (final entry in saved) {
+        final song = entry.songData;
+        if (song == null) continue;
+
+        // Skip if a task for this vId already exists
+        if (newState.hasTask(entry.vId)) continue;
+
+        // If the download was already completed on disk (has .json metadata and audio file),
+        // remove it from Hive and don't restore it as a pending task.
+        if (downloadDir != null && downloadDir.existsSync()) {
+          final fileName = song.songName + song.vId;
+          final metaFile = File('${downloadDir.path}/$fileName.json');
+          final m4a = File('${downloadDir.path}/$fileName.m4a');
+          final opus = File('${downloadDir.path}/$fileName.opus');
+          if (metaFile.existsSync() &&
+              (m4a.existsSync() || opus.existsSync())) {
+            await HiveDataBaseSingleton.instance
+                .removePausedDownload(entry.vId);
+            continue;
+          }
+        }
+
+        // Check if there is an existing partial file on disk to get the accurate downloaded bytes.
+        int bytes = entry.downloadedBytes;
+        if (downloadDir != null && downloadDir.existsSync()) {
+          final fileName = song.songName + song.vId;
+          final m4a = File('${downloadDir.path}/$fileName.m4a');
+          final opus = File('${downloadDir.path}/$fileName.opus');
+          if (m4a.existsSync()) {
+            final len = m4a.lengthSync();
+            if (len > bytes) bytes = len;
+          } else if (opus.existsSync()) {
+            final len = opus.lengthSync();
+            if (len > bytes) bytes = len;
+          }
+        }
+
+        newState = newState.withTask(
+          entry.vId,
+          DownloadTaskModel(
+            songData: song,
+            status: DownloadTaskStatus.paused,
+            progress: entry.progress,
+            downloadedBytes: bytes,
+          ),
+        );
+        // Also pre-populate the in-memory bytes map so resume works instantly.
+        _downloadedBytes[entry.vId] = bytes;
+      }
+      emit(newState);
+    } catch (e) {
+      debugPrint('DownloadManagerBloc _onRestore error: $e');
+    }
+  }
 
   Future<void> _onEnqueue(
       EnqueueDownloadEvent event, Emitter<DownloadManagerState> emit) async {
@@ -85,23 +162,31 @@ class DownloadManagerBloc
       ),
     ));
 
+    // Persist immediately in Hive as a pending task so if the app is killed right now, the data will be store
+    await HiveDataBaseSingleton.instance.savePausedDownload(
+      HivePausedDownload(
+        vId: vId,
+        songDataJson: jsonEncode(event.songData.toJson()),
+        downloadedBytes: 0,
+        progress: 0.0,
+      ),
+    );
+
     _startDownload(event.songData, resumeFromBytes: 0);
   }
 
   Future<void> _onPause(
       PauseDownloadEvent event, Emitter<DownloadManagerState> emit) async {
     final vId = event.vId;
-    final token = _cancelTokens[vId];
-    if (token == null || token.isCancelled) return;
-
-    // Cancel the Dio request 
-    token.cancel('paused');
-    _cancelTokens.remove(vId);
+    final token = _cancelTokens.remove(vId);
+    if (token != null && !token.isCancelled) {
+      token.cancel('paused');
+    }
 
     final task = state.task(vId);
     if (task == null) return;
 
-    final bytes = _downloadedBytes[vId] ?? 0;
+    final bytes = _downloadedBytes[vId] ?? task.downloadedBytes;
     final progress = task.progress;
 
     emit(state.withTask(
@@ -112,6 +197,16 @@ class DownloadManagerBloc
         progress: progress,
       ),
     ));
+
+    // Persist so the paused task survives app restarts.
+    await HiveDataBaseSingleton.instance.savePausedDownload(
+      HivePausedDownload(
+        vId: vId,
+        songDataJson: jsonEncode(task.songData.toJson()),
+        downloadedBytes: bytes,
+        progress: progress,
+      ),
+    );
 
     await _notificationService.showPaused(
       vId: vId,
@@ -126,6 +221,8 @@ class DownloadManagerBloc
     final task = state.task(vId);
     if (task == null || task.status != DownloadTaskStatus.paused) return;
 
+    // Do NOT remove from Hive Keep it saved in Hive so if the app is killed while downloading again, it survives
+
     emit(state.withTask(
       vId,
       task.copyWith(status: DownloadTaskStatus.downloading),
@@ -139,12 +236,14 @@ class DownloadManagerBloc
     final vId = event.vId;
 
     // Cancel any running download.
-    final token = _cancelTokens[vId];
+    final token = _cancelTokens.remove(vId);
     if (token != null && !token.isCancelled) {
       token.cancel('cancelled');
     }
-    _cancelTokens.remove(vId);
     _downloadedBytes.remove(vId);
+
+    // Clear any persisted pause record for this task.
+    await HiveDataBaseSingleton.instance.removePausedDownload(vId);
 
     // Delete partial audio file if it exists.
     await _deletePartialFile(vId);
@@ -160,6 +259,9 @@ class DownloadManagerBloc
       _ProgressUpdateEvent event, Emitter<DownloadManagerState> emit) {
     final task = state.task(event.vId);
     if (task == null) return;
+
+    // If task was already paused by user, ignore trailing stream updates
+    if (task.status == DownloadTaskStatus.paused) return;
 
     _downloadedBytes[event.vId] = event.downloadedBytes;
 
@@ -182,6 +284,16 @@ class DownloadManagerBloc
         songName: task.songData.songName,
         progress: event.progress.toInt(),
       );
+
+      // Periodically update Hive so if app is killed suddenly, progress is saved!
+      HiveDataBaseSingleton.instance.savePausedDownload(
+        HivePausedDownload(
+          vId: event.vId,
+          songDataJson: jsonEncode(task.songData.toJson()),
+          downloadedBytes: event.downloadedBytes,
+          progress: event.progress,
+        ),
+      );
     }
   }
 
@@ -189,6 +301,9 @@ class DownloadManagerBloc
       _DownloadCompletedEvent event, Emitter<DownloadManagerState> emit) {
     _cancelTokens.remove(event.vId);
     _downloadedBytes.remove(event.vId);
+
+    // Clear any persisted pause record (task was resumed then completed).
+    HiveDataBaseSingleton.instance.removePausedDownload(event.vId);
 
     final task = state.task(event.vId);
     if (task == null) return;
@@ -207,7 +322,9 @@ class DownloadManagerBloc
     );
 
     // download lyrics in the background.
-    _downloadRepo.saveLyricsForSong(task.songData, _repository).catchError((_) {});
+    _downloadRepo
+        .saveLyricsForSong(task.songData, _repository)
+        .catchError((_) {});
 
     // Remove from active tasks list after a short delay so UI can show.
     Future.delayed(const Duration(seconds: 2), () {
@@ -217,8 +334,7 @@ class DownloadManagerBloc
     });
   }
 
-  void _onError(
-      _DownloadErrorEvent event, Emitter<DownloadManagerState> emit) {
+  void _onError(_DownloadErrorEvent event, Emitter<DownloadManagerState> emit) {
     _cancelTokens.remove(event.vId);
     _downloadedBytes.remove(event.vId);
 
@@ -230,8 +346,7 @@ class DownloadManagerBloc
         event.errorMessage.contains('FileExist')) {
       emit(state.withTask(
         event.vId,
-        task.copyWith(
-            status: DownloadTaskStatus.completed, progress: 100.0),
+        task.copyWith(status: DownloadTaskStatus.completed, progress: 100.0),
       ));
       _notificationService.showCompleted(
           vId: event.vId, songName: task.songData.songName);
@@ -256,7 +371,7 @@ class DownloadManagerBloc
     );
   }
 
-  //  Private helpers 
+  //  Private helpers
 
   // Starts or resumes a download for songData
   void _startDownload(Songmodel songData, {required int resumeFromBytes}) {
@@ -266,8 +381,10 @@ class DownloadManagerBloc
 
     () async {
       try {
-        final songRawInfo =
-            await _repository.getSongUrl(vId, HiveDataBaseSingleton.instance.getData.downloadQuality);
+        final songRawInfo = await _repository.getSongUrl(
+            vId, HiveDataBaseSingleton.instance.getData.downloadQuality);
+
+        if (cancelToken.isCancelled || isClosed) return;
 
         // Mark as actively downloading once the URL is ready.
         add(_ProgressUpdateEvent(
@@ -289,7 +406,7 @@ class DownloadManagerBloc
             .asBroadcastStream();
 
         await for (final percent in stream) {
-          if (isClosed) break;
+          if (isClosed || cancelToken.isCancelled) break;
           // Approximate bytes from percentage.
           final approxBytes =
               ((percent / 100) * songRawInfo.totalBytes).toInt();
@@ -342,12 +459,34 @@ class DownloadManagerBloc
     emit(state.withoutTask(event.vId));
   }
 
+  /// Persists any currently downloading or queued tasks to Hive so they can be
+  /// restored in paused state if the app closes or is terminated.
+  void persistActiveDownloads() {
+    for (final task in state.activeTasks) {
+      if (task.status == DownloadTaskStatus.downloading ||
+          task.status == DownloadTaskStatus.queued ||
+          task.status == DownloadTaskStatus.paused) {
+        final bytes =
+            _downloadedBytes[task.songData.vId] ?? task.downloadedBytes;
+        HiveDataBaseSingleton.instance.savePausedDownload(
+          HivePausedDownload(
+            vId: task.songData.vId,
+            songDataJson: jsonEncode(task.songData.toJson()),
+            downloadedBytes: bytes,
+            progress: task.progress,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Future<void> close() {
     for (final token in _cancelTokens.values) {
       if (!token.isCancelled) token.cancel('bloc closed');
     }
     _cancelTokens.clear();
+    persistActiveDownloads();
     return super.close();
   }
 }

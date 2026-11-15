@@ -44,6 +44,7 @@ import 'package:nex_music/bloc/video_bloc/bloc/video_bloc.dart';
 import 'package:nex_music/constants/const.dart';
 import 'package:nex_music/core/bloc_provider/repository_provider/repository_provider.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
+import 'package:nex_music/core/services/hive/hive__adapter_model/hive_paused_download.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_registrar.g.dart';
 import 'package:nex_music/core/services/download_notification_service.dart';
@@ -92,12 +93,16 @@ Future<void> main() async {
   Hive
     ..init(dir.path)
     ..registerAdapters();
+  if (!Hive.isAdapterRegistered(3)) {
+    Hive.registerAdapter(HivePausedDownloadAdapter());
+  }
 
   await Hive.openBox<HiveQuality>(qualitySettingsBox);
   await Hive.openBox<bool>(thinkBox);
   await Hive.openBox<bool>(themeBox);
   await Hive.openBox<int>(lyricsSyncOffsetsBox);
   await Hive.openBox<bool>(cdnPreferenceBox);
+  await Hive.openBox<HivePausedDownload>(pausedDownloadsBox);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final audioHandler = await AudioService.init(
     builder: () => AudioPlayerHandler(audioPlayer),
@@ -216,7 +221,8 @@ class MyApp extends StatelessWidget {
             create: (context) => SavedArtistsBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
-            create: (context) => SavedPlaylistsBloc(context.read<DbRepository>()),
+            create: (context) =>
+                SavedPlaylistsBloc(context.read<DbRepository>()),
           ),
           BlocProvider(
             create: (context) =>
@@ -241,6 +247,7 @@ class MyApp extends StatelessWidget {
             ),
           ),
           BlocProvider(
+            lazy: false,
             create: (context) => DownloadManagerBloc(
               context.read<Repository>(),
               DownloadRepo(DownloadProvider(dio: Dio())),
@@ -278,8 +285,7 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider(create: (context) => QualityBloc(dbInstance)),
           BlocProvider(
-            create: (context) =>
-                ThemeBloc(dbInstance)..add(GetThemeEvent()),
+            create: (context) => ThemeBloc(dbInstance)..add(GetThemeEvent()),
           ),
           BlocProvider(
             create: (context) => LyricsBloc(
@@ -290,7 +296,8 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: BlocListener<UserLoggedBloc, UserLoggedState>(
-          listenWhen: (previous, current) => previous is LoggedInState && current is! LoggedInState,
+          listenWhen: (previous, current) =>
+              previous is LoggedInState && current is! LoggedInState,
           listener: (context, state) {
             // Clear router cache when user logs out
             AppRouter.clearCache();
@@ -298,12 +305,14 @@ class MyApp extends StatelessWidget {
           child: BlocBuilder<UserLoggedBloc, UserLoggedState>(
             builder: (context, state) {
               final themeState = context.watch<ThemeBloc>().state;
-              final isDark = themeState is ThemeLoadedState ? themeState.isDark : false;
+              final isDark =
+                  themeState is ThemeLoadedState ? themeState.isDark : false;
               final theme = themeData(context, isDark: isDark);
 
               if (state is LoggedInState) {
                 final router = AppRouter.createRouter(
-                  repositoryProviderClassInstance.getFirebaseAuthInstance.currentUser!,
+                  repositoryProviderClassInstance
+                      .getFirebaseAuthInstance.currentUser!,
                 );
 
                 return MaterialApp.router(
@@ -315,7 +324,8 @@ class MyApp extends StatelessWidget {
                     return GlobalDownloadListenerWrapper(
                       child: SplashWithRouter(
                         appLinks: applink,
-                        firebaseAuth: repositoryProviderClassInstance.getFirebaseAuthInstance,
+                        firebaseAuth: repositoryProviderClassInstance
+                            .getFirebaseAuthInstance,
                         child: child!,
                       ),
                     );

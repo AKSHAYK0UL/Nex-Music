@@ -23,3 +23,6 @@ const cdnAlbumCacheCollection = "Album_cache_CDN";
 
 // Hive box for persisting CDN preference (enabled/disabled by the user).
 const cdnPreferenceBox = "cdnPreferenceBox";
+
+// Hive box for persisting paused downloads across app restarts.
+const pausedDownloadsBox = "pausedDownloadsBox";

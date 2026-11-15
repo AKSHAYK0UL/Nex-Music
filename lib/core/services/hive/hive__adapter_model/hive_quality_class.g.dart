@@ -19,7 +19,8 @@ class HiveQualityAdapter extends TypeAdapter<HiveQuality> {
     return HiveQuality(
       thumbnailQuality: fields[0] as ThumbnailQuality,
       audioQuality: fields[1] as AudioQuality,
-      downloadQuality: fields[2] as AudioQuality? ?? AudioQuality.high,
+      downloadQuality:
+          fields[2] == null ? AudioQuality.high : fields[2] as AudioQuality,
     );
   }
 
