@@ -158,11 +158,14 @@ class Repository {
     final homeSections = networkData.homeSectionData;
 
     //   Quick Picks
-    // Prefer SongDetailed items from the top_picks / recommended section.
-    // Fall back to the searchSongs result if no songs were found there.
+    // Prefer SongDetailed items from the top_picks / recommended / quick_picks section.
+    // Fall back to listen_again songs, and finally to searchSongs if needed.
     List<Songmodel> quickPicks = [];
     final topPicksSection = homeSections.firstWhere(
-      (s) => s.stableTitle == 'top_picks' || s.stableTitle == 'recommended',
+      (s) =>
+          s.stableTitle == 'top_picks' ||
+          s.stableTitle == 'recommended' ||
+          s.stableTitle == 'quick_picks',
       orElse: () => HomeSection(title: '', stableTitle: '', contents: []),
     );
     final topPickSongs =
@@ -170,6 +173,20 @@ class Repository {
     if (topPickSongs.isNotEmpty) {
       quickPicks = await RepositoryHelperFunction.getQuickPicks(
           topPickSongs, quality.thumbnailQuality);
+    }
+    if (quickPicks.isEmpty) {
+      final listenAgainSection = homeSections.firstWhere(
+        (s) =>
+            s.stableTitle == 'listen_again' ||
+            s.title.toLowerCase().contains('listen again'),
+        orElse: () => HomeSection(title: '', stableTitle: '', contents: []),
+      );
+      final listenSongs =
+          listenAgainSection.contents.whereType<SongDetailed>().toList();
+      if (listenSongs.isNotEmpty) {
+        quickPicks = await RepositoryHelperFunction.getQuickPicks(
+            listenSongs, quality.thumbnailQuality);
+      }
     }
     // Fall back to search-based quick picks
     if (quickPicks.isEmpty) {
@@ -986,6 +1003,24 @@ class Repository {
     final radioSongsRaw = await _dataProvider.getUpNexts(videoId);
     return RepositoryHelperFunction.convertUpNextsDetailsListToSongModelList(
         radioSongsRaw);
+  }
+
+  // Update YouTube Music session cookies
+  Future<void> updateYtMusicCookies(String? cookies) {
+    return _dataProvider.updateYtMusicCookies(cookies);
+  }
+
+  // Report playback to YouTube Music to record watchtime and update recommendations
+  Future<void> reportPlayback({
+    required String videoId,
+    required int songDuration,
+    int? listenedSeconds,
+  }) {
+    return _dataProvider.reportPlayback(
+      videoId: videoId,
+      songDuration: songDuration,
+      listenedSeconds: listenedSeconds,
+    );
   }
 }
 

@@ -103,6 +103,7 @@ Future<void> main() async {
   await Hive.openBox<int>(lyricsSyncOffsetsBox);
   await Hive.openBox<bool>(cdnPreferenceBox);
   await Hive.openBox<HivePausedDownload>(pausedDownloadsBox);
+  await Hive.openBox<String>(ytMusicCookieBox);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final audioHandler = await AudioService.init(
     builder: () => AudioPlayerHandler(audioPlayer),

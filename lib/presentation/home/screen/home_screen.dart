@@ -138,7 +138,7 @@ Widget _buildSection(BuildContext context, HomeSection section) {
     }
   }
 
-  //  If this is a song section (e.g. Trending, New music videos)
+  //  If this is a pure song section
   if (songs.isNotEmpty && albums.isEmpty && playlists.isEmpty) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,13 +155,29 @@ Widget _buildSection(BuildContext context, HomeSection section) {
   final displayItems =
       isAlbumSection ? albums : (playlists.isNotEmpty ? playlists : albums);
 
-  if (displayItems.isEmpty) return const SizedBox.shrink();
+  if (displayItems.isEmpty && songs.isEmpty) return const SizedBox.shrink();
+
+  if (displayItems.isEmpty) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SubHeader(title: section.title),
+        FeaturedCarousel(songs: songs),
+        const SizedBox(height: 26),
+      ],
+    );
+  }
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
+      if (songs.isNotEmpty) ...[
+        _SubHeader(title: section.title),
+        FeaturedCarousel(songs: songs),
+        const SizedBox(height: 16),
+      ],
       SectionHeader(
-        title: section.title,
+        title: songs.isNotEmpty ? '${section.title} Mixes' : section.title,
         onTap: () => context.push(
           RouterPath.showAllGenericRoute,
           extra: {
@@ -188,41 +204,47 @@ class _HomeLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      physics: const BouncingScrollPhysics(
-        parent: AlwaysScrollableScrollPhysics(),
-      ),
-      slivers: [
-        SliverAppBar(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          // backgroundColor: Colors.amber,
+    return RefreshIndicator(
+      color: Colors.red,
+      onRefresh: () async {
+        context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
+      },
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
+        slivers: [
+          SliverAppBar(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            // backgroundColor: Colors.amber,
 
-          elevation: 0,
-          pinned: true,
-          expandedHeight: 80.0,
-          flexibleSpace: FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.fromLTRB(14, 0, 14, 07),
-            // title: Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children:[
-            title: Text(
-              "Home",
-              style: TextStyle(
-                fontFamily: 'serif',
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: -0.5,
+            elevation: 0,
+            pinned: true,
+            expandedHeight: 80.0,
+            flexibleSpace: FlexibleSpaceBar(
+              titlePadding: const EdgeInsets.fromLTRB(14, 0, 14, 07),
+              // title: Row(
+              //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //   children:[
+              title: Text(
+                "Home",
+                style: TextStyle(
+                  fontFamily: 'serif',
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                  letterSpacing: -0.5,
+                ),
+
+                // ),
+                // GestureDetector(child: Icon(Icons.radio_outlined,size: 20,),),
+                // ],
               ),
-
-              // ),
-              // GestureDetector(child: Icon(Icons.radio_outlined,size: 20,),),
-              // ],
             ),
           ),
-        ),
-        child,
-      ],
+          child,
+        ],
+      ),
     );
   }
 }

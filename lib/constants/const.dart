@@ -26,3 +26,7 @@ const cdnPreferenceBox = "cdnPreferenceBox";
 
 // Hive box for persisting paused downloads across app restarts.
 const pausedDownloadsBox = "pausedDownloadsBox";
+
+// Hive box for persisting YouTube Music authentication cookie.
+const ytMusicCookieBox = "ytMusicCookieBox";
+const ytMusicCookieKey = "ytMusicCookie";

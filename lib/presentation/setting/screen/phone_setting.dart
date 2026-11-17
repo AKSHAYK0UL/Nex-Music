@@ -6,11 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
+import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart'
+    hide LoadingState;
 import 'package:nex_music/bloc/theme_bloc/bloc/theme_bloc.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/helper_function/sign_out_helper/handle_sign_out.dart';
+import 'package:nex_music/presentation/setting/screen/yt_music_login_screen.dart';
+import 'package:nex_music/repository/home_repo/repository.dart';
 
 const Color kAppleBackgroundColor = Color(0xFFF2F2F7);
 
@@ -53,6 +57,64 @@ class Setting extends StatelessWidget {
               }
             },
             child: const Text("Sign Out"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _openYtMusicLogin(BuildContext context) async {
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => const YtMusicLoginScreen(),
+      ),
+    );
+    if (result == true) {
+      await _hiveDbInstance.saveRecommendation(true);
+      _recommendationNotifier.value = true;
+      if (context.mounted) {
+        context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
+      }
+    }
+  }
+
+  void _showYtMusicAccountDialog(BuildContext context) {
+    final email = currentUser.email ?? FirebaseAuth.instance.currentUser?.email;
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text("YouTube Music"),
+        content: Text(
+          email != null
+              ? "Connected to YouTube Music for $email.\nYour listening history is syncing to personalize your home feed."
+              : "Connected to YouTube Music.\nYour listening history is syncing to personalize your home feed.",
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _openYtMusicLogin(context);
+            },
+            child: const Text("Reconnect"),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _hiveDbInstance.clearYtMusicCookie();
+              await _hiveDbInstance.saveRecommendation(false);
+              _recommendationNotifier.value = false;
+              if (context.mounted) {
+                await context.read<Repository>().updateYtMusicCookies(null);
+                context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
+                showSnackbar(context, "Disconnected from YouTube Music");
+              }
+            },
+            child: const Text("Disconnect"),
+          ),
+          CupertinoDialogAction(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.pop(ctx),
           ),
         ],
       ),
@@ -138,15 +200,34 @@ class Setting extends StatelessWidget {
                 ValueListenableBuilder<bool>(
                   valueListenable: _recommendationNotifier,
                   builder: (context, value, _) {
+                    final isLoggedIn = _hiveDbInstance.isYtMusicLoggedIn;
+                    final subtitle = isLoggedIn
+                        ? (value
+                            ? "Connected · Tap to manage"
+                            : "Connected (Paused)")
+                        : "Connect YouTube Music for personalized mixes";
                     return _buildSwitchTile(
                       title: "Recommendations",
+                      subtitle: subtitle,
                       icon: CupertinoIcons.sparkles,
                       iconColor: Colors.orange,
                       textColor: theme.colorScheme.onSurface,
                       value: value,
+                      onTap: () => isLoggedIn
+                          ? _showYtMusicAccountDialog(context)
+                          : _openYtMusicLogin(context),
                       onChanged: (newValue) async {
-                        await _hiveDbInstance.saveRecommendation(newValue);
-                        _recommendationNotifier.value = newValue;
+                        if (newValue && !isLoggedIn) {
+                          _openYtMusicLogin(context);
+                        } else {
+                          await _hiveDbInstance.saveRecommendation(newValue);
+                          _recommendationNotifier.value = newValue;
+                          if (context.mounted) {
+                            context
+                                .read<HomesectionBloc>()
+                                .add(GetHomeSectonDataEvent());
+                          }
+                        }
                       },
                     );
                   },
@@ -328,13 +409,16 @@ class Setting extends StatelessWidget {
 
   Widget _buildSwitchTile({
     required String title,
+    String? subtitle,
     required IconData icon,
     required Color iconColor,
     required bool value,
     required ValueChanged<bool> onChanged,
+    VoidCallback? onTap,
     Color textColor = Colors.black,
   }) {
     return ListTile(
+      onTap: onTap,
       tileColor: Colors.transparent,
       leading: Container(
         padding: const EdgeInsets.all(6),
@@ -353,6 +437,15 @@ class Setting extends StatelessWidget {
           color: textColor,
         ),
       ),
+      subtitle: subtitle != null
+          ? Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
+            )
+          : null,
       trailing: CupertinoSwitch(
         value: value,
         activeTrackColor: CupertinoColors.destructiveRed,

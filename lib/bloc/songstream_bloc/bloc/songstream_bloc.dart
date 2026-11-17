@@ -1516,7 +1516,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
     _audioPlayer.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed && _songLoaded) {
-        _songLoaded = false; // Guard: prevent duplicate SongCompletedEvent when pause() re-triggers completed state
+        _songLoaded =
+            false; // prevent duplicate SongCompletedEvent when pause() re-triggers completed state
         add(SongCompletedEvent());
       }
       if (state.processingState == ProcessingState.buffering ||
@@ -1571,10 +1572,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
           add(PauseEvent());
         }
       } else if (event.type == AudioInterruptionType.duck) {
-        
-      } else if (event.type == AudioInterruptionType.unknown) {
-        
-      }
+      } else if (event.type == AudioInterruptionType.unknown) {}
     });
   }
 
@@ -1604,6 +1602,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
     await _resetAudioPlayer();
 
+    _reportPreviousSongPlayback();
     _songData = event.songData;
     emit(LoadingState(
       songData: _songData!,
@@ -1671,6 +1670,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   Future<void> _getSongUrlOnShuffle(
       GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
     await _resetAudioPlayerWhenOnShuffle();
+    _reportPreviousSongPlayback();
     _songData = event.songData;
 
     // Update current song index to match the song being played
@@ -1905,6 +1905,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _firstSongPlayedIndex = event.songIndex;
 
     // Set the song data
+    _reportPreviousSongPlayback();
     _songData = event.songData;
     _playlistSongs.add(_songData!);
     if (!_songData!.isLocal) {
@@ -2070,6 +2071,21 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   void _onSongCompleted(
       SongCompletedEvent event, Emitter<SongstreamState> emit) {
+    if (_songData != null) {
+      final total = songDuration.inSeconds > 0
+          ? songDuration.inSeconds
+          : _parseDurationSeconds(_songData!.duration);
+      if (total > 0) {
+        _repository
+            .reportPlayback(
+              videoId: _songData!.vId,
+              songDuration: total,
+              listenedSeconds: total,
+            )
+            .catchError((_) {});
+      }
+    }
+
     if (_audioPlayer.loopMode == LoopMode.one && Platform.isWindows) {
       _audioPlayer.seek(Duration.zero);
       _audioPlayer.play();
@@ -2085,6 +2101,43 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       add(GetSongUrlOnShuffleEvent(
           songData: _playlistSongs[_currentSongIndex]));
     }
+  }
+
+  int _parseDurationSeconds(String? dur) {
+    if (dur == null || dur.trim().isEmpty) return 0;
+    final parts = dur.trim().split(':');
+    if (parts.length == 2) {
+      final m = int.tryParse(parts[0]) ?? 0;
+      final s = int.tryParse(parts[1]) ?? 0;
+      return m * 60 + s;
+    } else if (parts.length == 3) {
+      final h = int.tryParse(parts[0]) ?? 0;
+      final m = int.tryParse(parts[1]) ?? 0;
+      final s = int.tryParse(parts[2]) ?? 0;
+      return h * 3600 + m * 60 + s;
+    }
+    return 0;
+  }
+
+  void _reportPreviousSongPlayback() {
+    final prevSong = _songData;
+    if (prevSong == null) return;
+    final listened = _audioPlayer.position.inSeconds;
+    if (listened < 5) return;
+
+    final total = songDuration.inSeconds > 0
+        ? songDuration.inSeconds
+        : _parseDurationSeconds(prevSong.duration);
+
+    if (total <= 0) return;
+
+    _repository
+        .reportPlayback(
+          videoId: prevSong.vId,
+          songDuration: total,
+          listenedSeconds: listened,
+        )
+        .catchError((_) {});
   }
 
   Future<void> _resetAudioPlayer() async {
@@ -2120,9 +2173,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _playlistSongs = event.songlist.toSet().toList();
     _currentSongIndex = -1;
     _firstSongPlayedIndex = 0;
-    if (_playlistSongs.isNotEmpty && !_playlistSongs.first.isLocal && _playlistSongs.first.vId.isNotEmpty) {
+    if (_playlistSongs.isNotEmpty &&
+        !_playlistSongs.first.isLocal &&
+        _playlistSongs.first.vId.isNotEmpty) {
       final qualityInfo = _dbInstance.getData;
-      _repository.preloadSongUrl(_playlistSongs.first.vId, qualityInfo.audioQuality);
+      _repository.preloadSongUrl(
+          _playlistSongs.first.vId, qualityInfo.audioQuality);
     }
   }
 
@@ -2239,7 +2295,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   int get getCurrentSongIndex => _currentSongIndex;
   bool get isRadioLoading => _isRadioLoading;
   bool get getSongLoaded => _songLoaded;
-  bool get isSongLoading => state is LoadingState || (!_songLoaded && _songData != null);
+  bool get isSongLoading =>
+      state is LoadingState || (!_songLoaded && _songData != null);
 
   // New methods for upcoming songs  logic
   void _getUpcomingSongs(
@@ -2342,6 +2399,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _storeQuicksPicksList.clear();
 
     // Set the song data
+    _reportPreviousSongPlayback();
     _songData = event.songData;
 
     emit(LoadingState(

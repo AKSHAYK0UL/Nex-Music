@@ -1,6 +1,8 @@
 import 'package:dart_ytmusic_api/types.dart' as yt;
 import 'package:dart_ytmusic_api/types.dart';
 import 'package:dart_ytmusic_api/yt_music.dart';
+import 'package:flutter/foundation.dart';
+import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/model/lyric_model.dart';
 import 'package:nex_music/network_provider/home_data/lyrics_network_provider.dart';
 import 'package:nex_music/secrets/gcp_key.dart';
@@ -66,8 +68,33 @@ class DataProvider {
 
   Future<void> _ensureInitialized() async {
     if (!_ytMusic.hasInitialized) {
-      await _ytMusic.initialize(dataApiKey: ytApIKey);
+      final savedCookies = HiveDataBaseSingleton.instance.ytMusicCookie;
+      await _ytMusic.initialize(
+        cookies: savedCookies,
+        dataApiKey: ytApIKey,
+      );
     }
+  }
+
+  Future<void> updateYtMusicCookies(String? cookies) async {
+    if (cookies != null && cookies.isNotEmpty) {
+      _ytMusic.setCookies(cookies);
+    } else {
+      _ytMusic.clearCookies();
+    }
+  }
+
+  Future<void> reportPlayback({
+    required String videoId,
+    required int songDuration,
+    int? listenedSeconds,
+  }) async {
+    await _ensureInitialized();
+    await _ytMusic.reportPlayback(
+      videoId: videoId,
+      songDuration: songDuration,
+      listenedSeconds: listenedSeconds,
+    );
   }
 
   //get home section data
@@ -77,9 +104,21 @@ class DataProvider {
         List<yt.SongDetailed> quickPicks
       })> homeScreenSongs(String inputPrompt) async {
     await _ensureInitialized();
+    final isRecommendationOn =
+        HiveDataBaseSingleton.instance.recommendationStatus;
+    final savedCookies = HiveDataBaseSingleton.instance.ytMusicCookie;
+    if (isRecommendationOn && savedCookies != null && savedCookies.isNotEmpty) {
+      _ytMusic.setCookies(savedCookies);
+    } else {
+      _ytMusic.clearCookies();
+    }
+
+    debugPrint(
+        'homeScreenSongs: recommendationOn=$isRecommendationOn, hasCookies=${savedCookies != null && savedCookies.isNotEmpty}, ytMusicAuthenticated=${_ytMusic.isAuthenticated}, sapisid=${_ytMusic.sapisid != null}');
+
     final fetchedData = await Future.wait(
       [
-        _ytMusic.getHome(country: 'IN'),
+        _ytMusic.getHome(country: isRecommendationOn ? null : 'IN'),
         _ytMusic.searchSongs(inputPrompt),
       ],
     );
@@ -87,6 +126,9 @@ class DataProvider {
     final homeSectionData =
         fetchedData[0] as List<yt.HomeSection>; //PlayList, Album
     final quickPicks = fetchedData[1] as List<yt.SongDetailed>; ////Quick Picks
+
+    debugPrint(
+        'homeScreenSongs: loaded ${homeSectionData.length} home sections: ${homeSectionData.map((s) => s.title).toList()}');
 
     return (homeSectionData: homeSectionData, quickPicks: quickPicks);
   }

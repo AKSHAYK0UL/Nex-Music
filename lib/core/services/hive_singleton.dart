@@ -178,4 +178,40 @@ class HiveDataBaseSingleton {
       return [];
     }
   }
+
+  // YT MUSIC COOKIE Box
+  Box<String> get getYtMusicCookieBox {
+    return Hive.box<String>(ytMusicCookieBox);
+  }
+
+  Future<void> saveYtMusicCookie(String cookie) async {
+    try {
+      final box = getYtMusicCookieBox;
+      await box.put(ytMusicCookieKey, cookie);
+    } catch (e) {
+      debugPrint('Error saving YT Music cookie: $e');
+    }
+  }
+
+  String? get ytMusicCookie {
+    try {
+      final box = getYtMusicCookieBox;
+      return box.get(ytMusicCookieKey);
+    } catch (e) {
+      debugPrint('Error reading YT Music cookie: $e');
+      return null;
+    }
+  }
+
+  Future<void> clearYtMusicCookie() async {
+    try {
+      final box = getYtMusicCookieBox;
+      await box.delete(ytMusicCookieKey);
+    } catch (e) {
+      debugPrint('Error clearing YT Music cookie: $e');
+    }
+  }
+
+  bool get isYtMusicLoggedIn =>
+      ytMusicCookie != null && ytMusicCookie!.isNotEmpty;
 }
