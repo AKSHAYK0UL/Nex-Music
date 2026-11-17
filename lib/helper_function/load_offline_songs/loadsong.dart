@@ -55,7 +55,6 @@ Stream<List<Songmodel>> loadDownloadedSongsStream() async* {
           );
           songs.add(song);
           debugPrint('Loaded song: ${song.songName}');
-          yield List.from(songs); // Emit current list
         }
       } catch (e) {
         debugPrint('Error loading ${file.path}: $e');
@@ -64,4 +63,5 @@ Stream<List<Songmodel>> loadDownloadedSongsStream() async* {
   }
 
   debugPrint('Total songs loaded: ${songs.length}');
+  yield List.from(songs);
 }

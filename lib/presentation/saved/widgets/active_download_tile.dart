@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nex_music/bloc/download_manager_bloc/bloc/download_manager_bloc.dart';
-import 'package:nex_music/bloc/offline_songs_bloc/bloc/offline_songs_bloc.dart';
 import 'package:nex_music/core/ui_component/cacheimage.dart';
 import 'package:nex_music/model/download_task_model.dart';
 
@@ -13,7 +12,7 @@ class ActiveDownloadTile extends StatelessWidget {
 
   const ActiveDownloadTile({super.key, required this.task});
 
-  //  Status colours 
+  //  Status colours
   static const _kRed = Color(0xFFFF2D55);
   static const _kOrange = Color(0xFFFF9500);
   static const _kGrey = Color(0xFF8E8E93);
@@ -66,7 +65,7 @@ class ActiveDownloadTile extends StatelessWidget {
     );
   }
 
-  // Delete confirmation dialog 
+  // Delete confirmation dialog
   void _confirmDelete(BuildContext context) {
     showCupertinoDialog(
       context: context,
@@ -88,9 +87,6 @@ class ActiveDownloadTile extends StatelessWidget {
               context
                   .read<DownloadManagerBloc>()
                   .add(CancelDownloadEvent(vId: task.songData.vId));
-              context
-                  .read<OfflineSongsBloc>()
-                  .add(LoadOfflineSongsEvent());
             },
             child: const Text('Cancel Download'),
           ),
@@ -191,15 +187,15 @@ class ActiveDownloadTile extends StatelessWidget {
                                     icon: CupertinoIcons.play_fill,
                                     onTap: () => context
                                         .read<DownloadManagerBloc>()
-                                        .add(ResumeDownloadEvent(
-                                            vId: song.vId)),
+                                        .add(
+                                            ResumeDownloadEvent(vId: song.vId)),
                                   )
                                 : const SizedBox(width: 8),
                       ),
 
                       const SizedBox(width: 8),
 
-                      // Trash 
+                      // Trash
                       Padding(
                         padding: const EdgeInsets.only(top: 10),
                         child: _ActionIcon(
@@ -246,8 +242,8 @@ class _ActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor =
-        color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65);
+    final iconColor = color ??
+        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65);
 
     return GestureDetector(
       onTap: onTap,

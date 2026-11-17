@@ -106,6 +106,17 @@ class _SavedSongsState extends State<SavedSongs>
             : null,
       ),
       body: BlocBuilder<OfflineSongsBloc, OfflineSongsState>(
+        buildWhen: (previous, current) {
+          if (previous is OfflineSongsDataState &&
+              current is OfflineSongsDataState) {
+            if (previous.songs.length != current.songs.length) return true;
+            for (int i = 0; i < previous.songs.length; i++) {
+              if (previous.songs[i].vId != current.songs[i].vId) return true;
+            }
+            return false;
+          }
+          return previous != current;
+        },
         builder: (context, state) {
           if (state is OfflineSongsLoadingState) {
             return const Center(
@@ -191,13 +202,14 @@ class _SavedSongsState extends State<SavedSongs>
                                   itemCount: filteredSongs.length,
                                   itemBuilder: (context, index) =>
                                       RecentSongTile(
+                                    key: ValueKey(filteredSongs[index].vId),
                                     songData: filteredSongs[index],
                                     songIndex: index,
                                     tabRouteENUM: TabRouteENUM.download,
                                     playlistSongs: filteredSongs,
                                   ),
                                 ),
-                          // Pending tab  shows all pending tasks
+                          // Pending tab shows all pending tasks
                           const _PendingTab(),
                         ],
                       ),
@@ -225,6 +237,16 @@ class _PendingTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
+      buildWhen: (prev, curr) {
+        if (prev.activeTasks.length != curr.activeTasks.length) return true;
+        for (int i = 0; i < prev.activeTasks.length; i++) {
+          if (prev.activeTasks[i].songData.vId !=
+              curr.activeTasks[i].songData.vId) {
+            return true;
+          }
+        }
+        return false;
+      },
       builder: (context, state) {
         final tasks = state.activeTasks;
 
@@ -238,12 +260,22 @@ class _PendingTab extends StatelessWidget {
           itemBuilder: (context, index) {
             final task = tasks[index];
             return BlocBuilder<DownloadManagerBloc, DownloadManagerState>(
-              buildWhen: (prev, curr) =>
-                  prev.task(task.songData.vId) != curr.task(task.songData.vId),
+              key: ValueKey(task.songData.vId),
+              buildWhen: (prev, curr) {
+                final p = prev.task(task.songData.vId);
+                final c = curr.task(task.songData.vId);
+                if (p == null || c == null) return p != c;
+                return p.status != c.status ||
+                    p.progress != c.progress ||
+                    p.errorMessage != c.errorMessage;
+              },
               builder: (context, s) {
                 final current = s.task(task.songData.vId);
                 if (current == null) return const SizedBox.shrink();
-                return ActiveDownloadTile(task: current);
+                return ActiveDownloadTile(
+                  key: ValueKey(current.songData.vId),
+                  task: current,
+                );
               },
             );
           },

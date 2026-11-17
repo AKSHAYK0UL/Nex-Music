@@ -20,20 +20,22 @@ class OfflineSongsBloc extends Bloc<OfflineSongsEvent, OfflineSongsState> {
   //load
   Future<void> _loadOfflineSongs(
       LoadOfflineSongsEvent event, Emitter<OfflineSongsState> emit) async {
-    emit(OfflineSongsLoadingState());
+    // Only show loading indicator on initial load background updates keep existing UI
+    if (state is! OfflineSongsDataState) {
+      emit(OfflineSongsLoadingState());
+    }
 
     try {
       final storagePermissionStatus =
           await _storagePermission.checkStoragePermissionStatus;
       if (storagePermissionStatus) {
-              await emit.forEach<List<Songmodel>>(
+        await emit.forEach<List<Songmodel>>(
           _downloadRepo.loadOfflineSongs,
           onData: (songs) => OfflineSongsDataState(songs: songs),
           onError: (_, __) =>
               OfflineSongsErrorState(errorMessage: "Failed to load downloads"),
         );
 
-        
         if (state is OfflineSongsLoadingState) {
           emit(OfflineSongsDataState(songs: const []));
         }
@@ -55,8 +57,14 @@ class OfflineSongsBloc extends Bloc<OfflineSongsEvent, OfflineSongsState> {
   Future<void> _deleteDownloadedSong(
       DeleteDownloadedSongEvent event, Emitter<OfflineSongsState> emit) async {
     try {
+      //  update the UI immediately without any reload flicker
+      if (state is OfflineSongsDataState) {
+        final currentSongs = (state as OfflineSongsDataState).songs;
+        final updatedSongs =
+            currentSongs.where((s) => s.vId != event.songData.vId).toList();
+        emit(OfflineSongsDataState(songs: updatedSongs));
+      }
       await _downloadRepo.deleteDownLoadedSong(event.songData);
-      add(LoadOfflineSongsEvent());
     } catch (e) {
       debugPrint("DELETE ERROR ${e.toString()}@@@@@");
       emit(OfflineSongsErrorState(errorMessage: e.toString()));

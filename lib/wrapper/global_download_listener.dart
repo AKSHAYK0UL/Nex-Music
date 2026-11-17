@@ -46,31 +46,30 @@ class _GlobalDownloadListenerWrapperState
   Widget build(BuildContext context) {
     return BlocListener<DownloadManagerBloc, DownloadManagerState>(
       listenWhen: (previous, current) {
-        // Fire whenever any task transitions to completed or error.
+        // Fire only when a task transitions to completed or error.
+        // Pausing, resuming, or progressing should NEVER trigger an offline songs reload.
         for (final vId in current.tasks.keys) {
           final prev = previous.task(vId);
           final curr = current.task(vId);
-          if (prev == null) continue;
-          if (prev.status != curr?.status) return true;
+          if (curr == null) continue;
+          if (prev?.status != curr.status &&
+              (curr.status == DownloadTaskStatus.completed ||
+                  curr.status == DownloadTaskStatus.error)) {
+            return true;
+          }
         }
-        // Also fire when a task is removed (completed task cleaned up).
-        if (previous.tasks.length != current.tasks.length) return true;
         return false;
       },
       listener: (context, state) {
         for (final entry in state.tasks.entries) {
-          // Only react to freshly completed tasks.
           final task = entry.value;
           if (task.status == DownloadTaskStatus.completed) {
             context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
-            return;
           }
           if (task.status == DownloadTaskStatus.error) {
             showSnackbar(context, task.errorMessage ?? 'Download failed');
           }
         }
-        // If a task was removed (completed task evicted), reload.
-        context.read<OfflineSongsBloc>().add(LoadOfflineSongsEvent());
       },
       child: widget.child,
     );
