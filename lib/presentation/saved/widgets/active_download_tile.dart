@@ -71,14 +71,12 @@ class ActiveDownloadTile extends StatelessWidget {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Cancel Download'),
-        content: Text(
-          'Cancel downloading "${task.songData.songName}"?\n'
-          'Any partially downloaded data will be removed.',
-        ),
-        actions: [
+        content: const Text('Are you sure you want to cancel this download?'),
+        actions: <CupertinoDialogAction>[
           CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Keep'),
+            child: const Text('No'),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -88,7 +86,7 @@ class ActiveDownloadTile extends StatelessWidget {
                   .read<DownloadManagerBloc>()
                   .add(CancelDownloadEvent(vId: task.songData.vId));
             },
-            child: const Text('Cancel Download'),
+            child: const Text('Yes'),
           ),
         ],
       ),
