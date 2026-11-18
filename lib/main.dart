@@ -48,6 +48,7 @@ import 'package:nex_music/core/services/hive/hive__adapter_model/hive_paused_dow
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_quality_class.dart';
 import 'package:nex_music/core/services/hive/hive__adapter_model/hive_registrar.g.dart';
 import 'package:nex_music/core/services/download_notification_service.dart';
+import 'package:nex_music/core/services/device_info_service.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/theme/theme.dart';
 import 'package:nex_music/helper_function/storage_permission/storage_permission.dart';
@@ -104,6 +105,10 @@ Future<void> main() async {
   await Hive.openBox<bool>(cdnPreferenceBox);
   await Hive.openBox<HivePausedDownload>(pausedDownloadsBox);
   await Hive.openBox<String>(ytMusicCookieBox);
+
+  // Initialize device info service for platform aware user agents.
+  await DeviceInfoService.instance.ensureInitialized();
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final audioHandler = await AudioService.init(
     builder: () => AudioPlayerHandler(audioPlayer),

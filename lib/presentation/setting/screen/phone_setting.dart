@@ -6,15 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
-import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart'
-    hide LoadingState;
 import 'package:nex_music/bloc/theme_bloc/bloc/theme_bloc.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/helper_function/sign_out_helper/handle_sign_out.dart';
-import 'package:nex_music/presentation/setting/screen/yt_music_login_screen.dart';
-import 'package:nex_music/repository/home_repo/repository.dart';
+import 'package:nex_music/presentation/setting/screen/recommendation_info_screen.dart';
 
 const Color kAppleBackgroundColor = Color(0xFFF2F2F7);
 
@@ -63,62 +60,21 @@ class Setting extends StatelessWidget {
     );
   }
 
-  void _openYtMusicLogin(BuildContext context) async {
-    final result = await Navigator.of(context).push<bool>(
+  void _openRecommendationInfo(BuildContext context) async {
+    final previousStatus = _hiveDbInstance.recommendationStatus;
+    await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => const YtMusicLoginScreen(),
+        builder: (_) => const RecommendationInfoScreen(),
       ),
     );
-    if (result == true) {
-      await _hiveDbInstance.saveRecommendation(true);
-      _recommendationNotifier.value = true;
-      if (context.mounted) {
-        context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
-      }
+    // Only update the switch if the recommendation state actually changed.
+    // The info screen already dispatches GetHomeSectonDataEvent() after any
+    // action, so we don't dispatch it again here — that would re-trigger the
+    // HomesectionBloc loading state and show a loading splash.
+    final newStatus = _hiveDbInstance.recommendationStatus;
+    if (newStatus != previousStatus) {
+      _recommendationNotifier.value = newStatus;
     }
-  }
-
-  void _showYtMusicAccountDialog(BuildContext context) {
-    final email = currentUser.email ?? FirebaseAuth.instance.currentUser?.email;
-    showCupertinoDialog(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: const Text("YouTube Music"),
-        content: Text(
-          email != null
-              ? "Connected to YouTube Music for $email.\nYour listening history is syncing to personalize your home feed."
-              : "Connected to YouTube Music.\nYour listening history is syncing to personalize your home feed.",
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _openYtMusicLogin(context);
-            },
-            child: const Text("Reconnect"),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await _hiveDbInstance.clearYtMusicCookie();
-              await _hiveDbInstance.saveRecommendation(false);
-              _recommendationNotifier.value = false;
-              if (context.mounted) {
-                await context.read<Repository>().updateYtMusicCookies(null);
-                context.read<HomesectionBloc>().add(GetHomeSectonDataEvent());
-                showSnackbar(context, "Disconnected from YouTube Music");
-              }
-            },
-            child: const Text("Disconnect"),
-          ),
-          CupertinoDialogAction(
-            child: const Text("Cancel"),
-            onPressed: () => Navigator.pop(ctx),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -203,9 +159,9 @@ class Setting extends StatelessWidget {
                     final isLoggedIn = _hiveDbInstance.isYtMusicLoggedIn;
                     final subtitle = isLoggedIn
                         ? (value
-                            ? "Connected · Tap to manage"
-                            : "Connected (Paused)")
-                        : "Connect YouTube Music for personalized mixes";
+                            ? "Enabled · Tap to manage"
+                            : "Paused · Tap to manage")
+                        : "Tap to learn more & connect";
                     return _buildSwitchTile(
                       title: "Recommendations",
                       subtitle: subtitle,
@@ -213,22 +169,8 @@ class Setting extends StatelessWidget {
                       iconColor: Colors.orange,
                       textColor: theme.colorScheme.onSurface,
                       value: value,
-                      onTap: () => isLoggedIn
-                          ? _showYtMusicAccountDialog(context)
-                          : _openYtMusicLogin(context),
-                      onChanged: (newValue) async {
-                        if (newValue && !isLoggedIn) {
-                          _openYtMusicLogin(context);
-                        } else {
-                          await _hiveDbInstance.saveRecommendation(newValue);
-                          _recommendationNotifier.value = newValue;
-                          if (context.mounted) {
-                            context
-                                .read<HomesectionBloc>()
-                                .add(GetHomeSectonDataEvent());
-                          }
-                        }
-                      },
+                      onTap: () => _openRecommendationInfo(context),
+                      onChanged: (_) => _openRecommendationInfo(context),
                     );
                   },
                 ),
