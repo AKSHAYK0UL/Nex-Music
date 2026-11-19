@@ -30,8 +30,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await Future.wait([
         _dbInstance.save(HiveQuality(
             thumbnailQuality: ThumbnailQuality.high,
-            audioQuality: AudioQuality.high)),
+            audioQuality: AudioQuality.high,
+            downloadQuality: AudioQuality.high)),
         _dbInstance.saveRecommendation(false),
+        _dbInstance.saveCdnEnabled(false),
       ]);
       // await _dbInstance.save(HiveQuality(
       //     thumbnailQuality: Platform.isAndroid

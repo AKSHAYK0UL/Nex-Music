@@ -128,7 +128,7 @@ class DataProvider {
     final quickPicks = fetchedData[1] as List<yt.SongDetailed>; ////Quick Picks
 
     debugPrint(
-        'homeScreenSongs: loaded ${homeSectionData.length} home sections: ${homeSectionData.map((s) => s.title).toList()}');
+        'homeScreenSongs: loaded ${homeSectionData.length} home sections: ${homeSectionData.map((s) => '${s.title} (${s.stableTitle}, songs=${s.contents.whereType<yt.SongDetailed>().length})').toList()}');
 
     return (homeSectionData: homeSectionData, quickPicks: quickPicks);
   }

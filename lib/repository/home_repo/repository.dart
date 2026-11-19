@@ -157,28 +157,77 @@ class Repository {
 
     final homeSections = networkData.homeSectionData;
 
-    //   Quick Picks
-    // Prefer SongDetailed items from the top_picks / recommended / quick_picks section.
-    // Fall back to listen_again songs, and finally to searchSongs if needed.
+    // Quick Picks
+
     List<Songmodel> quickPicks = [];
-    final topPicksSection = homeSections.firstWhere(
-      (s) =>
-          s.stableTitle == 'top_picks' ||
-          s.stableTitle == 'recommended' ||
-          s.stableTitle == 'quick_picks',
-      orElse: () => HomeSection(title: '', stableTitle: '', contents: []),
-    );
-    final topPickSongs =
-        topPicksSection.contents.whereType<SongDetailed>().toList();
-    if (topPickSongs.isNotEmpty) {
-      quickPicks = await RepositoryHelperFunction.getQuickPicks(
-          topPickSongs, quality.thumbnailQuality);
+    HomeSection? matchedSection;
+
+    //  "Quick picks"
+    for (final s in homeSections) {
+      final isMatch = s.stableTitle == 'quick_picks' ||
+          s.title.toLowerCase().contains('quick pick') ||
+          s.title.toLowerCase().contains('start radio');
+      if (isMatch) {
+        final songs = s.contents.whereType<SongDetailed>().toList();
+        if (songs.length >= 4) {
+          quickPicks = await RepositoryHelperFunction.getQuickPicks(
+              songs, quality.thumbnailQuality);
+          matchedSection = s;
+          debugPrint(
+              'homeScreenSongsList: quickPicks matched authentic quick_picks shelf "${s.title}" with ${quickPicks.length} songs');
+          break;
+        } else if (quickPicks.isEmpty && songs.isNotEmpty) {
+          quickPicks = await RepositoryHelperFunction.getQuickPicks(
+              songs, quality.thumbnailQuality);
+          matchedSection = s;
+        }
+      }
     }
+
+    // If quickPicks has fewer than 4 songs, look for any  large song carousel (>= 8 songs)
+    // On YouTube Music home, the Quick picks carousel is the primary 16-20 song .
+    if (quickPicks.length < 4) {
+      for (final s in homeSections) {
+        final songs = s.contents.whereType<SongDetailed>().toList();
+        if (songs.length >= 8) {
+          quickPicks = await RepositoryHelperFunction.getQuickPicks(
+              songs, quality.thumbnailQuality);
+          matchedSection = s;
+          debugPrint(
+              'homeScreenSongsList: quickPicks matched large song carousel "${s.title}" with ${quickPicks.length} songs');
+          break;
+        }
+      }
+    }
+
+    //  Fall back to top_picks / recommended (>= 4 songs)
+    if (quickPicks.length < 4) {
+      for (final s in homeSections) {
+        final isMatch = s.stableTitle == 'top_picks' ||
+            s.stableTitle == 'recommended' ||
+            s.title.toLowerCase().contains('top pick');
+        if (isMatch) {
+          final songs = s.contents.whereType<SongDetailed>().toList();
+          if (songs.length >= 4) {
+            quickPicks = await RepositoryHelperFunction.getQuickPicks(
+                songs, quality.thumbnailQuality);
+            matchedSection = s;
+            debugPrint(
+                'homeScreenSongsList: quickPicks matched top_picks shelf "${s.title}" with ${quickPicks.length} songs');
+            break;
+          }
+        }
+      }
+    }
+
+    // Fall back to listen_again / speed_dial if still empty
     if (quickPicks.isEmpty) {
       final listenAgainSection = homeSections.firstWhere(
         (s) =>
             s.stableTitle == 'listen_again' ||
-            s.title.toLowerCase().contains('listen again'),
+            s.stableTitle == 'speed_dial' ||
+            s.title.toLowerCase().contains('listen again') ||
+            s.title.toLowerCase().contains('speed dial'),
         orElse: () => HomeSection(title: '', stableTitle: '', contents: []),
       );
       final listenSongs =
@@ -186,13 +235,46 @@ class Repository {
       if (listenSongs.isNotEmpty) {
         quickPicks = await RepositoryHelperFunction.getQuickPicks(
             listenSongs, quality.thumbnailQuality);
+        matchedSection = listenAgainSection;
+        debugPrint(
+            'homeScreenSongsList: quickPicks matched listen_again shelf "${listenAgainSection.title}" with ${quickPicks.length} songs');
       }
     }
-    // Fall back to search-based quick picks
+
+    //  Fall back to any other personalized shelf with songs
+    if (quickPicks.isEmpty) {
+      for (final s in homeSections) {
+        final songs = s.contents.whereType<SongDetailed>().toList();
+        if (songs.isNotEmpty) {
+          quickPicks = await RepositoryHelperFunction.getQuickPicks(
+              songs, quality.thumbnailQuality);
+          matchedSection = s;
+          debugPrint(
+              'homeScreenSongsList: quickPicks matched first available shelf "${s.title}" with ${quickPicks.length} songs');
+          break;
+        }
+      }
+    }
+
+    // Fall back to search-based quick picks only if no songs exist in home sections
     if (quickPicks.isEmpty) {
       quickPicks = await RepositoryHelperFunction.getQuickPicks(
           networkData.quickPicks, quality.thumbnailQuality);
+      debugPrint(
+          'homeScreenSongsList: quickPicks fell back to search-based quickPicks (${quickPicks.length} songs)');
     }
+
+    // Filter out the shelf used for quickPicks so it is not duplicated below
+    final sectionToExclude = matchedSection;
+    final displayHomeSections = sectionToExclude != null
+        ? homeSections
+            .where((s) =>
+                s != sectionToExclude &&
+                s.stableTitle != sectionToExclude.stableTitle &&
+                s.title.toLowerCase().trim() !=
+                    sectionToExclude.title.toLowerCase().trim())
+            .toList()
+        : homeSections;
 
     //  Map HomeSection list to named fields by stableTitle
     // Helper: extract PlayListmodel list from a section's PlaylistDetailed contents
@@ -354,7 +436,7 @@ class Repository {
 
     return (
       quickPicks: quickPicks,
-      homeSections: homeSections,
+      homeSections: displayHomeSections,
       playlist: playlist,
       albums: albums,
       globalHitsPlaylists: globalHitsPlaylists,

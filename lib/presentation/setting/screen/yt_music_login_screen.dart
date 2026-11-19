@@ -44,17 +44,16 @@ class _YtMusicLoginScreenState extends State<YtMusicLoginScreen> {
       final url = await _webViewController!.getUrl();
       final cookieManager = CookieManager.instance();
 
+      // Only query YouTube domains. NEVER query accounts.google.com or google.com
+      // because Google Account cookies have different SAPISID/SID values that
+      // would overwrite YouTube's cookies and break InnerTube signature authentication!
       final domains = [
-        'https://music.youtube.com/',
         'https://music.youtube.com',
-        'https://www.youtube.com/',
+        'https://music.youtube.com/',
         'https://www.youtube.com',
-        'https://youtube.com/',
+        'https://www.youtube.com/',
         'https://youtube.com',
-        'https://accounts.google.com/',
-        'https://accounts.google.com',
-        'https://google.com/',
-        'https://google.com',
+        'https://youtube.com/',
       ];
 
       final cookieMap = <String, String>{};
@@ -62,7 +61,9 @@ class _YtMusicLoginScreenState extends State<YtMusicLoginScreen> {
         try {
           final cookies = await cookieManager.getCookies(url: WebUri(domain));
           for (final c in cookies) {
-            cookieMap[c.name] = c.value;
+            if (c.name.isNotEmpty && c.value.isNotEmpty) {
+              cookieMap[c.name] = c.value;
+            }
           }
         } catch (_) {}
       }
@@ -90,15 +91,16 @@ class _YtMusicLoginScreenState extends State<YtMusicLoginScreen> {
       final hasSapisid = cookieMap.containsKey('__Secure-3PAPISID') ||
           cookieMap.containsKey('SAPISID') ||
           cookieMap.containsKey('__Secure-1PAPISID');
-      final hasLoginInfo = cookieMap.containsKey('LOGIN_INFO');
       final hasSid = cookieMap.containsKey('SID') ||
           cookieMap.containsKey('__Secure-3PSID');
+      final hasLoginInfo = cookieMap.containsKey('LOGIN_INFO');
 
-      final hasAuthCookie = hasSapisid || (hasLoginInfo && hasSid);
+      // SAPISID is strictly required to compute SAPISIDHASH for YouTube Music
+      final hasAuthCookie = hasSapisid && (hasSid || hasLoginInfo);
       final isAtYtMusic = url != null && url.host.contains('music.youtube.com');
 
       debugPrint(
-          'YTMusic Cookie check: isAtYtMusic=$isAtYtMusic, hasSapisid=$hasSapisid, hasLoginInfo=$hasLoginInfo, totalCookies=${cookieMap.length}');
+          'YTMusic Cookie check: isAtYtMusic=$isAtYtMusic, hasSapisid=$hasSapisid, hasSid=$hasSid, hasLoginInfo=$hasLoginInfo, totalCookies=${cookieMap.length}');
 
       if (hasAuthCookie && (isAtYtMusic || showFeedbackOnFailure)) {
         final cookieString =
@@ -118,10 +120,17 @@ class _YtMusicLoginScreenState extends State<YtMusicLoginScreen> {
       }
 
       if (showFeedbackOnFailure && mounted) {
-        showSnackbar(
-          context,
-          'Please finish signing in on YouTube Music first.',
-        );
+        if (!isAtYtMusic) {
+          showSnackbar(
+            context,
+            'Please wait until YouTube Music finishes loading.',
+          );
+        } else {
+          showSnackbar(
+            context,
+            'Signing in... Please wait a few seconds and try again.',
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error extracting YouTube Music cookies: $e');
@@ -226,6 +235,11 @@ class _YtMusicLoginScreenState extends State<YtMusicLoginScreen> {
                   _progress = 1.0;
                 });
                 await _extractAndSaveCookies(showFeedbackOnFailure: false);
+              },
+              onUpdateVisitedHistory: (controller, url, isReload) async {
+                if (url != null && url.host.contains('music.youtube.com')) {
+                  await _extractAndSaveCookies(showFeedbackOnFailure: false);
+                }
               },
             ),
           ),

@@ -72,15 +72,16 @@ Widget _buildBody(
 
           // Quick Picks always shown at the top
           if (state.quickPicks.isNotEmpty) ...[
-            const _SubHeader(title: "Top Picks For You"),
+            const _SubHeader(title: "Quick Picks"),
             FeaturedCarousel(songs: state.quickPicks),
             const SizedBox(height: 26),
           ],
 
-          // Dynamic sections render exactly what getHome(country:'IN') returned
+          // Dynamic sections render exactly what getHome returned
           ...state.homeSections
               .where((s) =>
-                  // Skip top_picks since we render it as the featured carousel above
+                  // Skip quick_picks and top_picks since we render it as the featured carousel above
+                  s.stableTitle != 'quick_picks' &&
                   s.stableTitle != 'top_picks' &&
                   s.stableTitle != 'recommended' &&
                   s.contents.isNotEmpty)

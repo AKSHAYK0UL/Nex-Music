@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:nex_music/enum/tab_route.dart';
@@ -7,15 +6,18 @@ import 'package:nex_music/model/songmodel.dart';
 import 'package:nex_music/presentation/home/widget/build_playlist_album_card.dart';
 import 'package:nex_music/presentation/recent/widgets/recent_song_tile.dart';
 
-// Original SongColumView with 3 songs in one column
+// Dynamic SongColumView supporting 1, 2, or 3 songs per column
 class SongColumView extends StatelessWidget {
   final int rowIndex;
   final int quickPicksLength;
   final List<Songmodel> quickPicks;
+  final int rowsPerColumn;
+
   const SongColumView({
     required this.rowIndex,
     required this.quickPicksLength,
     required this.quickPicks,
+    this.rowsPerColumn = 3,
     super.key,
   });
 
@@ -26,11 +28,11 @@ class SongColumView extends StatelessWidget {
     return SizedBox(
       width: screenSize * 0.43,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: List.generate(
-          3, // Changed from 4 to 3
+          rowsPerColumn,
           (columnIndex) {
-            final index =
-                rowIndex * 3 + columnIndex; // Calculate the actual index (changed from 4 to 3)
+            final index = rowIndex * rowsPerColumn + columnIndex;
             if (index < quickPicksLength) {
               final songData = quickPicks[index];
               return RecentSongTile(
@@ -49,41 +51,41 @@ class SongColumView extends StatelessWidget {
   }
 }
 
-// Updated FeaturedCarousel using PageView with SongColumView
+// Updated FeaturedCarousel using PageView with dynamic height based on available songs
 class FeaturedCarousel extends StatelessWidget {
   final List<Songmodel> songs;
 
   const FeaturedCarousel({super.key, required this.songs});
 
+  static const double tileHeight = 85.0;
+
   @override
   Widget build(BuildContext context) {
     // Safety check for empty songs list
     if (songs.isEmpty) {
-      return const SizedBox(
-        height: 255,
-        child: Center(
-          child: Text(
-            'No songs available',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: 16,
-            ),
-          ),
-        ),
-      );
+      return const SizedBox.shrink();
     }
 
+    // Adaptively adjust height and rows based on actual song count:
+    // 1 song  -> 1 row  (85px)
+    // 2 songs -> 2 rows (170px)
+    // 3 songs -> 3 rows (255px)
+    final int rowsPerColumn = songs.length < 3 ? songs.length : 3;
+    final double carouselHeight = rowsPerColumn * tileHeight;
+    final int pageCount = (songs.length / rowsPerColumn).ceil();
+
     return SizedBox(
-      height: 255, // 3 tiles × 85px each no space
+      height: carouselHeight,
       child: PageView.builder(
         controller: PageController(viewportFraction: 0.92),
         padEnds: false,
-        itemCount: (songs.length / 3).ceil(),
+        itemCount: pageCount,
         itemBuilder: (context, rowIndex) {
           return SongColumView(
             rowIndex: rowIndex,
             quickPicksLength: songs.length,
             quickPicks: songs,
+            rowsPerColumn: rowsPerColumn,
           );
         },
       ),

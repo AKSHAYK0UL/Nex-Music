@@ -60,12 +60,12 @@ dependencies:
   app_links: ^6.3.2
   bloc_concurrency: ^0.3.0
   audio_service: ^0.18.18
+  # dart_ytmusic_api:
+  #   path: dart_ytmusic_api
   dart_ytmusic_api:
     git:
       url: https://github.com/AKSHAYK0UL/dart_ytmusic_api.git
-      ref: 16c4043898861f88f4f2f406582c11d5b97c120f    
-  # dart_ytmusic_api:
-  #   path: dart_ytmusic_api
+      ref: 19d3eddee38812ea5f69710d9659510777c5830b    
   flutter_inappwebview: ^6.1.5  
   youtube_explode_dart:
     git:
