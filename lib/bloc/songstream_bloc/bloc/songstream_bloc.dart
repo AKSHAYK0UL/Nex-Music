@@ -1421,6 +1421,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   bool _songLoaded = false;
   List<Songmodel> _storeQuicksPicksList = [];
   bool _isRadioLoading = false;
+  String? _reportedPlaybackVideoId;
+  String? _lastCompletedVideoId;
 
   SongstreamBloc(
     this._repository,
@@ -1537,6 +1539,31 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     //windows specific code
     // Windows-specific loop handling
     _audioPlayer.positionStream.listen((position) {
+      if (_songData != null && !_songData!.isLocal) {
+        final currentVid = _songData!.vId;
+        if (position.inSeconds >= 5 && _reportedPlaybackVideoId != currentVid) {
+          _reportedPlaybackVideoId = currentVid;
+          final parsedDur = _parseDurationSeconds(_songData!.duration);
+          final total = songDuration.inSeconds > 0
+              ? songDuration.inSeconds
+              : (parsedDur > 0 ? parsedDur : 180);
+          debugPrint(
+              '[PlaybackTracking] 5s listening threshold reached for "${_songData!.songName}" ($currentVid). Reporting play start & ATR to YouTube...');
+          _repository
+              .reportPlayback(
+            videoId: currentVid,
+            songDuration: total,
+            listenedSeconds: position.inSeconds,
+          )
+              .then((_) {
+            debugPrint(
+                '[PlaybackTracking] Active play reported to YouTube for: "${_songData?.songName}" ($currentVid)');
+          }).catchError((err) {
+            debugPrint(
+                '[PlaybackTracking] Error reporting active play for $currentVid: $err');
+          });
+        }
+      }
       if (Platform.isWindows &&
           _audioPlayer.loopMode == LoopMode.one &&
           position.inSeconds == songDuration.inSeconds - 1) {
@@ -1600,10 +1627,13 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       return;
     }
 
+    _reportPreviousSongPlayback();
     await _resetAudioPlayer();
 
-    _reportPreviousSongPlayback();
+    _reportedPlaybackVideoId = null;
     _songData = event.songData;
+    debugPrint(
+        '[PlaybackTracking]  User selected song: "${_songData!.songName}" (id: ${_songData!.vId}, dur: ${_songData!.duration}, isLocal: ${_songData!.isLocal})');
     emit(LoadingState(
       songData: _songData!,
       volume: _currentVolume,
@@ -1669,9 +1699,12 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 // Do exactly what [_getSongUrl] does, but with extra spice shuffle mode activated.
   Future<void> _getSongUrlOnShuffle(
       GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
-    await _resetAudioPlayerWhenOnShuffle();
     _reportPreviousSongPlayback();
+    await _resetAudioPlayerWhenOnShuffle();
+    _reportedPlaybackVideoId = null;
     _songData = event.songData;
+    debugPrint(
+        '[PlaybackTracking] Next queue/shuffle song: "${_songData!.songName}" (id: ${_songData!.vId}, dur: ${_songData!.duration})');
 
     // Update current song index to match the song being played
     _currentSongIndex =
@@ -1896,6 +1929,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       return;
     }
 
+    _reportPreviousSongPlayback();
     // Complete reset of all state
     await _resetAudioPlayer();
 
@@ -1905,7 +1939,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _firstSongPlayedIndex = event.songIndex;
 
     // Set the song data
-    _reportPreviousSongPlayback();
+    _reportedPlaybackVideoId = null;
     _songData = event.songData;
     _playlistSongs.add(_songData!);
     if (!_songData!.isLocal) {
@@ -2071,18 +2105,30 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   void _onSongCompleted(
       SongCompletedEvent event, Emitter<SongstreamState> emit) {
-    if (_songData != null) {
+    if (_songData != null && !_songData!.isLocal) {
+      final currentVid = _songData!.vId;
+      final songTitle = _songData!.songName;
+      _lastCompletedVideoId = currentVid;
+      final parsedDur = _parseDurationSeconds(_songData!.duration);
       final total = songDuration.inSeconds > 0
           ? songDuration.inSeconds
-          : _parseDurationSeconds(_songData!.duration);
+          : (parsedDur > 0 ? parsedDur : 180);
       if (total > 0) {
+        debugPrint(
+            '[PlaybackTracking] Song completed naturally: "$songTitle" ($currentVid). Reporting full watchtime (${total}s) to YouTube...');
         _repository
             .reportPlayback(
-              videoId: _songData!.vId,
-              songDuration: total,
-              listenedSeconds: total,
-            )
-            .catchError((_) {});
+          videoId: currentVid,
+          songDuration: total,
+          listenedSeconds: total,
+        )
+            .then((_) {
+          debugPrint(
+              '[PlaybackTracking] Full completion registered with YouTube for: "$songTitle" ($currentVid)');
+        }).catchError((err) {
+          debugPrint(
+              '[PlaybackTracking] Error reporting completion for $currentVid: $err');
+        });
       }
     }
 
@@ -2121,23 +2167,40 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
 
   void _reportPreviousSongPlayback() {
     final prevSong = _songData;
-    if (prevSong == null) return;
+    if (prevSong == null || prevSong.isLocal) return;
+    if (prevSong.vId == _lastCompletedVideoId) {
+      _lastCompletedVideoId = null;
+      return;
+    }
     final listened = _audioPlayer.position.inSeconds;
-    if (listened < 5) return;
+    if (listened < 5) {
+      debugPrint(
+          '[PlaybackTracking] Song changed before 5s ("${prevSong.songName}", listened: ${listened}s). Skipping history report.');
+      return;
+    }
 
+    final parsedDur = _parseDurationSeconds(prevSong.duration);
     final total = songDuration.inSeconds > 0
         ? songDuration.inSeconds
-        : _parseDurationSeconds(prevSong.duration);
+        : (parsedDur > 0 ? parsedDur : (listened > 180 ? listened : 180));
 
     if (total <= 0) return;
 
+    debugPrint(
+        '[PlaybackTracking] Track switch/skip: "${prevSong.songName}" (${prevSong.vId}). Reporting ${listened}s / ${total}s listened to YouTube...');
     _repository
         .reportPlayback(
-          videoId: prevSong.vId,
-          songDuration: total,
-          listenedSeconds: listened,
-        )
-        .catchError((_) {});
+      videoId: prevSong.vId,
+      songDuration: total,
+      listenedSeconds: listened,
+    )
+        .then((_) {
+      debugPrint(
+          '[PlaybackTracking] Track switch watchtime registered for: "${prevSong.songName}"');
+    }).catchError((err) {
+      debugPrint(
+          '[PlaybackTracking] Error reporting previous song playback: $err');
+    });
   }
 
   Future<void> _resetAudioPlayer() async {
@@ -2387,6 +2450,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       return;
     }
 
+    _reportPreviousSongPlayback();
     // Reset audio player
     await _resetAudioPlayer();
 
@@ -2399,7 +2463,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _storeQuicksPicksList.clear();
 
     // Set the song data
-    _reportPreviousSongPlayback();
+    _reportedPlaybackVideoId = null;
     _songData = event.songData;
 
     emit(LoadingState(

@@ -74,6 +74,12 @@ class DataProvider {
         dataApiKey: ytApIKey,
       );
     }
+    final savedCookies = HiveDataBaseSingleton.instance.ytMusicCookie;
+    if (savedCookies != null && savedCookies.isNotEmpty) {
+      if (!_ytMusic.isAuthenticated) {
+        _ytMusic.setCookies(savedCookies);
+      }
+    }
   }
 
   Future<void> updateYtMusicCookies(String? cookies) async {
@@ -114,7 +120,7 @@ class DataProvider {
     }
 
     debugPrint(
-        'homeScreenSongs: recommendationOn=$isRecommendationOn, hasCookies=${savedCookies != null && savedCookies.isNotEmpty}, ytMusicAuthenticated=${_ytMusic.isAuthenticated}, sapisid=${_ytMusic.sapisid != null}');
+        '[YTRecommendations] Fetching home feed. RecommendationsOn=$isRecommendationOn, HasCookies=${savedCookies != null && savedCookies.isNotEmpty}, Authenticated=${_ytMusic.isAuthenticated}, SapisidLoaded=${_ytMusic.sapisid != null}');
 
     final fetchedData = await Future.wait(
       [
@@ -128,7 +134,12 @@ class DataProvider {
     final quickPicks = fetchedData[1] as List<yt.SongDetailed>; ////Quick Picks
 
     debugPrint(
-        'homeScreenSongs: loaded ${homeSectionData.length} home sections: ${homeSectionData.map((s) => '${s.title} (${s.stableTitle}, songs=${s.contents.whereType<yt.SongDetailed>().length})').toList()}');
+        '[YTRecommendations] Loaded ${homeSectionData.length} home shelves from YouTube Music:');
+    for (final s in homeSectionData) {
+      final songCount = s.contents.whereType<yt.SongDetailed>().length;
+      debugPrint(
+          '   • "${s.title}" [stableTitle: ${s.stableTitle}, songs: $songCount, totalItems: ${s.contents.length}]');
+    }
 
     return (homeSectionData: homeSectionData, quickPicks: quickPicks);
   }

@@ -61,12 +61,12 @@ dependencies:
   bloc_concurrency: ^0.3.0
   audio_service: ^0.18.18
   # dart_ytmusic_api:
-  #   path: dart_ytmusic_api
+  #   path: dart_ytmusic_api    
+  flutter_inappwebview: ^6.1.5  
   dart_ytmusic_api:
     git:
       url: https://github.com/AKSHAYK0UL/dart_ytmusic_api.git
-      ref: 19d3eddee38812ea5f69710d9659510777c5830b    
-  flutter_inappwebview: ^6.1.5  
+      ref: d9dcbd6a441b6dc3d21f710c56b5789c5b202661  
   youtube_explode_dart:
     git:
       url: https://github.com/AKSHAYK0UL/Youtube-Client-Dart.git

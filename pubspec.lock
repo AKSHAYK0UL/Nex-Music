@@ -413,8 +413,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "19d3eddee38812ea5f69710d9659510777c5830b"
-      resolved-ref: "19d3eddee38812ea5f69710d9659510777c5830b"
+      ref: d9dcbd6a441b6dc3d21f710c56b5789c5b202661
+      resolved-ref: d9dcbd6a441b6dc3d21f710c56b5789c5b202661
       url: "https://github.com/AKSHAYK0UL/dart_ytmusic_api.git"
     source: git
     version: "1.4.0"
