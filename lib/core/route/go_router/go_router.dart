@@ -23,6 +23,7 @@ import 'package:nex_music/presentation/saved_playlists/screen/saved_albums_scree
 import 'package:nex_music/presentation/search/screens/search_result_tab.dart';
 import 'package:nex_music/presentation/search/screens/search_screen.dart';
 import 'package:nex_music/presentation/setting/screen/phone_setting.dart';
+import 'package:nex_music/presentation/setting/screen/advanced_settings_screen.dart';
 import 'package:nex_music/presentation/setting/screen/settting.dart';
 import 'package:nex_music/presentation/user_playlist/screens/user_playlist.dart';
 import 'package:nex_music/presentation/user_playlist/screens/user_playlist_songs.dart';
@@ -313,6 +314,11 @@ class AppRouter {
           builder: (context, state) => const QualitySettingsScreen(),
         ),
         GoRoute(
+          path: RouterPath.advancedSettingsRoute,
+          name: RouterName.advancedSettingsName,
+          builder: (context, state) => const AdvancedSettingsScreen(),
+        ),
+        GoRoute(
           parentNavigatorKey: rootNavigatorKey,
           path: RouterPath.artistRoute,
           name: RouterName.artistName,
@@ -382,6 +388,7 @@ class RouterPath {
   static const String userInfoRoute = '/user-info';
   static const String userPlaylistSongsRoute = 'user-playlist-songs';
   static const String qualityRoute = '/quality';
+  static const String advancedSettingsRoute = '/advanced-settings';
   static const String offlineDownloadsRoute = '/offline_downloads';
   static const String podcastsRoute = '/podcasts';
   static const String audioBooksRoute = '/audio-books';
@@ -416,6 +423,7 @@ class RouterName {
   static const String userInfoName = 'userInfo';
   static const String userPlaylistSongsName = 'userPlaylistSongs';
   static const String qualityName = 'quality';
+  static const String advancedSettingsName = 'advancedSettings';
   static const String offlineDownloadsName = 'offlineDownloads';
   static const String podcastsName = 'podcasts';
   static const String audioBooksName = 'audioBooks';

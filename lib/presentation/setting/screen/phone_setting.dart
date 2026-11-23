@@ -8,10 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:nex_music/bloc/auth_bloc/bloc/auth_bloc.dart';
 import 'package:nex_music/bloc/theme_bloc/bloc/theme_bloc.dart';
 import 'package:nex_music/core/route/go_router/go_router.dart';
-import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/helper_function/sign_out_helper/handle_sign_out.dart';
-import 'package:nex_music/presentation/setting/screen/recommendation_info_screen.dart';
 
 const Color kAppleBackgroundColor = Color(0xFFF2F2F7);
 
@@ -20,15 +18,7 @@ class Setting extends StatelessWidget {
 
   final User currentUser;
 
-  Setting({super.key, required this.currentUser});
-
-  final _hiveDbInstance = HiveDataBaseSingleton.instance;
-  final ValueNotifier<bool> _recommendationNotifier = ValueNotifier<bool>(
-    HiveDataBaseSingleton.instance.recommendationStatus,
-  );
-  final ValueNotifier<bool> _cdnNotifier = ValueNotifier<bool>(
-    HiveDataBaseSingleton.instance.cdnEnabled,
-  );
+  const Setting({super.key, required this.currentUser});
 
   void _showLogoutDialog(BuildContext context) {
     showCupertinoDialog(
@@ -58,23 +48,6 @@ class Setting extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _openRecommendationInfo(BuildContext context) async {
-    final previousStatus = _hiveDbInstance.recommendationStatus;
-    await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => const RecommendationInfoScreen(),
-      ),
-    );
-    // Only update the switch if the recommendation state actually changed.
-    // The info screen already dispatches GetHomeSectonDataEvent() after any
-    // action, so we don't dispatch it again here — that would re-trigger the
-    // HomesectionBloc loading state and show a loading splash.
-    final newStatus = _hiveDbInstance.recommendationStatus;
-    if (newStatus != previousStatus) {
-      _recommendationNotifier.value = newStatus;
-    }
   }
 
   @override
@@ -153,47 +126,14 @@ class Setting extends StatelessWidget {
                     indent: 56,
                     endIndent: 0,
                     color: theme.dividerColor),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _recommendationNotifier,
-                  builder: (context, value, _) {
-                    final isLoggedIn = _hiveDbInstance.isYtMusicLoggedIn;
-                    final subtitle = isLoggedIn
-                        ? (value
-                            ? "Enabled · Tap to manage"
-                            : "Paused · Tap to manage")
-                        : "Tap to learn more & connect";
-                    return _buildSwitchTile(
-                      title: "Recommendations",
-                      subtitle: subtitle,
-                      icon: CupertinoIcons.sparkles,
-                      iconColor: Colors.orange,
-                      textColor: theme.colorScheme.onSurface,
-                      value: value,
-                      onTap: () => _openRecommendationInfo(context),
-                      onChanged: (_) => _openRecommendationInfo(context),
-                    );
-                  },
-                ),
-                Divider(
-                    height: 1,
-                    indent: 56,
-                    endIndent: 0,
-                    color: theme.dividerColor),
-                ValueListenableBuilder<bool>(
-                  valueListenable: _cdnNotifier,
-                  builder: (context, value, _) {
-                    return _buildSwitchTile(
-                      title: "Fast Load (CDN Cache)",
-                      icon: CupertinoIcons.bolt_fill,
-                      iconColor: const Color(0xFF34C759),
-                      textColor: theme.colorScheme.onSurface,
-                      value: value,
-                      onChanged: (newValue) async {
-                        await _hiveDbInstance.saveCdnEnabled(newValue);
-                        _cdnNotifier.value = newValue;
-                      },
-                    );
-                  },
+                _buildSettingsTile(
+                  context,
+                  title: "Advanced",
+                  icon: CupertinoIcons.settings,
+                  iconColor: const Color(0xFF8E8E93),
+                  textColor: theme.colorScheme.onSurface,
+                  dividerColor: theme.dividerColor,
+                  onTap: () => context.push(RouterPath.advancedSettingsRoute),
                 ),
                 Divider(
                     height: 1,

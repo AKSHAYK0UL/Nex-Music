@@ -67,7 +67,7 @@ class QualitySettingState extends State<QualitySetting> {
                 downloadQuality: downloadQualityNotifier.value),
           ),
         );
-    context.read<hs.HomesectionBloc>().add(hs.GetHomeSectonDataEvent());
+    context.read<hs.HomesectionBloc>().add(hs.RefreshHomeSilentlyEvent());
     _initialThumbnailQuality = thumbnailQualityNotifier.value;
     _initialAudioQuality = audioQualityNotifier.value;
     _initialDownloadQuality = downloadQualityNotifier.value;

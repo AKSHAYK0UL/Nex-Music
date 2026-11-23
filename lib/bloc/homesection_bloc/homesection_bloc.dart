@@ -20,6 +20,7 @@ class HomesectionBloc extends Bloc<HomesectionEvent, HomesectionState> {
       this._repository, this._dbRepository, this._hiveDataBaseSingleton)
       : super(HomesectionInitial()) {
     on<GetHomeSectonDataEvent>(_getHomeSectionData);
+    on<RefreshHomeSilentlyEvent>(_refreshHomeSilently);
   }
 
   Future<void> _getHomeSectionData(
@@ -66,6 +67,52 @@ class HomesectionBloc extends Bloc<HomesectionEvent, HomesectionState> {
           errorMessage: e.toString(),
         ),
       );
+    }
+  }
+
+  // Fetches fresh home data without emitting [LoadingState].
+  // HomeScreen stays on its current content while the network call runs,
+  // then swaps to the new data when it arrives — no splash, no flicker.
+  Future<void> _refreshHomeSilently(
+      RefreshHomeSilentlyEvent event, Emitter<HomesectionState> emit) async {
+    try {
+      String inputPrompt = DEFAULT_PROMPT;
+      if (_hiveDataBaseSingleton.recommendationStatus) {
+        inputPrompt = await recommendationPrompt(_dbRepository);
+      }
+
+      final homeSectionData =
+          await _repository.homeScreenSongsList(inputPrompt);
+
+      final playlistsSet = homeSectionData.playlist.toSet();
+
+      emit(
+        HomeSectionStateData(
+          quickPicks: homeSectionData.quickPicks,
+          homeSections: homeSectionData.homeSections,
+          playlist: playlistsSet.toList(),
+          albums: homeSectionData.albums,
+          globalHitsPlaylists: homeSectionData.globalHitsPlaylists,
+          trendingGloballyPlaylists: homeSectionData.trendingGloballyPlaylists,
+          trendingPunjabiPlaylists: homeSectionData.trendingPunjabiPlaylists,
+          trendingPunjabiAlbums: homeSectionData.trendingPunjabiAlbums,
+          trendingHindiPlaylists: homeSectionData.trendingHindiPlaylists,
+          trendingHindiAlbums: homeSectionData.trendingHindiAlbums,
+          trendingEnglishPlaylists: homeSectionData.trendingEnglishPlaylists,
+          trendingPhonkPlaylists: homeSectionData.trendingPhonkPlaylists,
+          trendingPhonkAlbums: homeSectionData.trendingPhonkAlbums,
+          trendingBrazilianPhonkPlaylists:
+              homeSectionData.trendingBrazilianPhonkPlaylists,
+          trendingBrazilianPhonkAlbums:
+              homeSectionData.trendingBrazilianPhonkAlbums,
+          nonstopPunjabiMashup: homeSectionData.nonstopPunjabiMashup,
+          nonstopHindiMashup: homeSectionData.nonstopHindiMashup,
+          nonstopEnglishMashup: homeSectionData.nonstopEnglishMashup,
+        ),
+      );
+    } catch (_) {
+      // Silent refresh — ignore the error. The existing home content
+      // stays on screen. The user can pull-to-refresh if needed.
     }
   }
 }

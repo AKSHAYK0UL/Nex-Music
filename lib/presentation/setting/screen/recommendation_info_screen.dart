@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/yt_music_connection_status.dart';
+import 'package:nex_music/presentation/setting/screen/recommendation_info_shimmer_screen.dart';
 import 'package:nex_music/presentation/setting/screen/yt_music_login_screen.dart';
 import 'package:nex_music/repository/home_repo/repository.dart';
 
@@ -54,6 +54,12 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
   String? _errorMessage;
   VoidCallback? _retryAction;
 
+  // Set to true whenever an action changes recommendation state so that
+  // phone_setting.dart can dispatch GetHomeSectonDataEvent on pop keeping
+  // the event out of this screen and preventing the HomesectionBloc
+  // LoadingState from triggering the full-screen splash.
+  bool _needsHomeRefresh = false;
+
   bool get _isBusy => _phase != YtMusicConnectPhase.idle;
 
   YtMusicConnectionStatus get _status {
@@ -95,7 +101,6 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
     if (_isBusy) return;
 
     final navigator = Navigator.of(context);
-    final homeBloc = context.read<HomesectionBloc>();
 
     setState(() {
       _phase = isReconnect
@@ -144,7 +149,7 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
         _phase = YtMusicConnectPhase.idle;
       });
       HapticFeedback.lightImpact();
-      homeBloc.add(GetHomeSectonDataEvent());
+      _needsHomeRefresh = true;
       showSnackbar(context, successMessage);
     } else {
       setState(() {
@@ -182,7 +187,6 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
     if (_isBusy) return;
 
     final repo = context.read<Repository>();
-    final homeBloc = context.read<HomesectionBloc>();
 
     setState(() {
       _phase = YtMusicConnectPhase.pausing;
@@ -197,7 +201,7 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
         _recommendationOn = false;
         _phase = YtMusicConnectPhase.idle;
       });
-      homeBloc.add(GetHomeSectonDataEvent());
+      _needsHomeRefresh = true;
       showSnackbar(context, 'Recommendations paused');
     } catch (e) {
       debugPrint('Error pausing recommendations: $e');
@@ -218,7 +222,6 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
     if (_isBusy) return;
 
     final repo = context.read<Repository>();
-    final homeBloc = context.read<HomesectionBloc>();
 
     setState(() {
       _phase = YtMusicConnectPhase.removing;
@@ -252,7 +255,7 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
       _hasAgreed = false;
       _phase = YtMusicConnectPhase.idle;
     });
-    homeBloc.add(GetHomeSectonDataEvent());
+    _needsHomeRefresh = true;
     showSnackbar(
       context,
       webViewCleared
@@ -418,13 +421,55 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
     final textSecondary = theme.colorScheme.onSurface.withValues(alpha: 0.7);
     final cardColor = theme.cardColor;
 
-    return Scaffold(
+    // Show the shimmer as a full overlay during pause / remove so the
+    // underlying HomesectionBloc never gets a chance to show its splash.
+    final bool showShimmerOverlay =
+        _phase == YtMusicConnectPhase.pausing ||
+        _phase == YtMusicConnectPhase.removing;
+
+    return Stack(
+      children: [
+        Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
+        leadingWidth: 100,
+        leading: GestureDetector(
+          onTap: () => Navigator.of(context).pop(_needsHomeRefresh),
+          child: Row(
+            children: [
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
+              Text(
+                'Settings',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 17,
+                  backgroundColor: theme.scaffoldBackgroundColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(theme),
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
+              child: Text(
+                'Recommendations',
+                style: TextStyle(
+                  fontFamily: 'serif',
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ),
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
@@ -596,38 +641,18 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  // Header
-
-  Widget _buildHeader(ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-      child: Row(
-        children: [
-          CupertinoButton(
-            padding: const EdgeInsets.all(12),
-            minimumSize: const Size(44, 44),
-            onPressed: () => Navigator.of(context).pop(),
-            child: Icon(
-              CupertinoIcons.chevron_back,
-              color: theme.colorScheme.onSurface,
-              size: 22,
-              semanticLabel: 'Back',
-            ),
+        // Scaffold closing paren
+        ),
+        // Shimmer overlay for pause / remove operations — covers the entire
+        // screen so the underlying HomesectionBloc LoadingState never shows.
+        if (showShimmerOverlay)
+          RecommendationInfoShimmerScreen(
+            showStatusCard: true,
+            showConsentRow: !_isLoggedIn,
+            // Back button is blocked while the operation runs.
+            showBackButton: false,
           ),
-          Text(
-            'Recommendations',
-            style: TextStyle(
-              fontFamily: 'serif',
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-        ],
-      ),
+      ],
     );
   }
 
