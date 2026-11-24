@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
+import 'package:nex_music/core/ui_component/collapsing_title_sliver_app_bar.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/enum/yt_music_connection_status.dart';
 import 'package:nex_music/presentation/setting/screen/recommendation_info_shimmer_screen.dart';
@@ -430,54 +431,24 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
     return Stack(
       children: [
         Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        leadingWidth: 100,
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(_needsHomeRefresh),
-          child: Row(
-            children: [
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
-              Text(
-                'Settings',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 17,
-                  backgroundColor: theme.scaffoldBackgroundColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
-              child: Text(
-                'Recommendations',
-                style: TextStyle(
-                  fontFamily: 'serif',
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                  letterSpacing: -0.5,
-                ),
-              ),
+          backgroundColor: theme.scaffoldBackgroundColor,
+          body: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(bottom: 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHero(theme, textSecondary),
+            slivers: [
+              CollapsingTitleSliverAppBar(
+                title: 'Recommendations',
+                backLabel: 'Settings',
+                onBackTap: () => Navigator.of(context).pop(_needsHomeRefresh),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 40),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHero(theme, textSecondary),
 
                     //  STATUS (connecting / connected / paused / error)
                     if (_status != YtMusicConnectionStatus.notConnected)
@@ -641,8 +612,6 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
           ],
         ),
       ),
-        // Scaffold closing paren
-        ),
         // Shimmer overlay for pause / remove operations — covers the entire
         // screen so the underlying HomesectionBloc LoadingState never shows.
         if (showShimmerOverlay)

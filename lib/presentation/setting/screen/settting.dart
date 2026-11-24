@@ -1,6 +1,6 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:nex_music/core/ui_component/collapsing_title_sliver_app_bar.dart';
 import 'package:nex_music/presentation/setting/widget/onlysetting.dart';
 
 class QualitySettingsScreen extends StatefulWidget {
@@ -60,48 +60,21 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        leadingWidth: 100,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Row(
-            children: [
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
-              Text(
-                'Settings',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 17,
-                  backgroundColor: theme.scaffoldBackgroundColor,
-                ),
-              ),
-            ],
-          ),
+      body: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(
+          parent: BouncingScrollPhysics(),
         ),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
-            child: Text(
-              "Quality Settings",
-              style: TextStyle(
-                fontFamily: 'serif',
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface,
-                letterSpacing: -0.5,
-              ),
-            ),
+        slivers: [
+          CollapsingTitleSliverAppBar(
+            title: "Quality Settings",
+            backLabel: "Settings",
+            onBackTap: () => Navigator.pop(context),
           ),
-          Expanded(
+          SliverToBoxAdapter(
             child: QualitySetting(
               key: _qualitySettingKey,
               hasChangesNotifier: _hasChangesNotifier,
+              physics: const NeverScrollableScrollPhysics(),
             ),
           ),
         ],
@@ -147,4 +120,3 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nex_music/core/ui_component/collapsing_title_sliver_app_bar.dart';
 
 
 class RecommendationInfoShimmerScreen extends StatefulWidget {
@@ -61,126 +62,97 @@ class _RecommendationInfoShimmerScreenState
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: AppBar(
-        backgroundColor: bgColor,
-        elevation: 0,
-        leadingWidth: 100,
-        leading: GestureDetector(
-          onTap: widget.showBackButton ? () => Navigator.of(context).pop() : null,
-          child: Row(
-            children: [
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
-              Text(
-                'Settings',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 17,
-                  backgroundColor: bgColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
       body: _ShimmerScope(
         animation: _controller,
         colors: colors,
         child: Semantics(
           label: 'Loading Recommendations',
           liveRegion: true,
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
-                  child: Text(
-                    'Recommendations',
-                    style: TextStyle(
-                      fontFamily: 'serif',
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
+          child: CustomScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            slivers: [
+              CollapsingTitleSliverAppBar(
+                title: 'Recommendations',
+                backLabel: 'Settings',
+                showBackButton: widget.showBackButton,
+                onBackTap: widget.showBackButton
+                    ? () => Navigator.of(context).pop()
+                    : null,
+                backgroundColor: bgColor,
+              ),
+              SliverToBoxAdapter(
+                child: ExcludeSemantics(
+                  child: Padding(
                     padding: const EdgeInsets.only(bottom: 40),
-                    child: ExcludeSemantics(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildHero(),
-                          if (widget.showStatusCard)
-                            _buildStatusCard(cardColor),
-                          // ABOUT
-                          const _SectionHeaderBone(width: 56),
-                          _GroupedContainer(
-                            color: cardColor,
-                            children: [
-                              const _InfoCardBone(titleWidth: 190, bodyLines: 3),
-                              _divider(theme),
-                              const _InfoCardBone(titleWidth: 140, bodyLines: 4),
-                            ],
-                          ),
-                          // PERMISSIONS & ACCESS
-                          const _SectionHeaderBone(width: 150),
-                          _GroupedContainer(
-                            color: cardColor,
-                            children: [
-                              const _InfoCardBone(titleWidth: 160, bodyLines: 4),
-                              _divider(theme),
-                              const _InfoCardBone(titleWidth: 110, bodyLines: 3),
-                            ],
-                          ),
-                          // PRIVACY & SECURITY
-                          const _SectionHeaderBone(width: 130),
-                          _GroupedContainer(
-                            color: cardColor,
-                            children: const [
-                              _InfoCardBone(titleWidth: 200, bodyLines: 5),
-                            ],
-                          ),
-                          // YOUR CONTROLS
-                          const _SectionHeaderBone(width: 110),
-                          _GroupedContainer(
-                            color: cardColor,
-                            children: [
-                              const _InfoCardBone(titleWidth: 100, bodyLines: 2),
-                              _divider(theme),
-                              const _InfoCardBone(titleWidth: 140, bodyLines: 3),
-                              _divider(theme),
-                              const _InfoCardBone(titleWidth: 130, bodyLines: 3),
-                            ],
-                          ),
-                          if (widget.showConsentRow) ...[
-                            const SizedBox(height: 28),
-                            _GroupedContainer(
-                              color: cardColor,
-                              children: const [_ConsentRowBone()],
-                            ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHero(),
+                        if (widget.showStatusCard)
+                          _buildStatusCard(cardColor),
+                        // ABOUT
+                        const _SectionHeaderBone(width: 56),
+                        _GroupedContainer(
+                          color: cardColor,
+                          children: [
+                            const _InfoCardBone(titleWidth: 190, bodyLines: 3),
+                            _divider(theme),
+                            const _InfoCardBone(titleWidth: 140, bodyLines: 4),
                           ],
-                          const SizedBox(height: 20),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: _Bone(
-                              height: 52,
-                              radius: 12,
-                              onCard: false,
-                            ),
+                        ),
+                        // PERMISSIONS & ACCESS
+                        const _SectionHeaderBone(width: 150),
+                        _GroupedContainer(
+                          color: cardColor,
+                          children: [
+                            const _InfoCardBone(titleWidth: 160, bodyLines: 4),
+                            _divider(theme),
+                            const _InfoCardBone(titleWidth: 110, bodyLines: 3),
+                          ],
+                        ),
+                        // PRIVACY & SECURITY
+                        const _SectionHeaderBone(width: 130),
+                        _GroupedContainer(
+                          color: cardColor,
+                          children: const [
+                            _InfoCardBone(titleWidth: 200, bodyLines: 5),
+                          ],
+                        ),
+                        // YOUR CONTROLS
+                        const _SectionHeaderBone(width: 110),
+                        _GroupedContainer(
+                          color: cardColor,
+                          children: [
+                            const _InfoCardBone(titleWidth: 100, bodyLines: 2),
+                            _divider(theme),
+                            const _InfoCardBone(titleWidth: 140, bodyLines: 3),
+                            _divider(theme),
+                            const _InfoCardBone(titleWidth: 130, bodyLines: 3),
+                          ],
+                        ),
+                        if (widget.showConsentRow) ...[
+                          const SizedBox(height: 28),
+                          _GroupedContainer(
+                            color: cardColor,
+                            children: const [_ConsentRowBone()],
                           ),
-                          const SizedBox(height: 16),
                         ],
-                      ),
+                        const SizedBox(height: 20),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: _Bone(
+                            height: 52,
+                            radius: 12,
+                            onCard: false,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

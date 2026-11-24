@@ -11,7 +11,13 @@ import 'package:nex_music/enum/quality.dart';
 
 class QualitySetting extends StatefulWidget {
   final ValueNotifier<bool>? hasChangesNotifier;
-  const QualitySetting({super.key, this.hasChangesNotifier});
+  final ScrollPhysics? physics;
+
+  const QualitySetting({
+    super.key,
+    this.hasChangesNotifier,
+    this.physics,
+  });
 
   @override
   State<QualitySetting> createState() => QualitySettingState();
@@ -93,7 +99,7 @@ class QualitySettingState extends State<QualitySetting> {
         }
       },
       child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
+        physics: widget.physics ?? const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

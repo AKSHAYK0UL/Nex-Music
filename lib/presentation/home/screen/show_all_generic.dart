@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nex_music/core/ui_component/collapsing_title_sliver_app_bar.dart';
 import 'package:nex_music/model/playlistmodel.dart';
 import 'package:nex_music/presentation/home/widget/home_playlist.dart';
 
@@ -17,112 +18,15 @@ class ShowAllGeneric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double statusBarHeight = MediaQuery.of(context).padding.top;
-    const double expandedBarHeight = 110.0;
-
     return Scaffold(
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
-          SliverAppBar(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            surfaceTintColor: Colors.transparent,
-            elevation: 0,
-            pinned: true,
-            stretch: true,
-            expandedHeight: expandedBarHeight,
-            automaticallyImplyLeading: false,
-            flexibleSpace: LayoutBuilder(
-              builder: (context, constraints) {
-                final double top = constraints.biggest.height;
-                final double minHeight = kToolbarHeight + statusBarHeight;
-
-                // Calculate ratios for animations
-                // 1.0 = fully expanded, 0.0 = fully collapsed
-                final double expandRatio =
-                    ((top - minHeight) / (expandedBarHeight - kToolbarHeight))
-                        .clamp(0.0, 1.0);
-                final double collapseRatio = 1.0 - expandRatio;
-
-                return Stack(
-                  children: [
-                    //  STATIC BACK BUTTON (Always visible)
-                    Positioned(
-                      left: 8,
-                      top: statusBarHeight,
-                      height: kToolbarHeight,
-                      child: GestureDetector(
-                        onTap: () => context.pop(),
-                        behavior: HitTestBehavior.opaque,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.arrow_back_ios_new,
-                                color: Colors.red, size: 20),
-                            const SizedBox(width: 4),
-                            Opacity(
-                              opacity: expandRatio,
-                              child: const Text(
-                                'Home',
-                                style:
-                                    TextStyle(color: Colors.red, fontSize: 17),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // SMALL TITLE (Centered in Toolbar - Fades in on collapse)
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      top: statusBarHeight,
-                      height: kToolbarHeight,
-                      child: Container(
-                        alignment: Alignment.centerLeft,
-                        margin: const EdgeInsets.only(left: 40),
-                        child: Opacity(
-                          // Starts fading in after 80% of the scroll is done
-                          opacity: collapseRatio > 0.8
-                              ? (collapseRatio - 0.8) / 0.2
-                              : 0.0,
-                          child: Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.onSurface,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    //  BIG TITLE (Bottom Left - Fades out on collapse)
-                    Positioned(
-                      left: 20,
-                      bottom: 12,
-                      child: Opacity(
-                        opacity: expandRatio,
-                        child: Text(
-                          title,
-                          style: TextStyle(
-                            fontFamily: 'serif',
-                            fontSize: 28,
-                            overflow: TextOverflow.ellipsis,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                            letterSpacing: -1.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+          CollapsingTitleSliverAppBar(
+            title: title,
+            backLabel: 'Home',
+            onBackTap: () => context.pop(),
+            bigTitleFontSize: 28.0,
           ),
 
           // CONTENT SECTION
