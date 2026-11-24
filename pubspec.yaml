@@ -67,7 +67,7 @@ dependencies:
     git:
       url: https://github.com/AKSHAYK0UL/dart_ytmusic_api.git
       ref: d9dcbd6a441b6dc3d21f710c56b5789c5b202661  
-  youtube_explode_dart:
+  youtube_explode_dart: 
     git:
       url: https://github.com/AKSHAYK0UL/Youtube-Client-Dart.git
       ref: cc761744fff035802c8e3af9f5b4e0975210cbee    

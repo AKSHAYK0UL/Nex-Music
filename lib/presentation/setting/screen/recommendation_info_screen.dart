@@ -424,8 +424,7 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
 
     // Show the shimmer as a full overlay during pause / remove so the
     // underlying HomesectionBloc never gets a chance to show its splash.
-    final bool showShimmerOverlay =
-        _phase == YtMusicConnectPhase.pausing ||
+    final bool showShimmerOverlay = _phase == YtMusicConnectPhase.pausing ||
         _phase == YtMusicConnectPhase.removing;
 
     return Stack(
@@ -439,7 +438,7 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
             slivers: [
               CollapsingTitleSliverAppBar(
                 title: 'Recommendations',
-                backLabel: 'Settings',
+                backLabel: 'Advanced',
                 onBackTap: () => Navigator.of(context).pop(_needsHomeRefresh),
               ),
               SliverToBoxAdapter(
@@ -448,170 +447,173 @@ class _RecommendationInfoScreenState extends State<RecommendationInfoScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildHero(theme, textSecondary),
+                      // _buildHero(theme, textSecondary),
 
-                    //  STATUS (connecting / connected / paused / error)
-                    if (_status != YtMusicConnectionStatus.notConnected)
-                      _buildStatusCard(theme, cardColor, textSecondary),
+                      //  STATUS (connecting / connected / paused / error)
+                      if (_status != YtMusicConnectionStatus.notConnected)
+                        _buildStatusCard(theme, cardColor, textSecondary),
 
-                    // ABOUT
-                    _buildSectionHeader('ABOUT', textSecondary),
-                    _buildGroupedContainer(cardColor, [
-                      _buildInfoCard(
-                        icon: CupertinoIcons.sparkles,
-                        iconColor: Colors.orange,
-                        title: 'What is Recommendations?',
-                        body:
-                            'Recommendations personalizes your home feed with '
-                            'songs, mixes, and playlists based on your YouTube '
-                            'Music listening history. It\u2019s optional, and '
-                            'you can turn it off at any time.',
-                        theme: theme,
-                      ),
-                      _divider(theme),
-                      _buildInfoCard(
-                        icon: CupertinoIcons.arrow_2_circlepath,
-                        iconColor: Colors.blue,
-                        title: 'How does it work?',
-                        body: 'Once you connect, Nex Music uses your YouTube '
-                            'Music session to load suggestions made for you. '
-                            'Music you play in Nex Music is reported back to '
-                            'YouTube Music, which helps improve future '
-                            'suggestions.',
-                        theme: theme,
-                      ),
-                    ]),
-
-                    //  PERMISSIONS & ACCESS
-                    _buildSectionHeader('PERMISSIONS & ACCESS', textSecondary),
-                    _buildGroupedContainer(cardColor, [
-                      _buildInfoCard(
-                        icon: CupertinoIcons.person_crop_circle_fill,
-                        iconColor: const Color(0xFF007AFF),
-                        title: 'What access is needed',
-                        body:
-                            'You sign in to your Google account on Google\u2019s '
-                            'own page inside the app. Nex Music never sees or '
-                            'stores your password. After sign-in, the app keeps '
-                            'the session cookies that YouTube Music provides.',
-                        theme: theme,
-                      ),
-                      _divider(theme),
-                      _buildInfoCard(
-                        icon: CupertinoIcons.music_note_list,
-                        iconColor: const Color(0xFFFF2D55),
-                        title: 'How it\u2019s used',
-                        body: 'This access is used only for Recommendations: '
-                            'to request your personalized suggestions and to '
-                            'report what you play. It isn\u2019t intended to '
-                            'reach any unrelated YouTube or Google account '
-                            'information.',
-                        theme: theme,
-                      ),
-                    ]),
-
-                    //  PRIVACY & SECURITY
-                    _buildSectionHeader('PRIVACY & SECURITY', textSecondary),
-                    _buildGroupedContainer(cardColor, [
-                      _buildInfoCard(
-                        icon: CupertinoIcons.lock_shield_fill,
-                        iconColor: const Color(0xFF34C759),
-                        title: 'Stored on your device only',
-                        body: _storageIsEncrypted
-                            ? 'Your session data stays in the app\u2019s private '
-                                'storage and is encrypted at rest using your '
-                                'device\u2019s secure storage. It\u2019s never kept '
-                                'in plain text, never uploaded to a server, and '
-                                'never shared with third parties. It\u2019s also '
-                                'kept separate from unrelated app features.'
-                            : 'Your session data stays in the app\u2019s private '
-                                'storage on this device. It\u2019s never uploaded '
-                                'to a server or shared with third parties, and '
-                                'it\u2019s kept separate from unrelated app '
-                                'features.',
-                        theme: theme,
-                      ),
-                      // _divider(theme),
-                      // _buildInfoCard(
-                      //   icon: CupertinoIcons.exclamationmark_shield_fill,
-                      //   iconColor: const Color(0xFFFF9500),
-                      //   title: 'Google security notification',
-                      //   body:
-                      //       'Google may email you a security alert saying your '
-                      //       'account was accessed from your '
-                      //       '${DeviceInfoService.instance.deviceName}. '
-                      //       "That\u2019s because the sign-in page in Nex Music "
-                      //       'identifies as your device for compatibility with '
-                      //       'YouTube Music. Whether Google sends an alert is '
-                      //       'up to Google and can\u2019t be guaranteed. If the '
-                      //       'timing matches when you signed in, it\u2019s '
-                      //       'expected.',
-                      //   theme: theme,
-                      // ),
-                    ]),
-
-                    //  YOUR CONTROLS
-                    _buildSectionHeader('YOUR CONTROLS', textSecondary),
-                    _buildGroupedContainer(cardColor, [
-                      _buildInfoCard(
-                        icon: CupertinoIcons.arrow_clockwise,
-                        iconColor: const Color(0xFF5856D6),
-                        title: 'Reconnect',
-                        body: 'Refresh your connection if it expires or stops '
-                            'working.',
-                        theme: theme,
-                      ),
-                      _divider(theme),
-                      _buildInfoCard(
-                        icon: CupertinoIcons.pause_fill,
-                        iconColor: const Color(0xFFFF9500),
-                        title: 'Disconnect / Pause',
-                        body:
-                            'Stop using your account for Recommendations. Your '
-                            'connection is kept so you can resume without '
-                            'signing in again.',
-                        theme: theme,
-                      ),
-                      _divider(theme),
-                      _buildInfoCard(
-                        icon: CupertinoIcons.trash_fill,
-                        iconColor: CupertinoColors.destructiveRed,
-                        title: 'Remove Account',
-                        body:
-                            'Permanently delete all YouTube Music session data '
-                            'from this device. You\u2019ll need to sign in again '
-                            'to use Recommendations.',
-                        theme: theme,
-                      ),
-                    ]),
-
-                    // Consent (only when establishing a new connection)
-                    if (!_isLoggedIn) ...[
-                      const SizedBox(height: 28),
+                      // ABOUT
+                      _buildSectionHeader('ABOUT', textSecondary),
                       _buildGroupedContainer(cardColor, [
-                        _buildAgreementRow(theme),
-                      ]),
-                    ],
-
-                    const SizedBox(height: 20),
-                    _buildActionButton(theme),
-                    if (!_isLoggedIn && !_hasAgreed && !_isBusy)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(32, 10, 32, 0),
-                        child: Text(
-                          'Select the checkbox above to continue.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 13, color: textSecondary),
+                        _buildInfoCard(
+                          icon: CupertinoIcons.sparkles,
+                          iconColor: Colors.orange,
+                          title: 'What is Recommendations?',
+                          body:
+                              'Recommendations personalizes your home feed with '
+                              'songs, mixes, and playlists based on your YouTube '
+                              'Music listening history. It\u2019s optional, and '
+                              'you can turn it off at any time.',
+                          theme: theme,
                         ),
-                      ),
-                    const SizedBox(height: 16),
-                  ],
+                        _divider(theme),
+                        _buildInfoCard(
+                          icon: CupertinoIcons.arrow_2_circlepath,
+                          iconColor: Colors.blue,
+                          title: 'How does it work?',
+                          body: 'Once you connect, Nex Music uses your YouTube '
+                              'Music session to load suggestions made for you. '
+                              'Music you play in Nex Music is reported back to '
+                              'YouTube Music, which helps improve future '
+                              'suggestions.',
+                          theme: theme,
+                        ),
+                      ]),
+
+                      //  PERMISSIONS & ACCESS
+                      _buildSectionHeader(
+                          'PERMISSIONS & ACCESS', textSecondary),
+                      _buildGroupedContainer(cardColor, [
+                        _buildInfoCard(
+                          icon: CupertinoIcons.person_crop_circle_fill,
+                          iconColor: const Color(0xFF007AFF),
+                          title: 'What access is needed',
+                          body:
+                              'You sign in to your Google account on Google\u2019s '
+                              'own page inside the app. Nex Music never sees or '
+                              'stores your password. After sign-in, the app keeps '
+                              'the session cookies that YouTube Music provides.',
+                          theme: theme,
+                        ),
+                        _divider(theme),
+                        _buildInfoCard(
+                          icon: CupertinoIcons.music_note_list,
+                          iconColor: const Color(0xFFFF2D55),
+                          title: 'How it\u2019s used',
+                          body: 'This access is used only for Recommendations: '
+                              'to request your personalized suggestions and to '
+                              'report what you play. It isn\u2019t intended to '
+                              'reach any unrelated YouTube or Google account '
+                              'information.',
+                          theme: theme,
+                        ),
+                      ]),
+
+                      //  PRIVACY & SECURITY
+                      _buildSectionHeader('PRIVACY & SECURITY', textSecondary),
+                      _buildGroupedContainer(cardColor, [
+                        _buildInfoCard(
+                          icon: CupertinoIcons.lock_shield_fill,
+                          iconColor: const Color(0xFF34C759),
+                          title: 'Stored on your device only',
+                          body: _storageIsEncrypted
+                              ? 'Your session data stays in the app\u2019s private '
+                                  'storage and is encrypted at rest using your '
+                                  'device\u2019s secure storage. It\u2019s never kept '
+                                  'in plain text, never uploaded to a server, and '
+                                  'never shared with third parties. It\u2019s also '
+                                  'kept separate from unrelated app features.'
+                              : 'Your session data stays in the app\u2019s private '
+                                  'storage on this device. It\u2019s never uploaded '
+                                  'to a server or shared with third parties, and '
+                                  'it\u2019s kept separate from unrelated app '
+                                  'features.',
+                          theme: theme,
+                        ),
+                        // _divider(theme),
+                        // _buildInfoCard(
+                        //   icon: CupertinoIcons.exclamationmark_shield_fill,
+                        //   iconColor: const Color(0xFFFF9500),
+                        //   title: 'Google security notification',
+                        //   body:
+                        //       'Google may email you a security alert saying your '
+                        //       'account was accessed from your '
+                        //       '${DeviceInfoService.instance.deviceName}. '
+                        //       "That\u2019s because the sign-in page in Nex Music "
+                        //       'identifies as your device for compatibility with '
+                        //       'YouTube Music. Whether Google sends an alert is '
+                        //       'up to Google and can\u2019t be guaranteed. If the '
+                        //       'timing matches when you signed in, it\u2019s '
+                        //       'expected.',
+                        //   theme: theme,
+                        // ),
+                      ]),
+
+                      //  YOUR CONTROLS
+                      _buildSectionHeader('YOUR CONTROLS', textSecondary),
+                      _buildGroupedContainer(cardColor, [
+                        _buildInfoCard(
+                          icon: CupertinoIcons.arrow_clockwise,
+                          iconColor: const Color(0xFF5856D6),
+                          title: 'Reconnect',
+                          body:
+                              'Refresh your connection if it expires or stops '
+                              'working.',
+                          theme: theme,
+                        ),
+                        _divider(theme),
+                        _buildInfoCard(
+                          icon: CupertinoIcons.pause_fill,
+                          iconColor: const Color(0xFFFF9500),
+                          title: 'Disconnect / Pause',
+                          body:
+                              'Stop using your account for Recommendations. Your '
+                              'connection is kept so you can resume without '
+                              'signing in again.',
+                          theme: theme,
+                        ),
+                        _divider(theme),
+                        _buildInfoCard(
+                          icon: CupertinoIcons.trash_fill,
+                          iconColor: CupertinoColors.destructiveRed,
+                          title: 'Remove Account',
+                          body:
+                              'Permanently delete all YouTube Music session data '
+                              'from this device. You\u2019ll need to sign in again '
+                              'to use Recommendations.',
+                          theme: theme,
+                        ),
+                      ]),
+
+                      // Consent (only when establishing a new connection)
+                      if (!_isLoggedIn) ...[
+                        const SizedBox(height: 28),
+                        _buildGroupedContainer(cardColor, [
+                          _buildAgreementRow(theme),
+                        ]),
+                      ],
+
+                      const SizedBox(height: 20),
+                      _buildActionButton(theme),
+                      if (!_isLoggedIn && !_hasAgreed && !_isBusy)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(32, 10, 32, 0),
+                          child: Text(
+                            'Select the checkbox above to continue.',
+                            textAlign: TextAlign.center,
+                            style:
+                                TextStyle(fontSize: 13, color: textSecondary),
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
         // Shimmer overlay for pause / remove operations — covers the entire
         // screen so the underlying HomesectionBloc LoadingState never shows.
         if (showShimmerOverlay)

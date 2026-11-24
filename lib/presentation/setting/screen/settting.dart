@@ -22,13 +22,13 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
     super.dispose();
   }
 
-  void _showRestartDialog(BuildContext context) {
+  void _showApplyDialog(BuildContext context) {
     showCupertinoDialog(
       context: context,
       builder: (BuildContext context) => CupertinoAlertDialog(
-        title: const Text("Restart Required"),
+        title: const Text("Apply Changes"),
         content: const Text(
-          "The app needs to restart and clear cache to apply the new quality settings. Do you want to proceed?",
+          "Are you sure you want to apply the quality changes?",
         ),
         actions: <CupertinoDialogAction>[
           CupertinoDialogAction(
@@ -41,10 +41,8 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
             isDestructiveAction: false,
             onPressed: () async {
               await _qualitySettingKey.currentState?.applyChanges();
-
               if (context.mounted) {
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil('/', (route) => false);
+                Navigator.pop(context);
               }
             },
             child: const Text("OK"),
@@ -100,7 +98,7 @@ class _QualitySettingsScreenState extends State<QualitySettingsScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    onPressed: () => _showRestartDialog(context),
+                    onPressed: () => _showApplyDialog(context),
                     child: const Text(
                       "Apply Changes",
                       style: TextStyle(
