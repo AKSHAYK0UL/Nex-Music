@@ -22,8 +22,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _recommendationNotifier =
-        ValueNotifier<bool>(_hiveDb.recommendationStatus);
+    _recommendationNotifier = ValueNotifier<bool>(_hiveDb.recommendationStatus);
     _cdnNotifier = ValueNotifier<bool>(_hiveDb.cdnEnabled);
   }
 
@@ -34,7 +33,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
     super.dispose();
   }
 
-  //  Recommendation  
+  //  Recommendation
 
   void _openRecommendationInfo() async {
     final previousStatus = _hiveDb.recommendationStatus;
@@ -50,7 +49,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
     }
   }
 
-  //  CDN toggle 
+  //  CDN toggle
 
   Future<void> _toggleCdn(bool newValue) async {
     await _hiveDb.saveCdnEnabled(newValue);
@@ -63,7 +62,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
     }
   }
 
-  // Build 
+  // Build
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +117,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // PERSONALISATION 
+                    // PERSONALISATION
                     _buildSectionHeader('PERSONALISATION', textSecondary),
                     _buildGroupedContainer(cardColor, [
                       ValueListenableBuilder<bool>(
@@ -150,7 +149,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                         builder: (context, value, _) {
                           return _buildSwitchTile(
                             title: 'Fast Load (CDN Cache)',
-                            subtitle: 'Speed up artwork and playlist loading',
+                            subtitle: 'Stream music without delays',
                             icon: CupertinoIcons.bolt_fill,
                             iconColor: const Color(0xFF34C759),
                             value: value,
@@ -177,14 +176,15 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
     );
   }
 
-  //  Widgets 
+  //  Widgets
 
   Widget _buildSectionHeader(String text, Color color) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, bottom: 8, top: 20),
       child: Text(
         text,
-        style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w400),
+        style:
+            TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w400),
       ),
     );
   }

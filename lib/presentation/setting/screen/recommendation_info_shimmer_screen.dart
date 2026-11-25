@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nex_music/core/ui_component/collapsing_title_sliver_app_bar.dart';
 
-
 class RecommendationInfoShimmerScreen extends StatefulWidget {
   const RecommendationInfoShimmerScreen({
     super.key,
@@ -87,9 +86,8 @@ class _RecommendationInfoShimmerScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildHero(),
-                        if (widget.showStatusCard)
-                          _buildStatusCard(cardColor),
+                        // _buildHero(),
+                        if (widget.showStatusCard) _buildStatusCard(cardColor),
                         // ABOUT
                         const _SectionHeaderBone(width: 56),
                         _GroupedContainer(
@@ -350,7 +348,6 @@ class _ShimmerScope extends InheritedWidget {
   bool updateShouldNotify(_ShimmerScope old) =>
       old.animation != animation || old.colors != colors;
 }
-
 
 class _Bone extends StatelessWidget {
   const _Bone({
