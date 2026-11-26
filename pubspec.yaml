@@ -108,6 +108,7 @@ dependencies:
   # persistent_bottom_nav_bar:
   go_router: ^17.2.3
   flutter_local_notifications: 17.2.4
+  disable_battery_optimization: ^1.1.2
 
 
 

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +8,7 @@ import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/presentation/setting/screen/recommendation_info_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class AdvancedSettingsScreen extends StatefulWidget {
   const AdvancedSettingsScreen({super.key});
@@ -13,24 +17,40 @@ class AdvancedSettingsScreen extends StatefulWidget {
   State<AdvancedSettingsScreen> createState() => _AdvancedSettingsScreenState();
 }
 
-class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
+class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
+    with WidgetsBindingObserver {
   final _hiveDb = HiveDataBaseSingleton.instance;
 
   late final ValueNotifier<bool> _recommendationNotifier;
   late final ValueNotifier<bool> _cdnNotifier;
+  late final ValueNotifier<bool> _batteryUnrestrictedNotifier;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _recommendationNotifier = ValueNotifier<bool>(_hiveDb.recommendationStatus);
     _cdnNotifier = ValueNotifier<bool>(_hiveDb.cdnEnabled);
+    _batteryUnrestrictedNotifier = ValueNotifier<bool>(false);
+    if (Platform.isAndroid) {
+      _refreshBatteryOptimizationStatus();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _recommendationNotifier.dispose();
     _cdnNotifier.dispose();
+    _batteryUnrestrictedNotifier.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && Platform.isAndroid) {
+      _refreshBatteryOptimizationStatus();
+    }
   }
 
   //  Recommendation
@@ -60,6 +80,68 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
         newValue ? 'Fast Load enabled' : 'Fast Load disabled',
       );
     }
+  }
+
+  //  Background playback
+
+  Future<void> _refreshBatteryOptimizationStatus() async {
+    try {
+      final isDisabled =
+          await DisableBatteryOptimization.isBatteryOptimizationDisabled;
+      if (mounted) {
+        _batteryUnrestrictedNotifier.value = isDisabled ?? false;
+      }
+    } catch (e) {
+      debugPrint('Error checking battery optimization status: $e');
+    }
+  }
+
+  Future<void> _toggleBatteryOptimization() async {
+    if (!Platform.isAndroid) return;
+
+    final isUnrestricted = _batteryUnrestrictedNotifier.value;
+    if (!isUnrestricted) {
+      try {
+        final opened = await DisableBatteryOptimization
+            .showDisableBatteryOptimizationSettings();
+        if (opened == false && mounted) {
+          await openAppSettings();
+        }
+      } catch (e) {
+        debugPrint('Error disabling battery optimization: $e');
+        if (mounted) {
+          await openAppSettings();
+        }
+      }
+      await _refreshBatteryOptimizationStatus();
+      return;
+    }
+
+    if (!mounted) return;
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Background Playback'),
+        content: const Text(
+          'Battery optimization is already disabled for Nex Music. '
+          'You can review or change this in System Settings.',
+        ),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await openAppSettings();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   // Build
@@ -165,6 +247,35 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                       'artwork or playlist covers.',
                       textSecondary,
                     ),
+                    if (Platform.isAndroid) ...[
+                      _buildSectionHeader('BACKGROUND PLAYBACK', textSecondary),
+                      _buildGroupedContainer(cardColor, [
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _batteryUnrestrictedNotifier,
+                          builder: (context, value, _) {
+                            final subtitle = value
+                                ? 'Battery optimization is disabled'
+                                : 'Battery optimization is enabled';
+                            return _buildSwitchTile(
+                              title: 'Disable Optimization',
+                              subtitle: subtitle,
+                              icon: CupertinoIcons.battery_100,
+                              iconColor: const Color(0xFF007AFF),
+                              value: value,
+                              onTap: _toggleBatteryOptimization,
+                              onChanged: (_) => _toggleBatteryOptimization(),
+                              theme: theme,
+                            );
+                          },
+                        ),
+                      ]),
+                      _buildFootnote(
+                        'Disabling battery optimization prevents Android from '
+                        'stopping music playback when the app is in the '
+                        'background or the screen is off.',
+                        textSecondary,
+                      ),
+                    ],
                     const SizedBox(height: 40),
                   ],
                 ),
