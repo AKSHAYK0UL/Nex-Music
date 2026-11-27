@@ -13,7 +13,11 @@ final class GetSongStreamEvent extends SongstreamEvent {
 
 final class GetSongUrlOnShuffleEvent extends SongstreamEvent {
   final Songmodel songData;
-  GetSongUrlOnShuffleEvent({required this.songData});
+  final bool forceReload;
+  GetSongUrlOnShuffleEvent({
+    required this.songData,
+    this.forceReload = false,
+  });
 }
 
 final class PlayPauseEvent extends SongstreamEvent {}
@@ -52,7 +56,11 @@ final class CleanPlaylistEvent extends SongstreamEvent {}
 
 final class LoadingEvent extends SongstreamEvent {}
 
-final class PlayNextSongEvent extends SongstreamEvent {}
+
+final class PlayNextSongEvent extends SongstreamEvent {
+  final bool isAutoSkip;
+  PlayNextSongEvent({this.isAutoSkip = false});
+}
 
 final class PlayPreviousSongEvent extends SongstreamEvent {}
 

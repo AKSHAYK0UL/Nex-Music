@@ -589,7 +589,7 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
                         ),
                       ),
 
-                      // Lock button overlay  always on top 
+                      // Lock button overlay  always on top
                       Positioned(
                         top: 30,
                         right: 16,
@@ -631,7 +631,7 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
           ),
         ),
         child: Icon(
-          isLocked ? CupertinoIcons.lock_fill : CupertinoIcons.lock_open,
+          isLocked ? Icons.lock : Icons.lock_open,
           size: 18,
           color: isLocked ? Colors.red : onSurface.withValues(alpha: 0.55),
         ),
@@ -737,6 +737,8 @@ class _MusicLyricsViewState extends State<MusicLyricsView> {
               ],
             ),
           ),
+          // Reserve space for the floating lock button overlay (top: 30, right: 16)
+          const SizedBox(width: 35),
         ],
       ),
     );

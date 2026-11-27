@@ -57,9 +57,14 @@ class _PlayerState extends State<Player> {
   void _syncWithState(SongstreamState state) {
     final bloc = context.read<SongstreamBloc>();
     final isActuallyLoading = state is LoadingState ||
-        (!bloc.getSongLoaded && bloc.getCurrentSongData != null);
+    (state is! ErrorState &&
+        state is! PausedState &&
+        !bloc.getSongLoaded &&
+        bloc.getCurrentSongData != null);
     _isLoading.value = isActuallyLoading;
-    _isPaused.value = state is PausedState || state is SongstreamInitial;
+    _isPaused.value = state is PausedState ||
+        state is SongstreamInitial ||
+        state is ErrorState;
   }
 
   @override

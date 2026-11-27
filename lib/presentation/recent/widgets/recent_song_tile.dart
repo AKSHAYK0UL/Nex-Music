@@ -231,29 +231,38 @@ class _RecentSongTileState extends State<RecentSongTile> {
 
     return InkWell(
       onTap: () {
+        final songstreamBloc = context.read<SongstreamBloc>();
+        final isSameLoading = songstreamBloc.isSameSongLoading(widget.songData);
+
         if (widget.tabRouteENUM == TabRouteENUM.upNext) {
           context.pop();
-          context.read<SongstreamBloc>().add(
-                GetSongUrlOnShuffleEvent(
-                  songData: widget.songData,
-                ),
-              );
+          if (!isSameLoading) {
+            songstreamBloc.add(
+              GetSongUrlOnShuffleEvent(
+                songData: widget.songData,
+              ),
+            );
+          }
         } else if (widget.tabRouteENUM == TabRouteENUM.playlist ||
             widget.tabRouteENUM == TabRouteENUM.download) {
-          context.read<SongstreamBloc>().add(
-                PlaySongFromPlaylistEvent(
-                  songData: widget.songData,
-                  songIndex: widget.songIndex,
-                  playlistSongs: widget.playlistSongs!,
-                ),
-              );
+          if (!isSameLoading) {
+            songstreamBloc.add(
+              PlaySongFromPlaylistEvent(
+                songData: widget.songData,
+                songIndex: widget.songIndex,
+                playlistSongs: widget.playlistSongs!,
+              ),
+            );
+          }
         } else {
-          context.read<SongstreamBloc>().add(
-                PlayIndividualSongEvent(
-                  songData: widget.songData,
-                  songIndex: widget.songIndex,
-                ),
-              );
+          if (!isSameLoading) {
+            songstreamBloc.add(
+              PlayIndividualSongEvent(
+                songData: widget.songData,
+                songIndex: widget.songIndex,
+              ),
+            );
+          }
         }
 
         if (widget.tabRouteENUM != TabRouteENUM.upNext) {
@@ -313,7 +322,8 @@ class _RecentSongTileState extends State<RecentSongTile> {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: theme.colorScheme.onSurface.withValues(alpha: isDark ? 0.18 : 0.12),
+                      color: theme.colorScheme.onSurface
+                          .withValues(alpha: isDark ? 0.18 : 0.12),
                       width: 1.0,
                     ),
                   ),
@@ -339,7 +349,8 @@ class _RecentSongTileState extends State<RecentSongTile> {
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w400,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                              color: theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.55),
                             ),
                           ),
                         ],
@@ -349,7 +360,8 @@ class _RecentSongTileState extends State<RecentSongTile> {
                       key: _menuButtonKey,
                       onPressed: () => _showOptionsMenu(context),
                       icon: CircleAvatar(
-                        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        backgroundColor:
+                            theme.colorScheme.primary.withValues(alpha: 0.1),
                         radius: 12,
                         child: Icon(
                           Icons.more_vert,

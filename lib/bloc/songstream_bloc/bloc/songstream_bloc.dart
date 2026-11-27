@@ -1423,6 +1423,17 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   bool _isRadioLoading = false;
   String? _reportedPlaybackVideoId;
   String? _lastCompletedVideoId;
+  int _consecutiveAutoSkips = 0;
+
+  bool isSameSong(Songmodel songData) {
+    return _songData != null &&
+        songData.vId == _songData!.vId &&
+        songData.isLocal == _songData!.isLocal;
+  }
+
+  bool isSameSongLoading(Songmodel songData) {
+    return isSameSong(songData) && !_songLoaded && state is LoadingState;
+  }
 
   SongstreamBloc(
     this._repository,
@@ -1539,6 +1550,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     //windows specific code
     // Windows-specific loop handling
     _audioPlayer.positionStream.listen((position) {
+      if (position.inMilliseconds >= 500 && _songLoaded) {
+        _consecutiveAutoSkips = 0;
+      }
       if (_songData != null && !_songData!.isLocal) {
         final currentVid = _songData!.vId;
         if (position.inSeconds >= 5 && _reportedPlaybackVideoId != currentVid) {
@@ -1573,14 +1587,26 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         }
       }
     });
-    //auto play song
-    if (Platform.isWindows) {
-      _audioPlayer.playbackEventStream.listen((event) {
-        if (!_isPlaying && _songLoaded) {
+    // Auto play song on Windows & handle async playback stream errors
+    _audioPlayer.playbackEventStream.listen(
+      (event) {
+        if (Platform.isWindows && !_isPlaying && _songLoaded) {
           _audioPlayer.play();
         }
-      });
-    }
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        debugPrint('[SongstreamBloc] Playback stream error: $error');
+        if (error is PlayerInterruptedException ||
+            error.toString().contains('Loading interrupted')) {
+          return;
+        }
+        if (_songLoaded && _playlistSongs.length > 1) {
+          _songLoaded = false;
+          _isPlaying = false;
+          add(PlayNextSongEvent(isAutoSkip: true));
+        }
+      },
+    );
   }
 
   Future<void> _initAudioSession() async {
@@ -1603,18 +1629,70 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     });
   }
 
-// Grab the song URL, update the "Recently Played" list and start playing.
-  Future<void> _getSongUrl(
-      GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
-    debugPrint("SONG ID ${event.songData.vId}@@@");
-    if (_songData != null &&
-        event.songData.vId == _songData!.vId &&
-        event.songData.isLocal == _songData!.isLocal) {
-      if (_songLoaded) {
-        _audioPlayer.seek(Duration.zero);
+  void _resumeOrKeepCurrentSong(Emitter<SongstreamState> emit) {
+    if (!_isPlaying) {
+      _audioPlayer.play();
+      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
+      _isPlaying = true;
+    }
+    emit(PlayingState(
+      songData: _songData!,
+      volume: _currentVolume,
+      isMuted: _isMute,
+    ));
+  }
+
+  // Loads and plays [_songData], automatically skipping to the next song in
+  // [_playlistSongs] if loading/playback fails (e.g. deleted or unavailable track).
+  Future<void> _loadAndPlayWithQueueFallback(
+    Emitter<SongstreamState> emit, {
+    bool generateRadioOnSuccess = false,
+    bool loadMoreRadioOnSkip = false,
+  }) async {
+    int attempts = 0;
+    final int maxAttempts =
+        _playlistSongs.isNotEmpty ? _playlistSongs.length : 1;
+
+    while (true) {
+      if (emit.isDone || _songData == null) return;
+
+      emit(LoadingState(
+        songData: _songData!,
+        volume: _currentVolume,
+        isMuted: _isMute,
+      ));
+
+      _audioPlayerHandler.setMediaItem(MediaItem(
+        id: _songData!.vId,
+        title: _songData!.songName,
+        artist: _songData!.artist.name,
+        artUri: _resolveArtUri(_songData!),
+        duration: songDuration,
+      ));
+
+      try {
+        if (_songData!.isLocal && _songData!.localFilePath != null) {
+          await _audioPlayer.setFilePath(_songData!.localFilePath!);
+        } else {
+          final qualityInfo = _dbInstance.getData;
+          final songRawInfo = await _repository.getSongUrl(
+              _songData!.vId, qualityInfo.audioQuality);
+          final audioSource = LockCachingAudioSource(songRawInfo.url);
+          await _audioPlayer.setAudioSource(audioSource);
+        }
+
+        if (emit.isDone) return;
+
+        if (Platform.isWindows) {
+          await _audioPlayer.load();
+          await Future.delayed(const Duration(milliseconds: 100));
+          if (emit.isDone) return;
+        }
+
         _audioPlayer.play();
         _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
         _isPlaying = true;
+        _songLoaded = true;
         if (!_songData!.isLocal) {
           _dbRepository.addToRecentPlayedCollection(_songData!);
         }
@@ -1623,10 +1701,56 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
           volume: _currentVolume,
           isMuted: _isMute,
         ));
+
+        if (generateRadioOnSuccess) {
+          _generateRadioSongs(_songData!.vId);
+        }
+        _prefetchNextSong();
+        return;
+      } catch (e) {
+        if (emit.isDone ||
+            e is PlayerInterruptedException ||
+            e.toString().contains('Loading interrupted')) {
+          return;
+        }
+
+        debugPrint(
+            '[SongstreamBloc] Failed to load "${_songData?.songName}" (${_songData?.vId}): $e');
+
+        attempts++;
+        _songLoaded = false;
+        _isPlaying = false;
+
+        if (_playlistSongs.length > 1 && attempts < maxAttempts) {
+          _currentSongIndex = (_currentSongIndex + 1) % _playlistSongs.length;
+          _reportedPlaybackVideoId = null;
+          _songData = _playlistSongs[_currentSongIndex];
+          if (loadMoreRadioOnSkip &&
+              _currentSongIndex >= _playlistSongs.length - 3 &&
+              _songData != null) {
+            _loadMoreRadioSongs(_songData!.vId);
+          }
+          await _resetAudioPlayer();
+          continue;
+        }
+
+        _isRadioLoading = false;
+        emit(ErrorState(errorMessage: "Error fetching song: $e"));
+        return;
       }
+    }
+  }
+
+// Grab the song URL, update the "Recently Played" list and start playing.
+  Future<void> _getSongUrl(
+      GetSongStreamEvent event, Emitter<SongstreamState> emit) async {
+    debugPrint("SONG ID ${event.songData.vId}@@@");
+    if (isSameSong(event.songData) && _songLoaded) {
+      _resumeOrKeepCurrentSong(emit);
       return;
     }
 
+    _consecutiveAutoSkips = 0;
     _reportPreviousSongPlayback();
     await _resetAudioPlayer();
 
@@ -1634,11 +1758,6 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _songData = event.songData;
     debugPrint(
         '[PlaybackTracking]  User selected song: "${_songData!.songName}" (id: ${_songData!.vId}, dur: ${_songData!.duration}, isLocal: ${_songData!.isLocal})');
-    emit(LoadingState(
-      songData: _songData!,
-      volume: _currentVolume,
-      isMuted: _isMute,
-    ));
     _firstSongPlayedIndex = event.songIndex;
 
     // Clear playlist and start fresh when playing a new song
@@ -1647,58 +1766,20 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _playlistSongs.add(_songData!);
     _storeQuicksPicksList.clear();
 
-    _audioPlayerHandler.setMediaItem(MediaItem(
-      id: _songData!.vId,
-      title: _songData!.songName,
-      artist: _songData!.artist.name,
-      artUri: _resolveArtUri(_songData!),
-      duration: songDuration,
-    ));
-
-    try {
-      if (_songData!.isLocal && _songData!.localFilePath != null) {
-        await _audioPlayer.setFilePath(_songData!.localFilePath!);
-      } else {
-        final qualityInfo = _dbInstance.getData;
-        final songRawInfo = await _repository.getSongUrl(
-            _songData!.vId, qualityInfo.audioQuality);
-        final audioSource = LockCachingAudioSource(songRawInfo.url);
-        await _audioPlayer.setAudioSource(audioSource);
-      }
-
-      if (Platform.isWindows) {
-        await _audioPlayer.load();
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-
-      _audioPlayer.play();
-      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
-      _isPlaying = true;
-      _songLoaded = true;
-      if (!_songData!.isLocal) {
-        _dbRepository.addToRecentPlayedCollection(_songData!);
-      }
-      emit(PlayingState(
-        songData: _songData!,
-        volume: _currentVolume,
-        isMuted: _isMute,
-      ));
-
-      // After song starts playing, call auto radio to populate playlist
-      _generateRadioSongs(_songData!.vId);
-      _prefetchNextSong();
-    } catch (e) {
-      if (e is PlayerInterruptedException ||
-          e.toString().contains('Loading interrupted')) {
-        return;
-      }
-      emit(ErrorState(errorMessage: "Error fetching song: $e"));
-    }
+    await _loadAndPlayWithQueueFallback(
+      emit,
+      generateRadioOnSuccess: true,
+    );
   }
 
 // Do exactly what [_getSongUrl] does, but with extra spice shuffle mode activated.
   Future<void> _getSongUrlOnShuffle(
       GetSongUrlOnShuffleEvent event, Emitter<SongstreamState> emit) async {
+    if (!event.forceReload && isSameSong(event.songData) && _songLoaded) {
+      _resumeOrKeepCurrentSong(emit);
+      return;
+    }
+
     _reportPreviousSongPlayback();
     await _resetAudioPlayerWhenOnShuffle();
     _reportedPlaybackVideoId = null;
@@ -1715,57 +1796,10 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _currentSongIndex = _playlistSongs.length - 1;
     }
 
-    emit(LoadingState(
-      songData: _songData!,
-      volume: _currentVolume,
-      isMuted: _isMute,
-    ));
-
-    _audioPlayerHandler.setMediaItem(MediaItem(
-      id: _songData!.vId,
-      title: _songData!.songName,
-      artist: _songData!.artist.name,
-      artUri: _resolveArtUri(_songData!),
-      duration: songDuration,
-    ));
-
-    try {
-      if (_songData!.isLocal && _songData!.localFilePath != null) {
-        await _audioPlayer.setFilePath(_songData!.localFilePath!);
-      } else {
-        final qualityInfo = _dbInstance.getData;
-        final songRawInfo = await _repository.getSongUrl(
-            _songData!.vId, qualityInfo.audioQuality);
-
-        final audioSource = LockCachingAudioSource(songRawInfo.url);
-        await _audioPlayer.setAudioSource(audioSource);
-      }
-
-      if (Platform.isWindows) {
-        await _audioPlayer.load();
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-
-      _audioPlayer.play();
-      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
-      _isPlaying = true;
-      _songLoaded = true;
-      if (!_songData!.isLocal) {
-        _dbRepository.addToRecentPlayedCollection(_songData!);
-      }
-      emit(PlayingState(
-        songData: _songData!,
-        volume: _currentVolume,
-        isMuted: _isMute,
-      ));
-      _prefetchNextSong();
-    } catch (e) {
-      if (e is PlayerInterruptedException ||
-          e.toString().contains('Loading interrupted')) {
-        return;
-      }
-      emit(ErrorState(errorMessage: "Error fetching song: $e"));
-    }
+    await _loadAndPlayWithQueueFallback(
+      emit,
+      loadMoreRadioOnSkip: true,
+    );
   }
 
   // Helper to emit the appropriate state for playback controls/queue updates without overriding loading states
@@ -1804,6 +1838,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   void _togglePause(PauseEvent event, Emitter<SongstreamState> emit) {
+    if (_songData == null) return;
     _isPlaying = false;
     _audioPlayer.pause();
     emit(PausedState(
@@ -1814,6 +1849,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   }
 
   void _togglePlay(PlayEvent event, Emitter<SongstreamState> emit) {
+    if (_songData == null) return;
     _isPlaying = true;
     _audioPlayer.play();
     emit(PlayingState(
@@ -1905,30 +1941,13 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // Play individual song with complete state reset
   Future<void> _playIndividualSong(
       PlayIndividualSongEvent event, Emitter<SongstreamState> emit) async {
-    // Check if same song is already playing
-    if (_songData != null &&
-        event.songData.vId == _songData!.vId &&
-        event.songData.isLocal == _songData!.isLocal) {
-      if (_songLoaded) {
-        // Same song, just restart from beginning
-        _audioPlayer.seek(Duration.zero);
-        _audioPlayer.play();
-        _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
-        _isPlaying = true;
-
-        if (!_songData!.isLocal) {
-          _dbRepository.addToRecentPlayedCollection(_songData!);
-        }
-
-        emit(PlayingState(
-          songData: _songData!,
-          volume: _currentVolume,
-          isMuted: _isMute,
-        ));
-      }
+    // Same song already loaded: resume if paused, or keep playing without reloading/seeking
+    if (isSameSong(event.songData) && _songLoaded) {
+      _resumeOrKeepCurrentSong(emit);
       return;
     }
 
+    _consecutiveAutoSkips = 0;
     _reportPreviousSongPlayback();
     // Complete reset of all state
     await _resetAudioPlayer();
@@ -1946,63 +1965,25 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _isRadioLoading = true;
     }
 
-    emit(LoadingState(
-      songData: _songData!,
-      volume: _currentVolume,
-      isMuted: _isMute,
-    ));
-
-    _audioPlayerHandler.setMediaItem(MediaItem(
-      id: _songData!.vId,
-      title: _songData!.songName,
-      artist: _songData!.artist.name,
-      artUri: _resolveArtUri(_songData!),
-      duration: songDuration,
-    ));
-
-    try {
-      if (_songData!.isLocal && _songData!.localFilePath != null) {
-        await _audioPlayer.setFilePath(_songData!.localFilePath!);
-      } else {
-        final qualityInfo = _dbInstance.getData;
-        final songRawInfo = await _repository.getSongUrl(
-            _songData!.vId, qualityInfo.audioQuality);
-        final audioSource = LockCachingAudioSource(songRawInfo.url);
-        await _audioPlayer.setAudioSource(audioSource);
-      }
-
-      if (Platform.isWindows) {
-        await _audioPlayer.load();
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-
-      _audioPlayer.play();
-      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
-      _isPlaying = true;
-      _songLoaded = true;
-      if (!_songData!.isLocal) {
-        _dbRepository.addToRecentPlayedCollection(_songData!);
-      }
-      emit(PlayingState(
-        songData: _songData!,
-        volume: _currentVolume,
-        isMuted: _isMute,
-      ));
-
-      // After song starts playing, call auto radio to populate playlist
-      _generateRadioSongs(event.songData.vId);
-      _prefetchNextSong();
-    } catch (e) {
-      if (e is PlayerInterruptedException ||
-          e.toString().contains('Loading interrupted')) {
-        return;
-      }
-      emit(ErrorState(errorMessage: "Error fetching song: $e"));
-    }
+    await _loadAndPlayWithQueueFallback(
+      emit,
+      generateRadioOnSuccess: true,
+    );
   }
 
   void _playNextSong(PlayNextSongEvent event, Emitter<SongstreamState> emit) {
     if (_playlistSongs.isEmpty) return;
+
+    if (event.isAutoSkip) {
+      _consecutiveAutoSkips++;
+      if (_consecutiveAutoSkips >= _playlistSongs.length) {
+        _consecutiveAutoSkips = 0;
+        emit(ErrorState(errorMessage: "Unable to play songs in queue"));
+        return;
+      }
+    } else {
+      _consecutiveAutoSkips = 0;
+    }
 
     // Move to next song in playlist
     _currentSongIndex = (_currentSongIndex + 1) % _playlistSongs.length;
@@ -2012,7 +1993,10 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _loadMoreRadioSongs(_songData!.vId);
     }
 
-    add(GetSongUrlOnShuffleEvent(songData: _playlistSongs[_currentSongIndex]));
+    add(GetSongUrlOnShuffleEvent(
+      songData: _playlistSongs[_currentSongIndex],
+      forceReload: true,
+    ));
   }
 
   // Helper method to load more radio songs in the background
@@ -2095,11 +2079,15 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
         return;
       }
 
+      _consecutiveAutoSkips = 0;
+
       // Play previous song in playlist
       _currentSongIndex = (_currentSongIndex - 1 + _playlistSongs.length) %
           _playlistSongs.length;
       add(GetSongUrlOnShuffleEvent(
-          songData: _playlistSongs[_currentSongIndex]));
+        songData: _playlistSongs[_currentSongIndex],
+        forceReload: true,
+      ));
     }
   }
 
@@ -2136,6 +2124,8 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       _audioPlayer.seek(Duration.zero);
       _audioPlayer.play();
     } else if (_playlistSongs.isNotEmpty) {
+      _consecutiveAutoSkips = 0;
+
       // Move to next song in playlist
       _currentSongIndex = (_currentSongIndex + 1) % _playlistSongs.length;
 
@@ -2145,7 +2135,9 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
       }
 
       add(GetSongUrlOnShuffleEvent(
-          songData: _playlistSongs[_currentSongIndex]));
+        songData: _playlistSongs[_currentSongIndex],
+        forceReload: true,
+      ));
     }
   }
 
@@ -2422,42 +2414,35 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
   // This keeps the playlist songs in the Up Next queue instead of generating radio songs
   Future<void> _playSongFromPlaylist(
       PlaySongFromPlaylistEvent event, Emitter<SongstreamState> emit) async {
-    // Check if same song is already playing
-    if (_songData != null &&
-        event.songData.vId == _songData!.vId &&
-        event.songData.isLocal == _songData!.isLocal) {
-      if (_songLoaded) {
-        // Same song, just restart from beginning
-        _audioPlayer.seek(Duration.zero);
-        _audioPlayer.play();
-        _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
-        _isPlaying = true;
-
-        if (!_songData!.isLocal) {
-          _dbRepository.addToRecentPlayedCollection(_songData!);
-        }
-
-        // Update playlist context
-        _playlistSongs = event.playlistSongs.toSet().toList();
-        _currentSongIndex = event.songIndex;
-
-        emit(PlayingState(
-          songData: _songData!,
-          volume: _currentVolume,
-          isMuted: _isMute,
-        ));
-      }
+    // Same song already loaded: update playlist context and resume if paused without seeking to zero
+    if (isSameSong(event.songData) && _songLoaded) {
+      final deduped = event.playlistSongs.toSet().toList();
+      final resolvedIndex = deduped.indexWhere(
+        (s) => s.vId == _songData!.vId && s.isLocal == _songData!.isLocal,
+      );
+      _playlistSongs = deduped;
+      _currentSongIndex = resolvedIndex != -1
+          ? resolvedIndex
+          : event.songIndex.clamp(0, deduped.isEmpty ? 0 : deduped.length - 1);
+      _resumeOrKeepCurrentSong(emit);
       return;
     }
 
+    _consecutiveAutoSkips = 0;
     _reportPreviousSongPlayback();
     // Reset audio player
     await _resetAudioPlayer();
 
     // Set the playlist songs (no radio songs will be generated)
     _playlistSongs = event.playlistSongs.toSet().toList();
-    _currentSongIndex = event.songIndex;
-    _firstSongPlayedIndex = event.songIndex;
+    final resolvedIndex = _playlistSongs.indexWhere(
+      (s) => s.vId == event.songData.vId && s.isLocal == event.songData.isLocal,
+    );
+    _currentSongIndex = resolvedIndex != -1
+        ? resolvedIndex
+        : event.songIndex
+            .clamp(0, _playlistSongs.isEmpty ? 0 : _playlistSongs.length - 1);
+    _firstSongPlayedIndex = _currentSongIndex;
 
     // Clear stored quick picks so radio doesn't interfere
     _storeQuicksPicksList.clear();
@@ -2466,58 +2451,7 @@ class SongstreamBloc extends Bloc<SongstreamEvent, SongstreamState> {
     _reportedPlaybackVideoId = null;
     _songData = event.songData;
 
-    emit(LoadingState(
-      songData: _songData!,
-      volume: _currentVolume,
-      isMuted: _isMute,
-    ));
-
-    _audioPlayerHandler.setMediaItem(MediaItem(
-      id: _songData!.vId,
-      title: _songData!.songName,
-      artist: _songData!.artist.name,
-      artUri: _resolveArtUri(_songData!),
-      duration: songDuration,
-    ));
-
-    try {
-      if (_songData!.isLocal && _songData!.localFilePath != null) {
-        await _audioPlayer.setFilePath(_songData!.localFilePath!);
-      } else {
-        final qualityInfo = _dbInstance.getData;
-        final songRawInfo = await _repository.getSongUrl(
-            _songData!.vId, qualityInfo.audioQuality);
-        final audioSource = LockCachingAudioSource(songRawInfo.url);
-        await _audioPlayer.setAudioSource(audioSource);
-      }
-
-      if (Platform.isWindows) {
-        await _audioPlayer.load();
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-
-      _audioPlayer.play();
-      _audioPlayer.setVolume(_isMute ? 0.0 : _currentVolume);
-      _isPlaying = true;
-      _songLoaded = true;
-      if (!_songData!.isLocal) {
-        _dbRepository.addToRecentPlayedCollection(_songData!);
-      }
-      emit(PlayingState(
-        songData: _songData!,
-        volume: _currentVolume,
-        isMuted: _isMute,
-      ));
-
-      // NOTE: We do NOT call _generateRadioSongs here
-      // The Up Next will show playlist songs instead of radio songs
-    } catch (e) {
-      if (e is PlayerInterruptedException ||
-          e.toString().contains('Loading interrupted')) {
-        return;
-      }
-      emit(ErrorState(errorMessage: "Error fetching song: $e"));
-    }
+    await _loadAndPlayWithQueueFallback(emit);
   }
 
   // Helper method to get upcoming songs

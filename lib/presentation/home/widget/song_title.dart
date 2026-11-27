@@ -108,14 +108,15 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
           }
         },
         onTap: () {
-          // if (isSmallScreen) {
-          // Trigger play event before navigating (like recent songs)
-          context.read<SongstreamBloc>().add(
-                PlayIndividualSongEvent(
-                  songData: widget.songData,
-                  songIndex: widget.songIndex,
-                ),
-              );
+          final songstreamBloc = context.read<SongstreamBloc>();
+          if (!songstreamBloc.isSameSongLoading(widget.songData)) {
+            songstreamBloc.add(
+              PlayIndividualSongEvent(
+                songData: widget.songData,
+                songIndex: widget.songIndex,
+              ),
+            );
+          }
           context.push(
             RouterPath.audioPlayerRoute,
             extra: {
@@ -145,7 +146,9 @@ class _SongTitleState extends State<SongTitle> with TickerProviderStateMixin {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(screenSize * 0.0106),
             child: Transform.scale(
-              scaleX: widget.songData.thumbnail.contains('i.ytimg.com') ? 1.10 : 1.0,
+              scaleX: widget.songData.thumbnail.contains('i.ytimg.com')
+                  ? 1.10
+                  : 1.0,
               child: cacheImage(
                 imageUrl: widget.songData.thumbnail,
                 width: screenSize * 0.0755,
