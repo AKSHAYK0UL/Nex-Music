@@ -4,10 +4,12 @@ import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/presentation/setting/screen/recommendation_info_screen.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class AdvancedSettingsScreen extends StatefulWidget {
@@ -24,6 +26,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
   late final ValueNotifier<bool> _recommendationNotifier;
   late final ValueNotifier<bool> _cdnNotifier;
   late final ValueNotifier<bool> _batteryUnrestrictedNotifier;
+  late final ValueNotifier<String> _cacheSizeNotifier;
+  late final ValueNotifier<bool> _isClearingCacheNotifier;
 
   @override
   void initState() {
@@ -32,9 +36,12 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
     _recommendationNotifier = ValueNotifier<bool>(_hiveDb.recommendationStatus);
     _cdnNotifier = ValueNotifier<bool>(_hiveDb.cdnEnabled);
     _batteryUnrestrictedNotifier = ValueNotifier<bool>(false);
+    _cacheSizeNotifier = ValueNotifier<String>('Calculating...');
+    _isClearingCacheNotifier = ValueNotifier<bool>(false);
     if (Platform.isAndroid) {
       _refreshBatteryOptimizationStatus();
     }
+    _refreshCacheSize();
   }
 
   @override
@@ -43,6 +50,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
     _recommendationNotifier.dispose();
     _cdnNotifier.dispose();
     _batteryUnrestrictedNotifier.dispose();
+    _cacheSizeNotifier.dispose();
+    _isClearingCacheNotifier.dispose();
     super.dispose();
   }
 
@@ -142,6 +151,165 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
         ],
       ),
     );
+  }
+
+  //  Storage & Cache
+
+  Future<List<Directory>> _getSafeCacheDirectories() async {
+    final protectedPaths = <String>[];
+    try {
+      protectedPaths.add((await getApplicationDocumentsDirectory()).path);
+    } catch (_) {}
+    try {
+      final externalDir = await getExternalStorageDirectory();
+      if (externalDir != null) {
+        protectedPaths.add(externalDir.path);
+      }
+    } catch (_) {}
+
+    bool isProtected(String path) {
+      for (final protected in protectedPaths) {
+        if (path == protected ||
+            path.startsWith('$protected${Platform.pathSeparator}')) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    final seenPaths = <String>{};
+    final cacheDirs = <Directory>[];
+
+    Future<void> tryAdd(Future<Directory> Function() getter) async {
+      try {
+        final dir = await getter();
+        if (seenPaths.add(dir.path) &&
+            !isProtected(dir.path) &&
+            await dir.exists()) {
+          cacheDirs.add(dir);
+        }
+      } catch (_) {}
+    }
+
+    await tryAdd(getTemporaryDirectory);
+    await tryAdd(getApplicationCacheDirectory);
+    return cacheDirs;
+  }
+
+  Future<int> _calculateDirectorySize(Directory dir) async {
+    int totalBytes = 0;
+    try {
+      await for (final entity
+          in dir.list(recursive: true, followLinks: false)) {
+        if (entity is File) {
+          try {
+            totalBytes += await entity.length();
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+    return totalBytes;
+  }
+
+  String _formatBytes(int bytes) {
+    if (bytes <= 0) return '0 B';
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    }
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
+  }
+
+  Future<void> _refreshCacheSize() async {
+    try {
+      final dirs = await _getSafeCacheDirectories();
+      int totalBytes = 0;
+      for (final dir in dirs) {
+        totalBytes += await _calculateDirectorySize(dir);
+      }
+      if (mounted) {
+        _cacheSizeNotifier.value = _formatBytes(totalBytes);
+      }
+    } catch (e) {
+      debugPrint('Error calculating cache size: $e');
+      if (mounted) {
+        _cacheSizeNotifier.value = 'Tap to clean';
+      }
+    }
+  }
+
+  void _confirmClearCache() {
+    if (_isClearingCacheNotifier.value) return;
+
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Clear Cache?'),
+        content: const Text(
+          'This will clear cached thumbnails, metadata, and temporary audio data. '
+          'Your downloaded songs, playlists, and listening history will not be deleted.',
+        ),
+        actions: <CupertinoDialogAction>[
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _clearAppCache();
+            },
+            child: const Text('Clear Cache'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _clearAppCache() async {
+    _isClearingCacheNotifier.value = true;
+    try {
+      await DefaultCacheManager().emptyCache();
+      PaintingBinding.instance.imageCache.clear();
+      PaintingBinding.instance.imageCache.clearLiveImages();
+
+      final dirs = await _getSafeCacheDirectories();
+      for (final dir in dirs) {
+        try {
+          await for (final entity in dir.list(followLinks: false)) {
+            final lowerPath = entity.path.toLowerCase();
+            if (lowerPath.endsWith('.db') ||
+                lowerPath.endsWith('.db-journal') ||
+                lowerPath.endsWith('.db-wal') ||
+                lowerPath.endsWith('.db-shm')) {
+              continue;
+            }
+            try {
+              await entity.delete(recursive: true);
+            } catch (_) {}
+          }
+        } catch (_) {}
+      }
+
+      await _refreshCacheSize();
+      if (mounted) {
+        showSnackbar(context, 'Cache cleared');
+      }
+    } catch (e) {
+      debugPrint('Error clearing cache: $e');
+      if (mounted) {
+        showSnackbar(context, 'Failed to clear cache');
+      }
+    } finally {
+      if (mounted) {
+        _isClearingCacheNotifier.value = false;
+      }
+    }
   }
 
   // Build
@@ -271,11 +439,49 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
                       ]),
                       _buildFootnote(
                         'Disabling battery optimization prevents Android from '
-                        'stopping music playback when the app is in the '
+                        'stopping Nex Music playback when the app is in the '
                         'background or the screen is off.',
                         textSecondary,
                       ),
                     ],
+                    _buildSectionHeader('STORAGE', textSecondary),
+                    _buildGroupedContainer(cardColor, [
+                      ValueListenableBuilder<bool>(
+                        valueListenable: _isClearingCacheNotifier,
+                        builder: (context, isClearing, _) {
+                          return ValueListenableBuilder<String>(
+                            valueListenable: _cacheSizeNotifier,
+                            builder: (context, cacheSize, _) {
+                              return _buildActionTile(
+                                title: 'Clear Cache',
+                                subtitle: isClearing
+                                    ? 'Clearing cache...'
+                                    : 'Cache used: $cacheSize',
+                                icon: CupertinoIcons.trash,
+                                iconColor: CupertinoColors.systemRed,
+                                onTap: isClearing ? null : _confirmClearCache,
+                                trailing: isClearing
+                                    ? const CupertinoActivityIndicator(
+                                        radius: 10,
+                                      )
+                                    : Icon(
+                                        CupertinoIcons.chevron_forward,
+                                        color: theme.dividerColor,
+                                        size: 18,
+                                      ),
+                                theme: theme,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ]),
+                    _buildFootnote(
+                      'Clearing cache removes temporary thumbnails, metadata, '
+                      'and cached audio data to free up space. It will not '
+                      'delete any of your downloaded songs or listening history.',
+                      textSecondary,
+                    ),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -322,6 +528,30 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
     VoidCallback? onTap,
     required ThemeData theme,
   }) {
+    return _buildActionTile(
+      title: title,
+      subtitle: subtitle,
+      icon: icon,
+      iconColor: iconColor,
+      onTap: onTap,
+      trailing: CupertinoSwitch(
+        value: value,
+        activeTrackColor: CupertinoColors.destructiveRed,
+        onChanged: onChanged,
+      ),
+      theme: theme,
+    );
+  }
+
+  Widget _buildActionTile({
+    required String title,
+    String? subtitle,
+    required IconData icon,
+    required Color iconColor,
+    VoidCallback? onTap,
+    Widget? trailing,
+    required ThemeData theme,
+  }) {
     return ListTile(
       onTap: onTap,
       tileColor: Colors.transparent,
@@ -348,11 +578,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             )
           : null,
-      trailing: CupertinoSwitch(
-        value: value,
-        activeTrackColor: CupertinoColors.destructiveRed,
-        onChanged: onChanged,
-      ),
+      trailing: trailing,
     );
   }
 
