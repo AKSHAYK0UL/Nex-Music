@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:nex_music/bloc/homesection_bloc/homesection_bloc.dart';
 import 'package:nex_music/core/services/hive_singleton.dart';
+import 'package:nex_music/core/ui_component/collapsing_title_sliver_app_bar.dart';
 import 'package:nex_music/core/ui_component/snackbar.dart';
 import 'package:nex_music/presentation/setting/screen/recommendation_info_screen.dart';
 import 'package:path_provider/path_provider.dart';
@@ -322,169 +323,181 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen>
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
-        leadingWidth: 100,
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Row(
-            children: [
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
-              Text(
-                'Settings',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 17,
-                  backgroundColor: theme.scaffoldBackgroundColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: theme.scaffoldBackgroundColor,
+      //   elevation: 0,
+      //   leadingWidth: 100,
+      //   leading: GestureDetector(
+      //     onTap: () => Navigator.of(context).pop(),
+      //     child: Row(
+      //       children: [
+      //         const SizedBox(width: 8),
+      //         const Icon(Icons.arrow_back_ios, color: Colors.red, size: 20),
+      //         Text(
+      //           'Settings',
+      //           style: TextStyle(
+      //             color: Colors.red,
+      //             fontSize: 17,
+      //             backgroundColor: theme.scaffoldBackgroundColor,
+      //           ),
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      // ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
-              child: Text(
-                'Advanced',
-                style: TextStyle(
-                  fontFamily: 'serif',
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface,
-                  letterSpacing: -0.5,
-                ),
-              ),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          slivers: [
+            CollapsingTitleSliverAppBar(
+              title: "Advanced",
+              backLabel: "Settings",
+              onBackTap: () => Navigator.pop(context),
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // PERSONALISATION
-                    _buildSectionHeader('PERSONALISATION', textSecondary),
-                    _buildGroupedContainer(cardColor, [
-                      ValueListenableBuilder<bool>(
-                        valueListenable: _recommendationNotifier,
-                        builder: (context, value, _) {
-                          final isLoggedIn = _hiveDb.isYtMusicLoggedIn;
-                          final subtitle = isLoggedIn
-                              ? (value
-                                  ? 'Enabled · Tap to manage'
-                                  : 'Paused · Tap to manage')
-                              : 'Tap to learn more & connect';
-                          return _buildSwitchTile(
-                            title: 'Recommendations',
-                            subtitle: subtitle,
-                            icon: CupertinoIcons.sparkles,
-                            iconColor: Colors.orange,
-                            value: value,
-                            onTap: _openRecommendationInfo,
-                            onChanged: (_) => _openRecommendationInfo(),
-                            theme: theme,
-                          );
-                        },
-                      ),
-                    ]),
-                    _buildSectionHeader('PERFORMANCE', textSecondary),
-                    _buildGroupedContainer(cardColor, [
-                      ValueListenableBuilder<bool>(
-                        valueListenable: _cdnNotifier,
-                        builder: (context, value, _) {
-                          return _buildSwitchTile(
-                            title: 'Fast Load (CDN Cache)',
-                            subtitle: 'Stream music without delays',
-                            icon: CupertinoIcons.bolt_fill,
-                            iconColor: const Color(0xFF34C759),
-                            value: value,
-                            onChanged: _toggleCdn,
-                            theme: theme,
-                          );
-                        },
-                      ),
-                    ]),
-                    _buildFootnote(
-                      'CDN caching stores frequently accessed data nearby so '
-                      'it loads faster. Disable this if you notice stale '
-                      'artwork or playlist covers.',
-                      textSecondary,
-                    ),
-                    if (Platform.isAndroid) ...[
-                      _buildSectionHeader('BACKGROUND PLAYBACK', textSecondary),
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Padding(
+                  //   padding: const EdgeInsets.only(left: 16.0, bottom: 10.0),
+                  //   child: Text(
+                  //     'Advanced',
+                  //     style: TextStyle(
+                  //       fontFamily: 'serif',
+                  //       fontSize: 30,
+                  //       fontWeight: FontWeight.bold,
+                  //       color: theme.colorScheme.onSurface,
+                  //       letterSpacing: -0.5,
+                  //     ),
+                  //   ),
+                  // ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // PERSONALISATION
+                      _buildSectionHeader('PERSONALISATION', textSecondary),
                       _buildGroupedContainer(cardColor, [
                         ValueListenableBuilder<bool>(
-                          valueListenable: _batteryUnrestrictedNotifier,
+                          valueListenable: _recommendationNotifier,
                           builder: (context, value, _) {
-                            final subtitle = value
-                                ? 'Battery optimization is disabled'
-                                : 'Battery optimization is enabled';
+                            final isLoggedIn = _hiveDb.isYtMusicLoggedIn;
+                            final subtitle = isLoggedIn
+                                ? (value
+                                    ? 'Enabled · Tap to manage'
+                                    : 'Paused · Tap to manage')
+                                : 'Tap to learn more & connect';
                             return _buildSwitchTile(
-                              title: 'Disable Optimization',
+                              title: 'Recommendations',
                               subtitle: subtitle,
-                              icon: CupertinoIcons.battery_100,
-                              iconColor: const Color(0xFF007AFF),
+                              icon: CupertinoIcons.sparkles,
+                              iconColor: Colors.orange,
                               value: value,
-                              onTap: _toggleBatteryOptimization,
-                              onChanged: (_) => _toggleBatteryOptimization(),
+                              onTap: _openRecommendationInfo,
+                              onChanged: (_) => _openRecommendationInfo(),
+                              theme: theme,
+                            );
+                          },
+                        ),
+                      ]),
+                      _buildSectionHeader('PERFORMANCE', textSecondary),
+                      _buildGroupedContainer(cardColor, [
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _cdnNotifier,
+                          builder: (context, value, _) {
+                            return _buildSwitchTile(
+                              title: 'Fast Load (CDN Cache)',
+                              subtitle: 'Stream music without delays',
+                              icon: CupertinoIcons.bolt_fill,
+                              iconColor: const Color(0xFF34C759),
+                              value: value,
+                              onChanged: _toggleCdn,
                               theme: theme,
                             );
                           },
                         ),
                       ]),
                       _buildFootnote(
-                        'Disabling battery optimization prevents Android from '
-                        'stopping Nex Music playback when the app is in the '
-                        'background or the screen is off.',
+                        'CDN caching stores frequently accessed data nearby so '
+                        'it loads faster. Disable this if you notice stale '
+                        'artwork or playlist covers.',
                         textSecondary,
                       ),
-                    ],
-                    _buildSectionHeader('STORAGE', textSecondary),
-                    _buildGroupedContainer(cardColor, [
-                      ValueListenableBuilder<bool>(
-                        valueListenable: _isClearingCacheNotifier,
-                        builder: (context, isClearing, _) {
-                          return ValueListenableBuilder<String>(
-                            valueListenable: _cacheSizeNotifier,
-                            builder: (context, cacheSize, _) {
-                              return _buildActionTile(
-                                title: 'Clear Cache',
-                                subtitle: isClearing
-                                    ? 'Clearing cache...'
-                                    : 'Cache used: $cacheSize',
-                                icon: CupertinoIcons.trash,
-                                iconColor: CupertinoColors.systemRed,
-                                onTap: isClearing ? null : _confirmClearCache,
-                                trailing: isClearing
-                                    ? const CupertinoActivityIndicator(
-                                        radius: 10,
-                                      )
-                                    : Icon(
-                                        CupertinoIcons.chevron_forward,
-                                        color: theme.dividerColor,
-                                        size: 18,
-                                      ),
+                      if (Platform.isAndroid) ...[
+                        _buildSectionHeader(
+                            'BACKGROUND PLAYBACK', textSecondary),
+                        _buildGroupedContainer(cardColor, [
+                          ValueListenableBuilder<bool>(
+                            valueListenable: _batteryUnrestrictedNotifier,
+                            builder: (context, value, _) {
+                              final subtitle = value
+                                  ? 'Battery optimization is disabled'
+                                  : 'Battery optimization is enabled';
+                              return _buildSwitchTile(
+                                title: 'Disable Optimization',
+                                subtitle: subtitle,
+                                icon: CupertinoIcons.battery_100,
+                                iconColor: const Color(0xFF007AFF),
+                                value: value,
+                                onTap: _toggleBatteryOptimization,
+                                onChanged: (_) => _toggleBatteryOptimization(),
                                 theme: theme,
                               );
                             },
-                          );
-                        },
+                          ),
+                        ]),
+                        _buildFootnote(
+                          'Disabling battery optimization prevents Android from '
+                          'stopping Nex Music playback when the app is in the '
+                          'background or the screen is off.',
+                          textSecondary,
+                        ),
+                      ],
+                      _buildSectionHeader('STORAGE', textSecondary),
+                      _buildGroupedContainer(cardColor, [
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _isClearingCacheNotifier,
+                          builder: (context, isClearing, _) {
+                            return ValueListenableBuilder<String>(
+                              valueListenable: _cacheSizeNotifier,
+                              builder: (context, cacheSize, _) {
+                                return _buildActionTile(
+                                  title: 'Clear Cache',
+                                  subtitle: isClearing
+                                      ? 'Clearing cache...'
+                                      : 'Cache used: $cacheSize',
+                                  icon: CupertinoIcons.trash,
+                                  iconColor: CupertinoColors.systemRed,
+                                  onTap: isClearing ? null : _confirmClearCache,
+                                  trailing: isClearing
+                                      ? const CupertinoActivityIndicator(
+                                          radius: 10,
+                                        )
+                                      : Icon(
+                                          CupertinoIcons.chevron_forward,
+                                          color: theme.dividerColor,
+                                          size: 18,
+                                        ),
+                                  theme: theme,
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ]),
+                      _buildFootnote(
+                        'Clearing cache removes temporary thumbnails, metadata, '
+                        'and cached audio data to free up space. It will not '
+                        'delete any of your downloaded songs or listening history.',
+                        textSecondary,
                       ),
-                    ]),
-                    _buildFootnote(
-                      'Clearing cache removes temporary thumbnails, metadata, '
-                      'and cached audio data to free up space. It will not '
-                      'delete any of your downloaded songs or listening history.',
-                      textSecondary,
-                    ),
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                  // ),
+                  // ),
+                ],
               ),
             ),
           ],
